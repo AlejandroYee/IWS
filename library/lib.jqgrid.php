@@ -511,52 +511,54 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								// Для древовидных гридов переопределяем путь сохранения
 								if (grid_type == "TREE_GRID_FORM_MASTER" || grid_type == "TREE_GRID_FORM" || grid_type == "TREE_GRID_FORM_DETAIL") {								
 									$('#<?=$object_name?>').jqGrid('setGridParam',{editurl:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?type=<?=$type?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d='+ ids +'&id_mm='+ ids, page:1});	
-								}								
-								//Еси это не детальный грид то:
-								if (grid_type !== "GRID_FORM_DETAIL" && grid_type !== "TREE_GRID_FORM_DETAIL") {								
-									// Нужно просмотреть все детальные гриды, и обновить в них данные
-									$.each( $("#<?=$this -> pageid?> .tab_main_content .grid_resizer[form_type$='_DETAIL']"), function() {
-										var gridname = $(this).attr('for');
-										var grid_type = $(this).attr('form_type');
-										var grid_parent_id = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + gridname + "']").attr('form_id');
-										$('#' + gridname).jqGrid('setGridParam',{url:'<?=ENGINE_HTTP?>/ajax.data.grid.php?type=' + grid_type + '&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=' + grid_parent_id + '&Master_Table_ID=<?=$ResArray['Master_Table_ID']?>&id_mm='+ids,page:1});
-										$('#' + gridname).jqGrid('setGridParam',{editurl:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?type=' + grid_type + '&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=' + grid_parent_id + '&Master_Table_ID=<?=$ResArray['Master_Table_ID']?>&id_mm='+ids,page:1});
-										$('#' + gridname).jqGrid('setGridParam',{search:false, datatype:'json',loadonce:false,treedatatype:'json'}, true);
-																			
-										// Обновляем филд select в случае если он есть и подсовываем ему rowid	
-										$.each( $('#' + gridname).jqGrid ('getGridParam', 'colModel') , function() {
-											if (this.edittype == "select") {												
-												get_select_values_grid(gridname, this.name, ids);
+								}	
+								if ($('#<?=$object_name?>').jqGrid('getRowData', ids).isLeaf != "true") {	// защита от дерева						
+									//Если это не детальный грид то:
+									if (grid_type !== "GRID_FORM_DETAIL" && grid_type !== "TREE_GRID_FORM_DETAIL") {								
+										// Нужно просмотреть все детальные гриды, и обновить в них данные
+										$.each( $("#<?=$this -> pageid?> .tab_main_content .grid_resizer[form_type$='_DETAIL']"), function() {
+											var gridname = $(this).attr('for');
+											var grid_type = $(this).attr('form_type');
+											var grid_parent_id = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + gridname + "']").attr('form_id');										
+											$('#' + gridname).jqGrid('setGridParam',{url:'<?=ENGINE_HTTP?>/ajax.data.grid.php?type=' + grid_type + '&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=' + grid_parent_id + '&Master_Table_ID=<?=$ResArray['Master_Table_ID']?>&id_mm='+ids,page:1});
+											$('#' + gridname).jqGrid('setGridParam',{editurl:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?type=' + grid_type + '&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=' + grid_parent_id + '&Master_Table_ID=<?=$ResArray['Master_Table_ID']?>&id_mm='+ids,page:1});
+											$('#' + gridname).jqGrid('setGridParam',{search:false, datatype:'json',loadonce:false,treedatatype:'json'}, true);
+																				
+											// Обновляем филд select в случае если он есть и подсовываем ему rowid	
+											$.each( $('#' + gridname).jqGrid ('getGridParam', 'colModel') , function() {
+												if (this.edittype == "select") {												
+													get_select_values_grid(gridname, this.name, ids);
+												}
+											});
+											
+											$('#' + gridname).jqGrid().trigger('reloadGrid', true);
+										});
+									}
+									var grid_type = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer_tabs[for='" + $(this).attr('id') + "']").attr('form_type');
+									// В случае если гриды во вкладках, то обновляем их, но только активный перезагружаем
+									if (grid_type !== "GRID_FORM_DETAIL" && grid_type !== "TREE_GRID_FORM_DETAIL") {	
+										$.each( $("#<?=$this -> pageid?> .tab_main_content .grid_resizer_tabs[form_type$='_DETAIL']"), function() {
+											var gridname = $(this).attr('for');
+											var grid_type = $(this).attr('form_type');										
+											var grid_parent_id = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer_tabs[for='" + gridname + "']").attr('form_id');
+											$('#' + gridname).jqGrid('setGridParam',{url:'<?=ENGINE_HTTP?>/ajax.data.grid.php?type=' + grid_type + '&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=' + grid_parent_id + '&Master_Table_ID=<?=$ResArray['Master_Table_ID']?>&id_mm='+ids,page:1});
+											$('#' + gridname).jqGrid('setGridParam',{editurl:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?type=' + grid_type + '&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=' + grid_parent_id + '&Master_Table_ID=<?=$ResArray['Master_Table_ID']?>&id_mm='+ids,page:1});
+											$('#' + gridname).jqGrid('setGridParam',{search:false, datatype:'json',loadonce:false,treedatatype:'json'}, true);
+											
+											// Обновляем филд select в случае если он есть и подсовываем ему rowid	
+											$.each( $('#' + gridname).jqGrid ('getGridParam', 'colModel') , function() {
+												if (this.edittype == "select") {
+													get_select_values_grid(gridname, this.name, ids);
+												}
+											});								
+
+											if ($(this).parent().attr('aria-expanded') == "true") {
+												$('#' + gridname).jqGrid().trigger('reloadGrid', true);
+											} else {
+												$(this).attr('need_update','true');
 											}
 										});
-										
-										$('#' + gridname).jqGrid().trigger('reloadGrid', true);
-									});
-								}	
-								var grid_type = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer_tabs[for='" + $(this).attr('id') + "']").attr('form_type');
-								// В случае если гриды во вкладках, то обновляем их, но только активный перезагружаем
-								if (grid_type !== "GRID_FORM_DETAIL" && grid_type !== "TREE_GRID_FORM_DETAIL") {	
-									$.each( $("#<?=$this -> pageid?> .tab_main_content .grid_resizer_tabs[form_type$='_DETAIL']"), function() {
-										var gridname = $(this).attr('for');
-										var grid_type = $(this).attr('form_type');										
-										var grid_parent_id = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer_tabs[for='" + gridname + "']").attr('form_id');
-										$('#' + gridname).jqGrid('setGridParam',{url:'<?=ENGINE_HTTP?>/ajax.data.grid.php?type=' + grid_type + '&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=' + grid_parent_id + '&Master_Table_ID=<?=$ResArray['Master_Table_ID']?>&id_mm='+ids,page:1});
-										$('#' + gridname).jqGrid('setGridParam',{editurl:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?type=' + grid_type + '&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=' + grid_parent_id + '&Master_Table_ID=<?=$ResArray['Master_Table_ID']?>&id_mm='+ids,page:1});
-										$('#' + gridname).jqGrid('setGridParam',{search:false, datatype:'json',loadonce:false,treedatatype:'json'}, true);
-										
-										// Обновляем филд select в случае если он есть и подсовываем ему rowid	
-										$.each( $('#' + gridname).jqGrid ('getGridParam', 'colModel') , function() {
-											if (this.edittype == "select") {
-												get_select_values_grid(gridname, this.name, ids);
-											}
-										});								
-
-										if ($(this).parent().attr('aria-expanded') == "true") {
-											$('#' + gridname).jqGrid().trigger('reloadGrid', true);
-										} else {
-											$(this).attr('need_update','true');
-										}
-									});
+									}
 								}
 							},
 					gridComplete: function() {	// на случай невыбранной ноды после обновления в дереве				
