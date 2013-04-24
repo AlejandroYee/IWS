@@ -22,7 +22,7 @@ if (!isset($_GET['id_mm'])) {
 	$id_mm  		= @Convert_quotas($_GET['id_mm']);
 }
 $id_mm_fr   		= @intval($_GET['id_mm_fr']); 
-$id_mm_fr_d 		= (isset($_GET['id_mm_fr_d']))? intval($_GET['id_mm_fr_d']) : "";
+$id_mm_fr_d 		= (isset($_GET['id_mm_fr_d']))? Convert_quotas($_GET['id_mm_fr_d']) : "";
 $type_of_past 		= (isset($_POST['oper']))? Convert_quotas($_POST['oper']) : "";
 $Master_Table_ID 	= (isset($_GET['Master_Table_ID']))? Convert_quotas($_GET['Master_Table_ID'])  : "";	
 $file_data_path		= "";
@@ -58,7 +58,11 @@ while ($main_db -> sql_fetch($query)) {
 				if (empty($id_mm)) {
 						$str_sql_data .= ", null";
 					} else {
-						$str_sql_data .= ",".$id_mm_fr_d;
+						if (is_numeric($id_mm_fr_d)) {
+								$str_sql_data .= ",".$id_mm_fr_d;
+							} else {
+								$str_sql_data .= ", '".$id_mm_fr_d."'";
+						}
 				}
 				if ($main_db -> sql_result($query, "FIELD_TYPE") <> 'P') {
 						$str_sql_fl .= ",".$main_db -> sql_result($query, "FIELD_NAME");
