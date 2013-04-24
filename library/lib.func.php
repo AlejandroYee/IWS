@@ -132,7 +132,12 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strpos($_SERVER['HTTP_USER_AGENT'], 
 						}
 					}					
 				}
-				$theme_number = rand(0,count($theme_first));
+				$theme_number = rand(0,count($theme_first['theme_file']) - 1);			
+				if (isset($_COOKIE['theme_num_last'])) while ($theme_number == $_COOKIE['theme_num_last']) {
+						$theme_number = rand(0,count($theme_first['theme_file']) - 1);
+						
+				}
+				setcookie("theme_num_last", $theme_number);
 				echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP."/".$theme_first['theme_file'][$theme_number]." \" /> \n";					
 ?>								
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.0.0.min.js?s=<?=SESSION_ID?>"></script>				
@@ -233,6 +238,7 @@ $classes_define = get_declared_classes();
 		}
 	}
 }
+
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Ескейпим стринги
 //--------------------------------------------------------------------------------------------------------------------------------------------
@@ -538,8 +544,9 @@ function gzdecode_zip($data) {
   return $data;
 }
 
+//--------------------------------------------------------------------------------------------------------------------------------------------	
 // Создание select списка для jqgrid
-
+//--------------------------------------------------------------------------------------------------------------------------------------------
 function get_select_data($db, $sql, $rowid) {
 
 // заменяем ровид если передан
