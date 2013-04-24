@@ -507,12 +507,13 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					onSelectRow: function(ids) {
 								// Узнаем тип грида
 								var grid_type = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + $(this).attr('id') + "']").attr('form_type');
-								
-								// Для древовидных гридов переопределяем путь сохранения
-								if (grid_type == "TREE_GRID_FORM_MASTER" || grid_type == "TREE_GRID_FORM" || grid_type == "TREE_GRID_FORM_DETAIL") {								
-									$('#<?=$object_name?>').jqGrid('setGridParam',{editurl:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?type=<?=$type?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d='+ ids +'&id_mm='+ ids, page:1});	
-								}	
-								if ($('#<?=$object_name?>').jqGrid('getRowData', ids).isLeaf == "true") {	// защита от дерева						
+								var tree_leaf =  $('#<?=$object_name?>').jqGrid('getRowData', ids).isLeaf;
+								if (typeof(tree_leaf) === 'undefined' || tree_leaf  == "true") {	// защита от дерева	
+									// Для древовидных гридов переопределяем путь сохранения
+									if (grid_type == "TREE_GRID_FORM_MASTER" || grid_type == "TREE_GRID_FORM" || grid_type == "TREE_GRID_FORM_DETAIL") {								
+										$('#<?=$object_name?>').jqGrid('setGridParam',{editurl:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?type=<?=$type?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d='+ ids +'&id_mm='+ ids, page:1});	
+									}	
+													
 									//Если это не детальный грид то:
 									if (grid_type !== "GRID_FORM_DETAIL" && grid_type !== "TREE_GRID_FORM_DETAIL") {								
 										// Нужно просмотреть все детальные гриды, и обновить в них данные
