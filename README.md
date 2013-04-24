@@ -7,6 +7,7 @@ Intellectual web system
 ![main window](https://raw.github.com/andrey-boomer/IWS/master/themes/screenshot-main-window.png)
 ![form editing](https://raw.github.com/andrey-boomer/IWS/master/themes/screenshot-edit.png)
 ![tree grid](https://raw.github.com/andrey-boomer/IWS/master/themes/screenshot-tree.png)
+![login](https://raw.github.com/andrey-boomer/IWS/master/themes/screenshot-login.png)
 
 ## Особенности
 - Полностью интерактивное конфигурирование
@@ -14,12 +15,12 @@ Intellectual web system
   (переделанные диалоги jquery ui, своя реализация filtertoolbar, доработаны pager и многое другое.)
 - Полностью резиновый интерфейс под любое разрешение
 - Меню
-- Вкладки,
+- Вкладки
 - Темы оформления
 - Пользовательские настройки
 - Графики
 - Экспорты данных в различные форматы
-- Импорт файлов, и закрузка файлов в базу данных и на сервер
+- Импорт файлов, и загрузка файлов в базу данных и на сервер
 - Разграничение доступа по ролям
 - Легкая первоначальная настройка
 
@@ -38,7 +39,7 @@ Mozila firefox 16 и выше.
 1. Скачать и распаковать содержимое в каталог веб сервера
 2. Создать конфигурационный файл формата: config.имя сайта/домена.php
 3. Произвести настройку подключения к базе данных и авторизации (см. файл config.sample.php)
-4. Создать пользователя в базе данных Oracle и дать ему привелегии
+4. Создать пользователя в базе данных Oracle и дать ему привилегии
 5. Импортировать пустую конфигурацию в базу данных от созданного пользователя (configurations/empty_conf.sql).
 
 ## TODO
