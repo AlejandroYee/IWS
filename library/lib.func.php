@@ -553,7 +553,7 @@ function get_select_data($db, $sql, $rowid) {
 $sql = str_ireplace(":rowid",$rowid,$sql);	
 						
 // Выполняем запрос на получение данных:
-$query = $db -> sql_execute(iconv(HTML_ENCODING,LOCAL_ENCODING, $sql));	
+$query = $db -> sql_execute($sql);	
 $level 		= 0;
 $countgroup = 0;
 $i			= 0;
