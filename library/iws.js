@@ -107,9 +107,14 @@ $(function() {
 		$.ajax({
 			  url: tabContentUrl,							  
 			  type: 'GET',
-			  success: function(data){
-				$('#'+id).empty().css('text-align','left').append(data);
-				redraw_document();								
+			  success: function(data){				
+				if($(data).find("div[window_login='logon']").length == 0) {
+					$('#'+id).empty().css('text-align','left').append(data);
+					redraw_document();				
+				} else {		 		
+					// Нам вернули страницу авторизации. отчищаем докумен
+					$('html').empty().append(data);
+				}
 			  }	  
 			});
 		counttab++;							

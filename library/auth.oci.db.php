@@ -13,10 +13,17 @@ class AUTH {
 			
 			if (!empty($pwd)) {	
 				if (!defined("AUTH_DB_USER_NAME")) define("AUTH_DB_USER_NAME",Convert_quotas($_SESSION['us_name']));
-				if (!defined("AUTH_DB_PASSWORD")) define("AUTH_DB_PASSWORD",$pwd);			
+				if (!defined("AUTH_DB_PASSWORD")) define("AUTH_DB_PASSWORD",$pwd);	
+				
+				// проверка на неактивность сейсии:
+				if (isset($_SESSION['us_time']) and ((intval($_SESSION["us_time"]) + 60*60) < time())) {
+					to_log("LIB: OCI timeout... relogin.");
+					return false;
+				}
 				// пытаемся приверить пользователя
 				if (db::connect_db() !== false) {
 					// все хорошо, работаем дальше
+					$_SESSION["us_time"] = time();
 					return true;
 				} else {
 					return false;
@@ -65,6 +72,7 @@ class AUTH {
 		$key = $this->encrypt(base64_encode($pass),session_id());
 		$_SESSION["us_name"] = $user;
 		$_SESSION["us_pr"]   = $key;
+		$_SESSION["us_time"] = time();
 	}
 	
 	private function encrypt($str, $key)
