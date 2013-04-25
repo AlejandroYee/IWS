@@ -598,7 +598,7 @@ while ($db -> sql_fetch($query)) {
 }
 
 // Сформировали, выводим:
-foreach ($sd_options_content as $key) {
+if (isset($sd_options_content)) foreach ($sd_options_content as $key) {
 	$rezult .= $key['ID'].":".$key['NAME'].";";
 }
 
