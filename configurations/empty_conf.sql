@@ -147,9 +147,8 @@ create table WB_MM_FORM
   owner             VARCHAR2(50),
   action_bat        VARCHAR2(2000),
   edit_button       VARCHAR2(200) default 'A,E,D',
-  auto_update       NUMBER default 0 not null
-)
-;
+  auto_update       NUMBER default 0 null
+);
 create index IX_WB_MM_FORM_1 on WB_MM_FORM (ID_WB_MAIN_MENU);
 alter table WB_MM_FORM
   add primary key (ID_WB_MM_FORM);
@@ -2219,10 +2218,10 @@ begin
   if INSERTING then
     insert into wb_mm_form(id_wb_mm_form, id_wb_main_menu,num,name,id_wb_form_type,action_sql,object_name,xsl_file_in,html_img,
                              xsl_file_out,form_where,id_wb_chart_type,is_read_only,chart_show_name,chart_rotate_name,
-                             chart_x,chart_y,chart_dec_prec,height_rate,owner)
+                             chart_x,chart_y,chart_dec_prec,height_rate,owner,edit_button,auto_update)
       values (null,n_id,:new.num,:new.name,:new.id_wb_form_type,:new.action_sql,:new.object_name,:new.xsl_file_in,:new.html_img,
               :new.xsl_file_out,:new.form_where,:new.id_wb_chart_type,:new.is_read_only,:new.chart_show_name,:new.chart_rotate_name,
-              :new.chart_x,:new.chart_y,:new.chart_dec_prec,:new.height_rate,:new.owner)
+              :new.chart_x,:new.chart_y,:new.chart_dec_prec,:new.height_rate,:new.owner,:new.edit_button,:new.auto_update)
               returning id_wb_mm_form into l_id;
 		          dbms_session.set_context('CLIENTCONTEXT', 'rowid', l_id);
 
@@ -2246,7 +2245,9 @@ begin
       mf.chart_y           = :new.chart_y,
       mf.chart_dec_prec    = :new.chart_dec_prec,
       mf.height_rate       = :new.height_rate,
-      mf.owner             = :new.owner
+      mf.owner             = :new.owner,
+      mf.edit_button       = :new.edit_button,
+      mf.auto_update       = :new.auto_update
       where mf.id_wb_mm_form = l_id;
   else
     delete
