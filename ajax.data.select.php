@@ -28,7 +28,8 @@
 	$main_db = new db();
 	// Получаем данные из свойств столбца
 	$query = $main_db -> sql_execute("select fw.field_txt from ".DB_USER_NAME.".wb_form_field fw where lower(fw.field_name) = lower('".$value_name."') and abs(fw.id_wb_form_field) = '".$value_id."'");		
-    while ($main_db -> sql_fetch($query)) {
+    end_session(); // закрываем сейсию чтобы скрипты нетормозили
+	while ($main_db -> sql_fetch($query)) {
 		$select = $main_db -> sql_result($query, "FIELD_TXT",false);
 	}
 	
