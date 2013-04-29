@@ -66,13 +66,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					switch ($this -> return_sql($query, "FIELD_TYPE_SUM")) {
 						// DATETIME
 						case "DT":
-							$query_data_type = $this->db_conn->sql_execute("select count(*) as cont from ".$this -> return_sql($query, "OWNER").".".$this -> return_sql($query, "OBJECT_NAME")." t where to_char(t.".trim_fieldname($this -> return_sql($query, "FIELD_NAME")).",'hh24:mi:ss') != '00:00:00'");
-							while ($this-> db_conn-> sql_fetch($query_data_type)) $query_data_type_count = $this -> return_sql($query_data_type, "CONT");
-							if ($query_data_type_count > 0 ) {
-									$date_formatter = ", formatoptions:{srcformat:'d.m.Y H:i:s',newformat:'d.m.Y H:i:s'}";
-							} else {
-									$date_formatter = ", formatoptions:{srcformat:'d.m.Y H:i:s',newformat:'d.m.Y'}";
-							}
+							$date_formatter = ", formatoptions:{srcformat:'d.m.Y H:i:s',newformat:'d.m.Y H:i:s'}";							
 							$ResArray['html_addon'] .= "$('#TblGrid_".$object_name." tr').find('#".$this -> return_sql($query, "FIELD_NAME")."').attr('id','".$this -> return_sql($query, "FIELD_NAME")."_".$this -> pageid."')
 																											.datetimepicker({
 																												showWeek: true,
