@@ -153,7 +153,7 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strrpos($_SERVER['HTTP_USER_AGENT'],
 								text-align :right;
 						}
 						.FormElement {
-								padding:0.23em;
+								padding:0.3em;
 						}	
 					    .ui-pg-button {
 								left:1px;
