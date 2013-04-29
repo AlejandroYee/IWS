@@ -551,9 +551,12 @@ function get_select_data($db, $sql, $rowid) {
 
 // заменяем ровид если передан
 $sql = str_ireplace(":rowid",$rowid,$sql);	
-						
+// Проверяем кодировку
+
+$sql = iconv(HTML_ENCODING,LOCAL_ENCODING."//TRANSLIT", $sql);
+					
 // Выполняем запрос на получение данных:
-$query = $db -> sql_execute(iconv(HTML_ENCODING, LOCAL_ENCODING."//IGNORE", $sql));	
+$query = $db -> sql_execute($sql);	
 $level 		= 0;
 $countgroup = 0;
 $i			= 0;
