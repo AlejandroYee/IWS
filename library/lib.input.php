@@ -11,6 +11,8 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	function data_element($field_text, $field_name,$name, $requred) {
 			$output = "";
 			$field_name_short = strtolower($field_name."_".$this->pageid);
+			// проверка на пустой филд
+			if (empty($field_text)) $field_text = "sysdate";
 			$query_d = $this->db_conn->sql_execute("select to_char(".$field_text.", 'dd.mm.yyyy') def_date from dual");
 			
 						while ($this-> db_conn-> sql_fetch($query_d))  {					
@@ -42,6 +44,8 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	function data_time_element($field_text, $field_name,$name, $requred) {
 			$output = "";
 			$field_name_short = strtolower($field_name."_".$this->pageid);
+			// проверка на пустой филд
+			if (empty($field_text)) $field_text = "sysdate";
 			$query_d = $this->db_conn->sql_execute("select to_char(".$field_text.", 'dd.mm.yyyy') def_date from dual");
 						while ($this-> db_conn-> sql_fetch($query_d))  {					
 							$output .= "
@@ -152,6 +156,8 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	function number_element($field_text,$field_name,$name,$num_culture,$requred) {
 		$output = "";
 		$field_name_short = strtolower($field_name."_".$this->pageid);
+					// проверка на пустой филд
+					if (empty($field_text)) $field_text = "null";
 					$query_d = $this->db_conn->sql_execute("select (".$field_text.") def_num from dual");
 						while ($this-> db_conn-> sql_fetch($query_d)) $value = $this -> return_sql($query_d, "DEF_NUM");
 						$output .= "<p><label for=\"".$field_name_short."\">".FullTrim($name)."</label><input type='text'  class='FormElement ui-widget-content ui-corner-all' id='".$field_name_short."' value='".$value."' name='".$field_name."' /></p>";
