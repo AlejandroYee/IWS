@@ -30,7 +30,7 @@
 	$query = $main_db -> sql_execute("select fw.field_txt from ".DB_USER_NAME.".wb_form_field fw where lower(fw.field_name) = lower('".$value_name."') and abs(fw.id_wb_form_field) = '".$value_id."'");		
     end_session(); // закрываем сейсию чтобы скрипты нетормозили
 	while ($main_db -> sql_fetch($query)) {
-		$select = $main_db -> sql_result($query, "FIELD_TXT",false);
+		$select = $main_db -> sql_result($query, "FIELD_TXT");
 	}
 	
 	$result_array = get_select_data($main_db, $select, $parent_id);
