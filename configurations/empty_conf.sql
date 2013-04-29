@@ -2451,7 +2451,7 @@ prompt Loading WB_MAIN_MENU...
 insert into WB_MAIN_MENU (id_wb_main_menu, id_parent, num, name, create_user, create_date, last_user, last_date, used)
 values (-1, null, 999, 'Администрирование', 'LOADER', sysdate, 'LOADER', sysdate, 1);
 insert into WB_MAIN_MENU (id_wb_main_menu, id_parent, num, name, create_user, create_date, last_user, last_date, used)
-values (-2, -1, 6, 'Доступы', 'LOADER', sysdate, 'LOADER', sysdate, 1);
+values (-2, -1, 7, 'Доступы', 'LOADER', sysdate, 'LOADER', sysdate, 1);
 insert into WB_MAIN_MENU (id_wb_main_menu, id_parent, num, name, create_user, create_date, last_user, last_date, used)
 values (-3, -1, 2, 'Главное меню', 'LOADER', sysdate, 'LOADER', sysdate, 1);
 insert into WB_MAIN_MENU (id_wb_main_menu, id_parent, num, name, create_user, create_date, last_user, last_date, used)
