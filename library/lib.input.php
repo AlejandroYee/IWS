@@ -121,7 +121,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	function select_element($field_text,$field_name,$name,$width,$count_element, $requred) {
 		$output = "";
 		$field_name_short = strtolower($field_name."_".$this->pageid);
-		if ($count_element == 1) {
+		if ($count_element <= 1) {
 						$output .= "<script type=\"text/javascript\">	
 							$(function() {  
 								$(\"#".$field_name."-".$this->pageid."\").multiselect({multiple: false,  header:true, selectedList: 1}).multiselectfilter();;
