@@ -72,6 +72,11 @@ $(function() {
 		}
 	}
 
+	$("#tabs ul.ui-widget-header")
+		.delegate("li.ui-tabs-selected","mousedown",function(){
+		redraw_document();
+	});
+ 
 	// Функция добавления вкладок и содержимого через аякс
 	SetTab = function (tabTitle,tabContentUrl,same_tab) {
 		// Если предан флаг, то просто перезагружаем вкладу
@@ -162,16 +167,6 @@ $(function() {
 		$(".about_tabs").offset({ top: doc_height - 50});
 		$(".about_tabs_ver").offset({ top: doc_height - 25});
 		
-		// Оверлей закрываем только текущйи грид
-		var tab_nav = $(".ui-tabs-nav").height();
-		
-		// Корректировка оверлея
-		if ($.browser.msie) {
-				$(".dialog_jqgrid_overlay").height(doc_height - main_menu - 90).width(doc_width - 24).offset({ top: main_menu + tab_nav + 45, left: 12 });
-			} else {
-				$(".dialog_jqgrid_overlay").height(doc_height - main_menu - 90).width(doc_width - 24).offset({ top: main_menu + tab_nav + 50, left: 12 });
-		}
-		
 		// Прячем полосу прокрутки
 		$(".ui-tabs-panel").css('overflow','hidden');
 		
@@ -245,22 +240,24 @@ $(function() {
 	
 	replace_select_opt_group = function (object) {
 		if (typeof(object) === 'undefined') object = $('body');
-		
 		// перерисовываем селекты, чтобы сработали отп группы, сначало начало группы:
 		$.each($(object).find("select option[value='GROUP_START']"), function() {		
 			$(this).replaceWith("<optgroup label='" + $(this).text() + "' >");
-		});
-		
+		});	
 		// теперь смотри селекты с окончанием группы и преобразовавыем их
 		$.each($(object).find("select option[value='GROUP_END']"), function() {
 			var object 			= $(this).parent();
+			var	selected_obj 	= object.children('option:selected');	// запоминаем выбранную позицию
+			
 			if (typeof(object.html()) !== 'undefined') {
-				var select_text		= object.html().split('</optgroup>').join('')
+				var select_text	= $(object.html().split('</optgroup>').join('')
 												   .split('<option value="GROUP_END"></option>').join('</optgroup>')
-												   .split('<option role="option" value="GROUP_END"></option>').join('</optgroup>');
-				object.empty().append($(select_text));
+												   .split('<option role="option" value="GROUP_END"></option>').join('</optgroup>'));
+				select_text.children('option[value="' + selected_obj.attr('value') + '"]').attr('selected','selected');	
+				object.empty().append(select_text);
 			}
 		});	
+		
 	}
 	
 	// Автоширина столбцов в гриде (применяемся только к указаннуму)
@@ -452,11 +449,11 @@ $(function() {
 		$.each(formid.find("input, select, textarea"), function() {
 			var obj = $(this);
 			obj.width(obj.attr('w'));
-			var obj_clone = $(this).clone().attr('id','clone_' + obj.attr('id')).removeAttr('name');
-			
+					
 			switch (obj.attr('i_type')) {
 			
 				 case 'I': // INTEGER
+					var obj_clone = $(this).clone().attr('id','clone_' + obj.attr('id')).removeAttr('name');
 					obj_clone.insertBefore(obj.hide());
 					obj_clone.spinner({
 						change: function( event, ui ) {
@@ -474,9 +471,11 @@ $(function() {
 									obj_clone.calculator('show');
 							})
 					).insertAfter(obj_clone.parent());
+					obj = obj_clone;
 				break;
 				
 				case 'N': // NUMBER
+					var obj_clone = $(this).clone().attr('id','clone_' + obj.attr('id')).removeAttr('name');
 					obj_clone.insertBefore(obj.hide());
 					obj_clone.spinner({
 						numberFormat: 'n2',
@@ -497,9 +496,11 @@ $(function() {
 									obj_clone.calculator('show');
 							})
 					).insertAfter(obj_clone.parent());
+					obj = obj_clone;
 				break;
 				
 				case 'NL': // NUMBER LOOOONG
+					var obj_clone = $(this).clone().attr('id','clone_' + obj.attr('id')).removeAttr('name');
 					obj_clone.insertBefore(obj.hide());
 					obj_clone.spinner({
 						numberFormat: 'n7',
@@ -520,9 +521,11 @@ $(function() {
 									obj_clone.calculator('show');
 							})
 					).insertAfter(obj_clone.parent());
+					obj = obj_clone;
 				break;
 				
 				case 'C': // CURENSYS
+					var obj_clone = $(this).clone().attr('id','clone_' + obj.attr('id')).removeAttr('name');
 					obj_clone.insertBefore(obj.hide());
 					obj_clone.spinner({
 						numberFormat: 'C',
@@ -543,6 +546,7 @@ $(function() {
 									obj_clone.calculator('show');
 							})
 					).insertAfter(obj_clone.parent());
+					obj = obj_clone;
 				break;
 				
 				case 'P': // PASSWORD
@@ -636,7 +640,6 @@ $(function() {
 			// Если мы видим поля но не можем изменять
 			if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
 					obj.attr({'name':null,'disabled':'disabled','class':'FormElement ui-widget-content ui-corner-all ui-state-disabled'});
-					obj_clone.attr({'name':null,'disabled':'disabled','class':'FormElement ui-widget-content ui-corner-all ui-state-disabled'});
 			}
 		});
 	
@@ -855,11 +858,14 @@ $.extend($.jgrid,{
 		}, o || {});			
 			$(selector).dialog( "open" );				
 			var s_width = $(selector)[0].scrollWidth;
+			var doc_height = $(window).height();
+			var doc_width = $(window).width() - 2;
+			var main_menu = $(".main_menu").height();
+			var tab_nav = $(".ui-tabs-nav").height();
 			
 			if ($(selector).attr('selector_type') == "true") {
 				$(selector).find('.EditTable').css('table-layout','auto');
-				$(selector).find('.FormData td').removeClass('ui-widget-content');
-	
+				$(selector).find('.FormData td').removeClass('ui-widget-content');	
 			}
 			
 			if ($(selector).attr('selector_type') == "true" && s_width < 550) {
@@ -880,7 +886,13 @@ $.extend($.jgrid,{
 				'class':'ui-widget-overlay ui-front dialog_jqgrid_overlay ui-corner-all',
 				'style':'position:absolute;'
 			})).prependTo(to_object);
-			redraw_document();
+			
+			if ($.browser.msie) {		
+				$(".dialog_jqgrid_overlay").height(doc_height - main_menu - 90).width(doc_width - 24).offset({ top: main_menu + tab_nav + 45, left: 12 });
+			} else {
+				$(".dialog_jqgrid_overlay").height(doc_height - main_menu - 90).width(doc_width - 24).offset({ top: main_menu + tab_nav + 50, left: 12 });
+		}
+		
 	},
 	hideModal : function (selector,o) {
 		o = $.extend({jqm : true, gb :''}, o || {});
@@ -914,7 +926,6 @@ $.extend($.jgrid,{
 			}			
 			
 			var folder_self = $(insertSelector).parent().parent().parent();	
-			// Создаем диалог
 			$(folder_self).append($('<div />').attr({
 							'id': aIDs.themodal,
 							'selector_type': view_dialog,

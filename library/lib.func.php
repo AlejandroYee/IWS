@@ -593,7 +593,7 @@ while ($db -> sql_fetch($query)) {
 		
 		$i++; // Обновляем индекс
 		$level = $db -> sql_result($query, "LEV"); // Сохраняем индекс
-	} else {	
+	} else {
 		// Отп группы не используем, просто отдаем данные в селект
 		$sd_options_content[$i]['ID']		=	Convert_quotas($db -> sql_result($query, "ID"));
 		$sd_options_content[$i]['NAME'] 	=   str_ireplace("'","",trim(Convert_quotas($db -> sql_result($query, "NAME"))));
