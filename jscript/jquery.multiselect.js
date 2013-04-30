@@ -18,7 +18,7 @@
  *   http://www.gnu.org/licenses/gpl.html
  *
  */
- /*
+  /*
  # Внимание, плугин изменен, внимательно смотрим комментарии!
  # @andrey.boomer at gmail.com
  */
@@ -31,7 +31,7 @@
   $.widget("ech.multiselect", {
 
     // default options
- options: {
+    options: {
       header: true,
       height: 175,
       minWidth: 225,
@@ -46,7 +46,7 @@
       autoOpen: false,
       multiple: true,
       position: {},
-      appendTo: document.body
+      appendTo: "body"
     },
 
     _create: function() {
@@ -74,7 +74,7 @@
         menu = (this.menu = $('<div />'))
           .addClass('ui-multiselect-menu ui-widget ui-widget-content ui-corner-all')
           .addClass(o.classes)
-          .appendTo(document.body),
+          .appendTo($(o.appendTo)),
 
         header = (this.header = $('<div />'))
           .addClass('ui-widget-header ui-corner-all ui-multiselect-header ui-helper-clearfix')
@@ -108,7 +108,6 @@
         if(!o.multiple) {
           menu.addClass('ui-multiselect-single');
         }
-		
 		//############################ Измененные элементы:
 	  	// Говорим что можно ресизить меню
 		if ('resizable' in jQuery.ui) {
@@ -121,7 +120,6 @@
 			});
 		}
 		//############################ 
-		
         // bump unique ID
         multiselectID++;
     },
@@ -154,8 +152,8 @@
       el.find('option').each(function(i) {
         var $this = $(this);
         var parent = this.parentNode;
-        var title = this.innerHTML;
-        var description = this.title;
+        var description = this.innerHTML;
+        var title = this.title;
         var value = this.value;
         var inputID = 'ui-multiselect-' + (this.id || id + '-option-' + i);
         var isDisabled = this.disabled;
@@ -188,7 +186,7 @@
         html += '<li class="' + liClasses + '">';
 
         // create the label
-        html += '<label for="' + inputID + '" title="' + description + '" class="' + labelClasses.join(' ') + '">';
+        html += '<label for="' + inputID + '" title="' + title + '" class="' + labelClasses.join(' ') + '">';
         html += '<input id="' + inputID + '" name="multiselect_' + id + '" type="' + (o.multiple ? "checkbox" : "radio") + '" value="' + value + '" title="' + title + '"';
 
         // pre-selected?
@@ -204,7 +202,7 @@
         }
 
         // add the title and close everything off
-        html += ' /><span>' + title + '</span></label></li>';
+        html += ' /><span>' + description + '</span></label></li>';
       });
 
       // insert into the DOM
@@ -422,11 +420,11 @@
         var target = event.target;
 
         if(self._isOpen
+            && target !== self.button[0]
+            && target !== self.menu[0]
             && !$.contains(self.menu[0], target)
             && !$.contains(self.button[0], target)
-            && target !== self.button[0]
-            && target !== self.menu[0])
-        {
+          ) {
           self.close();
         }
       });
@@ -465,7 +463,7 @@
       var moveToLast = which === 38 || which === 37;
 
       // select the first li that isn't an optgroup label / disabled
-      $next = $start.parent()[moveToLast ? 'prevAll' : 'nextAll']('li:not(.ui-multiselect-disabled, .ui-multiselect-optgroup-label)')[ moveToLast ? 'last' : 'first']();
+      var $next = $start.parent()[moveToLast ? 'prevAll' : 'nextAll']('li:not(.ui-multiselect-disabled, .ui-multiselect-optgroup-label)').first();
 
       // if at the first/last element
       if(!$next.length) {
@@ -596,21 +594,18 @@
 
       // show the menu, maybe with a speed/effect combo
       $.fn.show.apply(menu, args);
-	
-	  
+
       // select the first not disabled option
       // triggering both mouseover and mouseover because 1.4.2+ has a bug where triggering mouseover
       // will actually trigger mouseenter.  the mouseenter trigger is there for when it's eventually fixed
       this.labels.filter(':not(.ui-state-disabled)').eq(0).trigger('mouseover').trigger('mouseenter').find('input').trigger('focus');
-	  
 	  //############################ Измененные элементы:
 	  // Отматываем к выделенному элементу: 	 
 	  if (!o.multiple && typeof($(menu).find('.ui-state-active').position()) !== 'undefined') {
 			$container.scrollTop($(menu).find('.ui-state-active').position().top);
 	  }
       //############################
-	  
-	  button.addClass('ui-state-active');
+      button.addClass('ui-state-active');
       this._isOpen = true;
       this._trigger('open');
     },
