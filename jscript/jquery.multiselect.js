@@ -19,7 +19,7 @@
  *
  */
   /*
- # Внимание, плугин изменен, внимательно смотрим комментарии!
+ # пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!
  # @andrey.boomer at gmail.com
  */
  
@@ -74,7 +74,7 @@
         menu = (this.menu = $('<div />'))
           .addClass('ui-multiselect-menu ui-widget ui-widget-content ui-corner-all')
           .addClass(o.classes)
-          .appendTo($(o.appendTo)),
+          .appendTo($('body')),
 
         header = (this.header = $('<div />'))
           .addClass('ui-widget-header ui-corner-all ui-multiselect-header ui-helper-clearfix')
@@ -108,8 +108,8 @@
         if(!o.multiple) {
           menu.addClass('ui-multiselect-single');
         }
-		//############################ Измененные элементы:
-	  	// Говорим что можно ресизить меню
+		//############################ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
+	  	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		if ('resizable' in jQuery.ui) {
 			menu.resizable({
 						resize: function( event, ui ) {						
@@ -599,8 +599,8 @@
       // triggering both mouseover and mouseover because 1.4.2+ has a bug where triggering mouseover
       // will actually trigger mouseenter.  the mouseenter trigger is there for when it's eventually fixed
       this.labels.filter(':not(.ui-state-disabled)').eq(0).trigger('mouseover').trigger('mouseenter').find('input').trigger('focus');
-	  //############################ Измененные элементы:
-	  // Отматываем к выделенному элементу: 	 
+	  //############################ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
+	  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ: 	 
 	  if (!o.multiple && typeof($(menu).find('.ui-state-active').position()) !== 'undefined') {
 			$container.scrollTop($(menu).find('.ui-state-active').position().top);
 	  }
