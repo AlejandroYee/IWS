@@ -446,7 +446,202 @@ $(function() {
 				return false;
 		}
 	}
-
+	
+	// создание элементов и контроллов на странице
+	create_from_table_elemnts = function (formid) {
+		$.each(formid.find("input, select, textarea"), function() {
+			var obj = $(this);
+			obj.width(obj.attr('w'));
+			var obj_clone = $(this).clone().attr('id','clone_' + obj.attr('id')).removeAttr('name');
+			
+			switch (obj.attr('i_type')) {
+			
+				 case 'I': // INTEGER
+					obj_clone.insertBefore(obj.hide());
+					obj_clone.spinner({
+						change: function( event, ui ) {
+								obj.val($(this).attr('aria-valuenow'));												
+						}
+					}).removeClass('ui-widget-content ui-corner-all')
+					.calculator({
+						useThemeRoller: true, showAnim:'', showOn:'',
+						onButton: function(label, value, inst) { 
+								obj_clone.spinner( 'value', value );
+						}
+					});	
+					$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
+							.click(function( event ) {
+									obj_clone.calculator('show');
+							})
+					).insertAfter(obj_clone.parent());
+				break;
+				
+				case 'N': // NUMBER
+					obj_clone.insertBefore(obj.hide());
+					obj_clone.spinner({
+						numberFormat: 'n2',
+						culture: 'ru-RU',
+						step: 0.01,
+						change: function( event, ui ) {
+								obj.val($(this).attr('aria-valuenow'));												
+						}
+					}).removeClass('ui-widget-content ui-corner-all')
+					.calculator({
+						useThemeRoller: true, showAnim:'', showOn:'',layout: $.calculator.scientificLayout, 
+						onButton: function(label, value, inst) { 
+								obj_clone.spinner( 'value', value );
+						}
+					});	
+					$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
+							.click(function( event ) {
+									obj_clone.calculator('show');
+							})
+					).insertAfter(obj_clone.parent());
+				break;
+				
+				case 'NL': // NUMBER LOOOONG
+					obj_clone.insertBefore(obj.hide());
+					obj_clone.spinner({
+						numberFormat: 'n7',
+						culture: 'ru-RU',
+						step: 0.01,
+						change: function( event, ui ) {
+								obj.val($(this).attr('aria-valuenow'));												
+						}
+					}).removeClass('ui-widget-content ui-corner-all')
+					.calculator({
+						useThemeRoller: true, showAnim:'', showOn:'',layout: $.calculator.scientificLayout, 
+						onButton: function(label, value, inst) { 
+								obj_clone.spinner( 'value', value );
+						}
+					});	
+					$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
+							.click(function( event ) {
+									obj_clone.calculator('show');
+							})
+					).insertAfter(obj_clone.parent());
+				break;
+				
+				case 'C': // CURENSYS
+					obj_clone.insertBefore(obj.hide());
+					obj_clone.spinner({
+						numberFormat: 'C',
+						culture: 'ru-RU',
+						step: 0.01,
+						change: function( event, ui ) {
+								obj.val($(this).attr('aria-valuenow'));												
+						}
+					}).removeClass('ui-widget-content ui-corner-all')
+					.calculator({
+						useThemeRoller: true, showAnim:'', showOn:'',
+						onButton: function(label, value, inst) { 
+								obj_clone.spinner( 'value', value );
+						}
+					});	
+					$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
+							.click(function( event ) {
+									obj_clone.calculator('show');
+							})
+					).insertAfter(obj_clone.parent());
+				break;
+				
+				case 'P': // PASSWORD
+					obj.attr('value','');
+				break;
+				
+				case 'B': // CHECKBOX
+							 obj.before('<label for="' + obj.attr('id') + '">Включено или выключено</label>')
+								.button({icons: { primary: 'ui-icon-check' }, text: false})
+								.click(function() {
+									if (obj.attr('checked') != 'checked') {
+											obj.attr('checked','checked').button({icons: { primary: 'ui-icon-check' }});
+										} else {
+											obj.removeAttr('checked').button({icons: { primary: 'ui-icon-bullet' }});
+									}
+								});
+								
+								if (obj.attr('checked') == 'checked') {
+									obj.attr('checked','checked').button({icons: { primary: 'ui-icon-check' }});
+								} else {
+									obj.removeAttr('checked').button({icons: { primary: 'ui-icon-bullet' }});						
+								}									
+				break;
+				
+				case 'D': // DATE
+					obj.datepicker({
+							showOn: 'button',
+							showWeek: true,
+							numberOfMonths: num_of_mounth,
+							changeYear: true,
+							firstDay: 1
+							})
+							.parent().children('.ui-datepicker-trigger')
+							.button({
+								icons: {primary: 'ui-icon-calendar'},
+								text: false
+							});
+				break;
+				
+				case 'D': // DATE TIME
+					obj.datetimepicker({
+							showWeek: true,
+							numberOfMonths: num_of_mounth,
+							changeYear: true,
+							firstDay: 1,
+							timeFormat :'HH:mm:ss',
+							showOn: 'button',
+							hourGrid: 4,
+							minuteGrid: 10
+							})
+							.parent().children('.ui-datepicker-trigger')
+							.button({
+								icons: {primary: 'ui-icon-calendar'},
+								text: false
+							});
+				break;		
+				
+				case 'SB': // MULTISELECT
+					obj.multiselect({
+							multiple: (typeof(obj.attr('multiple')) === "undefined")?false:true,
+							minWidth: (obj.width() < 255)?255:obj.width(),
+							header:true,
+							selectedList: obj.attr('h')
+						}).multiselectfilter();
+				break;
+				case 'M': // MULTILINE - CODEMIRROR					
+					obj.removeAttr('id').before('<div id="' + obj.attr('name')+ '"></label>');					
+					var editor = ace.edit(obj.attr('name'));
+					var h = (obj.attr('h')*12 > 50)?obj.attr('h')*12:50;
+					editor.getSession().setMode("ace/mode/pgsql");
+					editor.getSession().setValue(obj.val());
+						editor.getSession().on('change', function(){
+						  obj.val(editor.getSession().getValue());
+						});
+					obj.hide();
+					editor.setHighlightActiveLine(false);
+					editor.renderer.setShowGutter(false);
+					editor.setShowPrintMargin(false);
+					$('#' + obj.attr('name')).width(obj.attr('w')).height(h).addClass('FormElement ui-widget-content ui-corner-all').css('margin-left','5px')
+					.resizable({						  
+							resize: function(event, ui) {
+									$('#' + obj.attr('name')).height($(this).height()).width($(this).width());
+									editor.resize();
+							}
+						});
+					editor.resize();
+				
+				break;
+			} // end type def
+			
+			// Если мы видим поля но не можем изменять
+			if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
+					obj.attr({'name':null,'disabled':'disabled','class':'FormElement ui-widget-content ui-corner-all ui-state-disabled'});
+					obj_clone.attr({'name':null,'disabled':'disabled','class':'FormElement ui-widget-content ui-corner-all ui-state-disabled'});
+			}
+		});
+	
+	}
+	
 	// Диалог настроке и обработчики
 	$("#param").dialog({
 		autoOpen: false,
@@ -770,8 +965,11 @@ $.extend($.jgrid,{
 								};
 			};
 			
-			if (typeof(p.buttons) !== 'undefined') buttons_set = null;			
+			if (typeof(p.buttons) !== 'undefined') buttons_set = null;		
+			
 			replace_select_opt_group();
+			create_from_table_elemnts($('#' + aIDs.themodal).find('.FormGrid'));
+			
 			// Говорим что это диалог
 			$('#' + aIDs.themodal).dialog({
 										autoOpen: false,

@@ -10,7 +10,6 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 	//-----------------------------------------------------------------------------------------------------------------------------------------------	
     function Create_grid_header($object_name) {
 	$ResArray['Full_width'] = 0;
-	$ResArray['html_addon'] = "";
 	$ResArray['Filter_Box'] = "";
 	$ResArray['colModel'] = "";
 	$ResArray['colNames'] = "";	
@@ -29,21 +28,20 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		// Запрос в базу сразу с возвратом необходимых тегов и скриптов, тамже считаем длину текстовых полей
 		$query = $this -> db_conn -> sql_execute("select tf.object_name, tf.name form_name, decode(nvl(t.is_requred, 0), 0, 'false', 'true') is_requred, tf.owner, t.name, tf.edit_button, nvl(t.width, 100) l_name, t.id_wb_form_field field_id, t.field_name || '_' || abs(t.id_wb_form_field) field_name, 'align: ''' || nvl(ta.html_txt, 'left') || ''', ' align_txt,
 																case
-																	when upper(trim(t.field_type)) = 'S'  then  'editoptions: {size:' || round(trim(t.width) / 8) || '}'
-																	when upper(trim(t.field_type)) = 'P'  then  'edittype:''password'', editoptions: {size:' || round(trim(t.width) / 8) || '}'
+																	when upper(trim(t.field_type)) = 'P'  then  'edittype:''password'' '
 																	when upper(trim(t.field_type)) = 'SB' then  decode(trunc((nvl(t.count_element, 0) + 2) / 2), 1, 'stype:''select'', formatter:''select'', edittype: ''select'' ','stype:''select'', formatter:''select'', edittype: ''select'' multiple ')
-																	when upper(trim(t.field_type)) = 'M'  then  'edittype:''textarea'', editoptions: {rows:' || nvl(t.count_element, 5) || ', cols:' || round(trim(t.width) / 8) || '}'
-																	when upper(trim(t.field_type)) = 'I'  then  'editoptions: {size:' || round(trim(t.width) / 8) || '}, formatter: ''number'', formatoptions:{decimalPlaces: 0, defaultValue:''0'' }'
-																	when upper(trim(t.field_type)) = 'N'  then  'editoptions: {size:' || round(trim(t.width) / 8) || '}, formatter: ''number'', formatoptions:{decimalPlaces: 2, thousandsSeparator:'''',defaultValue:''0''}'
-																	when upper(trim(t.field_type)) = 'NL' then  'editoptions: {size:' || round(trim(t.width) / 8) || '}, formatter: ''number'', formatoptions:{decimalPlaces: 7}, defaultValue:''0'''
-																	when upper(trim(t.field_type)) = 'C'  then  'editoptions: {size:' || round(trim(t.width) / 8) || '}, formatter: ''currency'', formatoptions:{prefix: '''', suffix:''p.'',defaultValue:''0''}'
-																	when upper(trim(t.field_type)) = 'D'  then  'editoptions: {size:' || round(trim(t.width) / 8) || '}, formatter: ''date'' '
-																	when upper(trim(t.field_type)) = 'DT' then  'editoptions: {size:' || round(trim(t.width) / 8) || '}, formatter: ''date'' '
-																	when upper(trim(t.field_type)) = 'E'  then  'editoptions: {size:' || round(trim(t.width) / 8) || '}, formatter: ''email'' '
-																	when upper(trim(t.field_type)) = 'B'  then  'edittype:''checkbox'',editoptions: {value:''1:0''}, formatter:''checkbox'', formatoptions:{disabled:false}'
+																	when upper(trim(t.field_type)) = 'M'  then  'edittype:  ''textarea'''
+																	when upper(trim(t.field_type)) = 'I'  then  'formatter: ''number'', formatoptions:{decimalPlaces: 0, defaultValue:''0'' } '
+																	when upper(trim(t.field_type)) = 'N'  then  'formatter: ''number'', formatoptions:{decimalPlaces: 2, thousandsSeparator:'''',defaultValue:''0''}'
+																	when upper(trim(t.field_type)) = 'NL' then  'formatter: ''number'', formatoptions:{decimalPlaces: 7}, defaultValue:''0'''
+																	when upper(trim(t.field_type)) = 'C'  then  'formatter: ''currency'', formatoptions:{prefix: '''', suffix:''p.'',defaultValue:''0''}'
+																	when upper(trim(t.field_type)) = 'D'  then  'formatter: ''date'', formatoptions:{srcformat:''d.m.Y'',newformat:''d.m.Y''} '
+																	when upper(trim(t.field_type)) = 'DT' then  'formatter: ''date'', formatoptions:{srcformat:''d.m.Y H:i:s'',newformat:''d.m.Y H:i:s''}'
+																	when upper(trim(t.field_type)) = 'E'  then  'formatter: ''email'' '
+																	when upper(trim(t.field_type)) = 'B'  then  'edittype:''checkbox'', formatter:''checkbox'', formatoptions:{disabled:false}'
 																	when upper(trim(t.field_type)) = 'A'  then  'formatter: ''link'', formatoptions:{target: ''_blank''}'
 																	else 'formatoptions: { defaultValue: '''' }'
-																end field_type, 
+																end field_type, t.count_element,
 														t.field_type field_type_sum, t.field_txt,
 														decode(t.is_read_only, 1, 'true', 'false') is_read_only,
 														decode(tf.is_read_only, 1, 'true', 'false') as read_only_form
@@ -58,271 +56,47 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					$date_formatter = "";
 					$hidden 		= "";
 					$sd_options     = "";
+					$edit_options 	= "";
 					
 					// Параметры поля
 					$filed_type = $this -> return_sql($query, "FIELD_TYPE");
 						
 					// Проверка элементов:
-					switch ($this -> return_sql($query, "FIELD_TYPE_SUM")) {
-						// DATETIME
-						case "DT":
-							$date_formatter = ", formatoptions:{srcformat:'d.m.Y H:i:s',newformat:'d.m.Y H:i:s'}";							
-							$ResArray['html_addon'] .= "$('#TblGrid_".$object_name." tr').find('#".$this -> return_sql($query, "FIELD_NAME")."').attr('id','".$this -> return_sql($query, "FIELD_NAME")."_".$this -> pageid."')
-																											.datetimepicker({
-																												showWeek: true,
-																												numberOfMonths: ".$this -> db_conn -> get_param_view("num_mounth").",
-																												changeYear: true,
-																												firstDay: 1,
-																												timeFormat :'HH:mm:ss',
-																												showOn: 'button',
-																												hourGrid: 4,
-																												minuteGrid: 10
-																												})
-																												.parent().children('.ui-datepicker-trigger')
-																												.button({
-																													icons: {primary: 'ui-icon-calendar'},
-																													text: false
-																												});";	
-						break;
-						// ONLY DATE
-						case "D":
-							$date_formatter = ", formatoptions:{srcformat:'d.m.Y',newformat:'d.m.Y'}";
-							$ResArray['html_addon'] .= "$('#TblGrid_".$object_name." tr').find('#".$this -> return_sql($query, "FIELD_NAME")."').attr('id','".$this -> return_sql($query, "FIELD_NAME")."_".$this -> pageid."')
-													.datepicker({
-														showOn: 'button',
-														showWeek: true,
-														numberOfMonths: ".$this -> db_conn ->get_param_view("num_mounth").",
-														changeYear: true,
-														firstDay: 1
-														})
-														.parent().children('.ui-datepicker-trigger')
-														.button({
-															icons: {primary: 'ui-icon-calendar'},
-															text: false
-														});";
-						break;
-						
-						// MULTILINE
-						case "M":							
-							$ResArray['html_addon'] .= "
-								/*
-								var ".$object_name.$this -> return_sql($query, "FIELD_NAME")." =  CodeMirror.fromTextArea($('#TblGrid_".$object_name." tr').find('#".$this -> return_sql($query, "FIELD_NAME")."')[0],{								
-																															lineNumbers: false,
-																															mode: 'text/x-plsql'
-																															});
-									".$object_name.$this -> return_sql($query, "FIELD_NAME").".setSize(".$this -> return_sql($query, "L_NAME").", $('#TblGrid_".$object_name." tr').find('#".$this -> return_sql($query, "FIELD_NAME")."').attr('rows')*15);
-									setTimeout(function(){".$object_name.$this -> return_sql($query, "FIELD_NAME").".refresh();}, 500);
-									$('#TblGrid_".$object_name." tr').find('#".$this -> return_sql($query, "FIELD_NAME")."').parent()
-											.children('.CodeMirror').removeClass()
-											.addClass('FormElement ui-widget-content ui-corner-all CodeMirror cm-s-default')
-											.resizable({						  
-												  resize: function(event, ui) {
-														ui.element.children('.CodeMirror-scroll').height($(this).height());
-														ui.element.children('.CodeMirror-scroll').width($(this).width());
-														".$object_name.$this -> return_sql($query, "FIELD_NAME").".refresh();
-												  }
-											}).css({
-												'padding-bottom':'0px','padding-left':'0px','padding-top':'0px','padding-right':'0px','margin-left':'5px'
-											});										
-									".$object_name.$this -> return_sql($query, "FIELD_NAME").".on('blur', function(cm) {
-										$('#TblGrid_".$object_name." tr').find('#".$this -> return_sql($query, "FIELD_NAME")."')[0].value = cm.getValue();
-									});*/
-								";
-						break;
-						
+					switch ($this -> return_sql($query, "FIELD_TYPE_SUM")) {						
 						// SELECT
-						case "SB":						
-							if ($this -> return_sql($query, "L_NAME") < 225) { $minwidth = 225; } else { $minwidth = $this -> return_sql($query, "L_NAME"); }	
-							
+						case "SB":									
 							if (strrpos($this -> return_sql($query, "FIELD_TYPE"),"multiple") === false) {
-									$multi = "false";
-									$multi_str = "";
+									$multi_str = " multiple:false, h:1, ";
 								} else {
-									$multi = "true";
 									$filed_type = str_replace("multiple","",$filed_type);
-									$multi_str = " multiple:true, size:3, ";
-							}
-							
+									$multi_str = " multiple:true, h:3, ";
+							}							
 							$main_dbs = new db();
-							$sd_options_content = get_select_data($main_dbs, $this -> return_sql($query, "FIELD_TXT"), 'null');	
+								$sd_options_content = get_select_data($main_dbs, $this -> return_sql($query, "FIELD_TXT"), 'null');	
 							$main_dbs -> __destruct();						
-	
-							$sd_options = "editoptions: { ".$multi_str."value: '".$sd_options_content."'}, searchoptions: {value: ':;".$sd_options_content."'}, ";
-							$ResArray['html_addon'] .= "$('#TblGrid_".$object_name." tr').find('#".$this -> return_sql($query, "FIELD_NAME")."')
-																				.multiselect({
-																					multiple: ".$multi.",
-																					minWidth: ".$minwidth.",
-																					header:true,
-																					noneSelectedText: 'Ничего не выбрано',
-																					selectedList: 4
-																				}).multiselectfilter();";
-
+							$edit_options .= ", i_type:'SB', input_type:'select', ".$multi_str." value: '".$sd_options_content."'";
+							$sd_options = "searchoptions: {value: ':;".$sd_options_content."'}, ";
 						break;
+						case "DT": $edit_options .= ", i_type:'DT'";break;
+						// ONLY DATE
+						case "D":  $edit_options .= ", i_type:'D'";break;						
+						// MULTILINE
+						case "M":  $edit_options .= ", i_type:'M', h:'".$this -> return_sql($query, "COUNT_ELEMENT")."'";break;				
 						// CHEKBOX
-						case "B":							
-							$ResArray['html_addon'] .= "
-									$('#TblGrid_".$object_name." tr').find('#".$this -> return_sql($query, "FIELD_NAME")."').hide()
-															.before('<label for=\"".$this -> return_sql($query, "FIELD_NAME")."\">Включено или выключено</label>')
-															.button({icons: { primary: 'ui-icon-check' },text: false})
-															.click(function() {
-																var btn".$object_name." = $('#TblGrid_".$object_name." tr').find('#".$this -> return_sql($query, "FIELD_NAME")."');
-																	if (btn".$object_name.".attr(\"checked\") != \"checked\") {
-																			btn".$object_name.".attr(\"checked\",\"checked\")
-																			.button({icons: { primary: 'ui-icon-check' }});
-																		} else {
-																			btn".$object_name.".removeAttr(\"checked\")
-																			.button({icons: { primary: 'ui-icon-bullet' }});
-																	}
-															});
-								if ( $('#TblGrid_".$object_name." tr').find('#".$this -> return_sql($query, "FIELD_NAME")."').attr('checked') == 'checked') {
-									$('#TblGrid_".$object_name." tr').find('#".$this -> return_sql($query, "FIELD_NAME")."').button({icons: { primary: 'ui-icon-check' }});
-								} else {
-									$('#TblGrid_".$object_name." tr').find('#".$this -> return_sql($query, "FIELD_NAME")."').button({icons: { primary: 'ui-icon-bullet' }});						
-								}								
-							";
-						break;
+						case "B":  $edit_options .= ", i_type:'B', value:'1:0'";break;
 						// INTEGER
-						case "I":
-							if ($this -> return_sql($query, "IS_READ_ONLY")  <> "true") {
-								$ResArray['html_addon'] .= "
-								var self_element_".$object_name." = $('#TblGrid_".$object_name." tr .DataTD').find('#".$this -> return_sql($query, "FIELD_NAME")."');							
-								self_element_".$object_name.".parent().append(self_element_".$object_name.".clone().attr({
-												id:'clone_".$this -> return_sql($query, "FIELD_NAME")."',
-												name:'clone_".$this -> return_sql($query, "FIELD_NAME")."'
-											}));
-								$('#clone_".$this -> return_sql($query, "FIELD_NAME")."').spinner({											
-												change: function( event, ui ) {
-													self_element_".$object_name." = $('#TblGrid_".$object_name." tr .DataTD').find('#".$this -> return_sql($query, "FIELD_NAME")."').val($(this).attr('aria-valuenow'));												
-												}
-											}).removeClass('ui-widget-content ui-corner-all');
-								
-								$('#clone_".$this -> return_sql($query, "FIELD_NAME")."').calculator({
-												useThemeRoller: true,
-												showAnim:'',												
-												showOn:'',
-												onButton: function(label, value, inst) { 
-														$('#clone_".$this -> return_sql($query, "FIELD_NAME")."').spinner( 'value', value );
-												}
-												});	
-								$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false}).click(function( event ) {
-												$('#clone_".$this -> return_sql($query, "FIELD_NAME")."').calculator('show');
-								})).insertAfter($('#clone_".$this -> return_sql($query, "FIELD_NAME")."').parent());	
-												
-								self_element_".$object_name.".hide();
-								";
-							}
-						break;
-						
+						case "I":  $edit_options .= ", i_type:'I'";break;
 						// NUMBER
-						case "N":
-							if ($this -> return_sql($query, "IS_READ_ONLY")  <> "true") {
-								$ResArray['html_addon'] .= "
-								var self_element_".$object_name." = $('#TblGrid_".$object_name." tr .DataTD').find('#".$this -> return_sql($query, "FIELD_NAME")."');							
-								self_element_".$object_name.".parent().append(self_element_".$object_name.".clone().attr({
-												id:'clone_".$this -> return_sql($query, "FIELD_NAME")."',
-												name:'clone_".$this -> return_sql($query, "FIELD_NAME")."'
-											}));
-								$('#clone_".$this -> return_sql($query, "FIELD_NAME")."').spinner({
-												numberFormat: 'n2',
-												culture: 'ru-RU',
-												step: 0.01,
-												change: function( event, ui ) {
-													self_element_".$object_name." = $('#TblGrid_".$object_name." tr .DataTD').find('#".$this -> return_sql($query, "FIELD_NAME")."').val($(this).attr('aria-valuenow'));												
-												}
-											}).removeClass('ui-widget-content ui-corner-all');	
-											
-								$('#clone_".$this -> return_sql($query, "FIELD_NAME")."').calculator({
-												useThemeRoller: true,
-												showAnim:'',
-												layout: $.calculator.scientificLayout, 
-												showOn:'',
-												onButton: function(label, value, inst) { 
-														$('#clone_".$this -> return_sql($query, "FIELD_NAME")."').spinner( 'value', value );
-												}
-												});	
-								$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false}).click(function( event ) {
-												$('#clone_".$this -> return_sql($query, "FIELD_NAME")."').calculator('show');
-								})).insertAfter($('#clone_".$this -> return_sql($query, "FIELD_NAME")."').parent());	
-								
-								self_element_".$object_name.".hide();";
-							}
-						break;
-						
+						case "N":  $edit_options .= ", i_type:'N'";break;
 						// NUMBER LONG
-						case "NL":
-						if ($this -> return_sql($query, "IS_READ_ONLY")  <> "true") {
-								$ResArray['html_addon'] .= "var self_element_".$object_name." = $('#TblGrid_".$object_name." tr .DataTD').find('#".$this -> return_sql($query, "FIELD_NAME")."');							
-								self_element_".$object_name.".parent().append(self_element_".$object_name.".clone().attr({
-												id:'clone_".$this -> return_sql($query, "FIELD_NAME")."',
-												name:'clone_".$this -> return_sql($query, "FIELD_NAME")."'
-											}));
-								$('#clone_".$this -> return_sql($query, "FIELD_NAME")."').spinner({
-												numberFormat: 'n7',
-												culture: 'ru-RU',
-												step: 0.01,
-												change: function( event, ui ) {
-													self_element_".$object_name." = $('#TblGrid_".$object_name." tr .DataTD').find('#".$this -> return_sql($query, "FIELD_NAME")."').val($(this).attr('aria-valuenow'));												
-												}
-											}).removeClass('ui-widget-content ui-corner-all');		
-								
-								$('#clone_".$this -> return_sql($query, "FIELD_NAME")."').calculator({
-												useThemeRoller: true,
-												showAnim:'',
-												layout: $.calculator.scientificLayout, 
-												showOn:'',
-												onButton: function(label, value, inst) { 
-														$('#clone_".$this -> return_sql($query, "FIELD_NAME")."').spinner( 'value', value );
-												}
-												});	
-								$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false}).click(function( event ) {
-												$('#clone_".$this -> return_sql($query, "FIELD_NAME")."').calculator('show');
-								})).insertAfter($('#clone_".$this -> return_sql($query, "FIELD_NAME")."').parent());	
-								self_element_".$object_name.".hide();";
-							}
-						break;
-						
+						case "NL": $edit_options .= ", i_type:'NL'";break;
 						// CURRENCIS
-						case "C":
-							if ($this -> return_sql($query, "IS_READ_ONLY")  <> "true") {
-								$ResArray['html_addon'] .= "var self_element_".$object_name." = $('#TblGrid_".$object_name." tr .DataTD').find('#".$this -> return_sql($query, "FIELD_NAME")."');						
-								self_element_".$object_name.".parent().append(self_element_".$object_name.".clone().attr({
-												id:'clone_".$this -> return_sql($query, "FIELD_NAME")."',
-												name:'clone_".$this -> return_sql($query, "FIELD_NAME")."'
-											}));
-								$('#clone_".$this -> return_sql($query, "FIELD_NAME")."')
-											.spinner({
-												numberFormat: 'C',
-												culture: 'ru-RU',
-												step: 0.01,
-												change: function( event, ui ) {
-													$('#TblGrid_".$object_name." tr .DataTD').find('#".$this -> return_sql($query, "FIELD_NAME")."').val($(this).attr('aria-valuenow'));												
-												}
-											}).removeClass('ui-widget-content ui-corner-all');
-								$('#clone_".$this -> return_sql($query, "FIELD_NAME")."').calculator({
-												useThemeRoller: true,
-												showAnim:'',												
-												showOn:'',
-												onButton: function(label, value, inst) { 
-														$('#clone_".$this -> return_sql($query, "FIELD_NAME")."').spinner( 'value', value );
-												}
-												});	
-								$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false}).click(function( event ) {
-												$('#clone_".$this -> return_sql($query, "FIELD_NAME")."').calculator('show');
-								})).insertAfter($('#clone_".$this -> return_sql($query, "FIELD_NAME")."').parent());	
-								self_element_".$object_name.".hide();
-								";
-							}
-						break;
+						case "C":  $edit_options .= ", i_type:'C'";break;
 						// PASSWORD
-						case "P":
-							if ($this -> return_sql($query, "IS_READ_ONLY")  <> "true") {
-								$ResArray['html_addon'] .= "
-								$('#TblGrid_".$object_name." tr .DataTD').find('#".$this -> return_sql($query, "FIELD_NAME")."').attr('value','');
-								";
-							}
-						break;
+						case "P":  $edit_options .= ", i_type:'P'";break;					
 					}
-
+					$edit_options .= ", w:'".$this -> return_sql($query, "L_NAME")."'";
+					 
 					// Создаем заголовок					
 					$ResArray['colNames'] .= ",
 						'".trim(str_ireplace(array("(not display)","#","<br>")," ",$this -> return_sql($query, "NAME")))."'";
@@ -334,10 +108,10 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 										$hidden = "hidden: false,";
 							} 
 					}
-					
+				
 					//Поле обязательно?
-					if ($this -> return_sql($query, "IS_READ_ONLY")  != "true") {
-						$ResArray['html_addon'] .= "$('#TblGrid_".$object_name." tr').find('#".$this -> return_sql($query, "FIELD_NAME")."').attr('is_requred','".$this -> return_sql($query, "IS_REQURED")."');";
+					if (($this -> return_sql($query, "IS_READ_ONLY")  != "true") and ($this -> return_sql($query, "FIELD_TYPE_SUM") != "SB")) {
+						$edit_options .= ", is_requred:'".$this -> return_sql($query, "IS_REQURED")."'";
 					}
 					
 					// Спрятать ID_CONTROL_LOAD_DATA если включены служебные поля
@@ -351,12 +125,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					if ($this -> return_sql($query, "IS_READ_ONLY")  == "true") {
 						$editabled = "editable: false, ";
 						if 	( $this -> db_conn->get_param_view("editabled") == "checked") {
-							$ResArray['html_addon'] .= "
-								$('#TblGrid_".$object_name." tr').find('#".$this -> return_sql($query, "FIELD_NAME")."').attr({
-										'name':null,
-										'disabled':'disabled',
-										'class':'FormElement ui-widget-content ui-corner-all ui-state-disabled'
-										});";
+							$edit_options .= ", show_disabled:'true' ";
 							$editabled = "editable : true, ";
 						}
 					} else {
@@ -372,7 +141,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						".$editabled.$hidden."
 						searchoptions: {sopt:['eq','ne', 'lt', 'le', 'gt', 'ge', 'bw','cn']},
 						".$this -> return_sql($query, "ALIGN_TXT")."
-						".$sd_options.$filed_type.$date_formatter."
+						".$sd_options.$filed_type.", editoptions: {".trim($edit_options,",")."}
 					},";					
 					
 						
@@ -414,7 +183,6 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						break;							
 					}				
 				}
-				
 				// Возвращаем все
 				$ResArray['TREE_EMPTY_DATA'] = "{0:[".trim($ResArray['TREE_EMPTY_DATA'],",")."]}";
 				$ResArray['colNames'] = "[".trim($ResArray['colNames'], ",")."]";
@@ -587,7 +355,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               buttonicon: 'ui-icon-document',
                                               onClickButton: function(){
                                                                 row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');                                                               
-																$('#<?=$object_name?>').jqGrid('viewGridRow',row_id,{viewPagerButtons:true, recreateForm:true, closeOnEscape:true});
+																$('#<?=$object_name?>').jqGrid('viewGridRow',row_id,{viewPagerButtons:true, recreateForm:false, closeOnEscape:true});
                                                              }											
 							})					
 					.jqGrid('navSeparatorAdd','#Pager_<?=$object_name?>')
@@ -601,9 +369,6 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               buttonicon: 'ui-icon-plus',
                                               onClickButton: function(){
                                                       $('#<?=$object_name?>').jqGrid('editGridRow','new',{viewPagerButtons:false,closeOnEscape:true, addedrow:'last',recreateForm:true,reloadAfterSubmit:false, closeAfterAdd:true,																
-																	beforeShowForm: function(form) {
-																	<?=$ResArray['html_addon']?> 
-																	},
 																	afterSubmit: function(response, postdata) {																	
 																		if (response.responseText.length > 0) {																				
 																			if (response.responseText.length > 20) {
@@ -633,10 +398,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               onClickButton: function(){
 																row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
                                                                 $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{viewPagerButtons:false,closeOnEscape:true, recreateForm:true,reloadAfterSubmit:false, closeAfterEdit:true,																		
-															     	beforeShowForm: function(form) {
-																		<?=$ResArray['html_addon']?>
-																	},
-																	afterSubmit: function(response, postdata)  {
+															     	afterSubmit: function(response, postdata)  {
 																		if (response.responseText.length > 0) {
 																			custom_alert(response.responseText);																			
 																		} else {
@@ -706,7 +468,6 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 																}); 
 											}
 									});
-		redraw_document();
 		$('#<?=$object_name?>')
 		<?php
 		if (($type != "TREE_GRID_FORM_MASTER") and ($type != "TREE_GRID_FORM") and ($type != "TREE_GRID_FORM_DETAIL")) {

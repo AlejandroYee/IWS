@@ -422,6 +422,7 @@ function about($db) {
 		<a href="http://trentrichardson.com/examples/timepicker/" target="_blank">JQuery TimePicker</a>,
 		<a href="https://github.com/johnculviner/jquery.fileDownload" target="_blank">JQuery fileDownload</a>,
 		<a href="https://github.com/jquery/globalize" target="_blank">JQuery globalize</a>,
+		<a href="http://ace.ajax.org/" target="_blank">ACE Cloud9 Editor</a>,
 		<a href="https://github.com/ehynds/jquery-ui-multiselect-widget" target="_blank">JQuery UI multiselect</a>,		
 		<a href="http://sourceforge.net/projects/fusioncharts/" target="_blank">FusionCharts free (Under GNU License)</a>
 	</div>

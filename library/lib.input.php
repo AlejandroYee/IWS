@@ -8,36 +8,19 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 
 	// Описываем элементы данных
 	//-----------------------------------------------------------------------------------------------------------------------------------------------	
-	function data_element($field_text, $field_name,$name, $requred) {
+	function data_element($field_text, $field_name, $name, $requred) {
 			$output = "";
 			$field_name_short = strtolower($field_name."_".$this->pageid);
 			// проверка на пустой филд
 			if (empty($field_text)) $field_text = "sysdate";
 			$query_d = $this->db_conn->sql_execute("select to_char(".$field_text.", 'dd.mm.yyyy') def_date from dual");
-			
-						while ($this-> db_conn-> sql_fetch($query_d))  {					
-							$output .= "
-							<p><label for='".$field_name_short."' >".FullTrim($name)."</label>
-								<input type='text' class='date_".$this->pageid." FormElement ui-widget-content ui-corner-all' is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d, "DEF_DATE")."' />
-								<script type=\"text/javascript\">
-									$(function() {
-									$('#".$field_name_short."').datepicker({
-										showOn: 'button',
-										showWeek: true,
-										numberOfMonths: ".$this -> db_conn -> get_param_view("num_mounth").",
-										changeYear: true,
-										firstDay: 1
-									})
-									.parent().children('.ui-datepicker-trigger')
-									.button({
-										icons: {primary: 'ui-icon-calendar'},
-										text: false
-									});	
-									});
-									</script>
-							</p>
-							";
-						}
+				while ($this-> db_conn-> sql_fetch($query_d))  {					
+					$output .= "
+					<p><label for='".$field_name_short."' >".FullTrim($name)."</label>
+						<input type='text' class='date_".$this->pageid." FormElement ui-widget-content ui-corner-all' i_type='D' is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d, "DEF_DATE")."' />
+					</p>
+					";
+				}
 	return $output;	
 	}
 
@@ -50,25 +33,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 						while ($this-> db_conn-> sql_fetch($query_d))  {					
 							$output .= "
 							<p><label for='".$field_name_short."' >".FullTrim($name)."</label>
-								<input type='text' class='date_time_".$this->pageid." FormElement ui-widget-content ui-corner-all' is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d, "DEF_DATE")."' />
-									<script type=\"text/javascript\">
-									$(function() { 
-									$('#".$field_name_short."').datetimepicker({
-										showOn: 'button',
-										showWeek: true,
-										numberOfMonths: ".$this -> db_conn -> get_param_view("num_mounth").",
-										changeYear: true,
-										firstDay: 1,
-										timeFormat :'HH:mm:ss',
-										hourGrid: 4,minuteGrid: 10
-									})
-									.parent().children('.ui-datepicker-trigger')
-									.button({
-										icons: {primary: 'ui-icon-calendar'},
-										text: false
-									});
-									});
-									</script>
+								<input type='text' class='date_time_".$this->pageid." FormElement ui-widget-content ui-corner-all' i_type='DT' is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d, "DEF_DATE")."' />
 							</p>
 							";
 						}
@@ -94,102 +59,41 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 		$output = "";
 		$field_name_short = strtolower($field_name."_".$this->pageid);
 		return "<p style='text-align :left;'><label for='".$field_name_short."' >".FullTrim($name)."</label>
-					  <textarea id='".$field_name_short."' rows='".$count_elemen."' is_requred='".$requred."' name='".$field_name."' role='textbox' multiline='true' class='FormElement ui-widget-content ui-corner-all'></textarea>
-					</p>
-					<script type=\"text/javascript\">
-					$(function() { 					
-					var _".$field_name_short." =  CodeMirror.fromTextArea($('#".$field_name_short."')[0],{								
-								lineNumbers: false,
-								mode: 'text/x-plsql'								
-								});
-								_".$field_name_short.".setSize('".$width."', '".($count_element * 18)."');								
-								setTimeout(function(){_".$field_name_short.".refresh();}, 500);								
-								
-								$('#".$field_name_short."').parent().children('.CodeMirror').removeClass()
-										.addClass('FormElement ui-widget-content ui-corner-all CodeMirror cm-s-default')
-										.resizable({						  
-										  resize: function(event, ui) {
-											ui.element.children('.CodeMirror-scroll').height($(this).height());
-											ui.element.children('.CodeMirror-scroll').width($(this).width());
-											_".$field_name_short.".refresh();
-										  }
-								});
-								_".$field_name_short.".on('blur', function(cm) {
-									$('#".$field_name_short."')[0].value = cm.getValue();
-								});	
-					});
-					</script>
-				   ";
-		
+					  <textarea id='".$field_name_short."' h='".$count_elemen."' is_requred='".$requred."' i_type='M' name='".$field_name."' role='textbox' multiline='true' class='FormElement ui-widget-content ui-corner-all'></textarea>
+					</p>";
 	}
 	function select_element($field_text,$field_name,$name,$width,$count_element, $requred) {
 		$output = "";
 		$field_name_short = strtolower($field_name."_".$this->pageid);
-		if ($count_element <= 1) {
-						$output .= "<script type=\"text/javascript\">	
-							$(function() {  
-								$(\"#".$field_name."-".$this->pageid."\").multiselect({multiple: false,  header:true, selectedList: 1}).multiselectfilter();;
-							});
-							</script>";
+		if ($count_element <= 1) {						
 						$output .= "<p>
 								<label for='".$field_name."' >".FullTrim($name)."</label>
-								<select id=\"".$field_name."-".$this->pageid."\" is_requred='".$requred."' name=\"".$field_name."\" size=".$count_element." style=\"width: ".$width."px;\">";
+								<select id=\"".$field_name."-".$this->pageid."\"  i_type='SB' is_requred='".$requred."' name=\"".$field_name."\" h='1' w='".$width."' >";
 					} else {
-						$output .= "<script type=\"text/javascript\">	
-							$(function() {  
-								$(\"#".$field_name."-".$this->pageid."\").multiselect({multiple: true, header:true, noneSelectedText: 'Ничего не выбрано', selectedList: 1}).multiselectfilter();;
-							});
-							</script>";
+						
 						$output .= "<p>
 								<label for='".$field_name."' >".FullTrim($name)."</label>
-								<select multiple id=\"".$field_name."-".$this->pageid."\" is_requred='".$requred."' name=\"".$field_name."[]\" style=\"width: ".$width."px;\">";
+								<select id=\"".$field_name."-".$this->pageid."\" multiple='multiple' i_type='SB' name=\"".$field_name."[]\" h='".$count_element."' w='".$width."'>";
 					}
 					
 						$query_d = $this -> db_conn->sql_execute($field_text);
 						while ($this-> db_conn-> sql_fetch($query_d)) 
-								$output .= "<option ".$this -> return_sql($query_d, "FL_SELECTED")." value=".$this -> return_sql($query_d, "ID").">".$this -> return_sql($query_d, "NAME")."<br>";
+								$output .= "<option ".$this -> return_sql($query_d, "FL_SELECTED")." value=".$this -> return_sql($query_d, "ID").">".$this -> return_sql($query_d, "NAME");
 					$output .= "</select></p>";
 	return $output;
 	}
 	
 	// all numbers
-	function number_element($field_text,$field_name,$name,$num_culture,$requred) {
+	function number_element($field_text,$field_name,$name,$num_culture,$requred,$width) {
 		$output = "";
 		$field_name_short = strtolower($field_name."_".$this->pageid);
 					// проверка на пустой филд
 					if (empty($field_text)) $field_text = "null";
 					$query_d = $this->db_conn->sql_execute("select (".$field_text.") def_num from dual");
 						while ($this-> db_conn-> sql_fetch($query_d)) $value = $this -> return_sql($query_d, "DEF_NUM");
-						$output .= "<p><label for=\"".$field_name_short."\">".FullTrim($name)."</label><input type='text'  class='FormElement ui-widget-content ui-corner-all' id='".$field_name_short."' value='".$value."' name='".$field_name."' /></p>";
-						$output .= "<script type=\"text/javascript\">	
-							$(function() {  
-								var self_element_".$field_name_short." = $('#".$field_name_short."');							
-								self_element_".$field_name_short.".parent().append(self_element_".$field_name_short.".clone().attr({
-												id:'clone_".$field_name_short."',
-												name:'clone_".$field_name_short."'
-											}));
-								$('#clone_".$field_name_short."').spinner({	".$num_culture."										
-												change: function( event, ui ) {
-													self_element_".$field_name_short." = $('#".$field_name_short."').val($(this).attr('aria-valuenow'));												
-												}
-											}).removeClass('ui-widget-content ui-corner-all');		
-								
-							    $('#clone_".$field_name_short."').calculator({
-												useThemeRoller: true,
-												showAnim:'',
-												layout: $.calculator.scientificLayout, 
-												showOn:'',
-												onButton: function(label, value, inst) { 
-														$('#clone_".$field_name_short."').spinner( 'value', value );
-												}
-												});	
-								$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false}).click(function( event ) {
-												$('#clone_".$field_name_short."').calculator('show');
-								})).insertAfter($('#clone_".$field_name_short."').parent());	
-								
-								self_element_".$field_name_short.".hide().attr('is_requred','".$requred."');
-							});
-							</script>";
+						$output .= "<p><label for=\"".$field_name_short."\">".FullTrim($name)."</label>
+						<input type='text'  class='FormElement ui-widget-content ui-corner-all' i_type='".$num_culture."' w='".$width."' is_requred='".$requred."' id='".$field_name_short."' value='".$value."' name='".$field_name."' /></p>";
+						
 					
 	return $output;
 	}
@@ -205,27 +109,9 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	function checkbox_element($field_text,$field_name,$name,$requred) {
 		$output = "";
 		$field_name_short = strtolower($field_name."_".$this->pageid);
-						$output .= "<p><label for=\"".$field_name_short."\">".FullTrim($name)."</label><input type='checkbox'  is_requred='".$requred."' class='FormElement ui-widget-content ui-corner-all' id='".$field_name_short."' name='".$field_name."' /></p>";
-						$output .= "<script type=\"text/javascript\">	
-							$(function() {  
-								$('#".$field_name_short."').button({icons: { primary: 'ui-icon-bullet' },text: true})
-															.click(function() {
-																var btn".$field_name_short." = $('#".$field_name_short."');
-																	if (btn".$field_name_short.".attr(\"checked\") != \"checked\") {
-																			btn".$field_name_short.".attr(\"checked\",\"checked\").val('on')
-																			.button({icons: { primary: 'ui-icon-check' }});
-																		} else {
-																			btn".$field_name_short.".removeAttr(\"checked\").val('')
-																			.button({icons: { primary: 'ui-icon-bullet' }});
-																	}
-															});
-								if ( $('#".$field_name_short."').attr('checked') == 'checked') {
-									$('#".$field_name_short."').val('on').button({icons: { primary: 'ui-icon-check' }});
-								} else {
-									$('#".$field_name_short."').val('').button({icons: { primary: 'ui-icon-bullet' }});						
-								}		
-							});
-							</script>";
+						$output .= "<p><label for=\"".$field_name_short."\">".FullTrim($name)."</label>
+						<input type='checkbox'  is_requred='".$requred."' class='FormElement ui-widget-content ui-corner-all' i_type='B' is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' /></p>";
+						
 					
 	return $output;
 	}
@@ -314,32 +200,36 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 				$output .= $this -> number_element($this -> return_sql($query_tmp, "FIELD_TXT"),
 										$this -> return_sql($query_tmp, "FIELD_NAME"),
 										$this -> return_sql($query_tmp, "NAME"),
-										"numberFormat: 'C',	culture: 'ru-RU', step: 1,",
-										$this -> return_sql($query_tmp, "IS_REQURED")
+										"C",
+										$this -> return_sql($query_tmp, "IS_REQURED"),
+										$this -> return_sql($query_tmp, "WIDTH")
 										);				
 			break;
 			case "I":	
 				$output .= $this -> number_element($this -> return_sql($query_tmp, "FIELD_TXT"),
 										$this -> return_sql($query_tmp, "FIELD_NAME"),
 										$this -> return_sql($query_tmp, "NAME"),
-										"",
-										$this -> return_sql($query_tmp, "IS_REQURED")
+										"I",
+										$this -> return_sql($query_tmp, "IS_REQURED"),
+										$this -> return_sql($query_tmp, "WIDTH")
 										);				
 			break;
 			case "N":	
 				$output .= $this -> number_element($this -> return_sql($query_tmp, "FIELD_TXT"),
 										$this -> return_sql($query_tmp, "FIELD_NAME"),
 										$this -> return_sql($query_tmp, "NAME"),
-										"numberFormat: 'n2', culture: 'ru-RU', step: 0.01,",
-										$this -> return_sql($query_tmp, "IS_REQURED")
+										"N",
+										$this -> return_sql($query_tmp, "IS_REQURED"),
+										$this -> return_sql($query_tmp, "WIDTH")
 										);				
 			break;
 			case "NL":	
 				$output .= $this -> number_element($this -> return_sql($query_tmp, "FIELD_TXT"),
 										$this -> return_sql($query_tmp, "FIELD_NAME"),
 										$this -> return_sql($query_tmp, "NAME"),
-										"numberFormat: 'n7', culture: 'ru-RU', step: 0.01,",
-										$this -> return_sql($query_tmp, "IS_REQURED")
+										"NL",
+										$this -> return_sql($query_tmp, "IS_REQURED"),
+										$this -> return_sql($query_tmp, "WIDTH")
 										);				
 			break;			
 			case "A":	
@@ -366,6 +256,10 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	</div>
 	<script type=\"text/javascript\">
 				$(function() { 			
+				
+					// Преобразовываемся:
+					create_from_table_elemnts($('#form_parameters_".$this->pageid."'));			
+					
 					$('#param-".$this->pageid."').dialog({
 						autoOpen: false,
 						modal: true,						
@@ -594,6 +488,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 				$.post('".ENGINE_HTTP."/ajax.data.wizard.php?id_mm_fr=' + counter  + '&pageid=".$this -> pageid."&id_mm=".$this -> id_mm."',qstring, function(data) {
 					$('#ajaxload_".$this -> pageid."').hide();
 					self.append(data);
+					create_from_table_elemnts(self);	
 				});	
 		}
 	}

@@ -145,32 +145,36 @@ foreach($_POST as $k => $v) {
 				$output .= $this -> number_element($content_value,
 										strtolower($main_db -> sql_result($query_tmp, "FIELD_NAME")),
 										$main_db -> sql_result($query_tmp, "NAME"),
-										"numberFormat: 'C',	culture: 'ru-RU', step: 1,",
-										$main_db -> sql_result($query, "IS_REQURED")
+										"C",
+										$main_db -> sql_result($query, "IS_REQURED"),
+										$main_db -> sql_result($query, "WIDTH")
 										);				
 			break;
 			case "I":	
 				$output .= $this -> number_element($content_value,
 										strtolower($main_db -> sql_result($query_tmp, "FIELD_NAME")),
 										$main_db -> sql_result($query_tmp, "NAME"),
-										"",
-										$main_db -> sql_result($query, "IS_REQURED")
+										"I",
+										$main_db -> sql_result($query, "IS_REQURED"),
+										$main_db -> sql_result($query, "WIDTH")
 										);				
 			break;
 			case "N":	
 				$output .= $this -> number_element($content_value,
 										strtolower($main_db -> sql_result($query_tmp, "FIELD_NAME")),
 										$main_db -> sql_result($query_tmp, "NAME"),
-										"numberFormat: 'n2', culture: 'ru-RU', step: 0.01,",
-										$main_db -> sql_result($query, "IS_REQURED")
+										"N",
+										$main_db -> sql_result($query, "IS_REQURED"),
+										$main_db -> sql_result($query, "WIDTH")
 										);				
 			break;
 			case "NL":	
 				$output .= $this -> number_element($content_value,
 										strtolower($main_db -> sql_result($query_tmp, "FIELD_NAME")),
 										$main_db -> sql_result($query_tmp, "NAME"),
-										"numberFormat: 'n7', culture: 'ru-RU', step: 0.01,",
-										$main_db -> sql_result($query, "IS_REQURED")
+										"NL",
+										$main_db -> sql_result($query, "IS_REQURED"),
+										$main_db -> sql_result($query, "WIDTH")
 										);				
 			break;			
 			case "A":	
