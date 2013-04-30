@@ -137,7 +137,7 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 			$sql =  str_ireplace(array("wb.wb.","WB.WB."),"wb.", $sql);
 		}
 	
-		to_log("SQL: <".$this->link."> ".strtolower($sql));
+		to_log("SQL: <".$this->link."> ".trim(strtolower($sql),";").";");
 		
 		$rowid = "";
 		
