@@ -77,18 +77,27 @@ switch ($action) {
 	case "get_debug":			
 		$Navigation_res = "<h2 style='float: left;margin:0 5px 0 0;'>Лог файл программы:</h2>";
 		$DataGrid->data_res = "<div class='log_container ui-widget-content'>
-				<textarea id='log_".$tabid."' style='font-family: monospace;'>";
+				<textarea name='log_".$tabid."' style='font-family: monospace;'>";
 				$log = explode("\n",file_get_contents(ENGINE_ROOT."/".HAS_DEBUG_FILE));
 				$DataGrid -> data_res .= implode("\n",$log);
-		$DataGrid->data_res .= "</textarea></div>
+		$DataGrid->data_res .= "</textarea>
+				<div id='log_".$tabid."' style='font-family: monospace;'></div>
+				</div>
 				<script type='text/javascript'>
-				var log_run_".$tabid." =  CodeMirror.fromTextArea($('#log_".$tabid."')[0],{	lineNumbers: true,readOnly:true, mode: 'text/x-plsql'});
+						var elem = $('textarea[name=\"log_".$tabid."\"]');				
+						var editor = ace.edit('log_".$tabid."');						
+						editor.getSession().setMode('ace/mode/pgsql');
+						editor.getSession().setValue(elem.val());
+							editor.getSession().on('change', function(){
+							  elem.val(editor.getSession().getValue());
+							});
+								
 						$('.log_container').height($(document).height() - $('.main_menu').height() - 90);
-						log_run_".$tabid.".setSize($(document).width() - 25, $(document).height() - $('.main_menu').height() - 90);						
-						setTimeout(function(){
-							log_run_".$tabid.".refresh();
-							log_run_".$tabid.".scrollIntoView({line: ".count($log).", ch:0});
-						}, 300);
+						$('#log_".$tabid."').width($(document).width() - 25).height($(document).height() - $('.main_menu').height() - 90);
+						elem.hide();
+						editor.resize();
+						editor.setReadOnly(true);
+						editor.navigateFileEnd();
 				</script>
 				";
 	break;
