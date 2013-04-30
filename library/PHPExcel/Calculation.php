@@ -1701,6 +1701,8 @@ class PHPExcel_Calculation {
 	 * Get an instance of this class
 	 *
 	 * @access	public
+	 * @param   PHPExcel $workbook  Injected workbook for working with a PHPExcel object,
+	 *									or NULL to create a standalone claculation engine
 	 * @return PHPExcel_Calculation
 	 */
 	public static function getInstance(PHPExcel $workbook = NULL) {
@@ -1718,6 +1720,12 @@ class PHPExcel_Calculation {
 		return self::$_instance;
 	}	//	function getInstance()
 
+	/**
+	 * Unset an instance of this class
+	 *
+	 * @access	public
+	 * @param   PHPExcel $workbook  Injected workbook identifying the instance to unset
+	 */
 	public static function unsetInstance(PHPExcel $workbook = NULL) {
 		if ($workbook !== NULL) {
     		if (isset(self::$_workbookSets[$workbook->getID()])) {
@@ -1738,6 +1746,12 @@ class PHPExcel_Calculation {
 	}	//	function flushInstance()
 
 
+	/**
+	 * Get the debuglog for this claculation engine instance
+	 *
+	 * @access	public
+	 * @return PHPExcel_CalcEngine_Logger
+	 */
 	public function getDebugLog() {
 		return $this->_debugLog;
 	}
@@ -1849,6 +1863,8 @@ class PHPExcel_Calculation {
 
 	/**
 	 * Clear calculation cache for a specified worksheet
+	 *
+	 * @param string $worksheetName
 	 */
 	public function clearCalculationCacheForWorksheet($worksheetName) {
 		if (isset($this->_calculationCache[$worksheetName])) {
@@ -1858,6 +1874,9 @@ class PHPExcel_Calculation {
 
 	/**
 	 * Rename calculation cache for a specified worksheet
+	 *
+	 * @param string $fromWorksheetName
+	 * @param string $toWorksheetName
 	 */
 	public function renameCalculationCacheForWorksheet($fromWorksheetName, $toWorksheetName) {
 		if (isset($this->_calculationCache[$fromWorksheetName])) {
@@ -1880,9 +1899,10 @@ class PHPExcel_Calculation {
 	/**
 	 * Set the locale code
 	 *
+	 * @param string $locale  The locale to use for formula translation
 	 * @return boolean
 	 */
-	public function setLocale($locale='en_us') {
+	public function setLocale($locale = 'en_us') {
 		//	Identify our locale and language
 		$language = $locale = strtolower($locale);
 		if (strpos($locale,'_') !== FALSE) {
@@ -2229,7 +2249,9 @@ class PHPExcel_Calculation {
 	/**
 	 * Calculate the value of a formula
 	 *
-	 * @param	string		$formula		Formula to parse
+	 * @param	string			$formula	Formula to parse
+	 * @param	string			$cellID		Address of the cell to calculate
+	 * @param	PHPExcel_Cell	$pCell		Cell to calculate
 	 * @return	mixed
 	 * @throws	PHPExcel_Calculation_Exception
 	 */
@@ -2405,11 +2427,20 @@ class PHPExcel_Calculation {
 	/**
 	 * Ensure that paired matrix operands are both matrices of the same size
 	 *
-	 * @param	mixed		&$matrix1	First matrix operand
-	 * @param	mixed		&$matrix2	Second matrix operand
+	 * @param	mixed		&$matrix1		First matrix operand
+	 * @param	mixed		&$matrix2		Second matrix operand
+	 * @param	integer		$matrix1Rows	Row size of first matrix operand
+	 * @param	integer		$matrix1Columns	Column size of first matrix operand
+	 * @param	integer		$matrix2Rows	Row size of second matrix operand
+	 * @param	integer		$matrix2Columns	Column size of second matrix operand
 	 */
 	private static function _resizeMatricesShrink(&$matrix1,&$matrix2,$matrix1Rows,$matrix1Columns,$matrix2Rows,$matrix2Columns) {
 		if (($matrix2Columns < $matrix1Columns) || ($matrix2Rows < $matrix1Rows)) {
+			if ($matrix2Rows < $matrix1Rows) {
+				for ($i = $matrix2Rows; $i < $matrix1Rows; ++$i) {
+					unset($matrix1[$i]);
+				}
+			}
 			if ($matrix2Columns < $matrix1Columns) {
 				for ($i = 0; $i < $matrix1Rows; ++$i) {
 					for ($j = $matrix2Columns; $j < $matrix1Columns; ++$j) {
@@ -2417,24 +2448,19 @@ class PHPExcel_Calculation {
 					}
 				}
 			}
-			if ($matrix2Rows < $matrix1Rows) {
-				for ($i = $matrix2Rows; $i < $matrix1Rows; ++$i) {
-					unset($matrix1[$i]);
-				}
-			}
 		}
 
 		if (($matrix1Columns < $matrix2Columns) || ($matrix1Rows < $matrix2Rows)) {
+			if ($matrix1Rows < $matrix2Rows) {
+				for ($i = $matrix1Rows; $i < $matrix2Rows; ++$i) {
+					unset($matrix2[$i]);
+				}
+			}
 			if ($matrix1Columns < $matrix2Columns) {
 				for ($i = 0; $i < $matrix2Rows; ++$i) {
 					for ($j = $matrix1Columns; $j < $matrix2Columns; ++$j) {
 						unset($matrix2[$i][$j]);
 					}
-				}
-			}
-			if ($matrix1Rows < $matrix2Rows) {
-				for ($i = $matrix1Rows; $i < $matrix2Rows; ++$i) {
-					unset($matrix2[$i]);
 				}
 			}
 		}
@@ -2446,6 +2472,10 @@ class PHPExcel_Calculation {
 	 *
 	 * @param	mixed		&$matrix1	First matrix operand
 	 * @param	mixed		&$matrix2	Second matrix operand
+	 * @param	integer		$matrix1Rows	Row size of first matrix operand
+	 * @param	integer		$matrix1Columns	Column size of first matrix operand
+	 * @param	integer		$matrix2Rows	Row size of second matrix operand
+	 * @param	integer		$matrix2Columns	Column size of second matrix operand
 	 */
 	private static function _resizeMatricesExtend(&$matrix1,&$matrix2,$matrix1Rows,$matrix1Columns,$matrix2Rows,$matrix2Columns) {
 		if (($matrix2Columns < $matrix1Columns) || ($matrix2Rows < $matrix1Rows)) {
@@ -3594,12 +3624,13 @@ class PHPExcel_Calculation {
 	/**
 	 * Extract range values
 	 *
-	 * @param	string				&$pRange		String based range representation
+	 * @param	string				&$pRange	String based range representation
 	 * @param	PHPExcel_Worksheet	$pSheet		Worksheet
+	 * @param	boolean				$resetLog	Flag indicating whether calculation log should be reset or not
 	 * @return  mixed				Array of values in range if range contains more than one element. Otherwise, a single value is returned.
 	 * @throws	PHPExcel_Calculation_Exception
 	 */
-	public function extractCellRange(&$pRange = 'A1', PHPExcel_Worksheet $pSheet = NULL, $resetLog=TRUE) {
+	public function extractCellRange(&$pRange = 'A1', PHPExcel_Worksheet $pSheet = NULL, $resetLog = TRUE) {
 		// Return value
 		$returnValue = array ();
 
@@ -3621,7 +3652,7 @@ class PHPExcel_Calculation {
 			$pRange = $pSheetName.'!'.$pRange;
 			if (!isset($aReferences[1])) {
 				//	Single cell in range
-				list($currentCol,$currentRow) = sscanf($aReferences[0],'%[A-Z]%d');
+				sscanf($aReferences[0],'%[A-Z]%d', $currentCol, $currentRow);
 				$cellValue = NULL;
 				if ($pSheet->cellExists($aReferences[0])) {
 					$returnValue[$currentRow][$currentCol] = $pSheet->getCell($aReferences[0])->getCalculatedValue($resetLog);
@@ -3632,7 +3663,7 @@ class PHPExcel_Calculation {
 				// Extract cell data for all cells in the range
 				foreach ($aReferences as $reference) {
 					// Extract range
-					list($currentCol,$currentRow) = sscanf($reference,'%[A-Z]%d');
+					sscanf($reference,'%[A-Z]%d', $currentCol, $currentRow);
 					$cellValue = NULL;
 					if ($pSheet->cellExists($reference)) {
 						$returnValue[$currentRow][$currentCol] = $pSheet->getCell($reference)->getCalculatedValue($resetLog);
@@ -3654,9 +3685,10 @@ class PHPExcel_Calculation {
 	 * @param	string				&$pRange	String based range representation
 	 * @param	PHPExcel_Worksheet	$pSheet		Worksheet
 	 * @return  mixed				Array of values in range if range contains more than one element. Otherwise, a single value is returned.
+	 * @param	boolean				$resetLog	Flag indicating whether calculation log should be reset or not
 	 * @throws	PHPExcel_Calculation_Exception
 	 */
-	public function extractNamedRange(&$pRange = 'A1', PHPExcel_Worksheet $pSheet = NULL, $resetLog=TRUE) {
+	public function extractNamedRange(&$pRange = 'A1', PHPExcel_Worksheet $pSheet = NULL, $resetLog = TRUE) {
 		// Return value
 		$returnValue = array ();
 

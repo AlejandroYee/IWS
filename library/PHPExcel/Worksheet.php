@@ -1604,7 +1604,13 @@ class PHPExcel_Worksheet implements PHPExcel_IComparable
         $pCell = strtoupper($pCell);
 
         if ($pCell != '') {
-            $this->_breaks[$pCell] = $pBreak;
+        	if ($pBreak == PHPExcel_Worksheet::BREAK_NONE) {
+        		if (isset($this->_breaks[$pCell])) {
+	            	unset($this->_breaks[$pCell]);
+        		}
+        	} else {
+	            $this->_breaks[$pCell] = $pBreak;
+	        }
         } else {
             throw new PHPExcel_Exception('No cell coordinate specified.');
         }
@@ -1855,7 +1861,7 @@ class PHPExcel_Worksheet implements PHPExcel_IComparable
     /**
      *    Set AutoFilter
      *
-     *    @param    PHPExcel_Worksheet_AutoFilter|string    $pValue
+     *    @param    PHPExcel_Worksheet_AutoFilter|string   $pValue
      *            A simple string containing a Cell range like 'A1:E10' is permitted for backward compatibility
      *    @throws    PHPExcel_Exception
      *    @return PHPExcel_Worksheet
@@ -1873,10 +1879,10 @@ class PHPExcel_Worksheet implements PHPExcel_IComparable
     /**
      *    Set Autofilter Range by using numeric cell coordinates
      *
-     *    @param int $pColumn1    Numeric column coordinate of the first cell
-     *    @param int $pRow1        Numeric row coordinate of the first cell
-     *    @param int $pColumn2    Numeric column coordinate of the second cell
-     *    @param int $pRow2        Numeric row coordinate of the second cell
+     *    @param  integer  $pColumn1    Numeric column coordinate of the first cell
+     *    @param  integer  $pRow1       Numeric row coordinate of the first cell
+     *    @param  integer  $pColumn2    Numeric column coordinate of the second cell
+     *    @param  integer  $pRow2       Numeric row coordinate of the second cell
      *    @throws    PHPExcel_Exception
      *    @return PHPExcel_Worksheet
      */
@@ -2432,9 +2438,9 @@ class PHPExcel_Worksheet implements PHPExcel_IComparable
                         if ($formatData) {
                             $style = $this->_parent->getCellXfByIndex($cell->getXfIndex());
                             $returnValue[$rRef][$cRef] = PHPExcel_Style_NumberFormat::toFormattedString(
-                            	$returnValue[$rRef][$cRef], 
-								($style->getNumberFormat()) ? 
-									$style->getNumberFormat()->getFormatCode() : 
+                            	$returnValue[$rRef][$cRef],
+								($style->getNumberFormat()) ?
+									$style->getNumberFormat()->getFormatCode() :
 									PHPExcel_Style_NumberFormat::FORMAT_GENERAL
                             );
                         }

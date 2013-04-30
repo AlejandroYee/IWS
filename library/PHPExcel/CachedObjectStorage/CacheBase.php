@@ -86,6 +86,11 @@ abstract class PHPExcel_CachedObjectStorage_CacheBase {
 	}	//	function __construct()
 
 
+	/**
+	 * Return the parent worksheet for this cell collection
+	 *
+	 * @return	PHPExcel_Worksheet
+	 */
 	public function getParent()
 	{
 		return $this->_parent;
@@ -177,7 +182,7 @@ abstract class PHPExcel_CachedObjectStorage_CacheBase {
 	public function getSortedCellList() {
 		$sortKeys = array();
 		foreach ($this->getCellList() as $coord) {
-			list($column,$row) = sscanf($coord,'%[A-Z]%d');
+			sscanf($coord,'%[A-Z]%d', $column, $row);
 			$sortKeys[sprintf('%09d%3s',$row,$column)] = $coord;
 		}
 		ksort($sortKeys);
@@ -198,7 +203,7 @@ abstract class PHPExcel_CachedObjectStorage_CacheBase {
 		$col = array('A' => '1A');
 		$row = array(1);
 		foreach ($this->getCellList() as $coord) {
-			list($c,$r) = sscanf($coord,'%[A-Z]%d');
+			sscanf($coord,'%[A-Z]%d', $c, $r);
 			$row[$r] = $r;
 			$col[$c] = strlen($c).$c;
 		}
@@ -214,20 +219,35 @@ abstract class PHPExcel_CachedObjectStorage_CacheBase {
 	}
 
 
+	/**
+	 * Return the cell address of the currently active cell object
+	 *
+	 * @return	string
+	 */
 	public function getCurrentAddress()
 	{
 		return $this->_currentObjectID;
 	}
 
+	/**
+	 * Return the column address of the currently active cell object
+	 *
+	 * @return	string
+	 */
 	public function getCurrentColumn()
 	{
-		list($column,$row) = sscanf($this->_currentObjectID, '%[A-Z]%d');
+		sscanf($this->_currentObjectID, '%[A-Z]%d', $column, $row);
 		return $column;
 	}
 
+	/**
+	 * Return the row address of the currently active cell object
+	 *
+	 * @return	string
+	 */
 	public function getCurrentRow()
 	{
-		list($column,$row) = sscanf($this->_currentObjectID, '%[A-Z]%d');
+		sscanf($this->_currentObjectID, '%[A-Z]%d', $column, $row);
 		return $row;
 	}
 
