@@ -8,6 +8,18 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------
 require_once("library/lib.func.php");
 requre_script_file("lib.requred.php"); 
+
+function ext_implode($symv,$data) {
+$result = "";
+foreach ($data as $value) {
+	if (is_numeric($value)) {
+		$result .= $symv.$value;
+	} else {
+		$result .= $symv."'".$value."'";
+	}
+}
+return trim($result,",");
+}
 	
 // Начальные переменные
 $user_auth = new AUTH();	
@@ -33,7 +45,7 @@ if (isset($_GET['finish'])) {
 	// подменяем переменные
 	foreach($_POST as $k => $v) {
 		if (is_array($v)) {
-			$action_sql = str_replace(strtolower(trim(":".$k)),"'".implode(",",$v)."'",strtolower($action_sql));
+			$action_sql = str_replace(strtolower(trim(":".$k)),"'".ext_implode(",",$v)."'",strtolower($action_sql));
 		} else {
 			$action_sql = str_replace(strtolower(trim(":".$k)),"'".$v."'",strtolower($action_sql));
 		}
@@ -58,7 +70,7 @@ if (isset($_GET['finish'])) {
 // формируем массив спрятанных форм с пришедшими данными:
 foreach($_POST as $k => $v) {
 	if (is_array($v)) {
-		echo "<input type='hidden' name='".Convert_quotas(strtolower($k))."' value = '".Convert_quotas(implode(",",$v))."' >\n";
+		echo "<input type='hidden' name='".Convert_quotas(strtolower($k))."' value = '".Convert_quotas(ext_implode(",",$v))."' >\n";
 	} else {
 		echo "<input type='hidden' name='".Convert_quotas(strtolower($k))."' value = '".Convert_quotas($v)."' >\n";
 	}
@@ -76,7 +88,7 @@ $content_value = $main_db -> sql_result($query, "FIELD_TXT");
 // Производим подмену если есть такое значение:
 foreach($_POST as $k => $v) {
 	if (is_array($v)) {
-		$content_value = str_replace(strtolower(trim(":".$k)),"'".implode(",",$v)."'",strtolower($content_value));
+		$content_value = str_replace(strtolower(trim(":".$k)),"'".ext_implode(",",$v)."'",strtolower($content_value));
 	} else {
 		$content_value = str_replace(strtolower(trim(":".$k)),"'".$v."'",strtolower($content_value));
 	}

@@ -456,8 +456,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 											title: 'Скрыть/показать столбцы',
 											onClickButton : function (){
 																$('#<?=$object_name?>').jqGrid('columnChooser',{
-																done : function () {
-																			redraw_document();
+																done : function () {																	
+																			redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
 																			<?php
 																				// Если нужна автоширина, то запускаем перерасчет
 																				if ($this->db_conn->get_param_view("width_enable") == "checked") {
@@ -668,7 +668,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								$('.ui-dialog-buttonpane').find('button:contains("Нет")').button({icons: { primary: 'ui-icon-close'}});
 								$('.ui-dialog-buttonpane').find('button:contains("Да")').button({icons: { primary: 'ui-icon-check'}});
 								$(this).parent().parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
-								redraw_document();
+								redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
 						}						
 			});
 		});
@@ -778,7 +778,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								$('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_o_<?=$object_name?>');
 								$('.ui-dialog-buttonpane').find('button:contains("Экспортировать")').button({icons: { primary: 'ui-icon-disk'}}).prop('id','btn_e_<?=$object_name?>');
 								$(this).parent().parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
-								redraw_document();
+								redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
 						}
 					});	
 					

@@ -13,7 +13,10 @@ $(function() {
 	// Наши вкладки
 	$( "#tabs" ).tabs({
 			collapsible: false,
-			heightStyle: "fill" 
+			heightStyle: "fill",
+			activate: function( event, ui ) {
+				redraw_document(ui.newPanel);
+			}
 	});
 
 	custom_alert = function (output_msg, title_msg)
@@ -27,7 +30,7 @@ $(function() {
 		if (!output_msg)
 			output_msg = '';
 
-		$("<div></div>").html(output_msg).dialog({
+		$("<div />").html(output_msg).dialog({
 			title: title_msg,
 			resizable: false,
 			minWidth: 450,
@@ -71,12 +74,7 @@ $(function() {
 				}
 		}
 	}
-
-	$("#tabs ul.ui-widget-header")
-		.delegate("li.ui-tabs-selected","mousedown",function(){
-		redraw_document();
-	});
- 
+	
 	// Функция добавления вкладок и содержимого через аякс
 	SetTab = function (tabTitle,tabContentUrl,same_tab) {
 		// Если предан флаг, то просто перезагружаем вкладу
@@ -115,9 +113,9 @@ $(function() {
 			  success: function(data){				
 				if($(data).find("div[window_login='logon']").length == 0) {
 					$('#'+id).empty().css('text-align','left').append(data);
-					redraw_document();				
+					redraw_document($(".ui-tabs-panel[aria-expanded='true']"));				
 				} else {		 		
-					// Нам вернули страницу авторизации. отчищаем докумен
+					// Нам вернули страницу авторизации. отчищаем документ
 					$('html').empty().append(data);
 				}
 			  }	  
@@ -151,32 +149,41 @@ $(function() {
 	}));								
 		
 	// Отрисовка окна и вкладок:
-	redraw_document = function () {
+	redraw_document = function (id_tab) {
 		var doc_height = $(window).height();
 		var doc_width = $(window).width() - 2;						
 		var main_menu = $(".main_menu").height();
 		
 		// Основная страница расчет высоты:											
 		$("#tabs").tabs().height( doc_height - main_menu - 10);
-		$("#tabs .ui-tabs-panel").height( doc_height - main_menu - 10).width(doc_width - 20);						
-		$(".navigation_header").height(30);	
-		$(".ui-widget-overlay").height(doc_height - main_menu - 90).width(doc_width - 20);	
-		$(".tab_main_content").height(doc_height - main_menu - 90).width(doc_width - 20);
+		$("#tabs .ui-tabs-panel").height(doc_height - main_menu - 10).width(doc_width - 20);
 		
 		// Для надписи внутри вкладки
 		$(".about_tabs").offset({ top: doc_height - 50});
 		$(".about_tabs_ver").offset({ top: doc_height - 25});
 		
+		// Для убыстрения отрисовки нам может быть передан идентификатор вкладки. (а может и нет) так что в
+		// случае когда его нет берем весь документ
+		if (typeof(id_tab) === 'undefined')  id_tab = $('body');
+		
+		id_tab.find(".navigation_header").height(30);
+
+		//  Основные оверлеи
+		$(".dialog_jqgrid_overlay").height(doc_height - main_menu - 85).width(doc_width - 24).offset({ top: main_menu + 30 + 50, left: 12 });
+		
+		// Содержимое контейнера		
+		id_tab.find(".tab_main_content").height(doc_height - main_menu - 90).width(doc_width - 20);
+		
 		// Прячем полосу прокрутки
-		$(".ui-tabs-panel").css('overflow','hidden');
+		id_tab.css('overflow','hidden');
 		
 		// Помощь:
-		$(".help_content").height(doc_height - main_menu - 90).width(doc_width - 20)
+		id_tab.find(".help_content").height(doc_height - main_menu - 90).width(doc_width - 20)
 				.children('.ui-accordion-header').width(doc_width - 65)
 				.parent().children('.ui-accordion-content').height(doc_height - main_menu - 150 - (($(".ui-accordion-header").height() * 2.05)* ($(".help_content .ui-accordion-header").length - 1))	).width(doc_width - 87);
 		
 		// Гриды общие	
-		$.each( $('.grid_resizer'), function() {
+		$.each( id_tab.find('.grid_resizer'), function() {
 			var percent = $(this).attr('percent');							
 			var doc_width_grid = doc_width - 27;
 			
@@ -202,7 +209,7 @@ $(function() {
 		});
 		
 		// Гриды которые во вкладках	
-		$.each( $('.grid_resizer_tabs'), function() {
+		$.each( id_tab.find('.grid_resizer_tabs'), function() {
 			var doc_width_grid = doc_width - 48;
 			var percent = $(this).attr('percent') - (33/(doc_height/100));
 			
@@ -408,7 +415,7 @@ $(function() {
 	});	
 
 	$(window).resize(function () {
-		redraw_document();			
+		redraw_document($(".ui-tabs-panel[aria-expanded='true']"));			
 	});
 
 	// Проверка значений:
@@ -457,7 +464,8 @@ $(function() {
 					obj_clone.insertBefore(obj.hide());
 					obj_clone.spinner({
 						change: function( event, ui ) {
-								obj.val($(this).attr('aria-valuenow'));												
+								obj.val($(this).attr('aria-valuenow'));	
+								console.log(obj);
 						}
 					}).removeClass('ui-widget-content ui-corner-all')
 					.calculator({
@@ -471,7 +479,6 @@ $(function() {
 									obj_clone.calculator('show');
 							})
 					).insertAfter(obj_clone.parent());
-					obj = obj_clone;
 				break;
 				
 				case 'N': // NUMBER
@@ -496,7 +503,6 @@ $(function() {
 									obj_clone.calculator('show');
 							})
 					).insertAfter(obj_clone.parent());
-					obj = obj_clone;
 				break;
 				
 				case 'NL': // NUMBER LOOOONG
@@ -521,7 +527,6 @@ $(function() {
 									obj_clone.calculator('show');
 							})
 					).insertAfter(obj_clone.parent());
-					obj = obj_clone;
 				break;
 				
 				case 'C': // CURENSYS
@@ -546,7 +551,6 @@ $(function() {
 									obj_clone.calculator('show');
 							})
 					).insertAfter(obj_clone.parent());
-					obj = obj_clone;
 				break;
 				
 				case 'P': // PASSWORD
@@ -632,8 +636,7 @@ $(function() {
 									editor.resize();
 							}
 						});
-					editor.resize();
-				
+					editor.resize();				
 				break;
 			} // end type def
 			
@@ -888,10 +891,10 @@ $.extend($.jgrid,{
 			})).prependTo(to_object);
 			
 			if ($.browser.msie) {		
-				$(".dialog_jqgrid_overlay").height(doc_height - main_menu - 90).width(doc_width - 24).offset({ top: main_menu + tab_nav + 45, left: 12 });
-			} else {
-				$(".dialog_jqgrid_overlay").height(doc_height - main_menu - 90).width(doc_width - 24).offset({ top: main_menu + tab_nav + 50, left: 12 });
-		}
+					$(".dialog_jqgrid_overlay").height(doc_height - main_menu - 90).width(doc_width - 24).offset({ top: main_menu + tab_nav + 45, left: 12 });
+				} else {
+					$(".dialog_jqgrid_overlay").height(doc_height - main_menu - 90).width(doc_width - 24).offset({ top: main_menu + tab_nav + 50, left: 12 });
+		    }
 		
 	},
 	hideModal : function (selector,o) {

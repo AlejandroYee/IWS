@@ -139,7 +139,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								$(this).parent().children('.ui-dialog-buttonpane').find('button:contains(\"Отмена\")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_o_".$last_grid_name."');
 								$(this).parent().children('.ui-dialog-buttonpane').find('button:contains(\"Загрузить\")').button({icons: { primary: 'ui-icon-arrowthickstop-1-s'}}).prop('id','btn_".$last_grid_name."');
 								$(this).parent().parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
-								redraw_document();
+								redraw_document($(\".ui-tabs-panel[aria-expanded='true']\"));
 						}			
 			});
 			
