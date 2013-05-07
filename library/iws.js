@@ -612,7 +612,7 @@ $(function() {
 					obj.multiselect({
 							multiple: (typeof(obj.attr('multiple')) === "undefined")?false:true,
 							minWidth: (obj.width() < 255)?255:obj.width(),
-							header:true,
+							header: true,
 							selectedList: obj.attr('h')
 						}).multiselectfilter();
 				break;
@@ -832,8 +832,8 @@ $.calculator.regional['ru'] = {
 $.calculator.setDefaults($.calculator.regional['ru']);
 									
 $.extend($.ech.multiselectfilter.prototype.options, {
-	label: "",
-	placeholder: "Фильтр"
+	label: "Фильтр:",
+	placeholder: "введите слово"
 });
 
 $.extend($.ech.multiselect.prototype.options, {

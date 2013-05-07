@@ -18,11 +18,6 @@
  *   http://www.gnu.org/licenses/gpl.html
  *
  */
-  /*
- # ��������, ������ �������, ����������� ������� �����������!
- # @andrey.boomer at gmail.com
- */
- 
 (function($, undefined) {
 
   var multiselectID = 0;
@@ -74,7 +69,7 @@
         menu = (this.menu = $('<div />'))
           .addClass('ui-multiselect-menu ui-widget ui-widget-content ui-corner-all')
           .addClass(o.classes)
-          .appendTo($('body')),
+          .appendTo($(o.appendTo)),
 
         header = (this.header = $('<div />'))
           .addClass('ui-widget-header ui-corner-all ui-multiselect-header ui-helper-clearfix')
@@ -108,14 +103,17 @@
         if(!o.multiple) {
           menu.addClass('ui-multiselect-single');
         }
-		//############################ ���������� ��������:
-	  	// ������� ��� ����� �������� ����
+		
 		if ('resizable' in jQuery.ui) {
 			menu.resizable({
-						resize: function( event, ui ) {						
-								$(this).children('ul').height(ui.size.height);
-								o.height = ui.size.height;
-								
+						resize: function( event, ui ) {	
+								if (o.header === false) {
+									diff = 0;
+								} else {
+									diff = 12;
+								}
+								o.height = ui.size.height - header.height() - diff;
+								checkboxContainer.height(ui.size.height - header.height() - diff);
 						}		
 			});
 		}
@@ -126,7 +124,7 @@
 
     _init: function() {
       if(this.options.header === false) {
-        this.header.hide();
+        this.header.hide().height(0);
       }
       if(!this.options.multiple) {
         this.headerLinkContainer.find('.ui-multiselect-all, .ui-multiselect-none').hide();
@@ -239,7 +237,7 @@
         if($.isFunction(o.selectedText)) {
           value = o.selectedText.call(this, numChecked, $inputs.length, $checked.get());
         } else if(/\d/.test(o.selectedList) && o.selectedList > 0 && numChecked <= o.selectedList) {
-          value = $checked.map(function() { return $(this).next().html(); }).get().join(', ');
+          value = $checked.map(function() { return $(this).next().text(); }).get().join(', ');
         } else {
           value = o.selectedText.replace('#', numChecked).replace('#', $inputs.length);
         }
@@ -355,9 +353,9 @@
         e.preventDefault();
 
         switch(e.which) {
-          case 9: // tab
-            case 27: // esc
-            self.close();
+         case 9: // tab
+        		case 27: // esc
+           self.close();
           break;
           case 38: // up
             case 40: // down
@@ -599,8 +597,7 @@
       // triggering both mouseover and mouseover because 1.4.2+ has a bug where triggering mouseover
       // will actually trigger mouseenter.  the mouseenter trigger is there for when it's eventually fixed
       this.labels.filter(':not(.ui-state-disabled)').eq(0).trigger('mouseover').trigger('mouseenter').find('input').trigger('focus');
-	  //############################ ���������� ��������:
-	  // ���������� � ����������� ��������: 	 
+	  //############################
 	  if (!o.multiple && typeof($(menu).find('.ui-state-active').position()) !== 'undefined') {
 			$container.scrollTop($(menu).find('.ui-state-active').position().top);
 	  }

@@ -262,7 +262,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 					
 					$('#param-".$this->pageid."').dialog({
 						autoOpen: false,
-						modal: true,						
+						modal: false,						
 						minWidth: 450,
 						minHeight: 50,	
 						closeOnEscape: true,
@@ -340,12 +340,14 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 							}						
 						],
 						close:function() {
+							$(this).parent().parent().children('.ui-widget-overlay').remove();
 							$( this ).dialog( 'close' );
 						},
 						open: function() {
 								$('.ui-dialog-buttonpane').find('button:contains(\"Отмена\")').button({icons: { primary: 'ui-icon-close'}});
 								$('.ui-dialog-buttonpane').find('button:contains(\"Сохранить\")').button({icons: { primary: 'ui-icon-disk'}});
-								$(this).parent().parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
+								$($('<div />').attr({'class':'ui-widget-overlay ui-front dialog_jqgrid_overlay ui-corner-all',
+													 'style':'position:absolute;'})).prependTo($(this).parent().parent());
 								redraw_document();
 						}
 					});
@@ -495,17 +497,19 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	
 	$('#wizard_form_".$this->pageid."').dialog({
 						autoOpen: false,
-						modal: true,						
+						modal: false,						
 						minWidth: 450,
 						minHeight: 100,						
 						closeOnEscape: true,
 						resizable:false,
 						appendTo: $('#".$this->pageid." .tab_main_content'),						
 						close:function() {
+							$(this).parent().parent().children('.ui-widget-overlay').remove();
 							$(this).dialog('close');
 						},
 						open: function() {
-								$(this).parent().parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
+								$($('<div />').attr({'class':'ui-widget-overlay ui-front dialog_jqgrid_overlay ui-corner-all',
+													 'style':'position:absolute;'})).prependTo($(this).parent().parent());
 								redraw_document();
 								get_num_mm('first');
 						}					
