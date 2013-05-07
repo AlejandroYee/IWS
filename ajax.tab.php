@@ -95,9 +95,8 @@ switch ($action) {
 						$('.log_container').height($(document).height() - $('.main_menu').height() - 90);
 						$('#log_".$tabid."').width($(document).width() - 28).height($(document).height() - $('.main_menu').height() - 90);
 						elem.hide();
-						editor.resize();
 						editor.setReadOnly(true);
-						editor.navigateFileEnd();
+						editor.scrollToRow(editor.session.getLength()+1);
 				</script>
 				";
 	break;

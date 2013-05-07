@@ -983,7 +983,6 @@ $.extend($.jgrid,{
 			
 			replace_select_opt_group();
 			create_from_table_elemnts($('#' + aIDs.themodal).find('.FormGrid'));
-			
 			// Говорим что это диалог
 			$('#' + aIDs.themodal).dialog({
 										autoOpen: false,
