@@ -259,13 +259,13 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					colModel:<?=$ResArray['colModel']?>,					
 					sortable: true,
 					caption:'<?=$ResArray['Title']?>',
-					ignoreCase:true,	
+					ignoreCase:true,
 					viewrecords: true,	
 					scrollOffset:17,
 					hidegrid:false,
 					width:500,
 					url: '<?=ENGINE_HTTP?>/ajax.data.grid.php?type=<?=$type?>&pageid=<?=$this ->pageid?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=<?=$this ->id_mm_fr_d?>&id_mm=<?=$this ->id_mm?>',	
-					loadtext: 'Запрашиваю данные...',
+					loadtext: '',
 					onSelectRow: function(ids) {
 								// Узнаем тип грида
 								var grid_type = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + $(this).attr('id') + "']").attr('form_type');
@@ -333,6 +333,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 										export_post_data_<?=$object_name?> = export_post_data_<?=$object_name?> + '&' + key + '=' + postdata[key];
 								}
 							}
+							$(this).jqGrid('clearGridData');
 					},
 					beforeProcessing: function(data, status, xhr) {
 						if (crc_input_<?=$object_name?> == $.md5(xhr.responseText)) {
