@@ -9,7 +9,7 @@
 header("Content-Type: text/html; charset=".strtolower(HTML_ENCODING));
 header("Cache-Control: private,no-cache,no-store");
 header("Pragma: no-cache");
-define("VERSION_ENGINE","v2.00 RC15");
+define("VERSION_ENGINE","v2.00 RC16");
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Подключаем необходимые модули
 //--------------------------------------------------------------------------------------------------------------------------------------------
@@ -225,6 +225,11 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						$this -> data_res .= "<script type=\"text/javascript\"> var data_".$this -> pageid."_loaded = 0;  </script>";
 						$input = new INPUT($this -> id_mm_fr, $this -> id_mm, $this -> pageid);
 						$this -> Param_res .= $input -> Creare_wizard_from();
+							if (!empty($this -> Param_res)) {								
+									// Флаг на загрузку данных
+									$this -> data_res .= "<script type=\"text/javascript\"> var data_".$this -> pageid."_loaded = 0;  </script>";
+									$IsInputform = 1; 
+							}
 					break;
 					
 					// Графики

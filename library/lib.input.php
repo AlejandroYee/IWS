@@ -293,8 +293,6 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 									";
 				} else if (($c_count > 1) and isset($gridname)) {	$output .= "
 									$.get('ajax.saveparams.php?&id_mm_fr=".$this->id_mm_fr."&' + qString, function(data) {if (data.length > 20) {custom_alert(data);}});
-									
-									$('#".$gridname."').jqGrid('setGridParam',{datatype:'json'});									
 									if (data_".$this -> pageid."_loaded > 0) {
 										$.each( $('#".$this->pageid." .tab_main_content .chart_data_".$this -> pageid."') , function() {
 											var self = $(this);					
@@ -308,6 +306,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 									}
 									data_".$this -> pageid."_loaded = 1;
 									$('#show_parameters-".$this->pageid."').button('option','disabled',false);
+									$('#".$gridname."').jqGrid('setGridParam',{datatype:'json'});	
 									$('#".$gridname."').trigger('reloadGrid');
 									";
 				} else {
@@ -454,7 +453,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 					success: function(data, status) {
 					";
 					if(isset($gridname)) {
-						$output .= "$('#".$gridname."').trigger('reloadGrid');";
+						$output .= "$('#".$gridname."').jqGrid('setGridParam',{datatype:'json'});$('#".$gridname."').trigger('reloadGrid');";
 					} else if(!isset($gridname) and !isset($chartname)) {
 						$output .= "
 												$('#".$this->pageid." .tab_main_content .CaptionTD').remove();
@@ -465,18 +464,17 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 						";
 					}
 					$output .= "
-					data_".$this -> pageid."_loaded = 1;
-							if (data_".$this -> pageid."_loaded > 0) {
-														$.each( $('#down-size-".$this -> pageid." .chart_data_".$this -> pageid."') , function() {
-															var self = $(this);					
-															$.get(self.attr('url'),function(data) {													
-																	document.getElementById(self.attr('name')).SetVariable('_root.dataURL','');
-																	document.getElementById(self.attr('name')).SetVariable('_root.isNewData','1');
-																	document.getElementById(self.attr('name')).SetVariable('_root.newData',data);
-																	document.getElementById(self.attr('name')).TGotoLabel('/', 'JavaScriptHandler'); 													
-															});	
-														});
-							}
+						$.each( $('#".$this->pageid." .tab_main_content .chart_data_".$this -> pageid."') , function() {
+											var self = $(this);					
+											$.get(self.attr('url'),function(data) {													
+													document.getElementById(self.attr('name')).SetVariable('_root.dataURL','');
+													document.getElementById(self.attr('name')).SetVariable('_root.isNewData','1');
+													document.getElementById(self.attr('name')).SetVariable('_root.newData',data);
+													document.getElementById(self.attr('name')).TGotoLabel('/', 'JavaScriptHandler'); 													
+											});	
+						});
+						$('#show_parameters-".$this->pageid."').button('option','disabled',false);
+						data_".$this -> pageid."_loaded = 1;
 					if (data.length > 20) {custom_alert(data);}
 					}
 			});
