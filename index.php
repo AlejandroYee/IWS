@@ -191,17 +191,22 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strrpos($_SERVER['HTTP_USER_AGENT'],
 						.ui-jqgrid .loading { 
 								padding: 10px;
 								color:inherit;
-								border: 0px;
+								border: 0px transparent;
 								background: url(<?=ENGINE_HTTP?>/library/ajax-loader.gif);
-								background-color:inherit;
-								background-position-x: 50%;
+								background-position-x: 47%;
 								background-position-y: 50%;
 								background-repeat: no-repeat;
 								left:-5px;
 								top:-5px;
-								height: 98%;
-								width:  99%;
-								opacity:0.6;
+								height: 97%;
+								width:  100%;
+								opacity:1;
+						}
+						.ui-jqgrid .loading:after  { 
+							content:'Loading...';
+							 position: absolute;
+							top:49%;
+							left:48%;							
 						}
 						.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label { 
 									text-align:left;
