@@ -203,7 +203,7 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strrpos($_SERVER['HTTP_USER_AGENT'],
 								opacity:1;
 						}
 						.ui-jqgrid .loading:after  { 
-							content:'Loading...';
+							content:'Загружаю...';
 							 position: absolute;
 							top:49%;
 							left:48%;							
