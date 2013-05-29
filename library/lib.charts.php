@@ -50,9 +50,9 @@ var $id_mm_fr, $pageid, $main_db;
 		<script type='text/javascript'>
 		$(function() {		
 		
-		if ($('.chart_data_".$this -> pageid." :first').parent().children('.grid_resizer').attr('percent') > 0) {
-			var perch = 100 - $('.chart_data_".$this -> pageid." :first').parent().children('.grid_resizer').attr('percent');
-			$('<div class=\"grid_resizer has_resize_control chart_".$this -> pageid."\" percent=\"' + perch + '\"><div class=\"chart_content_".$this -> pageid."\"> </div></div>').insertBefore('.chart_data_".$this -> pageid." :first');		
+		if ($('.chart_data_".$this -> pageid.":first').parent().children('.grid_resizer').attr('percent') > 0) {
+			var perch = 100 - $('.chart_data_".$this -> pageid.":first').parent().children('.grid_resizer').attr('percent');			
+			$('<div class=\"grid_resizer has_resize_control chart_".$this -> pageid."\" percent=\"' + perch + '\"><div class=\"chart_content_".$this -> pageid."\"> </div></div>').insertBefore('.chart_data_".$this -> pageid.":first');		
 			$('.chart_data_".$this -> pageid."').appendTo(\".chart_content_".$this -> pageid."\");			
 			set_resizers();			
 		}
