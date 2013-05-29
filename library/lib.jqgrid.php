@@ -286,7 +286,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 											$('#' + gridname).jqGrid('setGridParam',{url:'<?=ENGINE_HTTP?>/ajax.data.grid.php?type=' + grid_type + '&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=' + grid_parent_id + '&Master_Table_ID=<?=$ResArray['Master_Table_ID']?>&id_mm='+ids,page:1});
 											$('#' + gridname).jqGrid('setGridParam',{editurl:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?type=' + grid_type + '&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=' + grid_parent_id + '&Master_Table_ID=<?=$ResArray['Master_Table_ID']?>&id_mm='+ids,page:1});
 											$('#' + gridname).jqGrid('setGridParam',{search:false, datatype:'json',loadonce:false,treedatatype:'json'}, true);											
-											$('#' + gridname).jqGrid().trigger('reloadGrid', true);
+											$('#' + gridname).trigger('reloadGrid');
 											// Обновляем филд select в случае если он есть и подсовываем ему rowid	
 											$.each( $('#' + gridname).jqGrid ('getGridParam', 'colModel') , function() {
 													if (this.edittype == "select") {												
@@ -311,7 +311,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 													}
 											});
 											if ($(this).parent().attr('aria-expanded') == "true") {
-												$('#' + gridname).jqGrid().trigger('reloadGrid', true);
+												$('#' + gridname).trigger('reloadGrid');
 											} else {
 												$(this).attr('need_update','true');
 											}
@@ -348,8 +348,17 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						}
 					})
 					.jqGrid('navGrid','#Pager_<?=$object_name?>',{
-						view: false,edit: false,del: false,add: false,search:false
+						view: false,edit: false,del: false,add: false,search:false,refresh:false
 					})
+					.jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
+                                              caption: '',
+                                              title: 'Перезагрузить содержимое таблици полностью без кеша.',
+                                              buttonicon: 'ui-icon-refresh',
+                                              onClickButton: function(){
+                                                crc_input_<?=$object_name?> = null; // Принудительно отчищаем crc
+												$('#<?=$object_name?>').trigger('reloadGrid');
+                                              }											
+							})	
 					.jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
                                               caption: 'Просмотр',
                                               title: 'Просмотреть выделенную запись',
