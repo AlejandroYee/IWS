@@ -915,19 +915,19 @@ procedure save_tmp$param_value_date_time(p_param_type  varchar2,
                                          p_param_value date);
 
 --+--Возвращает значение темпового параметра в типе VARCHAR2
-function get_tmp$param_value_str      (p_param_type varchar2) return varchar2;
+function get_tmp$param_value_str      (p_param_type varchar2) return varchar2 deterministic;
 
 --+--Возвращает значение темпового параметра в типе NUMBER
-function get_tmp$param_value_num      (p_param_type varchar2) return number;
+function get_tmp$param_value_num      (p_param_type varchar2) return number deterministic;
 
 --+--Возвращает значение темпового параметра в типе INTEGER
-function get_tmp$param_value_int      (p_param_type varchar2) return number;
+function get_tmp$param_value_int      (p_param_type varchar2) return number deterministic;
 
 --+--Возвращает значение темпового параметра в типе DATE
-function get_tmp$param_value_date     (p_param_type varchar2) return date;
+function get_tmp$param_value_date     (p_param_type varchar2) return date deterministic;
 
 --+--Возвращает значение темпового параметра в типе DATE_TIME
-function get_tmp$param_value_date_time(p_param_type varchar2) return date;
+function get_tmp$param_value_date_time(p_param_type varchar2) return date deterministic;
 
 end;
 /
