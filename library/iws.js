@@ -590,7 +590,7 @@ $(function() {
 							});
 				break;
 				
-				case 'D': // DATE TIME
+				case 'DT': // DATE TIME
 					obj.datetimepicker({
 							showWeek: true,
 							numberOfMonths: num_of_mounth,
