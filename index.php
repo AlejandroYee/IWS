@@ -52,15 +52,13 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strrpos($_SERVER['HTTP_USER_AGENT'],
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.jqGrid.locale-ru.js?s=<?=SESSION_ID?>" /></script>	
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.multiselect.js?s=<?=SESSION_ID?>" /></script>	
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.fileDownload.js?s=<?=SESSION_ID?>" /></script>	
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.ui.menubar.js?s=<?=SESSION_ID?>" /></script>	
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.multiselect.filter.min.js?s=<?=SESSION_ID?>" /></script>
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.ui.menubar.js?s=<?=SESSION_ID?>" /></script>
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.calculator.min.js?s=<?=SESSION_ID?>" /></script>
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/ace.js?s=<?=SESSION_ID?>" /></script>		
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.js?s=<?=SESSION_ID?>" /></script>	
 				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/library/normalize.css?s=<?=SESSION_ID?>" /> 
 				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/themes/smoothness/jquery-ui.css?s=<?=SESSION_ID?> " /> 
 				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/jscript/jquery.multiselect.css?s=<?=SESSION_ID?>" /> 
-				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/jscript/jquery.multiselect.filter.css?s=<?=SESSION_ID?>" /> 
 				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/jscript/ui.jqgrid.css?s=<?=SESSION_ID?>" /> 
 				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/jscript/jquery.calculator.css?s=<?=SESSION_ID?>" /> 
 				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/jscript/jquery-ui-timepicker-addon.css?s=<?=SESSION_ID?>" /> 				
