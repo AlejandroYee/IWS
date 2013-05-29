@@ -2,7 +2,7 @@
 /**
  * PHPExcel
  *
- * Copyright (c) 2006 - 2012 PHPExcel
+ * Copyright (c) 2006 - 2013 PHPExcel
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
  *
  * @category   PHPExcel
  * @package    PHPExcel_Calculation
- * @copyright  Copyright (c) 2006 - 2012 PHPExcel (http://www.codeplex.com/PHPExcel)
+ * @copyright  Copyright (c) 2006 - 2013 PHPExcel (http://www.codeplex.com/PHPExcel)
  * @license	http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt	LGPL
  * @version	##VERSION##, ##DATE##
  */
@@ -53,11 +53,11 @@ if (!defined('CALCULATION_REGEXP_CELLREF')) {
 
 
 /**
- * PHPExcel_Calculation (Singleton)
+ * PHPExcel_Calculation (Multiton)
  *
  * @category	PHPExcel
  * @package		PHPExcel_Calculation
- * @copyright	Copyright (c) 2006 - 2012 PHPExcel (http://www.codeplex.com/PHPExcel)
+ * @copyright	Copyright (c) 2006 - 2013 PHPExcel (http://www.codeplex.com/PHPExcel)
  */
 class PHPExcel_Calculation {
 
@@ -105,7 +105,7 @@ class PHPExcel_Calculation {
     private $_workbook;
 
 	/**
-	 * List of instances of the calculation engine that we've instantiated
+	 * List of instances of the calculation engine that we've instantiated for individual workbooks
 	 *
 	 * @access	private
 	 * @var PHPExcel_Calculation[]
@@ -194,26 +194,80 @@ class PHPExcel_Calculation {
 	 */
 	private $_cyclicReferenceStack;
 
+	/**
+	 * Current iteration counter for cyclic formulae
+	 * If the value is 0 (or less) then cyclic formulae will throw an exception,
+	 *    otherwise they will iterate to the limit defined here before returning a result
+	 *
+	 * @var integer
+	 *
+	 */
 	private $_cyclicFormulaCount = 0;
+
 	private $_cyclicFormulaCell = '';
+
+	/**
+	 * Number of iterations for cyclic formulae
+	 *
+	 * @var integer
+	 *
+	 */
 	public $cyclicFormulaCount = 0;
 
-
+	/**
+	 * Precision used for calculations
+	 *
+	 * @var integer
+	 *
+	 */
 	private $_savedPrecision	= 14;
 
 
+	/**
+	 * The current locale setting
+	 *
+	 * @var string
+	 *
+	 */
 	private static $_localeLanguage = 'en_us';					//	US English	(default locale)
+
+	/**
+	 * List of available locale settings
+	 * Note that this is read for the locale subdirectory only when requested
+	 *
+	 * @var string[]
+	 *
+	 */
 	private static $_validLocaleLanguages = array(	'en'		//	English		(default language)
 												 );
+	/**
+	 * Locale-specific argument separator for function arguments
+	 *
+	 * @var string
+	 *
+	 */
 	private static $_localeArgumentSeparator = ',';
 	private static $_localeFunctions = array();
+
+	/**
+	 * Locale-specific translations for Excel constants (True, False and Null)
+	 *
+	 * @var string[]
+	 *
+	 */
 	public static $_localeBoolean = array(	'TRUE'	=> 'TRUE',
 											'FALSE'	=> 'FALSE',
 											'NULL'	=> 'NULL'
 										  );
 
 
-	//	Constant conversion from text name/value to actual (datatyped) value
+	/**
+	 * Excel constant string translations to their PHP equivalents
+	 * Constant conversion from text name/value to actual (datatyped) value
+	 *
+	 * @var string[]
+	 *
+	 */
 	private static $_ExcelConstants = array('TRUE'	=> TRUE,
 											'FALSE'	=> FALSE,
 											'NULL'	=> NULL
@@ -2155,7 +2209,7 @@ class PHPExcel_Calculation {
 		try {
 			return $this->calculateCellValue($pCell);
 		} catch (PHPExcel_Exception $e) {
-			throw(new PHPExcel_Calculation_Exception($e->getMessage()));
+			throw new PHPExcel_Calculation_Exception($e->getMessage());
 		}
 	}	//	function calculate()
 
@@ -2189,7 +2243,7 @@ class PHPExcel_Calculation {
 		try {
 			$result = self::_unwrapResult($this->_calculateFormulaValue($pCell->getValue(), $pCell->getCoordinate(), $pCell));
 		} catch (PHPExcel_Exception $e) {
-			throw(new PHPExcel_Calculation_Exception($e->getMessage()));
+			throw new PHPExcel_Calculation_Exception($e->getMessage());
 		}
 
 		if ((is_array($result)) && (self::$returnArrayAsType != self::RETURN_ARRAY_AS_ARRAY)) {
@@ -2269,7 +2323,7 @@ class PHPExcel_Calculation {
 		try {
 			$result = self::_unwrapResult($this->_calculateFormulaValue($formula, $cellID, $pCell));
 		} catch (PHPExcel_Exception $e) {
-			throw(new PHPExcel_Calculation_Exception($e->getMessage()));
+			throw new PHPExcel_Calculation_Exception($e->getMessage());
 		}
 
 		//	Reset calculation cacheing to its previous state
