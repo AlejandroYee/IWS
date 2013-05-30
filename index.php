@@ -196,7 +196,7 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strrpos($_SERVER['HTTP_USER_AGENT'],
 								background-repeat: no-repeat;
 								left:-5px;
 								top:-5px;
-								height: 97%;
+								height: 100%;
 								width:  100%;
 								opacity:1;
 						}
@@ -211,7 +211,7 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strrpos($_SERVER['HTTP_USER_AGENT'],
 						}
 						.ui-search-toolbar {
 								border-color:transparent;
-						}		
+						}									
 <?php 
 if (($main_db->get_param_view("render_type") > 2) and isset($_SERVER['HTTP_USER_AGENT']) and (!strrpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == "")) $main_db -> set_param_view("render_type",2); // Проверка на эксплорер
 switch ($main_db->get_param_view("render_type")) {

@@ -7,17 +7,135 @@
 */
 jQuery.uiBackCompat = false;
 jQuery.jgrid.no_legacy_api = true;
+
+function browserDetectNav(chrAfterPoint)
+{
+var UA=window.navigator.userAgent,
+	OperaB = /Opera[ \/]+\w+\.\w+/i,
+	OperaV = /Version[ \/]+\w+\.\w+/i,	
+	FirefoxB = /Firefox\/\w+\.\w+/i,
+	ChromeB = /Chrome\/\w+\.\w+/i,
+	SafariB = /Version\/\w+\.\w+/i,
+	IEB = /MSIE *\d+\.\w+/i,
+	SafariV = /Safari\/\w+\.\w+/i,
+	browser = new Array(),
+	browserSplit = /[ \/\.]/i,
+	OperaV = UA.match(OperaV),
+	Firefox = UA.match(FirefoxB),
+	Chrome = UA.match(ChromeB),
+	Safari = UA.match(SafariB),
+	SafariV = UA.match(SafariV),
+	IE = UA.match(IEB),
+	Opera = UA.match(OperaB);
+		
+		if ((!Opera=="")&(!OperaV=="")) browser[0]=OperaV[0].replace(/Version/, "Opera")
+				else 
+					if (!Opera=="")	browser[0]=Opera[0]
+						else
+							if (!IE=="") browser[0] = IE[0]
+								else 
+									if (!Firefox=="") browser[0]=Firefox[0]
+										else
+											if (!Chrome=="") browser[0] = Chrome[0]
+												else
+													if ((!Safari=="")&&(!SafariV=="")) browser[0] = Safari[0].replace("Version", "Safari");
+
+	var outputData;
+	
+	if (browser[0] != null) outputData = browser[0].split(browserSplit);
+	if (((chrAfterPoint == null)|(chrAfterPoint == 0))&(outputData != null)) 
+		{
+			chrAfterPoint=outputData[2].length;
+			outputData[2] = outputData[2].substring(0, chrAfterPoint);
+			return(outputData);
+		}
+			else
+				if (chrAfterPoint != null) 
+				{
+					outputData[2] = outputData[2].substr(0, chrAfterPoint);
+					return(outputData);					
+				}
+					else	return(false);
+}
+
+function browserDetectJS() {
+var
+	browser = new Array();
+	
+	if (window.opera) {
+		browser[0] = "Opera";
+		browser[1] = window.opera.version();
+	}
+		else 
+		if (window.chrome) {
+			browser[0] = "Chrome";
+		}
+			else
+			if (window.sidebar) {
+				browser[0] = "Firefox";
+			}
+				else
+					if ((!window.external)&&(browser[0]!=="Opera")) {
+						browser[0] = "Safari";
+					}
+						else
+						if (window.ActiveXObject) {
+							browser[0] = "MSIE";
+							if (window.navigator.userProfile) browser[1] = "6"
+								else 
+									if (window.Storage) browser[1] = "8"
+										else 
+											if ((!window.Storage)&&(!window.navigator.userProfile)) browser[1] = "7"
+												else browser[1] = "Unknown";
+						}
+	
+	if (!browser) return(false)
+		else return(browser);
+}
+function alert_browser_message (br) {
+alert("Рљ СЃРѕР¶Р°Р»РµРЅРёСЋ, РІР°С€Р° РІРµСЂСЃРёСЏ Р±СЂР°СѓР·РµСЂР°:\r\n" + br + "\r\nР±РѕР»СЊС€Рµ РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚СЃСЏ Рё СЃРёСЃС‚РµРјР° Р±СѓРґРµС‚ СЂР°Р±РѕС‚Р°С‚СЊ РЅРµСЃС‚Р°Р±РёР»СЊРЅРѕ, РѕР±РЅРѕРІРёС‚РµСЃСЊ, Р»РёР±Рѕ РѕР±СЂР°С‚РёС‚РµСЃСЊ Рє Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂСѓ!");
+throw new Exception_no_browser("error"); // РёРЅРёС†РёРёСЂСѓРµРј РѕС€РёР±РєСѓ РґР»СЏ РѕСЃС‚Р°РЅРѕРІРєРё РІС‹РїРѕР»РЅРµРЅРёСЏ СЃРєСЂРёРїС‚РѕРІ
+}
+
+var browserNav = browserDetectNav(1),
+	browserJS = browserDetectJS(), browser;
+	if (browserNav[0] == browserJS[0]) browser = browserNav
+		else
+			if (browserNav[0] != browserJS[0]) browser = browserJS
+				else
+			browser = false;
+			
+// РџСЂРѕРїРёСЃС‹РІР°РµРј РєРѕСЂСЂРµРєС‚РЅРѕ РѕРїСЂРµРґРµР»РµРЅРЅС‹Рµ РІРµСЂСЃРёРё Р±СЂР°СѓР·РµСЂРѕРІ, Рё СЃРІРµСЂСЏРµРјСЃСЏ СЃ РІРµСЂСЃРёСЏРјРё
 jQuery.browser = {};
-jQuery.browser.mozilla = /mozilla/.test(navigator.userAgent.toLowerCase()) && !/webkit/.test(navigator.userAgent.toLowerCase());
-jQuery.browser.webkit = /webkit/.test(navigator.userAgent.toLowerCase());
-jQuery.browser.opera = /opera/.test(navigator.userAgent.toLowerCase());
-jQuery.browser.msie = /msie/.test(navigator.userAgent.toLowerCase());
-				
+switch (browser[0])
+{
+		case 'Chrome':
+			jQuery.browser.webkit = true;
+			if (browser[1] < 23) { alert_browser_message(browser[0] +' (РІРµСЂСЃРёСЏ ' + browser[1] +'.' + browser[2] + ')') }; 
+		break;
+		case 'Safari':
+			jQuery.browser.safari = true;
+			if (browser[1] < 5) { alert_browser_message(browser[0] +' (РІРµСЂСЃРёСЏ ' + browser[1] +'.' + browser[2] + ')') }; 
+		break;
+		case 'MSIE':
+			jQuery.browser.msie = true;
+			if (browser[1] < 9) { alert_browser_message(browser[0] +' (РІРµСЂСЃРёСЏ ' + browser[1] +'.' + browser[2] + ')') }; 
+		break;
+		case 'Opera':
+			jQuery.browser.opera = true;
+			if (browser[1] < 13 ) { alert_browser_message(browser[0] +' (РІРµСЂСЃРёСЏ ' + browser[1] +'.' + browser[2] + ')') }; 
+		break;
+		case 'Firefox':
+			jQuery.browser.mozilla = true;
+			if (browser[1] < 10) { alert_browser_message(browser[0] +' (РІРµСЂСЃРёСЏ ' + browser[1] +'.' + browser[2] + ')') }; 
+		break;
+};
+			
 var counttab = 1;	
 var hidden_menu = false;	
 			
 $(function() {
-	// Наши вкладки
+	// РќР°С€Рё РІРєР»Р°РґРєРё
 	$( "#tabs" ).tabs({
 			collapsible: false,
 			heightStyle: "fill",
@@ -30,7 +148,7 @@ $(function() {
 	{	
 		is_modal = false;
 		if (!title_msg) {
-			title_msg = 'Ошибка';
+			title_msg = 'РћС€РёР±РєР°';
 			is_modal = true;
 			st = "ui-state-error";
 		}
@@ -43,7 +161,7 @@ $(function() {
 			minWidth: 450,
 			modal: is_modal,
 			buttons: {
-				"Закрыть": function() 
+				"Р—Р°РєСЂС‹С‚СЊ": function() 
 				{
 					$( this ).dialog( "close" );
 				}
@@ -57,7 +175,7 @@ $(function() {
 		});
 	}
 					
-	// Основное меню для загрузки
+	// РћСЃРЅРѕРІРЅРѕРµ РјРµРЅСЋ РґР»СЏ Р·Р°РіСЂСѓР·РєРё
 	$("#Menubar").menubar({
 		menuIcon : true
 	}).css({						
@@ -66,7 +184,7 @@ $(function() {
 		'display': 'block'
 	});	
 
-	// Функция обезки строки
+	// Р¤СѓРЅРєС†РёСЏ РѕР±РµР·РєРё СЃС‚СЂРѕРєРё
 	trim_text = function (text,size,col) {
 		var final_string = '';
 		if (text.length < size ) {
@@ -82,9 +200,9 @@ $(function() {
 		}
 	}
 	
-	// Функция добавления вкладок и содержимого через аякс
+	// Р¤СѓРЅРєС†РёСЏ РґРѕР±Р°РІР»РµРЅРёСЏ РІРєР»Р°РґРѕРє Рё СЃРѕРґРµСЂР¶РёРјРѕРіРѕ С‡РµСЂРµР· Р°СЏРєСЃ
 	SetTab = function (tabTitle,tabContentUrl,same_tab) {
-		// Если предан флаг, то просто перезагружаем вкладу
+		// Р•СЃР»Рё РїСЂРµРґР°РЅ С„Р»Р°Рі, С‚Рѕ РїСЂРѕСЃС‚Рѕ РїРµСЂРµР·Р°РіСЂСѓР¶Р°РµРј РІРєР»Р°РґСѓ
 		if (same_tab != 'false') {
 				var id = same_tab;								
 				$('#'+id).empty();						
@@ -113,7 +231,7 @@ $(function() {
 		if (same_tab == 'false') {
 			$("#tabs").tabs("option", "active",$('#tabs').children('.ui-tabs-nav li').length - 1);
 		}						
-		// ставим тригер на загрузку содержимого вкладки во фрейм						
+		// СЃС‚Р°РІРёРј С‚СЂРёРіРµСЂ РЅР° Р·Р°РіСЂСѓР·РєСѓ СЃРѕРґРµСЂР¶РёРјРѕРіРѕ РІРєР»Р°РґРєРё РІРѕ С„СЂРµР№Рј						
 		$.ajax({
 			  url: tabContentUrl,							  
 			  type: 'GET',
@@ -122,7 +240,7 @@ $(function() {
 					$('#'+id).empty().css('text-align','left').append(data);
 					redraw_document($(".ui-tabs-panel[aria-expanded='true']"));				
 				} else {		 		
-					// Нам вернули страницу авторизации. отчищаем документ
+					// РќР°Рј РІРµСЂРЅСѓР»Рё СЃС‚СЂР°РЅРёС†Сѓ Р°РІС‚РѕСЂРёР·Р°С†РёРё. РѕС‚С‡РёС‰Р°РµРј РґРѕРєСѓРјРµРЅС‚
 					$('html').empty().append(data);
 				}
 			  }	  
@@ -130,7 +248,7 @@ $(function() {
 		counttab++;							
 	}					
 
-	// Закрываем вкладку
+	// Р—Р°РєСЂС‹РІР°РµРј РІРєР»Р°РґРєСѓ
 	CloseTab = function (id_tab) {
 		$("#ui-" + id_tab).parent().closest( "li" ).remove();
 		$('#' + id_tab).remove();
@@ -139,14 +257,14 @@ $(function() {
 		redraw_document();
 	}
 
-	// Кнопка справки если есть:
+	// РљРЅРѕРїРєР° СЃРїСЂР°РІРєРё РµСЃР»Рё РµСЃС‚СЊ:
 	$(".help_button").button({icons: {primary: 'ui-icon-help'},text: true}).attr('style','float: right;').appendTo("#tabs .ui-tabs-nav").click(function() {
-				SetTab('Индекс справочного раздела',$(this).attr('url'),'false'); 
+				SetTab('РРЅРґРµРєСЃ СЃРїСЂР°РІРѕС‡РЅРѕРіРѕ СЂР°Р·РґРµР»Р°',$(this).attr('url'),'false'); 
 	});
 								
-	// Кнопка закрытия
+	// РљРЅРѕРїРєР° Р·Р°РєСЂС‹С‚РёСЏ
 	$("#tabs").children(".ui-tabs-nav").append(
-			$('<button>Закрыть все вкладки</button>').attr({
+			$('<button>Р—Р°РєСЂС‹С‚СЊ РІСЃРµ РІРєР»Р°РґРєРё</button>').attr({
 				id:'close_all_tab',
 				style:'float: right;margin: 0px 5px 3px 0px;'
 			}).button({icons: {primary: 'ui-icon-closethick'},text: false}).click(function() {
@@ -155,41 +273,41 @@ $(function() {
 			});
 	}));								
 		
-	// Отрисовка окна и вкладок:
+	// РћС‚СЂРёСЃРѕРІРєР° РѕРєРЅР° Рё РІРєР»Р°РґРѕРє:
 	redraw_document = function (id_tab) {
 		var doc_height = $(window).height();
 		var doc_width = $(window).width() - 2;						
 		var main_menu = $(".main_menu").height();
 		
-		// Основная страница расчет высоты:											
+		// РћСЃРЅРѕРІРЅР°СЏ СЃС‚СЂР°РЅРёС†Р° СЂР°СЃС‡РµС‚ РІС‹СЃРѕС‚С‹:											
 		$("#tabs").tabs().height( doc_height - main_menu - 10);
 		$("#tabs .ui-tabs-panel").height(doc_height - main_menu - 10).width(doc_width - 20);
 		
-		// Для надписи внутри вкладки
+		// Р”Р»СЏ РЅР°РґРїРёСЃРё РІРЅСѓС‚СЂРё РІРєР»Р°РґРєРё
 		$(".about_tabs").offset({ top: doc_height - 50});
 		$(".about_tabs_ver").offset({ top: doc_height - 25});
 		
-		// Для убыстрения отрисовки нам может быть передан идентификатор вкладки. (а может и нет) так что в
-		// случае когда его нет берем весь документ
+		// Р”Р»СЏ СѓР±С‹СЃС‚СЂРµРЅРёСЏ РѕС‚СЂРёСЃРѕРІРєРё РЅР°Рј РјРѕР¶РµС‚ Р±С‹С‚СЊ РїРµСЂРµРґР°РЅ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РІРєР»Р°РґРєРё. (Р° РјРѕР¶РµС‚ Рё РЅРµС‚) С‚Р°Рє С‡С‚Рѕ РІ
+		// СЃР»СѓС‡Р°Рµ РєРѕРіРґР° РµРіРѕ РЅРµС‚ Р±РµСЂРµРј РІРµСЃСЊ РґРѕРєСѓРјРµРЅС‚
 		if (typeof(id_tab) === 'undefined')  id_tab = $('body');
 		
 		id_tab.find(".navigation_header").height(30);
 
-		//  Основные оверлеи
+		//  РћСЃРЅРѕРІРЅС‹Рµ РѕРІРµСЂР»РµРё
 		$(".dialog_jqgrid_overlay").height(doc_height - main_menu - 85).width(doc_width - 24).offset({ top: main_menu + 30 + 50, left: 12 });
 		
-		// Содержимое контейнера		
+		// РЎРѕРґРµСЂР¶РёРјРѕРµ РєРѕРЅС‚РµР№РЅРµСЂР°		
 		id_tab.find(".tab_main_content").height(doc_height - main_menu - 90).width(doc_width - 20);
 		
-		// Прячем полосу прокрутки
+		// РџСЂСЏС‡РµРј РїРѕР»РѕСЃСѓ РїСЂРѕРєСЂСѓС‚РєРё
 		id_tab.css('overflow','hidden');
 		
-		// Помощь:
+		// РџРѕРјРѕС‰СЊ:
 		id_tab.find(".help_content").height(doc_height - main_menu - 90).width(doc_width - 20)
 				.children('.ui-accordion-header').width(doc_width - 65)
 				.parent().children('.ui-accordion-content').height(doc_height - main_menu - 150 - (($(".ui-accordion-header").height() * 2.05)* ($(".help_content .ui-accordion-header").length - 1))	).width(doc_width - 87);
 		
-		// Гриды общие	
+		// Р“СЂРёРґС‹ РѕР±С‰РёРµ	
 		$.each( id_tab.find('.grid_resizer'), function() {
 			var percent = $(this).attr('percent');							
 			var doc_width_grid = doc_width - 27;
@@ -200,7 +318,7 @@ $(function() {
 					var doc_height_grid = doc_height - main_menu - 93;
 			}
 			
-			// Коэфициент для грида если открыт фильтр:
+			// РљРѕСЌС„РёС†РёРµРЅС‚ РґР»СЏ РіСЂРёРґР° РµСЃР»Рё РѕС‚РєСЂС‹С‚ С„РёР»СЊС‚СЂ:
 			if ($(this).children('.ui-jqgrid').find('.ui-search-toolbar').css("display") != 'none' && $(this).attr('form_type') != "TREE_GRID_FORM_MASTER" && $(this).attr('form_type') != "TREE_GRID_FORM_DETAIL"  && $(this).attr('form_type') != "TREE_GRID_FORM" ) {
 					var coeffd_filtr = 102;
 				} else {
@@ -215,14 +333,14 @@ $(function() {
 				   
 		});
 		
-		// Гриды которые во вкладках	
+		// Р“СЂРёРґС‹ РєРѕС‚РѕСЂС‹Рµ РІРѕ РІРєР»Р°РґРєР°С…	
 		$.each( id_tab.find('.grid_resizer_tabs'), function() {
 			var doc_width_grid = doc_width - 48;
 			var percent = $(this).attr('percent') - (33/(doc_height/100));
 			
 			var doc_height_grid = (doc_height - main_menu - 93)/100 * percent - 23;
 			
-			// Коэфициент для грида если открыт фильтр:
+			// РљРѕСЌС„РёС†РёРµРЅС‚ РґР»СЏ РіСЂРёРґР° РµСЃР»Рё РѕС‚РєСЂС‹С‚ С„РёР»СЊС‚СЂ:
 			if ($(this).children('.ui-jqgrid').find('.ui-search-toolbar').css("display") != 'none' && $(this).attr('form_type') != "TREE_GRID_FORM_MASTER" && $(this).attr('form_type') != "TREE_GRID_FORM_DETAIL"  && $(this).attr('form_type') != "TREE_GRID_FORM" ) {
 					var coeffd_filtr = 82;
 				} else {
@@ -237,12 +355,12 @@ $(function() {
 				   
 		});
 		
-		// Проверка на открытые вкладки:
+		// РџСЂРѕРІРµСЂРєР° РЅР° РѕС‚РєСЂС‹С‚С‹Рµ РІРєР»Р°РґРєРё:
 		if ($("#tabs").children(".ui-tabs-nav").children("li").length > 6) {
 				$.each($('.navigation_header'), function() {											
 					if ($(this).children('.alert_button').length != 1) {
-						$(this).append("<div class='alert_button ui-state-error ui-corner-all' style='float:right;width:100px;margin: 6px 15px 5px 5px;' title='Открыто более 7 вкладок одновременно," +
-							"это может сильно замедлить работу системы. По возможности закройте одну или несколько вкладок.'><span class='ui-icon ui-icon-alert' style='float:left'></span>ВНИМАНИЕ!</div>");
+						$(this).append("<div class='alert_button ui-state-error ui-corner-all' style='float:right;width:100px;margin: 6px 15px 5px 5px;' title='РћС‚РєСЂС‹С‚Рѕ Р±РѕР»РµРµ 7 РІРєР»Р°РґРѕРє РѕРґРЅРѕРІСЂРµРјРµРЅРЅРѕ," +
+							"СЌС‚Рѕ РјРѕР¶РµС‚ СЃРёР»СЊРЅРѕ Р·Р°РјРµРґР»РёС‚СЊ СЂР°Р±РѕС‚Сѓ СЃРёСЃС‚РµРјС‹. РџРѕ РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё Р·Р°РєСЂРѕР№С‚Рµ РѕРґРЅСѓ РёР»Рё РЅРµСЃРєРѕР»СЊРєРѕ РІРєР»Р°РґРѕРє.'><span class='ui-icon ui-icon-alert' style='float:left'></span>Р’РќРРњРђРќРР•!</div>");
 					}
 				});
 			} else {
@@ -254,14 +372,14 @@ $(function() {
 	
 	replace_select_opt_group = function (object) {
 		if (typeof(object) === 'undefined') object = $('body');
-		// перерисовываем селекты, чтобы сработали отп группы, сначало начало группы:
+		// РїРµСЂРµСЂРёСЃРѕРІС‹РІР°РµРј СЃРµР»РµРєС‚С‹, С‡С‚РѕР±С‹ СЃСЂР°Р±РѕС‚Р°Р»Рё РѕС‚Рї РіСЂСѓРїРїС‹, СЃРЅР°С‡Р°Р»Рѕ РЅР°С‡Р°Р»Рѕ РіСЂСѓРїРїС‹:
 		$.each($(object).find("select option[value='GROUP_START']"), function() {		
 			$(this).replaceWith("<optgroup label='" + $(this).text() + "' >");
 		});	
-		// теперь смотри селекты с окончанием группы и преобразовавыем их
+		// С‚РµРїРµСЂСЊ СЃРјРѕС‚СЂРё СЃРµР»РµРєС‚С‹ СЃ РѕРєРѕРЅС‡Р°РЅРёРµРј РіСЂСѓРїРїС‹ Рё РїСЂРµРѕР±СЂР°Р·РѕРІР°РІС‹РµРј РёС…
 		$.each($(object).find("select option[value='GROUP_END']"), function() {
 			var object 			= $(this).parent();
-			var	selected_obj 	= object.children('option:selected');	// запоминаем выбранную позицию
+			var	selected_obj 	= object.children('option:selected');	// Р·Р°РїРѕРјРёРЅР°РµРј РІС‹Р±СЂР°РЅРЅСѓСЋ РїРѕР·РёС†РёСЋ
 			
 			if (typeof(object.html()) !== 'undefined') {
 				var select_text	= $(object.html().split('</optgroup>').join('')
@@ -274,40 +392,40 @@ $(function() {
 		
 	}
 	
-	// Автоширина столбцов в гриде (применяемся только к указаннуму)
+	// РђРІС‚РѕС€РёСЂРёРЅР° СЃС‚РѕР»Р±С†РѕРІ РІ РіСЂРёРґРµ (РїСЂРёРјРµРЅСЏРµРјСЃСЏ С‚РѕР»СЊРєРѕ Рє СѓРєР°Р·Р°РЅРЅСѓРјСѓ)
 	auto_width_grid = function (grid) {
-		// Выбираем загловок и первую строку в таблице в гриде
+		// Р’С‹Р±РёСЂР°РµРј Р·Р°РіР»РѕРІРѕРє Рё РїРµСЂРІСѓСЋ СЃС‚СЂРѕРєСѓ РІ С‚Р°Р±Р»РёС†Рµ РІ РіСЂРёРґРµ
 		var grid_header = $('#gview_' + grid + ' .ui-jqgrid-hdiv .ui-jqgrid-hbox table tr:first th:visible');
 		var grid_hcontent = $('#gview_' + grid + ' .ui-jqgrid-bdiv div table tr:first td:visible');
 		
-		// Проверяем можно ли сделать автоширину (т.е. сумма столбцов по длине меньше чем общий документ)
+		// РџСЂРѕРІРµСЂСЏРµРј РјРѕР¶РЅРѕ Р»Рё СЃРґРµР»Р°С‚СЊ Р°РІС‚РѕС€РёСЂРёРЅСѓ (С‚.Рµ. СЃСѓРјРјР° СЃС‚РѕР»Р±С†РѕРІ РїРѕ РґР»РёРЅРµ РјРµРЅСЊС€Рµ С‡РµРј РѕР±С‰РёР№ РґРѕРєСѓРјРµРЅС‚)
 		var grid_width_old = 0;
 		var has_r_num	= 0;	
 		var count_element = 0;
 		
 		$.each(grid_header, function() {
 			if ($(this).attr('id') == grid + "_rn") {
-				has_r_num = $(this).width(); // Убираем r_num из расчета
+				has_r_num = $(this).width(); // РЈР±РёСЂР°РµРј r_num РёР· СЂР°СЃС‡РµС‚Р°
 			}
 			grid_width_old = grid_width_old + $(this).width();
 			count_element = count_element + 1;
 		});
 		
-		var grid_width = $('#' + grid).parent().width(); // офсет на прокрутку обязателен
+		var grid_width = $('#' + grid).parent().width(); // РѕС„СЃРµС‚ РЅР° РїСЂРѕРєСЂСѓС‚РєСѓ РѕР±СЏР·Р°С‚РµР»РµРЅ
 		
 		if (grid_width_old < grid_width) {
-			// Перерасчитываем ширину и применяем ее согласно старой ширине столбцов
-			var coeff = (grid_width/(grid_width_old)); // Коэфициент увеличения
+			// РџРµСЂРµСЂР°СЃС‡РёС‚С‹РІР°РµРј С€РёСЂРёРЅСѓ Рё РїСЂРёРјРµРЅСЏРµРј РµРµ СЃРѕРіР»Р°СЃРЅРѕ СЃС‚Р°СЂРѕР№ С€РёСЂРёРЅРµ СЃС‚РѕР»Р±С†РѕРІ
+			var coeff = (grid_width/(grid_width_old)); // РљРѕСЌС„РёС†РёРµРЅС‚ СѓРІРµР»РёС‡РµРЅРёСЏ
 			$.each(grid_header, function() {
 				var w_tmp = $(this).width();
-				// Применяем к заголовку
+				// РџСЂРёРјРµРЅСЏРµРј Рє Р·Р°РіРѕР»РѕРІРєСѓ
 				if ($(this).attr('id') != grid + "_rn") {	
 					$(this).width(w_tmp * coeff);
 				}
 			});
 			$.each(grid_hcontent, function() {
 				var w_tmp = $(this).width();
-				// Применяем к заголовку
+				// РџСЂРёРјРµРЅСЏРµРј Рє Р·Р°РіРѕР»РѕРІРєСѓ
 				if ($(this).width() != has_r_num) {	
 					$(this).width(w_tmp * coeff);
 				}
@@ -315,14 +433,14 @@ $(function() {
 		}					
 	}
 
-	// Прикрепляем ресизеры
+	// РџСЂРёРєСЂРµРїР»СЏРµРј СЂРµСЃРёР·РµСЂС‹
 	set_resizers = function() {
-		// Авторесизер
+		// РђРІС‚РѕСЂРµСЃРёР·РµСЂ
 		$('.has_resize_control').resizable({
 			distance: 30,					
 			handles: 's',	
 			resize: function( event, ui ) {						
-					// Обновляем проценты и перерисовываем все
+					// РћР±РЅРѕРІР»СЏРµРј РїСЂРѕС†РµРЅС‚С‹ Рё РїРµСЂРµСЂРёСЃРѕРІС‹РІР°РµРј РІСЃРµ
 					var main_menu = $(".main_menu").height();
 					var hh = $(window).height() - main_menu - 93;	
 					var hgrid = 100 + ((ui.size.height - hh)/Math.abs(hh) * 100);
@@ -336,14 +454,14 @@ $(function() {
 					}									
 			},
 			create: function( event, ui ) {
-				// Ресизер хелпер:
+				// Р РµСЃРёР·РµСЂ С…РµР»РїРµСЂ:
 				$(this).children('.ui-resizable-handle').height(5.3).attr('align','center').append(
 						$('<div />').addClass('ui-widget-header ui-state-hover ui-corner-all').height(2).width(150));
 			}
 		});
 	}
 
-	//Детальные вкладки
+	//Р”РµС‚Р°Р»СЊРЅС‹Рµ РІРєР»Р°РґРєРё
 	set_detail_tab= function() {						
 			$( ".detail_tab" ).tabs({
 					collapsible: true,
@@ -357,28 +475,28 @@ $(function() {
 			});
 	}
 
-	// Нужно для корретного закрытия вкладки, чтобы ничего в коде от нее не осталось
+	// РќСѓР¶РЅРѕ РґР»СЏ РєРѕСЂСЂРµС‚РЅРѕРіРѕ Р·Р°РєСЂС‹С‚РёСЏ РІРєР»Р°РґРєРё, С‡С‚РѕР±С‹ РЅРёС‡РµРіРѕ РІ РєРѕРґРµ РѕС‚ РЅРµРµ РЅРµ РѕСЃС‚Р°Р»РѕСЃСЊ
 	$(document).on("click", "#tabs span.ui-icon-close", function() {
 		CloseTab($( this ).parent().attr( "aria-controls" ));	
 	});
 				
-	// Хук для полноэкранного расчета высоты вкладок (будем позже на нее опираться)
+	// РҐСѓРє РґР»СЏ РїРѕР»РЅРѕСЌРєСЂР°РЅРЅРѕРіРѕ СЂР°СЃС‡РµС‚Р° РІС‹СЃРѕС‚С‹ РІРєР»Р°РґРѕРє (Р±СѓРґРµРј РїРѕР·Р¶Рµ РЅР° РЅРµРµ РѕРїРёСЂР°С‚СЊСЃСЏ)
 	$(document).ready(function () {	
 
-		// Исправление некорректных пробелов в меню для IE8+
+		// РСЃРїСЂР°РІР»РµРЅРёРµ РЅРµРєРѕСЂСЂРµРєС‚РЅС‹С… РїСЂРѕР±РµР»РѕРІ РІ РјРµРЅСЋ РґР»СЏ IE8+
 		if ($.browser.msie) {
 			$('.ui-menu-item a').append('&nbsp;&nbsp;&nbsp;&nbsp;');
 		}
 		
-		// Если задано вскрытое меню, то прячем его
+		// Р•СЃР»Рё Р·Р°РґР°РЅРѕ РІСЃРєСЂС‹С‚РѕРµ РјРµРЅСЋ, С‚Рѕ РїСЂСЏС‡РµРј РµРіРѕ
 		if (hidden_menu) {						
-			// Убиваем обычное меню:
+			// РЈР±РёРІР°РµРј РѕР±С‹С‡РЅРѕРµ РјРµРЅСЋ:
 			$("#Menubar").menubar( "destroy" );
 			$(".main_menu").height(0).hide();
 			
-			// создаем кнопку
+			// СЃРѕР·РґР°РµРј РєРЅРѕРїРєСѓ
 			$("#tabs").children(".ui-tabs-nav").append(
-							$('<button>Меню</button>').attr({
+							$('<button>РњРµРЅСЋ</button>').attr({
 								id:'menu_hidden_tab',
 								style:'float: left;margin: 0px 5px 3px 0px;'
 							}).button({icons: {primary: "ui-icon-newwin", secondary: 'ui-icon-triangle-1-s'},text: true}).click(function() {
@@ -396,7 +514,7 @@ $(function() {
 			
 			$.each($("#hidden_menubar").children('li'), function() {
 				$(this).children('a').append("<span class='ui-icon ui-icon-folder-collapsed'></span>").removeClass("ui-button-text-icon-secondary").children("b").removeAttr("style");								
-				// Исправление некорректных пробелов в меню для IE8+
+				// РСЃРїСЂР°РІР»РµРЅРёРµ РЅРµРєРѕСЂСЂРµРєС‚РЅС‹С… РїСЂРѕР±РµР»РѕРІ РІ РјРµРЅСЋ РґР»СЏ IE8+
 				if ($.browser.msie) {
 					$(this).children('a').append("&nbsp;&nbsp;&nbsp;&nbsp;");
 				}
@@ -405,27 +523,20 @@ $(function() {
 			$("#hidden_menubar").hide().menu();							
 		}		
 
-		// Отрисовываем все элементы и формы на вкладке
+		// РћС‚СЂРёСЃРѕРІС‹РІР°РµРј РІСЃРµ СЌР»РµРјРµРЅС‚С‹ Рё С„РѕСЂРјС‹ РЅР° РІРєР»Р°РґРєРµ
 		redraw_document();	
 		
-		// Сплеш сгрин для процесса загрузки страници
-		// Дело в том что пока страница и скрипты непрогрузятся отображается как есть,
-		// По этому мы ее скрываем чтобы небыло видно кишков
+		// РЎРїР»РµС€ СЃРіСЂРёРЅ РґР»СЏ РїСЂРѕС†РµСЃСЃР° Р·Р°РіСЂСѓР·РєРё СЃС‚СЂР°РЅРёС†Рё
+		// Р”РµР»Рѕ РІ С‚РѕРј С‡С‚Рѕ РїРѕРєР° СЃС‚СЂР°РЅРёС†Р° Рё СЃРєСЂРёРїС‚С‹ РЅРµРїСЂРѕРіСЂСѓР·СЏС‚СЃСЏ РѕС‚РѕР±СЂР°Р¶Р°РµС‚СЃСЏ РєР°Рє РµСЃС‚СЊ,
+		// РџРѕ СЌС‚РѕРјСѓ РјС‹ РµРµ СЃРєСЂС‹РІР°РµРј С‡С‚РѕР±С‹ РЅРµР±С‹Р»Рѕ РІРёРґРЅРѕ РєРёС€РєРѕРІ
 		$('#loading').fadeOut(300);
-		
-		// В случае старой версии, обнуляемся.
-		if ( $.browser.msie && parseInt(navigator.userAgent.substring (navigator.userAgent.indexOf ( "MSIE " )+5, navigator.userAgent.indexOf (".", navigator.userAgent.indexOf ( "MSIE " ) ))) < 8 ) {							
-			$(document).empty();
-			alert("К сожалению, ваша версия браузера больше не поддерживается, обновитесь, либо обратитесь к администратору!");
-		}
-		
 	});	
 
 	$(window).resize(function () {
 		redraw_document($(".ui-tabs-panel[aria-expanded='true']"));			
 	});
 
-	// Проверка значений:
+	// РџСЂРѕРІРµСЂРєР° Р·РЅР°С‡РµРЅРёР№:
 	check_form = function(formid) {
 		var data_ok = true;
 				$.each(formid.find("input[is_requred='true']"), function() {
@@ -453,12 +564,12 @@ $(function() {
 		if (data_ok) {
 				return true; 
 			} else {								
-				custom_alert("необходимо заполнить все выделенные поля!");
+				custom_alert("РЅРµРѕР±С…РѕРґРёРјРѕ Р·Р°РїРѕР»РЅРёС‚СЊ РІСЃРµ РІС‹РґРµР»РµРЅРЅС‹Рµ РїРѕР»СЏ!");
 				return false;
 		}
 	}
 	
-	// создание элементов и контроллов на странице
+	// СЃРѕР·РґР°РЅРёРµ СЌР»РµРјРµРЅС‚РѕРІ Рё РєРѕРЅС‚СЂРѕР»Р»РѕРІ РЅР° СЃС‚СЂР°РЅРёС†Рµ
 	create_from_table_elemnts = function (formid) {
 		$.each(formid.find("input, select, textarea"), function() {
 			var obj = $(this);
@@ -480,7 +591,7 @@ $(function() {
 								obj_clone.spinner( 'value', value );
 						}
 					});	
-					$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
+					$($('<button>РћС‚РєСЂС‹С‚СЊ РєР°Р»СЊРєСѓР»СЏС‚РѕСЂ</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
 							.click(function( event ) {
 									obj_clone.calculator('show');
 							})
@@ -504,7 +615,7 @@ $(function() {
 								obj_clone.spinner( 'value', value );
 						}
 					});	
-					$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
+					$($('<button>РћС‚РєСЂС‹С‚СЊ РєР°Р»СЊРєСѓР»СЏС‚РѕСЂ</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
 							.click(function( event ) {
 									obj_clone.calculator('show');
 							})
@@ -528,7 +639,7 @@ $(function() {
 								obj_clone.spinner( 'value', value );
 						}
 					});	
-					$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
+					$($('<button>РћС‚РєСЂС‹С‚СЊ РєР°Р»СЊРєСѓР»СЏС‚РѕСЂ</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
 							.click(function( event ) {
 									obj_clone.calculator('show');
 							})
@@ -552,7 +663,7 @@ $(function() {
 								obj_clone.spinner( 'value', value );
 						}
 					});	
-					$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
+					$($('<button>РћС‚РєСЂС‹С‚СЊ РєР°Р»СЊРєСѓР»СЏС‚РѕСЂ</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
 							.click(function( event ) {
 									obj_clone.calculator('show');
 							})
@@ -564,7 +675,7 @@ $(function() {
 				break;
 				
 				case 'B': // CHECKBOX
-							 obj.before('<label for="' + obj.attr('id') + '">Включено или выключено</label>')
+							 obj.before('<label for="' + obj.attr('id') + '">Р’РєР»СЋС‡РµРЅРѕ РёР»Рё РІС‹РєР»СЋС‡РµРЅРѕ</label>')
 								.button({icons: { primary: 'ui-icon-check' }, text: false})
 								.click(function() {
 									if (obj.attr('checked') != 'checked') {
@@ -646,7 +757,7 @@ $(function() {
 				break;
 			} // end type def
 			
-			// Если мы видим поля но не можем изменять
+			// Р•СЃР»Рё РјС‹ РІРёРґРёРј РїРѕР»СЏ РЅРѕ РЅРµ РјРѕР¶РµРј РёР·РјРµРЅСЏС‚СЊ
 			if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
 					obj.attr({'name':null,'disabled':'disabled','class':'FormElement ui-widget-content ui-corner-all ui-state-disabled'});
 			}
@@ -654,7 +765,7 @@ $(function() {
 	
 	}
 	
-	// Диалог настроке и обработчики
+	// Р”РёР°Р»РѕРі РЅР°СЃС‚СЂРѕРєРµ Рё РѕР±СЂР°Р±РѕС‚С‡РёРєРё
 	$("#param").dialog({
 		autoOpen: false,
 		modal: true,
@@ -662,8 +773,8 @@ $(function() {
 		closeOnEscape: true,
 		resizable:false,
 		buttons: {
-			"Применить" : function() {	
-				// Сохраняем данные	
+			"РџСЂРёРјРµРЅРёС‚СЊ" : function() {	
+				// РЎРѕС…СЂР°РЅСЏРµРј РґР°РЅРЅС‹Рµ	
 				if ($.browser.msie) {
 					$('#submit_settings').click();
 				} else {															
@@ -681,7 +792,7 @@ $(function() {
 				}
 				$( this ).dialog( "close" );
 			},
-			"Отмена":function() {
+			"РћС‚РјРµРЅР°":function() {
 			$( this ).dialog( "close" );
 			}
 		},
@@ -689,8 +800,8 @@ $(function() {
 			$( this ).dialog( "close" );
 		},
 		open: function() {
-				$('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}});
-				$('.ui-dialog-buttonpane').find('button:contains("Применить")').button({icons: { primary: 'ui-icon-disk'}});
+				$('.ui-dialog-buttonpane').find('button:contains("РћС‚РјРµРЅР°")').button({icons: { primary: 'ui-icon-close'}});
+				$('.ui-dialog-buttonpane').find('button:contains("РџСЂРёРјРµРЅРёС‚СЊ")').button({icons: { primary: 'ui-icon-disk'}});
 				$(this).parent().css('z-index', 110).parent().children('.ui-widget-overlay').css('z-index', 105);
 		}
 	});				
@@ -710,7 +821,7 @@ $(function() {
 	});	
 
 					
-	// Обработка мультиселекта и кнопки настроек
+	// РћР±СЂР°Р±РѕС‚РєР° РјСѓР»СЊС‚РёСЃРµР»РµРєС‚Р° Рё РєРЅРѕРїРєРё РЅР°СЃС‚СЂРѕРµРє
 	$("#themeselector").multiselect({multiple: false, header: false, selectedList: 1});
 	$("#width_enable").button({icons: { primary: "ui-icon-arrow-2-e-w" }}).click(function() {var btn = $("#width_enable");if (btn.attr("checked") != "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});
 	$("#page_enable").button({icons: { primary: "ui-icon-script" }}).click(function() {var btn = $("#page_enable");if (btn.attr("checked") != "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});
@@ -745,7 +856,7 @@ $(function() {
 					  }
 					});
 	
-	// Нужно для автозагрузки данных в селект в гриде 	
+	// РќСѓР¶РЅРѕ РґР»СЏ Р°РІС‚РѕР·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С… РІ СЃРµР»РµРєС‚ РІ РіСЂРёРґРµ 	
 	get_select_values_grid = function (gridname,value_name, parent_value_id) {
 		$.ajax({
 				url: 'ajax.data.select.php?value_name=' + value_name + '&parent_id=' + parent_value_id,
@@ -761,13 +872,13 @@ $(function() {
 Globalize.addCultureInfo( "ru-RU", "default", {
 	name: "ru-RU",
 	englishName: "Russian (Russia)",
-	nativeName: "русский (Россия)",
+	nativeName: "СЂСѓСЃСЃРєРёР№ (Р РѕСЃСЃРёСЏ)",
 	language: "ru",
 	numberFormat: {
 		",": "",
 		".": ",",
-		negativeInfinity: "-бесконечность",
-		positiveInfinity: "бесконечность",
+		negativeInfinity: "-Р±РµСЃРєРѕРЅРµС‡РЅРѕСЃС‚СЊ",
+		positiveInfinity: "Р±РµСЃРєРѕРЅРµС‡РЅРѕСЃС‚СЊ",
 		percent: {
 			pattern: ["-n%","n%"],
 			",": "",
@@ -777,7 +888,7 @@ Globalize.addCultureInfo( "ru-RU", "default", {
 			pattern: ["-n$","n$"],
 			",": "",
 			".": ",",
-			symbol: "р."
+			symbol: "СЂ."
 		}
 	},
 	calendars: {
@@ -785,27 +896,27 @@ Globalize.addCultureInfo( "ru-RU", "default", {
 			"/": ".",
 			firstDay: 1,
 			days: {
-				names: ["воскресенье","понедельник","вторник","среда","четверг","пятница","суббота"],
-				namesAbbr: ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"],
-				namesShort: ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"]
+				names: ["РІРѕСЃРєСЂРµСЃРµРЅСЊРµ","РїРѕРЅРµРґРµР»СЊРЅРёРє","РІС‚РѕСЂРЅРёРє","СЃСЂРµРґР°","С‡РµС‚РІРµСЂРі","РїСЏС‚РЅРёС†Р°","СЃСѓР±Р±РѕС‚Р°"],
+				namesAbbr: ["Р’СЃ","РџРЅ","Р’С‚","РЎСЂ","Р§С‚","РџС‚","РЎР±"],
+				namesShort: ["Р’СЃ","РџРЅ","Р’С‚","РЎСЂ","Р§С‚","РџС‚","РЎР±"]
 			},
 			months: {
-				names: ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь",""],
-				namesAbbr: ["янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек",""]
+				names: ["РЇРЅРІР°СЂСЊ","Р¤РµРІСЂР°Р»СЊ","РњР°СЂС‚","РђРїСЂРµР»СЊ","РњР°Р№","РСЋРЅСЊ","РСЋР»СЊ","РђРІРіСѓСЃС‚","РЎРµРЅС‚СЏР±СЂСЊ","РћРєС‚СЏР±СЂСЊ","РќРѕСЏР±СЂСЊ","Р”РµРєР°Р±СЂСЊ",""],
+				namesAbbr: ["СЏРЅРІ","С„РµРІ","РјР°СЂ","Р°РїСЂ","РјР°Р№","РёСЋРЅ","РёСЋР»","Р°РІРі","СЃРµРЅ","РѕРєС‚","РЅРѕСЏ","РґРµРє",""]
 			},
 			monthsGenitive: {
-				names: ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря",""],
-				namesAbbr: ["янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек",""]
+				names: ["СЏРЅРІР°СЂСЏ","С„РµРІСЂР°Р»СЏ","РјР°СЂС‚Р°","Р°РїСЂРµР»СЏ","РјР°СЏ","РёСЋРЅСЏ","РёСЋР»СЏ","Р°РІРіСѓСЃС‚Р°","СЃРµРЅС‚СЏР±СЂСЏ","РѕРєС‚СЏР±СЂСЏ","РЅРѕСЏР±СЂСЏ","РґРµРєР°Р±СЂСЏ",""],
+				namesAbbr: ["СЏРЅРІ","С„РµРІ","РјР°СЂ","Р°РїСЂ","РјР°Р№","РёСЋРЅ","РёСЋР»","Р°РІРі","СЃРµРЅ","РѕРєС‚","РЅРѕСЏ","РґРµРє",""]
 			},
 			AM: null,
 			PM: null,
 			patterns: {
 				d: "dd.MM.yyyy",
-				D: "d MMMM yyyy 'г.'",
+				D: "d MMMM yyyy 'Рі.'",
 				t: "H:mm",
 				T: "H:mm:ss",
-				f: "d MMMM yyyy 'г.' H:mm",
-				F: "d MMMM yyyy 'г.' H:mm:ss",
+				f: "d MMMM yyyy 'Рі.' H:mm",
+				F: "d MMMM yyyy 'Рі.' H:mm:ss",
 				Y: "MMMM yyyy"
 			}
 		}
@@ -814,44 +925,44 @@ Globalize.addCultureInfo( "ru-RU", "default", {
 	
 $.calculator.regional['ru'] = {
 	decimalChar: ',',
-	buttonText: '...', buttonStatus: 'Открыть калькулятор',
-	closeText: 'Закрыть', closeStatus: 'Закрыть калькулятор',
-	useText: 'OK', useStatus: 'Использовать текущее значение в поле',
-	eraseText: 'Сброс', eraseStatus: 'Стереть значение',
-	backspaceText: '<-', backspaceStatus: 'Стереть последнюю цифру',
-	clearErrorText: 'CE', clearErrorStatus: 'Стереть последнее число',
-	clearText: 'С', clearStatus: 'Сбросить',
-	memClearText: 'MC', memClearStatus: 'Сбросить память',
-	memRecallText: 'MR', memRecallStatus: 'Вставить из памяти',
-	memStoreText: 'MS', memStoreStatus: 'Сохранить в память',
-	memAddText: 'M+', memAddStatus: 'Добавить в память',
-	memSubtractText: 'M-', memSubtractStatus: 'Вычесть из памяти',
-	base2Text: 'Бин', base2Status: 'Бинарный',
-	base8Text: 'Восм', base8Status: 'Восмеричный',
-	base10Text: 'Дес', base10Status: 'Десятичный',
-	base16Text: 'Шест', base16Status: 'Шестнадцатиричный',
-	degreesText: 'Град', degreesStatus: 'Градусы',
-	radiansText: 'Рад', radiansStatus: 'Радианы',
+	buttonText: '...', buttonStatus: 'РћС‚РєСЂС‹С‚СЊ РєР°Р»СЊРєСѓР»СЏС‚РѕСЂ',
+	closeText: 'Р—Р°РєСЂС‹С‚СЊ', closeStatus: 'Р—Р°РєСЂС‹С‚СЊ РєР°Р»СЊРєСѓР»СЏС‚РѕСЂ',
+	useText: 'OK', useStatus: 'РСЃРїРѕР»СЊР·РѕРІР°С‚СЊ С‚РµРєСѓС‰РµРµ Р·РЅР°С‡РµРЅРёРµ РІ РїРѕР»Рµ',
+	eraseText: 'РЎР±СЂРѕСЃ', eraseStatus: 'РЎС‚РµСЂРµС‚СЊ Р·РЅР°С‡РµРЅРёРµ',
+	backspaceText: '<-', backspaceStatus: 'РЎС‚РµСЂРµС‚СЊ РїРѕСЃР»РµРґРЅСЋСЋ С†РёС„СЂСѓ',
+	clearErrorText: 'CE', clearErrorStatus: 'РЎС‚РµСЂРµС‚СЊ РїРѕСЃР»РµРґРЅРµРµ С‡РёСЃР»Рѕ',
+	clearText: 'РЎ', clearStatus: 'РЎР±СЂРѕСЃРёС‚СЊ',
+	memClearText: 'MC', memClearStatus: 'РЎР±СЂРѕСЃРёС‚СЊ РїР°РјСЏС‚СЊ',
+	memRecallText: 'MR', memRecallStatus: 'Р’СЃС‚Р°РІРёС‚СЊ РёР· РїР°РјСЏС‚Рё',
+	memStoreText: 'MS', memStoreStatus: 'РЎРѕС…СЂР°РЅРёС‚СЊ РІ РїР°РјСЏС‚СЊ',
+	memAddText: 'M+', memAddStatus: 'Р”РѕР±Р°РІРёС‚СЊ РІ РїР°РјСЏС‚СЊ',
+	memSubtractText: 'M-', memSubtractStatus: 'Р’С‹С‡РµСЃС‚СЊ РёР· РїР°РјСЏС‚Рё',
+	base2Text: 'Р‘РёРЅ', base2Status: 'Р‘РёРЅР°СЂРЅС‹Р№',
+	base8Text: 'Р’РѕСЃРј', base8Status: 'Р’РѕСЃРјРµСЂРёС‡РЅС‹Р№',
+	base10Text: 'Р”РµСЃ', base10Status: 'Р”РµСЃСЏС‚РёС‡РЅС‹Р№',
+	base16Text: 'РЁРµСЃС‚', base16Status: 'РЁРµСЃС‚РЅР°РґС†Р°С‚РёСЂРёС‡РЅС‹Р№',
+	degreesText: 'Р“СЂР°Рґ', degreesStatus: 'Р“СЂР°РґСѓСЃС‹',
+	radiansText: 'Р Р°Рґ', radiansStatus: 'Р Р°РґРёР°РЅС‹',
 	isRTL: false
 };
 
 $.calculator.setDefaults($.calculator.regional['ru']);
 									
 $.extend($.ech.multiselectfilter.prototype.options, {
-	label: "Фильтр:",
-	placeholder: "введите слово"
+	label: "Р¤РёР»СЊС‚СЂ:",
+	placeholder: "РІРІРµРґРёС‚Рµ СЃР»РѕРІРѕ"
 });
 
 $.extend($.ech.multiselect.prototype.options, {
     height: 250,
     minWidth: 350,
-	checkAllText: 'Отметить все',
-	uncheckAllText: 'Снять отметку со всех',
-	noneSelectedText: 'Выберите из списка',
-	selectedText: 'Выбрано #'
+	checkAllText: 'РћС‚РјРµС‚РёС‚СЊ РІСЃРµ',
+	uncheckAllText: 'РЎРЅСЏС‚СЊ РѕС‚РјРµС‚РєСѓ СЃРѕ РІСЃРµС…',
+	noneSelectedText: 'Р’С‹Р±РµСЂРёС‚Рµ РёР· СЃРїРёСЃРєР°',
+	selectedText: 'Р’С‹Р±СЂР°РЅРѕ #'
 });
 
-// Оверлай для диалогов грида:
+// РћРІРµСЂР»Р°Р№ РґР»СЏ РґРёР°Р»РѕРіРѕРІ РіСЂРёРґР°:
 $.extend($.jgrid,{	
 	viewModal : function (selector,o){
 		o = $.extend({
@@ -918,13 +1029,13 @@ $.extend($.jgrid,{
 			p = $.extend(true, {}, $.jgrid.jqModal || {}, p);
 			var self = this, i, buttons_set = [];
 			
-			// Зачищаем предыдущий диалог если есть
+			// Р—Р°С‡РёС‰Р°РµРј РїСЂРµРґС‹РґСѓС‰РёР№ РґРёР°Р»РѕРі РµСЃР»Рё РµСЃС‚СЊ
 			$('#' + aIDs.themodal).dialog('destroy').remove();
 			
-			// Убираем оверлай
+			// РЈР±РёСЂР°РµРј РѕРІРµСЂР»Р°Р№
 			$('body').find('.jqgrid-overlay').remove();
 			
-			// Проверяем дефаулты
+			// РџСЂРѕРІРµСЂСЏРµРј РґРµС„Р°СѓР»С‚С‹
 			if(p.jqModal === undefined) {p.jqModal = true; }
 			if(p.resize === undefined) {p.resize=true;}
 			
@@ -946,7 +1057,7 @@ $.extend($.jgrid,{
 			$('#' + aIDs.themodal).children('table').hide();
 						  
 			if (p.viewPagerButtons  == true) {				
-					buttons_set[buttons_set.length] = {text: 'Предыдущая', icons: { primary: "ui-icon-arrowthick-1-w" }, showText : false,
+					buttons_set[buttons_set.length] = {text: 'РџСЂРµРґС‹РґСѓС‰Р°СЏ', icons: { primary: "ui-icon-arrowthick-1-w" }, showText : false,
 														click: function() {
 															$( this ).find('#pData').click();
 														} 
@@ -954,7 +1065,7 @@ $.extend($.jgrid,{
 		
 			
 			
-					buttons_set[buttons_set.length] = {text: 'Следующая', icons: { primary: "ui-icon-arrowthick-1-e" }, showText : false,
+					buttons_set[buttons_set.length] = {text: 'РЎР»РµРґСѓСЋС‰Р°СЏ', icons: { primary: "ui-icon-arrowthick-1-e" }, showText : false,
 														click: function() {
 															$( this ).find('#nData').click();
 														} 
@@ -965,10 +1076,10 @@ $.extend($.jgrid,{
 			if ($(content).find('#sData') !== 'undefined') {
 					buttons_set[buttons_set.length] = {text: p.bSubmit?p.bSubmit:'false', icons: { primary: p._savedData?"ui-icon-disk":"ui-icon-trash" },
 														click: function() {
-														  // Сохраняем
+														  // РЎРѕС…СЂР°РЅСЏРµРј
 														  if (typeof(p._savedData) !== 'undefined')	$( this ).find('#sData').click();
 														  
-														  // Удаляем
+														  // РЈРґР°Р»СЏРµРј
 														  if (typeof(p.delData) !== 'undefined') $( this ).find('#dData').click();
 														  $( this ).dialog( "close" );
 														} 
@@ -989,7 +1100,7 @@ $.extend($.jgrid,{
 			
 			replace_select_opt_group();
 			create_from_table_elemnts($('#' + aIDs.themodal).find('.FormGrid'));
-			// Говорим что это диалог
+			// Р“РѕРІРѕСЂРёРј С‡С‚Рѕ СЌС‚Рѕ РґРёР°Р»РѕРі
 			$('#' + aIDs.themodal).dialog({
 										autoOpen: false,
 										appendTo: folder_self,
@@ -1005,7 +1116,7 @@ $.extend($.jgrid,{
 										},
 										open: function() {
 											if (p.viewPagerButtons  == true) {											
-												// прячем если есть что спрятать
+												// РїСЂСЏС‡РµРј РµСЃР»Рё РµСЃС‚СЊ С‡С‚Рѕ СЃРїСЂСЏС‚Р°С‚СЊ
 												$('.ui-dialog-buttonpane').find('button:contains("false")').hide();
 											}
 										}
@@ -1041,7 +1152,7 @@ $.jgrid.extend({
 					has_search = true;
 					if(v) {	
 						if ($("#search_" + ext_name + "_" + $.jgrid.jqID(this.name)).prop("class") == " ui-icon  ui-icon-close") 
-								$("#search_" + ext_name + "_" + $.jgrid.jqID(this.name)).attr({ 'class': " ui-icon  ui-icon-radio-off", title: "входит", value: "LIKE"});
+								$("#search_" + ext_name + "_" + $.jgrid.jqID(this.name)).attr({ 'class': " ui-icon  ui-icon-radio-off", title: "РІС…РѕРґРёС‚", value: "LIKE"});
 						sdata[nm] = $("#search_" + ext_name + "_" + $.jgrid.jqID(this.name)).attr("value") + ">" + $("#gs_" + ext_name + "_" + $.jgrid.jqID(this.name)).prop("value"); 
 						sopt[nm] = so;
 						j++;
@@ -1090,7 +1201,7 @@ $.jgrid.extend({
 					var v;
 					if(this.searchoptions && this.searchoptions.defaultValue !== undefined) { v = this.searchoptions.defaultValue; }					
 					nm = this.index || this.name;
-					$("#search_" + ext_name + "_" + $.jgrid.jqID(this.name)).prop({ 'class': " ui-icon  ui-icon-close", title: "Неиспользуется", value: "NONE"});
+					$("#search_" + ext_name + "_" + $.jgrid.jqID(this.name)).prop({ 'class': " ui-icon  ui-icon-close", title: "РќРµРёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ", value: "NONE"});
 					$("#gs_" + ext_name + "_" + $.jgrid.jqID(this.name)).prop({value: ""});
 					switch (this.stype) {
 						case 'select' :
@@ -1162,7 +1273,7 @@ $.jgrid.extend({
 			};
 			var toggleToolbar = function(){
 				var trow = $("tr.ui-search-toolbar",$t.grid.hDiv),
-				// Показываем скрываем и перерасчитываем грид
+				// РџРѕРєР°Р·С‹РІР°РµРј СЃРєСЂС‹РІР°РµРј Рё РїРµСЂРµСЂР°СЃС‡РёС‚С‹РІР°РµРј РіСЂРёРґ
 				trow2 = $t.p.frozenColumns === true ?  $("tr.ui-search-toolbar",$t.grid.fhDiv) : false;
 				if(trow.css("display")=='none') { 
 					trow.show();
@@ -1298,7 +1409,7 @@ $.jgrid.extend({
 						var df = soptions.defaultValue !== undefined ? soptions.defaultValue: "";						
 						$(thd).append("<input type='checkbox' class='ui-widget ui-widget-content ui-corner-all' name='"+(cm.index || cm.name)+"' id='gs_"+ ext_name + "_" + cm.name+"' value=''/>");						
 						$(thd).css('text-align','center'); 
-						$(thd).children('input').before("<label for='gs_"+ ext_name + "_" + cm.name+"'>Включено или выключено</label>")
+						$(thd).children('input').before("<label for='gs_"+ ext_name + "_" + cm.name+"'>Р’РєР»СЋС‡РµРЅРѕ РёР»Рё РІС‹РєР»СЋС‡РµРЅРѕ</label>")
 										        .button({icons: { primary: "ui-icon-check" },text: false})
 						if(soptions.prop) {$("input",thd).prop(soptions.prop);}
 						if(soptions.dataInit !== undefined) { soptions.dataInit($("input",thd)[0]); }
@@ -1433,23 +1544,23 @@ $.jgrid.extend({
 					}
 				}
 				
-				// Добавляем иконки и спан для передачи типа поиска
+				// Р”РѕР±Р°РІР»СЏРµРј РёРєРѕРЅРєРё Рё СЃРїР°РЅ РґР»СЏ РїРµСЂРµРґР°С‡Рё С‚РёРїР° РїРѕРёСЃРєР°
 				if ((cm.name !== 'rn') && ( cm.formatter !== "checkbox") && ( cm.formatter !== "select")) {					
 					thd.append($("<span />").attr({
 							'class':' ui-icon  ui-icon-close',
 							id:'search_' + ext_name + '_' + cm.name,
 							style: 'float:left;top:3px;position: absolute; cursor: pointer;',
-							title:'Неиспользуется',
+							title:'РќРµРёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ',
 							value:'NONE'
 						}));
 						
 						$("span.ui-icon",thd).click(function() {
-							if ($(this).prop("class") == " ui-icon  ui-icon-close") { $(this).attr({ 'class': " ui-icon  ui-icon-notice", title: "Неравно", value: "NOT"});
-							} else if ($(this).prop("class") == " ui-icon  ui-icon-notice") { $(this).attr({ 'class': " ui-icon  ui-icon-carat-1-e", title: "Больше", value: "MORE"});
-							} else if ($(this).prop("class") == " ui-icon  ui-icon-carat-1-e") { $(this).attr({ 'class': " ui-icon  ui-icon-carat-1-w", title: "Меньше", value: "MINI"});
-							} else if ($(this).prop("class") == " ui-icon  ui-icon-carat-1-w") { $(this).attr({ 'class': " ui-icon  ui-icon-grip-solid-horizontal", title: "Равно", value: "EQUAL"});
-							} else if ($(this).prop("class") == " ui-icon  ui-icon-grip-solid-horizontal") { $(this).attr({ 'class': " ui-icon  ui-icon-radio-off", title: "входит", value: "LIKE"});
-							} else if ($(this).prop("class") == " ui-icon  ui-icon-radio-off") $(this).attr({ 'class': " ui-icon  ui-icon-close", title: "Неиспользуется", value: "NONE"});
+							if ($(this).prop("class") == " ui-icon  ui-icon-close") { $(this).attr({ 'class': " ui-icon  ui-icon-notice", title: "РќРµСЂР°РІРЅРѕ", value: "NOT"});
+							} else if ($(this).prop("class") == " ui-icon  ui-icon-notice") { $(this).attr({ 'class': " ui-icon  ui-icon-carat-1-e", title: "Р‘РѕР»СЊС€Рµ", value: "MORE"});
+							} else if ($(this).prop("class") == " ui-icon  ui-icon-carat-1-e") { $(this).attr({ 'class': " ui-icon  ui-icon-carat-1-w", title: "РњРµРЅСЊС€Рµ", value: "MINI"});
+							} else if ($(this).prop("class") == " ui-icon  ui-icon-carat-1-w") { $(this).attr({ 'class': " ui-icon  ui-icon-grip-solid-horizontal", title: "Р Р°РІРЅРѕ", value: "EQUAL"});
+							} else if ($(this).prop("class") == " ui-icon  ui-icon-grip-solid-horizontal") { $(this).attr({ 'class': " ui-icon  ui-icon-radio-off", title: "РІС…РѕРґРёС‚", value: "LIKE"});
+							} else if ($(this).prop("class") == " ui-icon  ui-icon-radio-off") $(this).attr({ 'class': " ui-icon  ui-icon-close", title: "РќРµРёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ", value: "NONE"});
 							
 					});
 				}
@@ -1461,7 +1572,7 @@ $.jgrid.extend({
 			this.triggerToolbar = triggerToolbar;
 			this.clearToolbar = clearToolbar;
 			this.toggleToolbar = toggleToolbar;
-			// Скрываем по умолчанию тулбар поиска
+			// РЎРєСЂС‹РІР°РµРј РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ С‚СѓР»Р±Р°СЂ РїРѕРёСЃРєР°
 			toggleToolbar();
 		});
 		
@@ -1660,5 +1771,5 @@ $.jgrid.extend({
             var tempValue = wordToHex(a) + wordToHex(b) + wordToHex(c) + wordToHex(d);
             return tempValue.toLowerCase();
         }
-    });
+    });	
 });
