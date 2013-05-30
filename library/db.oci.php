@@ -213,7 +213,7 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 	public function get_realname() {		
 		$names = explode(" ",$this->user_real_name);
 		if (count($names) > 1) {
-				return $names[0]." ".mb_substr ($names[1],0,1,HTML_ENCODING).". ".mb_substr ($names[2],0,1,HTML_ENCODING);
+				return $names[0]." ".mb_substr ($names[1],0,1,HTML_ENCODING).". ".mb_substr ($names[2],0,1,HTML_ENCODING).".";
 			} else {
 				return $this->user_real_name;
 		}
