@@ -413,7 +413,7 @@ function about($db) {
 			} 
 	?>
 	</div>
-	<b>Используемые сторонние бибилиотеки под <a href="http://opensource.org/licenses/mit-license.php">MIT License:</a></b></br>
+	<b>Используемые сторонние бибилиотеки под <a href="http://opensource.org/licenses/mit-license.php" target="_blank">MIT License:</a></b></br>
 	<div class="ui-widget-content" style="height:30px;overflow: auto;font-size:80%;padding: .5em 1em; text-align:center;position: relative;">
 		<a href="http://www.phpexcel.net" target="_blank">PHPExcel</a>,
 		<a href="http://jqgrid.com" target="_blank">JQGrid</a>,
