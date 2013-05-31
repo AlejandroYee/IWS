@@ -28,7 +28,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-define('ace/mode/pgsql', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/text', 'ace/tokenizer', 'ace/mode/pgsql_highlight_rules', 'ace/range'], function(require, exports, module) {
+define('ace/mode/log', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/text', 'ace/tokenizer', 'ace/mode/pgsql_highlight_rules', 'ace/range'], function(require, exports, module) {
 
 var oop = require("../lib/oop");
 var TextMode = require("../mode/text").Mode;
@@ -474,6 +474,26 @@ var PgsqlHighlightRules = function() {
     this.$rules = {
         "start" : [
             {
+             token : "support.type",
+             regex : "\\[.*\\]",
+             next : "start"
+            },  
+            {
+				token : "indefiner",
+                regex : "SQL:.*\\>",
+                next : "statement" 
+            }, 
+            {
+                token : "indefiner",
+                regex : "LIB:.*$",
+                next : "start"
+            },  
+			 {
+                token : "invalid.deprecated",
+                regex : "ERR:.*$",
+                next : "start"
+            },  
+            {
                 token : "comment",
                 regex : "--.*$"
             },
@@ -503,7 +523,7 @@ var PgsqlHighlightRules = function() {
             }, {
                 token : "statementEnd",
                 regex : ";",
-                next : "statement"
+                next : "start"
             }, {
                 token : "string", // perl, python, tcl are in the pg default dist (no tcl highlighter)
                 regex : "\\$perl\\$",

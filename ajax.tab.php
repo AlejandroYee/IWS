@@ -86,7 +86,7 @@ switch ($action) {
 				<script type='text/javascript'>
 						var elem = $('textarea[name=\"log_".$tabid."\"]');				
 						var editor = ace.edit('log_".$tabid."');						
-						editor.getSession().setMode('ace/mode/pgsql');
+						editor.getSession().setMode('ace/mode/log');
 						editor.getSession().setValue(elem.val());
 							editor.getSession().on('change', function(){
 							  elem.val(editor.getSession().getValue());
