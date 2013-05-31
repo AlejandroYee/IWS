@@ -378,7 +378,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               title: 'Добавить новую запись',
                                               buttonicon: 'ui-icon-plus',
                                               onClickButton: function(){
-                                                      $('#<?=$object_name?>').jqGrid('editGridRow','new',{viewPagerButtons:false,closeOnEscape:true, addedrow:'last',recreateForm:true,reloadAfterSubmit:false, closeAfterAdd:true,																
+                                                      $('#<?=$object_name?>').jqGrid('editGridRow','new',{viewPagerButtons:false,closeOnEscape:true, addedrow:'last',recreateForm:false,reloadAfterSubmit:false, closeAfterAdd:true,																
 																	afterSubmit: function(response, postdata) {																	
 																		if (response.responseText.length > 0) {																				
 																			if (response.responseText.length > 20) {
@@ -407,7 +407,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               buttonicon: 'ui-icon-pencil',
                                               onClickButton: function(){
 																row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
-                                                                $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{viewPagerButtons:false,closeOnEscape:true, recreateForm:true,reloadAfterSubmit:false, closeAfterEdit:true,																		
+                                                                $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{viewPagerButtons:false,closeOnEscape:true, recreateForm:false,reloadAfterSubmit:false, closeAfterEdit:true,																		
 															     	afterSubmit: function(response, postdata)  {
 																		if (response.responseText.length > 0) {
 																			custom_alert(response.responseText);																			
@@ -432,7 +432,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               onClickButton: function(){
 																row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selarrrow');
 																if ($.isArray(row_id) && row_id != "") {																	
-																		 $('#<?=$object_name?>').jqGrid('delGridRow',row_id,{closeAfterDel: true,closeOnEscape:true, recreateForm:true,reloadAfterSubmit:false,															
+																		 $('#<?=$object_name?>').jqGrid('delGridRow',row_id,{closeAfterDel: true,closeOnEscape:true, recreateForm:false,reloadAfterSubmit:false,															
 																			afterSubmit: function(response, postdata)  {
 																				if (response.responseText.length > 0) {
 																					custom_alert(response.responseText);
@@ -619,11 +619,9 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 																			$('#<?=$button_name?>').attr('grid_row',row_id);
 																			$('#<?=$button_name?>').dialog( 'open' );															
 																	} else {
-																			row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
-																			if ( row_id != null) {	
+																			row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');																			
 																				$('#<?=$button_name?>').attr('grid_row',row_id);
 																				$('#<?=$button_name?>').dialog( 'open' );
-																			}
 													}
 											}
 						});
