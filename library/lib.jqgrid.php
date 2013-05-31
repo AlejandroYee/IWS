@@ -378,7 +378,19 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               title: 'Добавить новую запись',
                                               buttonicon: 'ui-icon-plus',
                                               onClickButton: function(){
-                                                      $('#<?=$object_name?>').jqGrid('editGridRow','new',{viewPagerButtons:false,closeOnEscape:true, addedrow:'last',recreateForm:false,reloadAfterSubmit:false, closeAfterAdd:true,																
+													if ($('#<?=$object_name?>').attr('new_colmodel') == "true") {
+														var recreate = true;
+														$('#<?=$object_name?>').removeAttr('new_colmodel');
+														} else {
+														var recreate = false;
+													}
+                                                      $('#<?=$object_name?>').jqGrid('editGridRow','new',{
+																viewPagerButtons:false,
+																closeOnEscape:true,
+																addedrow:'last',
+																recreateForm: recreate,
+																reloadAfterSubmit:false,
+																closeAfterAdd:true,																
 																	afterSubmit: function(response, postdata) {																	
 																		if (response.responseText.length > 0) {																				
 																			if (response.responseText.length > 20) {
@@ -406,8 +418,19 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               title: 'Изменить выделенную запись',
                                               buttonicon: 'ui-icon-pencil',
                                               onClickButton: function(){
+																if ($('#<?=$object_name?>').attr('new_colmodel') == "true") {
+																	var recreate = true;
+																	$('#<?=$object_name?>').removeAttr('new_colmodel');
+																	} else {
+																	var recreate = false;
+																}
 																row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
-                                                                $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{viewPagerButtons:false,closeOnEscape:true, recreateForm:false,reloadAfterSubmit:false, closeAfterEdit:true,																		
+                                                                $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{
+																	viewPagerButtons:false,
+																	closeOnEscape:true,
+																	recreateForm:recreate,
+																	reloadAfterSubmit:false,
+																	closeAfterEdit:true,																		
 															     	afterSubmit: function(response, postdata)  {
 																		if (response.responseText.length > 0) {
 																			custom_alert(response.responseText);																			

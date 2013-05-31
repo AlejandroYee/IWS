@@ -160,6 +160,7 @@ $(function() {
 			resizable: false,
 			minWidth: 450,
 			modal: is_modal,
+			
 			buttons: {
 				"Закрыть": function() 
 				{
@@ -170,6 +171,7 @@ $(function() {
 					$(this).parent().css('z-index', 9999).parent().children('.ui-widget-overlay').css('z-index', 105);
 					if (st != "") {
 						$(this).addClass(st);
+						$(this).dialog({ dialogClass: "alert" });
 					}
 			}
 		});
@@ -183,7 +185,7 @@ $(function() {
 		'text-align':'left',
 		'display': 'block'
 	});	
-
+	
 	// Функция обезки строки
 	trim_text = function (text,size,col) {
 		var final_string = '';
@@ -294,7 +296,7 @@ $(function() {
 		id_tab.find(".navigation_header").height(30);
 
 		//  Основные оверлеи
-		$(".dialog_jqgrid_overlay").height(doc_height - main_menu - 85).width(doc_width - 24).offset({ top: main_menu + 30 + 50, left: 12 });
+		$(".dialog_jqgrid_overlay,.ui-widget-overlay").height(doc_height - main_menu - 85).width(doc_width - 24).offset({ top: main_menu + 30 + 50, left: 12 });
 		
 		// Содержимое контейнера		
 		id_tab.find(".tab_main_content").height(doc_height - main_menu - 90).width(doc_width - 20);
@@ -577,97 +579,113 @@ $(function() {
 					
 			switch (obj.attr('i_type')) {
 			
-				 case 'I': // INTEGER
-					var obj_clone = $(this).clone().attr('id','clone_' + obj.attr('id')).removeAttr('name');
-					obj_clone.insertBefore(obj.hide());
-					obj_clone.spinner({
-						change: function( event, ui ) {
-								obj.val($(this).attr('aria-valuenow'));	
-						}
-					}).removeClass('ui-widget-content ui-corner-all')
-					.calculator({
-						useThemeRoller: true, showAnim:'', showOn:'',
-						onButton: function(label, value, inst) { 
-								obj_clone.spinner( 'value', value );
-						}
-					});	
-					$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
-							.click(function( event ) {
-									obj_clone.calculator('show');
-							})
-					).insertAfter(obj_clone.parent());
+				 case 'I': // INTEGER					
+					if ($('#clone_' + obj.attr('id')).length < 1) { // возможно есть такой обьект
+						var obj_clone = $(this).clone().attr('id','clone_' + obj.attr('id')).removeAttr('name').removeAttr('i_type');
+						obj_clone.insertBefore(obj.hide());
+						obj_clone.spinner({
+							change: function( event, ui ) {
+									obj.val($(this).attr('aria-valuenow'));	
+							}
+						}).removeClass('ui-widget-content ui-corner-all')
+						.calculator({
+							useThemeRoller: true, showAnim:'', showOn:'',
+							onButton: function(label, value, inst) { 
+									obj_clone.spinner( 'value', value );
+							}
+						});	
+						$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
+								.click(function( event ) {
+										obj_clone.calculator('show');
+								})
+						).insertAfter(obj_clone.parent());
+					} else {
+						$('#clone_' + obj.attr('id')).spinner( 'value', obj.val() );
+					}
 				break;
 				
 				case 'N': // NUMBER
-					var obj_clone = $(this).clone().attr('id','clone_' + obj.attr('id')).removeAttr('name');
-					obj_clone.insertBefore(obj.hide());
-					obj_clone.spinner({
-						numberFormat: 'n2',
-						culture: 'ru-RU',
-						step: 0.01,
-						change: function( event, ui ) {
-								obj.val($(this).attr('aria-valuenow'));												
-						}
-					}).removeClass('ui-widget-content ui-corner-all')
-					.calculator({
-						useThemeRoller: true, showAnim:'', showOn:'',layout: $.calculator.scientificLayout, 
-						onButton: function(label, value, inst) { 
-								obj_clone.spinner( 'value', value );
-						}
-					});	
-					$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
-							.click(function( event ) {
-									obj_clone.calculator('show');
-							})
-					).insertAfter(obj_clone.parent());
+					if ($('#clone_' + obj.attr('id')).length < 1) { // возможно есть такой обьект
+						var obj_clone = $(this).clone().attr('id','clone_' + obj.attr('id')).removeAttr('name').removeAttr('i_type');
+						obj_clone.insertBefore(obj.hide());
+						obj_clone.spinner({
+							numberFormat: 'n2',
+							culture: 'ru-RU',
+							step: 0.01,
+							change: function( event, ui ) {
+									obj.val($(this).attr('aria-valuenow'));												
+							}
+						}).removeClass('ui-widget-content ui-corner-all')
+						.calculator({
+							useThemeRoller: true, showAnim:'', showOn:'',layout: $.calculator.scientificLayout, 
+							onButton: function(label, value, inst) { 
+									obj_clone.spinner( 'value', value );
+							}
+						});	
+						$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
+								.click(function( event ) {
+										obj_clone.calculator('show');
+								})
+						).insertAfter(obj_clone.parent());
+					} else {
+						$('#clone_' + obj.attr('id')).spinner( 'value', obj.val() );
+					}
 				break;
 				
 				case 'NL': // NUMBER LOOOONG
-					var obj_clone = $(this).clone().attr('id','clone_' + obj.attr('id')).removeAttr('name');
-					obj_clone.insertBefore(obj.hide());
-					obj_clone.spinner({
-						numberFormat: 'n7',
-						culture: 'ru-RU',
-						step: 0.01,
-						change: function( event, ui ) {
-								obj.val($(this).attr('aria-valuenow'));												
-						}
-					}).removeClass('ui-widget-content ui-corner-all')
-					.calculator({
-						useThemeRoller: true, showAnim:'', showOn:'',layout: $.calculator.scientificLayout, 
-						onButton: function(label, value, inst) { 
-								obj_clone.spinner( 'value', value );
-						}
-					});	
-					$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
-							.click(function( event ) {
-									obj_clone.calculator('show');
-							})
-					).insertAfter(obj_clone.parent());
+					if ($('#clone_' + obj.attr('id')).length < 1) { // возможно есть такой обьект
+						var obj_clone = $(this).clone().attr('id','clone_' + obj.attr('id')).removeAttr('name').removeAttr('i_type');
+						obj_clone.insertBefore(obj.hide());
+						obj_clone.spinner({
+							numberFormat: 'n7',
+							culture: 'ru-RU',
+							step: 0.01,
+							change: function( event, ui ) {
+									obj.val($(this).attr('aria-valuenow'));												
+							}
+						}).removeClass('ui-widget-content ui-corner-all')
+						.calculator({
+							useThemeRoller: true, showAnim:'', showOn:'',layout: $.calculator.scientificLayout, 
+							onButton: function(label, value, inst) { 
+									obj_clone.spinner( 'value', value );
+							}
+						});	
+						$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
+								.click(function( event ) {
+										obj_clone.calculator('show');
+								})
+						).insertAfter(obj_clone.parent());
+					} else {
+						$('#clone_' + obj.attr('id')).spinner( 'value', obj.val() );
+					}
 				break;
 				
 				case 'C': // CURENSYS
-					var obj_clone = $(this).clone().attr('id','clone_' + obj.attr('id')).removeAttr('name');
-					obj_clone.insertBefore(obj.hide());
-					obj_clone.spinner({
-						numberFormat: 'C',
-						culture: 'ru-RU',
-						step: 0.01,
-						change: function( event, ui ) {
-								obj.val($(this).attr('aria-valuenow'));												
-						}
-					}).removeClass('ui-widget-content ui-corner-all')
-					.calculator({
-						useThemeRoller: true, showAnim:'', showOn:'',
-						onButton: function(label, value, inst) { 
-								obj_clone.spinner( 'value', value );
-						}
-					});	
-					$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
-							.click(function( event ) {
-									obj_clone.calculator('show');
-							})
-					).insertAfter(obj_clone.parent());
+					if ($('#clone_' + obj.attr('id')).length < 1) { // возможно есть такой обьект
+						var obj_clone = $(this).clone().attr('id','clone_' + obj.attr('id')).removeAttr('name').removeAttr('i_type');
+						obj_clone.insertBefore(obj.hide());
+						obj_clone.spinner({
+							numberFormat: 'C',
+							culture: 'ru-RU',
+							step: 0.01,
+							change: function( event, ui ) {
+									obj.val($(this).attr('aria-valuenow'));												
+							}
+						}).removeClass('ui-widget-content ui-corner-all')
+						.calculator({
+							useThemeRoller: true, showAnim:'', showOn:'',
+							onButton: function(label, value, inst) { 
+									obj_clone.spinner( 'value', value );
+							}
+						});	
+						$($('<button>Открыть калькулятор</button>').button({icons: {primary: 'ui-icon-calculator'}, text: false})
+								.click(function( event ) {
+										obj_clone.calculator('show');
+								})
+						).insertAfter(obj_clone.parent());
+					} else {
+						$('#clone_' + obj.attr('id')).spinner( 'value', obj.val() );
+					}
 				break;
 				
 				case 'P': // PASSWORD
@@ -675,7 +693,8 @@ $(function() {
 				break;
 				
 				case 'B': // CHECKBOX
-							 obj.before('<label for="' + obj.attr('id') + '">Включено или выключено</label>')
+							if (obj.parent().children('label[for="'+ obj.attr('id') +'"]').length < 1) {  // Если уже есть такой чекбокс
+								obj.before('<label for="' + obj.attr('id') + '">Включено или выключено</label>')
 								.button({icons: { primary: 'ui-icon-check' }, text: false})
 								.click(function() {
 									if (obj.attr('checked') != 'checked') {
@@ -684,76 +703,131 @@ $(function() {
 											obj.removeAttr('checked').button({icons: { primary: 'ui-icon-bullet' }});
 									}
 								});
-								
-								if (obj.attr('checked') == 'checked') {
-									obj.attr('checked','checked').button({icons: { primary: 'ui-icon-check' }});
-								} else {
-									obj.removeAttr('checked').button({icons: { primary: 'ui-icon-bullet' }});						
-								}									
+							}	
+							if (obj.attr('checked') == 'checked') {
+								obj.attr('checked','checked').button({icons: { primary: 'ui-icon-check' }}).button( "refresh" );
+							} else {
+								obj.removeAttr('checked').button({icons: { primary: 'ui-icon-bullet' }}).button( "refresh" );						
+							}									
 				break;
 				
 				case 'D': // DATE
-					obj.datepicker({
-							showOn: 'button',
-							showWeek: true,
-							numberOfMonths: num_of_mounth,
-							changeYear: true,
-							firstDay: 1
-							})
-							.parent().children('.ui-datepicker-trigger')
-							.button({
-								icons: {primary: 'ui-icon-calendar'},
-								text: false
-							});
+					if (obj.parent().children('.ui-datepicker-trigger').length < 1) { 
+						obj.datepicker({
+								showOn: 'button',
+								showWeek: true,
+								numberOfMonths: num_of_mounth,
+								changeYear: true,
+								firstDay: 1
+								})
+								.parent().children('.ui-datepicker-trigger')
+								.button({
+									icons: {primary: 'ui-icon-calendar'},
+									text: false
+								});
+					} else {
+						obj.datepicker( "setDate", obj.val() );					
+					}
 				break;
 				
 				case 'DT': // DATE TIME
-					obj.datetimepicker({
-							showWeek: true,
-							numberOfMonths: num_of_mounth,
-							changeYear: true,
-							firstDay: 1,
-							timeFormat :'HH:mm:ss',
-							showOn: 'button',
-							hourGrid: 4,
-							minuteGrid: 10
-							})
-							.parent().children('.ui-datepicker-trigger')
-							.button({
-								icons: {primary: 'ui-icon-calendar'},
-								text: false
-							});
+					if (obj.parent().children('.ui-datepicker-trigger').length < 1) { 
+									var myControl=  {
+										create: function(tp_inst, obj, unit, val, min, max, step){
+											$('<input class="ui-timepicker-input" value="'+val+'" style="width:50px">')
+												.appendTo(obj)
+												.spinner({
+													min: min,
+													max: max,
+													step: step,												
+													change: function(e,ui){
+															if(e.originalEvent !== undefined)
+																tp_inst._onTimeChange();
+															tp_inst._onSelectHandler();
+														},
+													spin: function(e,ui){
+															tp_inst.control.value(tp_inst, obj, unit, ui.value);
+															tp_inst._onTimeChange();
+															tp_inst._onSelectHandler();
+														}
+												});
+											return obj;
+										},
+										options: function(tp_inst, obj, unit, opts, val){
+											if(typeof(opts) == 'string' && val !== undefined)
+													return obj.find('.ui-timepicker-input').spinner(opts, val);
+											return obj.find('.ui-timepicker-input').spinner(opts);
+										},
+										value: function(tp_inst, obj, unit, val){
+											if(val !== undefined)
+												return obj.find('.ui-timepicker-input').spinner('value', val);
+											return obj.find('.ui-timepicker-input').spinner('value');
+										}
+									};
+					
+						obj.datetimepicker({
+								showWeek: true,
+								numberOfMonths: num_of_mounth,
+								changeYear: true,
+								firstDay: 1,
+								timeFormat :'HH:mm:ss',
+								showOn: 'button',
+								controlType: myControl,
+								})
+								.parent().children('.ui-datepicker-trigger')
+								.button({
+									icons: {primary: 'ui-icon-calendar'},
+									text: false
+								});
+					} else {
+						obj.datetimepicker( "setDate", obj.val() );					
+					}
 				break;		
 				
 				case 'SB': // MULTISELECT
-					obj.multiselect({
-							multiple: (typeof(obj.attr('multiple')) === "undefined")?false:true,
-							minWidth: (obj.width() < 255)?255:obj.width(),
-							header: true,
-							selectedList: obj.attr('h')
-						}).multiselectfilter();
+					if (obj.parent().children('.ui-multiselect').length < 1) { 
+						obj.multiselect({
+								multiple: (typeof(obj.attr('multiple')) === "undefined")?false:true,
+								minWidth: (obj.width() < 255)?255:obj.width(),
+								header: true,
+								selectedList: obj.attr('h')
+							}).multiselectfilter();
+					} else {
+						if (typeof(obj.attr('multiple')) === "undefined") {
+						var txt = obj.find('option:selected').text();
+							obj.parent().find('.ui-multiselect span:last').text(txt);
+							obj.multiselect("widget").find("input:checked").removeAttr('checked').removeAttr('aria-selected').parent().removeClass('ui-state-active ui-state-hover');							
+							$.each(obj.multiselect("widget").find("span:contains('" + txt + "')"), function() {
+								if (txt != "" && $(this).text() == txt) {
+								$(this).parent().addClass('ui-corner-all ui-state-active ui-state-hover')
+									.children('input').attr('checked','checked').attr('aria-selected',true);
+								}
+							});
+						} else {
+							obj.multiselect("refresh");						
+						}
+					}
 				break;
-				case 'M': // MULTILINE - CODEMIRROR					
-					obj.removeAttr('id').before('<div id="' + obj.attr('name')+ '"></label>');					
-					var editor = ace.edit(obj.attr('name'));
-					var h = (obj.attr('h')*12 > 50)?obj.attr('h')*12:50;
-					editor.getSession().setMode("ace/mode/pgsql");
-					editor.getSession().setValue(obj.val());
-						editor.getSession().on('change', function(){
-						  obj.val(editor.getSession().getValue());
-						});
-					obj.hide();
-					editor.setHighlightActiveLine(false);
-					editor.renderer.setShowGutter(false);
-					editor.setShowPrintMargin(false);
-					$('#' + obj.attr('name')).width(obj.attr('w')).height(h).addClass('FormElement ui-widget-content ui-corner-all').css('margin-left','5px')
-					.resizable({						  
-							resize: function(event, ui) {
-									$('#' + obj.attr('name')).height($(this).height()).width($(this).width());
-									editor.resize();
+				
+				case 'M': // MULTILINE - ACE	
+					if (obj.parent().children('.ace_editor').length < 1) { 
+						obj.before('<div id="editor_' + obj.attr('name')+ '"></div>');
+						$('#editor_' + obj.attr('name')).ace_editor({
+							width: obj.attr('w'),
+							heigth:  (obj.attr('h')*12 > 50)?obj.attr('h')*12:50,
+							mode: 'ace/mode/pgsql',
+							classes: 'FormElement ui-widget-content ui-corner-all',
+							resizable: true,
+							value: obj.val(),
+							change: function( element, data ) {								
+								obj.val(data);
 							}
 						});
-					editor.resize();				
+						obj.hide();
+					} else {
+						$('#editor_' + obj.attr('name')).ace_editor({value: obj.val()});
+					}
+				
 				break;
 			} // end type def
 			
@@ -865,6 +939,7 @@ $(function() {
 				type: 'GET',
 					success: function(data) {											
 						$('#' + gridname).jqGrid('setColProp',value_name,{ editoptions: { value: data }, searchoptions: {value: ':;'+ data}});
+						$('#' + gridname).attr('new_colmodel',true);
 				}	  
 			});	
 	}
@@ -965,64 +1040,21 @@ $.extend($.ech.multiselect.prototype.options, {
 // Оверлай для диалогов грида:
 $.extend($.jgrid,{	
 	viewModal : function (selector,o){
-		o = $.extend({
-			toTop: true,
-			overlay: 10,
-			modal: true,
-			overlayClass : 'ui-widget-overlay',
-			onShow: $.jgrid.showModal,
-			onHide: $.jgrid.closeModal,
-			gbox: '',
-			jqm : true,
-			jqM : true
-		}, o || {});			
-			$(selector).dialog( "open" );				
-			var s_width = $(selector)[0].scrollWidth;
-			var doc_height = $(window).height();
-			var doc_width = $(window).width() - 2;
-			var main_menu = $(".main_menu").height();
-			var tab_nav = $(".ui-tabs-nav").height();
-			
-			if ($(selector).attr('selector_type') == "true") {
-				$(selector).find('.EditTable').css('table-layout','auto');
-				$(selector).find('.FormData td').removeClass('ui-widget-content');	
-			}
-			
-			if ($(selector).attr('selector_type') == "true" && s_width < 550) {
-					var view_conf = 1.5;								
-				} else {
-					var view_conf = 1;
-			}
-			if (s_width > 0 ) {
-				$(selector).dialog( "option", "width", s_width * view_conf + 25);
-			}
-			
-			if ($(selector).parent().parent().attr('role') == "tabpanel") {
-					var to_object = $(selector).parent().parent().parent().parent();
-				} else {
-					var to_object = $(selector).parent().parent();				
-			}			
-			$($("<div />").attr({
-				'class':'ui-widget-overlay ui-front dialog_jqgrid_overlay ui-corner-all',
-				'style':'position:absolute;'
-			})).prependTo(to_object);
-			
-			if ($.browser.msie) {		
-					$(".dialog_jqgrid_overlay").height(doc_height - main_menu - 90).width(doc_width - 24).offset({ top: main_menu + tab_nav + 45, left: 12 });
-				} else {
-					$(".dialog_jqgrid_overlay").height(doc_height - main_menu - 90).width(doc_width - 24).offset({ top: main_menu + tab_nav + 50, left: 12 });
-		    }
+		create_from_table_elemnts($(selector).find('.FormGrid'));
+		$(selector).dialog( "open" );				
+		var s_width = $(selector)[0].scrollWidth;		
 		
+		if ($(selector).attr('selector_type') == "true" && s_width < 550) {
+				var view_conf = 1.5;								
+			} else {
+				var view_conf = 1;
+		}
+		if (s_width > 0 ) {
+			$(selector).dialog( "option", "width", s_width * view_conf + 25);
+		}	
+		redraw_document();		
 	},
-	hideModal : function (selector,o) {
-		o = $.extend({jqm : true, gb :''}, o || {});
-			if ($(selector).parent().parent().attr('role') == "tabpanel") {
-					var to_object = $(selector).parent().parent().parent().parent();
-				} else {
-					var to_object = $(selector).parent().parent();				
-			}
-			
-		to_object.children('.ui-widget-overlay').remove();		
+	hideModal : function (selector,o) {	
 		$(selector).dialog( "close" );		
 	},
 	createModal : function(aIDs, content, p, insertSelector, posSelector, appendsel, css) {
@@ -1032,11 +1064,7 @@ $.extend($.jgrid,{
 			// Зачищаем предыдущий диалог если есть
 			$('#' + aIDs.themodal).dialog('destroy').remove();
 			
-			// Убираем оверлай
-			$('body').find('.jqgrid-overlay').remove();
-			
-			// Проверяем дефаулты
-			if(p.jqModal === undefined) {p.jqModal = true; }
+			// Проверяем дефаулты			
 			if(p.resize === undefined) {p.resize=true;}
 			
 			if (aIDs.themodal.indexOf('viewmod', 0) > -1) {
@@ -1096,10 +1124,10 @@ $.extend($.jgrid,{
 								};
 			};
 			
-			if (typeof(p.buttons) !== 'undefined') buttons_set = null;		
+			if (typeof(p.buttons) !== 'undefined') buttons_set = null;
 			
 			replace_select_opt_group();
-			create_from_table_elemnts($('#' + aIDs.themodal).find('.FormGrid'));
+			
 			// Говорим что это диалог
 			$('#' + aIDs.themodal).dialog({
 										autoOpen: false,
@@ -1113,12 +1141,16 @@ $.extend($.jgrid,{
 												$( this ).find('#cData').click();
 												$( this ).find('#eData').click();
 												$( this ).dialog( "close" );
+												$(folder_self).children('.ui-widget-overlay').remove();
 										},
 										open: function() {
 											if (p.viewPagerButtons  == true) {											
 												// прячем если есть что спрятать
 												$('.ui-dialog-buttonpane').find('button:contains("false")').hide();
 											}
+											// Оверлей
+											$("<div>").addClass("ui-widget-overlay ui-front")
+												.prependTo( $(folder_self));
 										}
 									});
 	}
@@ -1772,4 +1804,64 @@ $.jgrid.extend({
             return tempValue.toLowerCase();
         }
     });	
+	
+	$.widget("ui.ace_editor", {  
+	options: {  
+		editor: null,
+		mode: 'ace/mode/pgsql',
+		classes: 'ui-widget-content ui-corner-all',
+		resizable: true,
+		value: '',
+		heigth: 30,
+		width: 250
+		},
+	_create: function() { 
+		var self = this,
+			self_id = self.element.attr('id'),
+			self_elem = $('#' + self.element.attr('id'));
+			
+		self.options.editor = ace.edit(self_id);
+		self.options.editor.getSession().setMode(self.options.mode);
+		self.options.editor.getSession().setValue(self.options.value);
+		
+		self.options.editor.getSession().on('change', function(){
+			self._trigger("change",self,self.options.editor.getSession().getValue());
+		});						
+
+		self.options.editor.setHighlightActiveLine(false);
+		self.options.editor.renderer.setShowGutter(false);
+		self.options.editor.setShowPrintMargin(false);
+		
+		self_elem.width(self.options.width)
+				.height(self.options.heigth)
+				.addClass(self.options.classes)
+				.css('margin-left','5px');
+				
+		if 	(self.options.resizable) {	
+			self_elem.resizable({						  
+					resize: function(event, ui) {
+							self_elem.height($(this).height()).width($(this).width());
+							self.options.editor.resize();
+					}
+				});
+		}
+		self.options.editor.resize();		
+	},
+	_setOption: function(option, value) {  
+		$.Widget.prototype._setOption.apply( this, arguments );  
+		switch (option) {  
+			case "value":  
+				this.options.editor.getSession().setValue(value);
+				this.options.value = value;
+			break;
+			case "heigth":  this.options.heigth = value; 	break; 
+			case "width":  this.options.width = value; 	break; 
+			case "resizable":  this.options.resizable = value; 	break; 
+			case "classes":  this.options.classes = value; 	break; 
+			case "mode":  this.options.mode = value; 	break; 
+			}  
+	} 	
+	
+	});
+	
 });
