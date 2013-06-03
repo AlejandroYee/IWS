@@ -99,7 +99,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					 
 					// Создаем заголовок					
 					$ResArray['colNames'] .= ",
-						'".trim(str_ireplace(array("(not display)","#","<br>")," ",$this -> return_sql($query, "NAME")))."'";
+						'".trim(str_ireplace(array("(not display)","#")," ",$this -> return_sql($query, "NAME")))."'";
 					
 					// Проверяем на служебные поля
 					if (trim_fieldname($this -> return_sql($query, "FIELD_NAME")) == "ID_".$this -> return_sql($query, "OBJECT_NAME") ) {
