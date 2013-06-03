@@ -268,13 +268,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 						closeOnEscape: true,
 						resizable:true,
 						appendTo: $('#".$this->pageid." .tab_main_content'),
-						buttons: [
-							 {
-								text: 'Отмена',
-								click: function () {
-									$(this).dialog('close');
-								}
-							 },	
+						buttons: [							 
 							 {
 								text: 'Применить',
 								click: function () {
@@ -336,7 +330,13 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 				$output .= "	 }
 								}
 											
-							}					
+							},
+							{
+								text: 'Отмена',
+								click: function () {
+									$(this).dialog('close');
+								}
+							 }							
 						],
 						close:function() {
 							$(this).parent().parent().children('.ui-widget-overlay').remove();
@@ -390,10 +390,10 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 								</div>
 							</form>
 							<div>
-								<div class=\"ui-widget-header\" style = \"height: 1px;\"></div><br>
-								<button id ='button_close_".$this -> pageid."' >Отмена</button>
+								<div class=\"ui-widget-header\" style = \"height: 1px;\"></div><br>								
 								<button id ='button_back_".$this -> pageid."' >назад</button>
 								<button id ='button_next_".$this -> pageid."' >вперед</button>
+								<button id ='button_close_".$this -> pageid."' >Отмена</button>
 							</div>
 							</div>";
 		} else {
