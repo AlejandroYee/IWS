@@ -270,7 +270,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 						appendTo: $('#".$this->pageid." .tab_main_content'),
 						buttons: [	
 							 {
-								text: 'Сохранить',
+								text: 'Применить',
 								click: function () {
 								if (check_form($('#form_parameters_".$this->pageid."'))) {
 									var qString = $('#form_parameters_".$this->pageid."').serialize();	
@@ -344,7 +344,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 						},
 						open: function() {
 								$('.ui-dialog-buttonpane').find('button:contains(\"Отмена\")').button({icons: { primary: 'ui-icon-close'}});
-								$('.ui-dialog-buttonpane').find('button:contains(\"Сохранить\")').button({icons: { primary: 'ui-icon-disk'}});
+								$('.ui-dialog-buttonpane').find('button:contains(\"Применить\")').button({icons: { primary: 'ui-icon-disk'}});
 								$($('<div />').attr({'class':'ui-widget-overlay ui-front dialog_jqgrid_overlay ui-corner-all',
 													 'style':'position:absolute;'})).prependTo($(this).parent().parent());
 								redraw_document();
@@ -417,7 +417,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 							$('#button_back_".$this -> pageid."').button('option','disabled', false );
 						}
 						if (i == (form_list_".$this->pageid.".length - 2)) {
-							$('#button_next_".$this -> pageid."').children('span.ui-button-text').text('Готово');
+							$('#button_next_".$this -> pageid."').button({icons: { primary: 'ui-icon-disk'},label: 'Применить'});
 						}
 					}
 		}
@@ -427,14 +427,13 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 						counter = form_list_".$this->pageid."[i-1];
 						if ( i == 1 ) {
 							$('#button_back_".$this -> pageid."').button('option','disabled', true );
-						} else {
-						    $('#button_next_".$this -> pageid."').children('span.ui-button-text').text('вперед');
-						}
+						}	
+						$('#button_next_".$this -> pageid."').button({icons: { primary: 'ui-icon-arrowthick-1-e'},label: 'вперед'});
 					}			
 		}
 		if (action === 'first') {					
 				counter = form_list_".$this->pageid."[0];
-				$('#button_next_".$this -> pageid."').children('span.ui-button-text').text('вперед');				
+				$('#button_next_".$this -> pageid."').button({icons: { primary: 'ui-icon-arrowthick-1-e'},label: 'вперед'});			
 		}
 		if (counter === undefined) {
 			// Загрузку делать ненужно отдаем на выполнение скрипт:
