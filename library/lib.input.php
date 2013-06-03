@@ -268,7 +268,13 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 						closeOnEscape: true,
 						resizable:true,
 						appendTo: $('#".$this->pageid." .tab_main_content'),
-						buttons: [	
+						buttons: [
+							 {
+								text: 'Отмена',
+								click: function () {
+									$(this).dialog('close');
+								}
+							 },	
 							 {
 								text: 'Применить',
 								click: function () {
@@ -330,13 +336,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 				$output .= "	 }
 								}
 											
-							},
-							{
-								text: 'Отмена',
-								click: function () {
-									$(this).dialog('close');
-								}
-							}						
+							}					
 						],
 						close:function() {
 							$(this).parent().parent().children('.ui-widget-overlay').remove();
