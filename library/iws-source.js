@@ -931,7 +931,7 @@ $(function() {
 					});
 	
 	// Нужно для автозагрузки данных в селект в гриде 	
-	get_select_values_grid = function (gridname,value_name, parent_value_id) {
+	get_select_values_grid = function (gridname, value_name, parent_value_id) {
 		$.ajax({
 				url: 'ajax.data.select.php?value_name=' + value_name + '&parent_id=' + parent_value_id,
 				datatype :'json',
@@ -1052,7 +1052,7 @@ $.extend($.jgrid,{
 		if (s_width > 0 ) {
 			$(selector).dialog( "option", "width", s_width * view_conf + 25);
 		}	
-		redraw_document();		
+		redraw_document($(".ui-tabs-panel[aria-expanded='true']"));		
 	},
 	hideModal : function (selector,o) {	
 		$(selector).dialog( "close" );		
