@@ -708,7 +708,9 @@ $(function() {
 								obj.attr('checked','checked').button({icons: { primary: 'ui-icon-check' }}).button( "refresh" );
 							} else {
 								obj.removeAttr('checked').button({icons: { primary: 'ui-icon-bullet' }}).button( "refresh" );						
-							}									
+							}		
+						
+						obj.removeAttr('style'); // Исправление неверной длины чекбокса							
 				break;
 				
 				case 'D': // DATE
