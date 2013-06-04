@@ -339,12 +339,14 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								}
 							}
 							$(this).jqGrid('clearGridData');
-							grid_load_<?=$object_name?>_intval = setInterval(function() {
+							function loader_function() {
 								grid_load_<?=$object_name?>_time++;
 								minutes_<?=$object_name?> = (Math.floor(grid_load_<?=$object_name?>_time/60) < 10) ? "0"+Math.floor(grid_load_<?=$object_name?>_time/60) : Math.floor(grid_load_<?=$object_name?>_time/60);
 								seconds_<?=$object_name?> = ((grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60) < 10) ? "0"+(grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60) : (grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60);
 								$("#load_<?=$object_name?>").html("<table style='left:42%;position:absolute;top:47%;width:250px;vertical-align:middle;'><tr><td><img src='<?=ENGINE_HTTP?>/library/ajax-loader.gif'><span style='top:-10px;'></td><td>(" + minutes_<?=$object_name?> +':' + seconds_<?=$object_name?> + ") Ожидаю данные...</td></tr></table>");
-							}, 1000);	
+							}
+							grid_load_<?=$object_name?>_intval = setInterval(loader_function, 1000);
+							loader_function();
 					},
 					beforeProcessing: function(data, status, xhr) {						
 						if (crc_input_<?=$object_name?> == $.md5(xhr.responseText)) {								
@@ -368,6 +370,11 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               onClickButton: function(){
                                                 crc_input_<?=$object_name?> = null; // Принудительно отчищаем crc
 												$('#<?=$object_name?>').trigger('reloadGrid');
+												// Если есть детальные гриды то отчищаем их
+												$.each( $("#<?=$this -> pageid?> .tab_main_content .grid_resizer_tabs[form_type$='_DETAIL'],#<?=$this -> pageid?> .tab_main_content .grid_resizer[form_type$='_DETAIL']"), function() {													
+													$('#' +  $(this).attr('for')).jqGrid('clearGridData');
+													$(this).attr('need_update','true');
+												});
                                               }											
 							})	
 					.jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
