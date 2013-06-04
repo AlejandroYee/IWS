@@ -772,7 +772,7 @@ $(function() {
 								firstDay: 1,
 								timeFormat :'HH:mm:ss',
 								showOn: 'button',
-								controlType: myControl,
+								controlType: myControl
 								})
 								.parent().children('.ui-datepicker-trigger')
 								.button({
@@ -1862,6 +1862,5 @@ $.jgrid.extend({
 			}  
 	} 	
 	
-	});
-	
+	}); 
 });
