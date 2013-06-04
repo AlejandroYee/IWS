@@ -289,6 +289,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 											$('#' + gridname).jqGrid('setGridParam',{editurl:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?type=' + grid_type + '&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=' + grid_parent_id + '&Master_Table_ID=<?=$ResArray['Master_Table_ID']?>&id_mm='+ids,page:1});
 											$('#' + gridname).jqGrid('setGridParam',{search:false, datatype:'json',loadonce:false,treedatatype:'json'}, true);											
 											$('#' + gridname).trigger('reloadGrid');
+											
 											// Обновляем филд select в случае если он есть и подсовываем ему rowid	
 											$.each( $('#' + gridname).jqGrid ('getGridParam', 'colModel') , function() {
 													if (this.edittype == "select") {												
@@ -319,6 +320,14 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 											}
 										});
 									}
+								} else {
+									// В случае если это дерево, и мы нажали не на конечную ветку, то данные в детальных гридах отчищаются
+									// тк. есть возможность попытаться редактировать данные неотносящиеся к выбранной ветке
+									$.each( $("#<?=$this -> pageid?> .tab_main_content .grid_resizer_tabs[form_type$='_DETAIL'],#<?=$this -> pageid?> .tab_main_content .grid_resizer[form_type$='_DETAIL']"), function() {													
+										$('#' + $(this).attr('for')).jqGrid('clearGridData');
+										$('#' + $(this).attr('for')).jqGrid('setGridParam',{search:false, datatype:'local',loadonce:false,treedatatype:'local'}, true);
+										$(this).attr('need_update','true');
+									});
 								}
 							},
 					gridComplete: function() {	// на случай невыбранной ноды после обновления в дереве				
@@ -370,11 +379,16 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               onClickButton: function(){
                                                 crc_input_<?=$object_name?> = null; // Принудительно отчищаем crc
 												$('#<?=$object_name?>').trigger('reloadGrid');
-												// Если есть детальные гриды то отчищаем их
-												$.each( $("#<?=$this -> pageid?> .tab_main_content .grid_resizer_tabs[form_type$='_DETAIL'],#<?=$this -> pageid?> .tab_main_content .grid_resizer[form_type$='_DETAIL']"), function() {													
-													$('#' +  $(this).attr('for')).jqGrid('clearGridData');
-													$(this).attr('need_update','true');
-												});
+												// Если есть детальные гриды то отчищаем их, но при этом смотрим текущий грид на предмет детальности
+												// если именно в нем нажали кнопку обновить то отчищать ничего не нужно
+												grid_type = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + $(this).attr('id') + "']").attr('form_type');
+												if (grid_type !== "GRID_FORM_DETAIL" && grid_type !== "TREE_GRID_FORM_DETAIL") {	
+													$.each( $("#<?=$this -> pageid?> .tab_main_content .grid_resizer_tabs[form_type$='_DETAIL'],#<?=$this -> pageid?> .tab_main_content .grid_resizer[form_type$='_DETAIL']"), function() {													
+														$('#' + $(this).attr('for')).jqGrid('clearGridData');
+														$('#' + $(this).attr('for')).jqGrid('setGridParam',{search:false, datatype:'local',loadonce:false,treedatatype:'local'}, true);
+														$(this).attr('need_update','true');
+													});
+												}
                                               }											
 							})	
 					.jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
