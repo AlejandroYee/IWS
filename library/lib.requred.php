@@ -94,7 +94,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 												$('#btn_o_".$last_grid_name."').button('option', 'disabled', false );	
 												$('#".$last_grid_name."').trigger('reloadGrid');
 												$('#btn_".$last_grid_name."').button('option', 'disabled', true );
-												$('#ui-".$this->pageid."').parent().effect('pulsate', {}, 2000);
+												$('li[aria-selected=\"false\"] a[href=\"#".$this->pageid."\"]').parent().effect('highlight', {}, 3000);
 												if (data.length > 20) {
 														custom_alert(data);
 												}

@@ -707,7 +707,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 														$('.ui-dialog-buttonpane').show();
 														$('#ajax_<?=$button_name?>').hide();
 														$('#<?=$button_name?>').dialog( 'close' );
-														$('#ui-<?=$this->pageid?>').parent().effect('pulsate', {}, 2000);
+														$('li[aria-selected="false"] a[href="#<?=$this -> pageid?>"]').parent().effect('pulsate', {}, 2000);													
 														$('#<?=$object_name?>').jqGrid().trigger('reloadGrid', true);
 												if (data.length > 20) {
 														custom_alert(data);
@@ -810,6 +810,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 												encodeHTMLEntities: false,
 												httpMethod:'GET',
 												successCallback: function (responseHtml, url) {
+														$('li[aria-selected="false"] a[href="#<?=$this -> pageid?>"]').parent().effect('pulsate', {}, 2000);
 														$('#export_<?=$object_name?>').dialog( 'close' );													
 												},
 												failCallback: function (responseHtml, url) {
