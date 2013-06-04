@@ -112,7 +112,8 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strrpos($_SERVER['HTTP_USER_AGENT'],
 						.ui-jqgrid .loading{background:transparent;border:0 transparent;color:inherit;height:99%;left:-5px;opacity:1;padding:10px;top:-5px;width:98%;z-index:89}
 						.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label{text-align:left}
 						.ui-search-toolbar{border-color:transparent}
-						.ui-jqgrid tr.jqgrow,.ui-state-active{cursor:default}									
+						.ui-jqgrid tr.jqgrow,.ui-state-active{cursor:default}	
+						li, li li, li li li {list-style-type: none; }   						
 <?php 
 if (($main_db->get_param_view("render_type") > 2) and isset($_SERVER['HTTP_USER_AGENT']) and (!strrpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == "")) $main_db -> set_param_view("render_type",2); // Проверка на эксплорер
 switch ($main_db->get_param_view("render_type")) {
