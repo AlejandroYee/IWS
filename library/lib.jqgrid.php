@@ -31,7 +31,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 																	when upper(trim(t.field_type)) = 'P'  then  'edittype:''password'' '
 																	when upper(trim(t.field_type)) = 'SB' then  decode(trunc((nvl(t.count_element, 0) + 2) / 2), 1, 'stype:''select'', formatter:''select'', edittype: ''select'' ','stype:''select'', formatter:''select'', edittype: ''select'' multiple ')
 																	when upper(trim(t.field_type)) = 'M'  then  'edittype:  ''textarea'''
-																	when upper(trim(t.field_type)) = 'I'  then  'formatter: ''number'', formatoptions:{decimalPlaces: 0, defaultValue:''0'' } '
+																	when upper(trim(t.field_type)) = 'I'  then  'formatter: ''number'', formatoptions:{decimalPlaces: 0, defaultValue:''0'',thousandsSeparator:''''} '
 																	when upper(trim(t.field_type)) = 'N'  then  'formatter: ''number'', formatoptions:{decimalPlaces: 2, thousandsSeparator:'''',defaultValue:''0''}'
 																	when upper(trim(t.field_type)) = 'NL' then  'formatter: ''number'', formatoptions:{decimalPlaces: 7}, defaultValue:''0'''
 																	when upper(trim(t.field_type)) = 'C'  then  'formatter: ''currency'', formatoptions:{prefix: '''', suffix:''p.'',defaultValue:''0''}'
@@ -217,7 +217,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		// Постраничная или нет прокрутка
 		if ($this->db_conn->get_param_view("page_enable") == "checked") { 
 					?> 		 scroll:false,
-							 rowNum:50,
+							 rowNum:100,
 							 recordtext:'Просмотр записей {0} - {1} из {2}',
 							 <?php	
 			} else  {
@@ -323,7 +323,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						var grid_type = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + $(this).attr('id') + "']").attr('form_type');
 						if (grid_type == "TREE_GRID_FORM_MASTER" || grid_type == "TREE_GRID_FORM" || grid_type == "TREE_GRID_FORM_DETAIL") {								
 							$('#<?=$object_name?>').jqGrid('setGridParam',{editurl:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?type=<?=$type?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=&id_mm=', page:1});							
-						};					
+						};
+						//clearInterval(grid_load_<?=$object_name?>_intval);
 					},
 					beforeRequest: function() {
 							var postdata = $(this).getGridParam('postData');
@@ -334,12 +335,16 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								}
 							}
 							$(this).jqGrid('clearGridData');
+						//	var grid_load_<?=$object_name?>_intval = setInterval(function() {
+								
+							
+						//	}, 1000);	
 					},
-					beforeProcessing: function(data, status, xhr) {
-						if (crc_input_<?=$object_name?> == $.md5(xhr.responseText)) {
+					beforeProcessing: function(data, status, xhr) {						
+						if (crc_input_<?=$object_name?> == $.md5(xhr.responseText)) {								
 								return false;
-							}else {								
-								crc_input_<?=$object_name?> = $.md5(xhr.responseText);									
+							} else {								
+								crc_input_<?=$object_name?> = $.md5(xhr.responseText);
 						}
 					},
 					editurl:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?type=<?=$type?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=<?=$this ->id_mm_fr_d?>',
@@ -730,7 +735,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		} else {
 			$ex_sel = "selected";
 		}							
-	?>
+	?>								
 								<option value='xls' <?=$ex_sel?> >Формат Microsoft Office XP (.xls)</option>
 								<option value='xlsx' >Формат Microsoft Office 2007 (.xlsx)</option>							
 								<option value='csv' >Формат данных с разделителями (.csv)</option>
@@ -769,32 +774,56 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 									$('#export_ajax_<?=$object_name?>').show();
 									$('#btn_e_<?=$object_name?>').button('option', 'disabled', true );
 									$('#btn_o_<?=$object_name?>').button('option', 'disabled', true );
-									$.fileDownload('<?=ENGINE_HTTP?>/ajax.export.grid.php?isaexport=' + $('#select_export_<?=$object_name?>').val() + '&type=<?=$type?>&pageid=<?=$this ->pageid?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=<?=$this ->id_mm_fr_d?>&id_mm=<?=$this ->id_mm?>&id=' + $('#<?=$export_grid?>').jqGrid('getGridParam', 'selrow') + '&filtred=' + $("#export_filtered_<?=$object_name?>").attr('checked') + export_post_data_<?=$object_name?>,
-									{ 	
-											encodeHTMLEntities: false,
-											httpMethod:'GET',
-											successCallback: function (responseHtml, url) {
-													$('#export_ajax_<?=$object_name?>').hide();
-													$('#btn_e_<?=$object_name?>').button('option', 'disabled', false );
-													$('#btn_o_<?=$object_name?>').button('option', 'disabled', false );
-													$('#export_<?=$object_name?>').dialog( 'close' );													
-											},
-											failCallback: function (responseHtml, url) {
-													$('#export_ajax_<?=$object_name?>').hide();
-													$('#btn_e_<?=$object_name?>').button('option', 'disabled', false );
-													$('#btn_o_<?=$object_name?>').button('option', 'disabled', false );
-													$('#export_<?=$object_name?>').dialog( 'close' );
-													custom_alert("Ошибка выполнения экспорта!" + responseHtml);
-											}
-									});	
+									$('#btn_f_<?=$object_name?>').button('option', 'disabled', true );										
+										$.fileDownload('<?=ENGINE_HTTP?>/ajax.export.grid.php?isaexport=' + $('#select_export_<?=$object_name?>').val() + '&type=<?=$type?>&pageid=<?=$this ->pageid?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=<?=$this ->id_mm_fr_d?>&id_mm=<?=$this ->id_mm?>&id=' + $('#<?=$export_grid?>').jqGrid('getGridParam', 'selrow') + '&filtred=' + $("#export_filtered_<?=$object_name?>").attr('checked') + export_post_data_<?=$object_name?>,
+										{ 	
+												encodeHTMLEntities: false,
+												httpMethod:'GET',
+												successCallback: function (responseHtml, url) {
+														$('#export_<?=$object_name?>').dialog( 'close' );													
+												},
+												failCallback: function (responseHtml, url) {
+														$('#export_<?=$object_name?>').dialog( 'close' );
+														custom_alert("Ошибка выполнения экспорта!" + responseHtml);
+												}
+										});										
 								  }
 								},
 								{
-								text: 'Отмена',
+								text: 'Быстрый экспорт',
 								click: function () {
-									$('#export_ajax_<?=$object_name?>').hide();
-									$('#btn_e_<?=$object_name?>').button('option', 'disabled', false );
-									$('#btn_o_<?=$object_name?>').button('option', 'disabled', false );
+									$('#export_ajax_<?=$object_name?>').show();
+									$('#btn_e_<?=$object_name?>').button('option', 'disabled', true );
+									$('#btn_o_<?=$object_name?>').button('option', 'disabled', true );	
+									$('#btn_f_<?=$object_name?>').button('option', 'disabled', true );	
+									
+									var slp_str = "", // Компенсация пустой ящейки в первом столбце
+										out_doc = "";
+									// Получаем столбци в гриде			
+									$.each($("#<?=$object_name?>").parent().parent().parent().children("div.ui-jqgrid-hdiv").find("div table tr:visible"), function() {	
+										$.each($(this).children("th:visible"), function() {
+											slp_str = slp_str + ';' + $(this).text();
+										});
+										out_doc = out_doc + '\r\n' + slp_str.replace(/[\n\r]/g,"").replace(/^;+/, "");
+										slp_str = "";
+									});
+									// Получаем данные
+									$.each($("#<?=$object_name?> tr[role='row']"), function() {	
+										$.each($(this).children("td:visible"), function() {
+											slp_str = slp_str + ';' + $(this).text();
+										});
+											out_doc = out_doc + '\r\n' + slp_str.replace(/[\n\r]/g,"").replace(/^;+/, "");
+											slp_str = "";
+									});
+									$('#export_<?=$object_name?>').append('<a id="file_content<?=$export_grid?>" href="data:text/plain;base64,' + btoa(unescape(encodeURIComponent(out_doc))) + '" download="content.csv">TableContent</a>');
+									$('#file_content<?=$export_grid?>')[0].click();
+									$('#file_content<?=$export_grid?>').remove();
+									$('#export_<?=$object_name?>').dialog( 'close' );
+								}
+								},
+								{
+								text: 'Отмена',
+								click: function () {									
 									$( this ).dialog( 'close' );
 								}
 							   }						
@@ -803,11 +832,13 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 							$('#export_ajax_<?=$object_name?>').hide();
 							$('#btn_e_<?=$object_name?>').button('option', 'disabled', false );
 							$('#btn_o_<?=$object_name?>').button('option', 'disabled', false );
+							$('#btn_f_<?=$object_name?>').button('option', 'disabled', false );	
 							$( this ).dialog( 'close' );
 						},
 						open: function() {
 								$('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_o_<?=$object_name?>');
 								$('.ui-dialog-buttonpane').find('button:contains("Экспортировать")').button({icons: { primary: 'ui-icon-disk'}}).prop('id','btn_e_<?=$object_name?>');
+								$('.ui-dialog-buttonpane').find('button:contains("Быстрый экспорт")').button({icons: { primary: 'ui-icon-arrowthickstop-1-s'},text:false}).prop('id','btn_f_<?=$object_name?>').attr('title','Быстрый экспорт в csv только текущей страницы со всем содержимым');
 								$(this).parent().parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
 								redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
 						}
