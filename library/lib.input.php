@@ -280,14 +280,24 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 				if ($c_count < 2 ) {
 						$output .= "
 									$('#".$this->pageid." .tab_main_content .CaptionTD').remove();
-									$('#".$this->pageid." .tab_main_content').append('<div class=\"ui-widget CaptionTD\" style=\"height: 80%;width: 99%;vertical-align: middle;\"><h2>Данные обрабатываются ... </h2></div>');
-									$.get('ajax.saveparams.php?&id_mm_fr=".$this->id_mm_fr."&' + qString, function(data) {
-										$('#".$this->pageid." .tab_main_content .CaptionTD').remove();
-										$('#".$this->pageid." .tab_main_content').append('<div class=\"ui-widget CaptionTD\" style=\"height: 80%;width: 99%;vertical-align: middle;\"><h2>Данные успешно обработаны!</h2></div>');
-										$('#ui-".$this->pageid."').parent().effect('pulsate', {}, 2000);
+									$('#".$this->pageid." .tab_main_content').append('<div class=\"ui-widget CaptionTD\" style=\"height: 80%;width: 99%;vertical-align: middle;\"></div>');
+									var load_".$this->pageid."_time = 0;
+									function loader_function() {
+													load_".$this->pageid."_time++;
+													minutes_".$this->pageid." = (Math.floor(load_".$this->pageid."_time/60) < 10) ? '0'+Math.floor(load_".$this->pageid."_time/60) : Math.floor(load_".$this->pageid."_time/60);
+													seconds_".$this->pageid." = ((load_".$this->pageid."_time - minutes_".$this->pageid."*60) < 10) ? '0'+(load_".$this->pageid."_time - minutes_".$this->pageid."*60) : (load_".$this->pageid."_time - minutes_".$this->pageid."*60);										
+													$('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>(' + minutes_".$this->pageid." +':' + seconds_".$this->pageid." + ') Данные обрабатываются ... </h2>');
+									}	
+									load_".$this->pageid."_intval = setInterval(loader_function, 1000);
+									loader_function();
+									$.get('ajax.saveparams.php?&id_mm_fr=".$this->id_mm_fr."&' + qString, function(data) {										
+										clearInterval(load_".$this->pageid."_intval);
+										load_".$this->pageid."_time = 0;
+										$('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>Данные успешно обработаны!</h2>');
+										$('li[aria-selected=\"false\"] a[href=\"#".$this->pageid."\"]').parent().effect('pulsate', {}, 2000);
 										$('#show_parameters-".$this->pageid."').button('option','disabled',false);
 										if (data.length > 20) {
-														custom_alert(data);
+												custom_alert(data);
 										}
 									});
 									";
@@ -441,8 +451,18 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 			$('#wizard_form_".$this->pageid."').dialog('close');
 			var qstring = $('#wizard_parameters_".$this -> pageid."').serialize();";
 			if(!isset($gridname) and !isset($chartname)) {
-				$output .= "$('#".$this->pageid." .tab_main_content .CaptionTD').remove();
-												$('#".$this->pageid." .tab_main_content').append('<div class=\"ui-widget CaptionTD\" style=\"height: 80%;width: 99%;vertical-align: middle;\"><h2>Данные обрабатываются ... </h2></div>');";
+				$output .= "$('#".$this->pageid." .tab_main_content .CaptionTD').remove();											
+						$('#".$this->pageid." .tab_main_content').append('<div class=\"ui-widget CaptionTD\" style=\"height: 80%;width: 99%;vertical-align: middle;\"></div>');
+						var load_".$this->pageid."_time = 0;
+						function loader_function() {
+										load_".$this->pageid."_time++;
+										minutes_".$this->pageid." = (Math.floor(load_".$this->pageid."_time/60) < 10) ? '0'+Math.floor(load_".$this->pageid."_time/60) : Math.floor(load_".$this->pageid."_time/60);
+										seconds_".$this->pageid." = ((load_".$this->pageid."_time - minutes_".$this->pageid."*60) < 10) ? '0'+(load_".$this->pageid."_time - minutes_".$this->pageid."*60) : (load_".$this->pageid."_time - minutes_".$this->pageid."*60);										
+										$('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>(' + minutes_".$this->pageid." +':' + seconds_".$this->pageid." + ') Данные обрабатываются ... </h2>');
+						}							
+						load_".$this->pageid."_intval = setInterval(loader_function, 1000);
+						loader_function();
+				";
 			}
 			$output .= "			
 			$.ajax({
@@ -455,10 +475,11 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 						$output .= "$('#".$gridname."').jqGrid('setGridParam',{datatype:'json'});$('#".$gridname."').trigger('reloadGrid');";
 					} else if(!isset($gridname) and !isset($chartname)) {
 						$output .= "
-												$('#".$this->pageid." .tab_main_content .CaptionTD').remove();
-												$('#".$this->pageid." .tab_main_content').append('<div  class=\"ui-widget CaptionTD\" style=\"height: 80%;width: 99%;vertical-align: middle;\"><h2>Данные успешно обработаны!</h2></div>');
-												parent.$('#ui-".$this->pageid."').parent().effect('pulsate', {}, 2000);
-												$('#show_parameters-".$this->pageid."').button('option','disabled',false);
+								clearInterval(load_".$this->pageid."_intval);
+								load_".$this->pageid."_time = 0;
+								$('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>Данные успешно обработаны!</h2>');
+								$('li[aria-selected=\"false\"] a[href=\"#".$this->pageid."\"]').parent().effect('pulsate', {}, 2000);
+								$('#show_parameters-".$this->pageid."').button('option','disabled',false);
 												
 						";
 					}

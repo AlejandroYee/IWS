@@ -335,7 +335,10 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						if (grid_type == "TREE_GRID_FORM_MASTER" || grid_type == "TREE_GRID_FORM" || grid_type == "TREE_GRID_FORM_DETAIL") {								
 							$('#<?=$object_name?>').jqGrid('setGridParam',{editurl:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?type=<?=$type?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=&id_mm=', page:1});							
 						};
-						clearInterval(grid_load_<?=$object_name?>_intval);
+						clearInterval(grid_load_<?=$object_name?>_intval);						
+						if (grid_load_<?=$object_name?>_time > 60) { // Сигнализируем что данные загрузились
+							$('li[aria-selected="false"] a[href="#<?=$this -> pageid?>"]').parent().effect('highlight', {}, 3000);
+						}
 						grid_load_<?=$object_name?>_time = 0;
 						$("#load_<?=$object_name?>").html(" ");
 					},
@@ -381,7 +384,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 												$('#<?=$object_name?>').trigger('reloadGrid');
 												// Если есть детальные гриды то отчищаем их, но при этом смотрим текущий грид на предмет детальности
 												// если именно в нем нажали кнопку обновить то отчищать ничего не нужно
-												grid_type = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + $(this).attr('id') + "']").attr('form_type');
+												grid_type = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer_tabs[for='" + $(this).attr('id') + "'],#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + $(this).attr('id') + "']").attr('form_type');
 												if (grid_type !== "GRID_FORM_DETAIL" && grid_type !== "TREE_GRID_FORM_DETAIL") {	
 													$.each( $("#<?=$this -> pageid?> .tab_main_content .grid_resizer_tabs[form_type$='_DETAIL'],#<?=$this -> pageid?> .tab_main_content .grid_resizer[form_type$='_DETAIL']"), function() {													
 														$('#' + $(this).attr('for')).jqGrid('clearGridData');
