@@ -207,6 +207,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		<script type="text/javascript">		
 		var export_post_data_<?=$object_name?> = '';
 		var crc_input_<?=$object_name?> = '';
+		var grid_load_<?=$object_name?>_intval;
+		var grid_load_<?=$object_name?>_time = 0;
 		
 		$(function() {	
 			$('#<?=$object_name?>').jqGrid({										
@@ -324,7 +326,9 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						if (grid_type == "TREE_GRID_FORM_MASTER" || grid_type == "TREE_GRID_FORM" || grid_type == "TREE_GRID_FORM_DETAIL") {								
 							$('#<?=$object_name?>').jqGrid('setGridParam',{editurl:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?type=<?=$type?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=&id_mm=', page:1});							
 						};
-						//clearInterval(grid_load_<?=$object_name?>_intval);
+						clearInterval(grid_load_<?=$object_name?>_intval);
+						grid_load_<?=$object_name?>_time = 0;
+						$("#load_<?=$object_name?>").html(" ");
 					},
 					beforeRequest: function() {
 							var postdata = $(this).getGridParam('postData');
@@ -335,10 +339,12 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								}
 							}
 							$(this).jqGrid('clearGridData');
-						//	var grid_load_<?=$object_name?>_intval = setInterval(function() {
-								
-							
-						//	}, 1000);	
+							grid_load_<?=$object_name?>_intval = setInterval(function() {
+								grid_load_<?=$object_name?>_time++;
+								minutes_<?=$object_name?> = (Math.floor(grid_load_<?=$object_name?>_time/60) < 10) ? "0"+Math.floor(grid_load_<?=$object_name?>_time/60) : Math.floor(grid_load_<?=$object_name?>_time/60);
+								seconds_<?=$object_name?> = ((grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60) < 10) ? "0"+(grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60) : (grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60);
+								$("#load_<?=$object_name?>").html("<table style='left:42%;position:absolute;top:47%;width:250px;vertical-align:middle;'><tr><td><img src='<?=ENGINE_HTTP?>/library/ajax-loader.gif'><span style='top:-10px;'></td><td>(" + minutes_<?=$object_name?> +':' + seconds_<?=$object_name?> + ") Ожидаю данные...</td></tr></table>");
+							}, 1000);	
 					},
 					beforeProcessing: function(data, status, xhr) {						
 						if (crc_input_<?=$object_name?> == $.md5(xhr.responseText)) {								
@@ -797,14 +803,14 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 									$('#btn_o_<?=$object_name?>').button('option', 'disabled', true );	
 									$('#btn_f_<?=$object_name?>').button('option', 'disabled', true );	
 									
-									var slp_str = "", // Компенсация пустой ящейки в первом столбце
-										out_doc = "";
+									var slp_str = "", 
+										out_doc = "Номер строки;";
 									// Получаем столбци в гриде			
 									$.each($("#<?=$object_name?>").parent().parent().parent().children("div.ui-jqgrid-hdiv").find("div table tr:visible"), function() {	
 										$.each($(this).children("th:visible"), function() {
 											slp_str = slp_str + ';' + $(this).text();
 										});
-										out_doc = out_doc + '\r\n' + slp_str.replace(/[\n\r]/g,"").replace(/^;+/, "");
+										out_doc = out_doc + slp_str.replace(/[\n\r]/g,"").replace(/^;+/, "");
 										slp_str = "";
 									});
 									// Получаем данные
@@ -812,7 +818,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 										$.each($(this).children("td:visible"), function() {
 											slp_str = slp_str + ';' + $(this).text();
 										});
-											out_doc = out_doc + '\r\n' + slp_str.replace(/[\n\r]/g,"").replace(/^;+/, "");
+											out_doc = out_doc + slp_str.replace(/[\n\r]/g,"").replace(/^;+/, "") + '\r\n';
 											slp_str = "";
 									});
 									$('#export_<?=$object_name?>').append('<a id="file_content<?=$export_grid?>" href="data:text/plain;base64,' + btoa(unescape(encodeURIComponent(out_doc))) + '" download="content.csv">TableContent</a>');

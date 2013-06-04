@@ -31,16 +31,17 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strrpos($_SERVER['HTTP_USER_AGENT'],
 				<meta charset="<?php echo strtolower(HTML_ENCODING); ?>">
 				<title><?=$main_db -> get_settings_val('ROOT_CONFIG_NAME')?></title>
 				<meta http-equiv="Content-Type" content="text/html; charset=<?php echo strtolower(HTML_ENCODING); ?>"/>
-				<meta http-equiv="Pragma" content="no-cache" >
 				<meta http-equiv="Cache-Control" content="no-cache">
-				<?php if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strrpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== false)) { ?>				
+				<meta http-equiv="Pragma" content="no-cache" >				
+				<meta http-equiv="expires" content="0">						
 				<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-				<?php } ?>				
-				<link rel="shortcut icon" href="<?=ENGINE_HTTP?>/<?=$main_db -> get_settings_val("ROOT_CONFIG_FAVICON")?>" />
+				<link rel="icon" type="image/x-icon" href="<?=ENGINE_HTTP?>/<?=$main_db -> get_settings_val("ROOT_CONFIG_FAVICON")?>" />
+				<link rel="Bookmark" type="image/x-icon" href="<?=ENGINE_HTTP?>/<?=$main_db -> get_settings_val("ROOT_CONFIG_FAVICON")?>" />
+				<link rel="shortcut icon" type="image/x-icon" href="<?=ENGINE_HTTP?>/<?=$main_db -> get_settings_val("ROOT_CONFIG_FAVICON")?>" />
 				<?php				
 				if (!is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR.THEMES_DIR)) die ("Неуказана директория тем в конфигурации!");	
-				if (!is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR."jscript/")) die ("Ошибка конфигурации и привелегий сервера!");									
-				?>
+				if (!is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR."jscript/")) die ("Ошибка конфигурации и привелегий сервера!"); ?>
+				
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.0.1.min.js?s=<?=SESSION_ID?>" /></script>	
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.10.3.custom.min.js?s=<?=SESSION_ID?>" /></script>
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-timepicker-addon.js?s=<?=SESSION_ID?>" /></script>	
@@ -55,13 +56,9 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strrpos($_SERVER['HTTP_USER_AGENT'],
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.ui.menubar.js?s=<?=SESSION_ID?>" /></script>
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.calculator.min.js?s=<?=SESSION_ID?>" /></script>
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/ace.js?s=<?=SESSION_ID?>" /></script>		
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.js?s=<?=SESSION_ID?>" /></script>	
-				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/library/normalize.css?s=<?=SESSION_ID?>" /> 
-				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/themes/smoothness/jquery-ui.css?s=<?=SESSION_ID?> " /> 
-				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/jscript/jquery.multiselect.css?s=<?=SESSION_ID?>" /> 
-				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/jscript/ui.jqgrid.css?s=<?=SESSION_ID?>" /> 
-				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/jscript/jquery.calculator.css?s=<?=SESSION_ID?>" /> 
-				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/jscript/jquery-ui-timepicker-addon.css?s=<?=SESSION_ID?>" /> 				
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.js?s=<?=SESSION_ID?>" /></script>
+				
+				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/library/normalize.css?s=<?=SESSION_ID?>" />  				
 				<?php
 				$db_link = new DB();
 				if ((trim($db_link->get_param_view("theme")) != "") and ( is_file(ENGINE_ROOT."/".Convert_quotas($db_link->get_param_view("theme"))) )) {	
@@ -93,139 +90,40 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strrpos($_SERVER['HTTP_USER_AGENT'],
 				}
 				?> 				
 				<style type="text/css">
-						#loading {
-								background:#ffffff url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;
-								height: 100%;
-								width: 100%;
-								position: absolute;
-								z-index: 100; 
-						}						
-						html, body {
-								padding: 0px;
-								margin: 0px;
-								overflow:hidden;
-								font-size: 12px;
-						}
-						a { 
-								cursor:pointer;
-						}	
-						.loader_tab {
-								background: url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;
-								height: 100%;
-								width: 100%;
-								position: absolute;
-								z-index: 100
-						}
-						.ui-widget-content{
-								padding:1px;
-								margin:1px;
-						}
-						.ui-menubar-item {
-								list-style:none;
-								float: left;
-								white-space:nowrap;
-								z-index: 102;
-						}	
-						.ui-menubar .ui-menu {
-								white-space:nowrap;
-								min-width:200px;
-								list-style:none;
-								position: absolute;
-								z-index: 102;
-						}	
-						.ui-menu-item .ui-menu {
-								min-width:200px;
-								z-index: 102;
-						}
-						.ui-menu {
-								min-width:250px;
-								white-space:nowrap;
-								list-style:none;
-								margin: 1px;
-								padding:3px;
-								z-index:101;
-						}
-						.ui-dialog .ui-dialog-content {
-								text-align :right;
-						}
-						.FormElement {
-								padding:0.3em;
-						}	
-					    .ui-pg-button {
-								left:1px;
-						}
-						.ui-menu-divider {
-								padding:0
-						}						
-						.ui-pg-table {
-								border-collapse: separate;
-						}
-						.ui-jqgrid tr.jqgrow {
-								cursor: default;
-						}
-						.ui-state-active {
-								cursor: default;
-						}												
-						.ui-tabs .ui-tabs-panel {
-								padding: 7px;
-						}
-						.ui-accordion-header {
-								margin:1px;
-						}
-						.ui-jqgrid .ui-jqgrid-htable th div {
-								overflow: hidden;
-								position:relative;
-								height:26px;
-								white-space:normal !important;
-						}
-						.ui-multiselect-single .ui-multiselect-checkboxes label {
-								padding:2px !important
-						}
-						.ui-multiselect-checkboxes span {
-								clear:both;
-								font-size:0.9em;
-								padding-left:4px;
-						}
-						.ui-jqgrid .loading { 
-								padding: 10px;
-								color:inherit;
-								border: 0px transparent;
-								background: url(<?=ENGINE_HTTP?>/library/ajax-loader.gif);
-								background-position-x: 47%;
-								background-position-y: 50%;
-								background-repeat: no-repeat;
-								left:-5px;
-								top:-5px;
-								height: 100%;
-								width:  100%;
-								opacity:1;
-						}
-						.ui-jqgrid .loading:after  { 
-							content:'Загружаю...';
-							 position: absolute;
-							top:49%;
-							left:48%;							
-						}
-						.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label { 
-									text-align:left;
-						}
-						.ui-search-toolbar {
-								border-color:transparent;
-						}									
+						#loading{background:#fff url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;height:100%;position:absolute;width:100%;z-index:100}
+						html,body{font-size:12px;margin:0;overflow:hidden;padding:0}
+						a{cursor:pointer}
+						.loader_tab{background:url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;height:100%;position:absolute;width:100%;z-index:100}
+						.ui-widget-content{margin:1px;padding:1px}
+						.ui-menubar-item{float:left;list-style:none;white-space:nowrap;z-index:102}
+						.ui-menubar .ui-menu{list-style:none;min-width:200px;position:absolute;white-space:nowrap;z-index:102}
+						.ui-menu-item .ui-menu{min-width:200px;z-index:102}
+						.ui-menu{list-style:none;margin:1px;min-width:250px;padding:3px;white-space:nowrap;z-index:101}
+						.ui-dialog .ui-dialog-content{text-align:right}
+						.formelement{padding:.3em}
+						.ui-pg-button{left:1px}
+						.ui-menu-divider{padding:0}
+						.ui-pg-table{border-collapse:separate}
+						.ui-tabs .ui-tabs-panel{padding:7px}
+						.ui-accordion-header{margin:1px}
+						.ui-jqgrid .ui-jqgrid-htable th div{height:26px;overflow:hidden;position:relative;white-space:normal!important}
+						.ui-multiselect-single .ui-multiselect-checkboxes label{padding:2px!important}
+						.ui-multiselect-checkboxes span{clear:both;font-size:.9em;padding-left:4px}
+						.ui-jqgrid .loading{background:transparent;border:0 transparent;color:inherit;height:99%;left:-5px;opacity:1;padding:10px;top:-5px;width:98%}
+						.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label{text-align:left}
+						.ui-search-toolbar{border-color:transparent}
+						.ui-jqgrid tr.jqgrow,.ui-state-active{cursor:default}									
 <?php 
 if (($main_db->get_param_view("render_type") > 2) and isset($_SERVER['HTTP_USER_AGENT']) and (!strrpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == "")) $main_db -> set_param_view("render_type",2); // Проверка на эксплорер
 switch ($main_db->get_param_view("render_type")) {
 case 2: // для ie максимальный режим
-         echo "			* {border-radius: 0 !important;box-shadow: none !important;}
-						li, li li, li li li {list-style-type: none;	}		";
+echo "						* {border-radius: 0 !important;box-shadow: none !important;}";
 break;
 case 1:
-         echo "			*:not(.ui-icon) {border-radius: 0 !important;box-shadow: none !important;background-repeat: no-repeat !important;background-image: none !important; }
-						li, li li, li li li {list-style-type: none;	}		";
+echo "						*:not(.ui-icon) {border-radius: 0 !important;box-shadow: none !important;background-repeat: no-repeat !important;background-image: none !important; }";
 break;
 case 0:
-         echo "			* {border-radius: 0 !important;box-shadow: none !important;background:white !important;color:black !important;background-image:none !important;filter: none !important; opacity:1 !important;}
-						li, li li, li li li {list-style-type: none;	}		";
+echo "						* {border-radius: 0 !important;box-shadow: none !important;background:white !important;color:black !important;background-image:none !important;filter: none !important; opacity:1 !important;}";
 break;
 } 
 ?>
