@@ -42,21 +42,21 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strrpos($_SERVER['HTTP_USER_AGENT'],
 				if (!is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR.THEMES_DIR)) die ("Неуказана директория тем в конфигурации!");	
 				if (!is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR."jscript/")) die ("Ошибка конфигурации и привелегий сервера!"); ?>
 				
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.0.1.min.js?s=<?=SESSION_ID?>" /></script>	
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.10.3.custom.min.js?s=<?=SESSION_ID?>" /></script>
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-timepicker-addon.js?s=<?=SESSION_ID?>" /></script>	
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-timepicker-ru.js?s=<?=SESSION_ID?>" /></script>	
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/globalize.js?s=<?=SESSION_ID?>" /></script>	
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/FusionCharts.js?s=<?=SESSION_ID?>" /></script>	
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.jqGrid.min.js?s=<?=SESSION_ID?>" /></script>				
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.fileUpload.js?s=<?=SESSION_ID?>" /></script>						
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.jqGrid.locale-ru.js?s=<?=SESSION_ID?>" /></script>	
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.multiselect.js?s=<?=SESSION_ID?>" /></script>	
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.fileDownload.js?s=<?=SESSION_ID?>" /></script>	
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.ui.menubar.js?s=<?=SESSION_ID?>" /></script>
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.calculator.min.js?s=<?=SESSION_ID?>" /></script>
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/ace.js?s=<?=SESSION_ID?>" /></script>		
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.js?s=<?=SESSION_ID?>" /></script>
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.0.1.min.js?s=<?=SESSION_ID?>" ></script>	
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.10.3.custom.min.js?s=<?=SESSION_ID?>" ></script>
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-timepicker-addon.js?s=<?=SESSION_ID?>" ></script>	
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-timepicker-ru.js?s=<?=SESSION_ID?>" ></script>	
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/globalize.js?s=<?=SESSION_ID?>" ></script>	
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/FusionCharts.js?s=<?=SESSION_ID?>" ></script>	
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.jqGrid.min.js?s=<?=SESSION_ID?>" ></script>				
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.fileUpload.js?s=<?=SESSION_ID?>" ></script>						
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.jqGrid.locale-ru.js?s=<?=SESSION_ID?>" ></script>	
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.multiselect.js?s=<?=SESSION_ID?>" ></script>	
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.fileDownload.js?s=<?=SESSION_ID?>" ></script>	
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.ui.menubar.js?s=<?=SESSION_ID?>" ></script>
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.calculator.min.js?s=<?=SESSION_ID?>" ></script>
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/ace.js?s=<?=SESSION_ID?>" ></script>		
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.js?s=<?=SESSION_ID?>" ></script>
 				
 				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/library/normalize.css?s=<?=SESSION_ID?>" />  				
 				<?php
@@ -162,7 +162,7 @@ break;
 		<input type="hidden" name="multiselect" value="off" ><input type="checkbox" name="multiselect" id="multiselect" <?=$main_db->get_param_view("multiselect") ?>><label for="multiselect" style="font-size:80%" >Множественный выбор</label><br>
 		<input type="hidden" name="editabled" value="off" ><input type="checkbox" name="editabled" id="editabled" <?=$main_db->get_param_view("editabled") ?>><label for="editabled" style="font-size:80%" >Отображать нередактируемые поля</label><br>
 		<input type="hidden" name="hide_menu" value="off" ><input type="checkbox" name="hide_menu" id="hide_menu" <?=$main_db->get_param_view("hide_menu") ?>><label for="hide_menu" style="font-size:80%" >Меню в панели вкладок</label><br><br>
-		<label for="spinner">Количество месяцев в окне выбора дат: </label><input id="num_mounth" size="2" name="num_mounth" value = "<?=$main_db->get_param_view("num_mounth")?>" />
+		<label for="spinner">Количество месяцев в окне выбора дат: </label><input id="num_mounth" size="2" name="num_mounth" value = "<?=$main_db->get_param_view("num_mounth")?>" /><br><br>
 		<label for="spinner2">Количество записей на страницу: </label><input id="num_reck" size="2" name="num_reck" value = "<?=$main_db->get_param_view("num_reck")?>" />		
 		<br><br><div class="ui-widget-header" style = "height: 1px;"></div><br>
 		Парамерты производительности:<br><br>

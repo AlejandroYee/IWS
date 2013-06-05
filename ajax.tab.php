@@ -91,9 +91,13 @@ switch ($action) {
 							editor.getSession().on('change', function(){
 							  elem.val(editor.getSession().getValue());
 							});
-								
-						$('.log_container').height($(document).height() - $('.main_menu').height() - 90);
-						$('#log_".$tabid."').width($(document).width() - 28).height($(document).height() - $('.main_menu').height() - 90);
+						if ($.browser.msie) {		
+							$('.log_container').height($(document).height() - $('.main_menu').height() - 150);
+							$('#log_".$tabid."').width($(document).width() - 28).height($(document).height() - $('.main_menu').height() - 150);
+						} else {
+							$('.log_container').height($(document).height() - $('.main_menu').height() - 90);
+							$('#log_".$tabid."').width($(document).width() - 28).height($(document).height() - $('.main_menu').height() - 90);
+						}
 						elem.hide();
 						editor.setReadOnly(true);
 						editor.scrollToRow(editor.session.getLength()+1);
