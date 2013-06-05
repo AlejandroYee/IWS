@@ -84,7 +84,7 @@ $input = new INPUT($id_mm_fr, $id_mm, $pageid);
 $query = $main_db -> sql_execute("select decode(nvl(t.is_requred,0), 0,'false', 'true') is_requred, t.field_type, substr(t.name, 1, decode(instr(t.name, '@')-1, -1, length(t.name), instr(t.name, '@')-1)) name, substr(t.name, decode(instr(t.name, '@')+1, 1, null, instr(t.name, '@')+1)) help_name, t.field_txt, t.field_name, t.field_type,
 nvl(t.count_element, 1) count_element, nvl(t.width, decode(trim(t.field_type), 'D', 46, 300)) width from ".DB_USER_NAME.".wb_form_field t  where t.id_wb_mm_form = ".$id_mm_fr." order by t.num");
 while ($main_db -> sql_fetch($query)) {	
-$content_value = $main_db -> sql_result($query, "FIELD_TXT");
+$content_value = $main_db -> sql_result($query, "FIELD_TXT",false);
 // Производим подмену если есть такое значение:
 foreach($_POST as $k => $v) {
 	if (is_array($v)) {
