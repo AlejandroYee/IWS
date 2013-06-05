@@ -158,16 +158,10 @@
 				$dt -> page         = 1;  
 				$dt -> total        = 1;  
 				$dt -> records      = 1; 	
-			} else if ($main_db -> get_param_view("page_enable") == "checked") {
+			} else {
 				// Если у нас выставлена постраничная прокрутка то грузим постранично
 				$str_dt = $str_dt.$str_dt_f." order by ".$sidx." ".$sord.")) where r_num_page between ".$start." and ".$stop;
-			} else {
-				// Если у нас прокрутка сквозная и число записей не больше 500 то грузим все
-				$str_dt = $str_dt.$str_dt_f." order by ".$sidx." ".$sord.")) ";
-				$dt -> page         = 1;  
-				$dt -> total        = 1;  
-				$dt -> records      = 1; 
-			}		
+			} 
 			
 			end_session();
 			

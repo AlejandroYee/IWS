@@ -235,10 +235,10 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 		// Необходимо вернуть значения по умолчанию
 		if (!$is_found)
 			switch (strtolower(trim($param_name))) {
-				case "page_enable": return "checked"; break;
 				case "editabled": return "checked"; break;
 				case "num_mounth": return "3"; break;
 				case "render_type": return "2"; break;
+				case "num_reck": return "100"; break;
 			}
 	}
 	

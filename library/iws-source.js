@@ -900,7 +900,6 @@ $(function() {
 	// Обработка мультиселекта и кнопки настроек
 	$("#themeselector").multiselect({multiple: false, header: false, selectedList: 1});
 	$("#width_enable").button({icons: { primary: "ui-icon-arrow-2-e-w" }}).click(function() {var btn = $("#width_enable");if (btn.attr("checked") != "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});
-	$("#page_enable").button({icons: { primary: "ui-icon-script" }}).click(function() {var btn = $("#page_enable");if (btn.attr("checked") != "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});
 	$("#multiselect").button({icons: { primary: "ui-icon-grip-solid-horizontal" }}).click(function() {var btn = $("#multiselect");if (btn.attr("checked") != "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});
 	$("#editabled").button({icons: { primary: "ui-icon-lightbulb" }}).click(function() {var btn = $("#editabled");if (btn.attr("checked") != "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
 	$("#hide_menu").button({icons: { primary: "ui-icon-carat-2-e-w" }}).click(function() {var btn = $("#hide_menu");if (btn.attr("checked") != "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
@@ -931,7 +930,18 @@ $(function() {
 						}
 					  }
 					});
-	
+	$("#num_reck").spinner({
+					  step: 10,
+					  spin: function( event, ui ) {
+						if ( ui.value > 5000 ) {
+						  $( this ).spinner( "value", 1 );
+						  return false;
+						} else if ( ui.value < 1 ) {
+						  $( this ).spinner( "value", 5000 );
+						  return false;
+						}
+					  }
+					});
 	// Нужно для автозагрузки данных в селект в гриде 	
 	get_select_values_grid = function (gridname, value_name, parent_value_id) {
 		$.ajax({

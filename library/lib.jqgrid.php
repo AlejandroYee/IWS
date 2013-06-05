@@ -214,20 +214,10 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 			$('#<?=$object_name?>').jqGrid({										
 			rownumbers: true,	
 			shrinkToFit:false,						
-		<?php		
-		
-		// Постраничная или нет прокрутка
-		if ($this->db_conn->get_param_view("page_enable") == "checked") { 
-					?> 		 scroll:false,
-							 rowNum:100,
-							 recordtext:'Просмотр записей {0} - {1} из {2}',
-							 <?php	
-			} else  {
-					?> 		 scroll:true,
-							 rowNum: 1000,
-							 recordtext:'Просмотр записей {0} - {1}',
-							  <?php	
-		}
+			scroll: false,
+			rowNum: <?=$this->db_conn->get_param_view("num_reck")?>,
+			recordtext:'Просмотр записей {0} - {1} из {2}',
+			<?php	
 	// Множественный выбор
 	if (($this->db_conn->get_param_view("multiselect") == "checked") and ($type != "TREE_GRID_FORM_DETAIL") and (stripos($type,"_MASTER") === false)) {		
 		?> multiselect:true, <?php
@@ -256,7 +246,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 				    datatype: '<?=$dataload?>',						
 					mtype: 'GET',											
 					pager: '#Pager_<?=$object_name?>',
-					rowList:[10,50,100,500,1000,2000,5000],					
+					rowList:[<?=$this->db_conn->get_param_view("num_reck")?>,10,50,100,500,1000,2000,5000],					
 					colNames:<?=$ResArray['colNames']?>,  
 					colModel:<?=$ResArray['colModel']?>,					
 					sortable: true,
@@ -334,12 +324,12 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						var grid_type = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + $(this).attr('id') + "']").attr('form_type');
 						if (grid_type == "TREE_GRID_FORM_MASTER" || grid_type == "TREE_GRID_FORM" || grid_type == "TREE_GRID_FORM_DETAIL") {								
 							$('#<?=$object_name?>').jqGrid('setGridParam',{editurl:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?type=<?=$type?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=&id_mm=', page:1});							
-						};
-						clearInterval(grid_load_<?=$object_name?>_intval);						
+						};											
 						if (grid_load_<?=$object_name?>_time > 60) { // Сигнализируем что данные загрузились
 							$('li[aria-selected="false"] a[href="#<?=$this -> pageid?>"]').parent().effect('highlight', {}, 3000);
 						}
-						grid_load_<?=$object_name?>_time = 0;
+						clearInterval(grid_load_<?=$object_name?>_intval);
+						grid_load_<?=$object_name?>_time = 0;						
 						$("#load_<?=$object_name?>").html(" ");
 					},
 					beforeRequest: function() {
@@ -360,7 +350,10 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 							grid_load_<?=$object_name?>_intval = setInterval(loader_function, 1000);
 							loader_function();
 					},
-					beforeProcessing: function(data, status, xhr) {						
+					onPaging: function () {
+						 crc_input_<?=$object_name?> = null;					
+					},
+					beforeProcessing: function(data, status, xhr) {	
 						if (crc_input_<?=$object_name?> == $.md5(xhr.responseText)) {								
 								return false;
 							} else {								
@@ -555,16 +548,11 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						$('#pg_Pager_<?=$object_name?>').children('.ui-pg-table').removeAttr( 'style' ).css('width','100%');
 						$('#Pager_<?=$object_name?>_left').removeAttr( 'style' );
 						$('#Pager_<?=$object_name?>_center').removeAttr( 'style' ).removeAttr('align').css({'width':'0px','align':'right'});						
-						$('#Pager_<?=$object_name?>_right').removeAttr( 'style' ).removeAttr('align').css({'width':'250px','align':'right'});
+						$('#Pager_<?=$object_name?>_right').removeAttr( 'style' ).removeAttr('align').css({'width':'250px','align':'right'});		
+						$('#Pager_<?=$object_name?>_center').removeAttr( 'style' ).removeAttr('align').css({'width':'260px','align':'right'});
+						$('#Pager_<?=$object_name?>_center .ui-pg-table tr').find('.ui-pg-input').prop('class','ui-pg-input ui-state-default');		
+						$('#Pager_<?=$object_name?>_center .ui-pg-table tr').find('.ui-pg-selbox').prop('class','ui-pg-selbox ui-state-default');			
 		<?php
-		// Для постраничноый прокрутки применяем стили на элементы выбора страници
-		if ($this->db_conn->get_param_view("page_enable") == "checked") { 
-		?>
-			$('#Pager_<?=$object_name?>_center').removeAttr( 'style' ).removeAttr('align').css({'width':'260px','align':'right'});
-			$('#Pager_<?=$object_name?>_center .ui-pg-table tr').find('.ui-pg-input').prop('class','ui-pg-input ui-state-default');		
-			$('#Pager_<?=$object_name?>_center .ui-pg-table tr').find('.ui-pg-selbox').prop('class','ui-pg-selbox ui-state-default');			
-		<?php
-	    }
 		// Если нужна автоширина, то запускаем перерасчет
 		if ($this->db_conn->get_param_view("width_enable") == "checked") {
 				?> auto_width_grid('<?=$object_name?>'); <?php	
@@ -870,6 +858,9 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								$('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_o_<?=$object_name?>');
 								$('.ui-dialog-buttonpane').find('button:contains("Экспортировать")').button({icons: { primary: 'ui-icon-disk'}}).prop('id','btn_e_<?=$object_name?>');
 								$('.ui-dialog-buttonpane').find('button:contains("Быстрый экспорт")').button({icons: { primary: 'ui-icon-arrowthickstop-1-s'},text:false}).prop('id','btn_f_<?=$object_name?>').attr('title','Быстрый экспорт в csv только текущей страницы со всем содержимым');
+								if ($.browser.msie) {									
+									$('#btn_f_<?=$object_name?>').button('option', 'disabled', true );	
+								}
 								$(this).parent().parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
 								redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
 						}

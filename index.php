@@ -158,12 +158,12 @@ break;
 			}
 	?>
 		</select><br><br>
-		<input type="hidden" name="page_enable" value="off" ><input type="checkbox" name="page_enable" id="page_enable" <?=$main_db->get_param_view("page_enable")?>><label for="page_enable" style="font-size:80%" >Постраничная прокрутка</label><br>
 		<input type="hidden" name="width_enable" value="off" ><input type="checkbox" name="width_enable" id="width_enable" <?=$main_db->get_param_view("width_enable") ?>><label for="width_enable" style="font-size:80%" >Автоширина данных</label><br>
 		<input type="hidden" name="multiselect" value="off" ><input type="checkbox" name="multiselect" id="multiselect" <?=$main_db->get_param_view("multiselect") ?>><label for="multiselect" style="font-size:80%" >Множественный выбор</label><br>
 		<input type="hidden" name="editabled" value="off" ><input type="checkbox" name="editabled" id="editabled" <?=$main_db->get_param_view("editabled") ?>><label for="editabled" style="font-size:80%" >Отображать нередактируемые поля</label><br>
 		<input type="hidden" name="hide_menu" value="off" ><input type="checkbox" name="hide_menu" id="hide_menu" <?=$main_db->get_param_view("hide_menu") ?>><label for="hide_menu" style="font-size:80%" >Меню в панели вкладок</label><br><br>
 		<label for="spinner">Количество месяцев в окне выбора дат: </label><input id="num_mounth" size="2" name="num_mounth" value = "<?=$main_db->get_param_view("num_mounth")?>" />
+		<label for="spinner2">Количество записей на страницу: </label><input id="num_reck" size="2" name="num_reck" value = "<?=$main_db->get_param_view("num_reck")?>" />		
 		<br><br><div class="ui-widget-header" style = "height: 1px;"></div><br>
 		Парамерты производительности:<br><br>
 		<input type="hidden" name="cache_enable" value="off" ><input type="checkbox" name="cache_enable" id="cache_enable" <?=$main_db->get_param_view("cache_enable") ?>><label for="cache_enable" style="font-size:80%" >Отключить кеширование</label><br><br>
