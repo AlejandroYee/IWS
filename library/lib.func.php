@@ -107,16 +107,16 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strpos($_SERVER['HTTP_USER_AGENT'], 
 				<meta charset="<?php echo strtolower(HTML_ENCODING); ?>">
 				<title>IWS Login</title>
 				<meta http-equiv="Content-Type" content="text/html; charset=<?php echo strtolower(HTML_ENCODING); ?>"/>
-				<meta http-equiv="Pragma" content="no-cache" >
 				<meta http-equiv="Cache-Control" content="no-cache">
-				<?php if (isset($_SERVER['HTTP_USER_AGENT']) && (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== false)) { 				
-					echo "  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge,chrome=1\" />";
-				}?>				
-				<link rel="shortcut icon" href="<?=ENGINE_HTTP?>/favicon.ico" />	
+				<meta http-equiv="Pragma" content="no-cache" >				
+				<meta http-equiv="expires" content="0">						
+				<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />				
 				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/library/normalize.css?s=<?=SESSION_ID?>" />
 <?php			
 				// Тема не задана! Задаем тему по умомчанию и выводим напоминание пользователю чтобы зашел и сменил
-				if (!is_dir(THEMES_DIR)) die ("Неуказана директория тем в конфигурации!");		
+				if (!is_dir(THEMES_DIR)) die ("Неуказана директория тем в конфигурации!");	
+				if (!is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR."jscript/")) die ("Ошибка конфигурации и привелегий сервера!");
+				
 				$dh  = opendir(THEMES_DIR.DIRECTORY_SEPARATOR);
 				while (false !== ($file = readdir($dh))) {
 				if (($file == ".") or ($file == "..")) continue;
@@ -145,7 +145,6 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strpos($_SERVER['HTTP_USER_AGENT'], 
 				<style type="text/css">											
 						#loading {background:#ffffff url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;height: 100%;width: 100%;position: absolute; z-index: 999999; }		
 						html, body {padding: 0px; margin: 0px; overflow:hidden; font-size: 12px;}
-						a { cursor:pointer; }		
 				</style>						 
 </head>
 <body>
@@ -164,7 +163,7 @@ if ($main_db)	echo $main_db -> get_settings_val("ROOT_CONFIG_NAME");
 			<input aria-required="true"  autofocus="autofocus" id="username" name="username" class="ui-widget ui-widget-content ui-corner-all" style="height: 24px;"  type="text" /><br><br>
 			<label for="password" tabindex="-1" style="font-size:1.2em"><b>Пароль:</b></label>
 		</div>
-			<input aria-required="true" id="password" class="ui-widget ui-widget-content ui-corner-all" name ="password" style="height: 24px;" type="password" /><br><br>
+			<input aria-required="true" id="password" class="ui-widget ui-widget-content ui-corner-all" name="password" style="height: 24px;" type="password" /><br><br>
 			<input type="submit" id="submit_settings" style="display: none;">
 			<button>Войти</button>
 </form>
