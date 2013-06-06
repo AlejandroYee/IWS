@@ -547,11 +547,22 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						.hideCol(['r_num']);						
 						$('#pg_Pager_<?=$object_name?>').children('.ui-pg-table').removeAttr( 'style' ).css('width','100%');
 						$('#Pager_<?=$object_name?>_left').removeAttr( 'style' );
+						
 						$('#Pager_<?=$object_name?>_center').removeAttr( 'style' ).removeAttr('align').css({'width':'0px','align':'right'});						
 						$('#Pager_<?=$object_name?>_right').removeAttr( 'style' ).removeAttr('align').css({'width':'250px','align':'right'});		
 						$('#Pager_<?=$object_name?>_center').removeAttr( 'style' ).removeAttr('align').css({'width':'260px','align':'right'});
+						
 						$('#Pager_<?=$object_name?>_center .ui-pg-table tr').find('.ui-pg-input').prop('class','ui-pg-input ui-state-default');		
-						$('#Pager_<?=$object_name?>_center .ui-pg-table tr').find('.ui-pg-selbox').prop('class','ui-pg-selbox ui-state-default');			
+						$('#Pager_<?=$object_name?>_center .ui-pg-table tr').find('.ui-pg-selbox').prop('class','ui-pg-selbox ui-state-default')
+									.multiselect({
+											multiple: false,
+											position: {my: 'left bottom', at: 'left top' },
+											minWidth: 70,
+											height: 120,
+											header: false,
+											selectedList: 1
+									});					
+							
 		<?php
 		// Если нужна автоширина, то запускаем перерасчет
 		if ($this->db_conn->get_param_view("width_enable") == "checked") {
