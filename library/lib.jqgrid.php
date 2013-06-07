@@ -258,7 +258,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					width:500,
 					url: '<?=ENGINE_HTTP?>/ajax.data.grid.php?type=<?=$type?>&pageid=<?=$this ->pageid?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=<?=$this ->id_mm_fr_d?>&id_mm=<?=$this ->id_mm?>',	
 					loadtext: '',
-					onSelectRow: function(ids) {
+					onSelectRow: function(ids) {							
+								
 								// Узнаем тип грида
 								var grid_type = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + $(this).attr('id') + "']").attr('form_type');
 								var tree_leaf =  $('#<?=$object_name?>').jqGrid('getRowData', ids).isLeaf;
@@ -335,7 +336,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					beforeRequest: function() {
 							var postdata = $(this).getGridParam('postData');
 						    export_post_data_<?=$object_name?> = '';
-							for( key in postdata ){
+							for( key in postdata ) {
 								if(postdata.hasOwnProperty(key)) {
 										export_post_data_<?=$object_name?> = export_post_data_<?=$object_name?> + '&' + key + '=' + postdata[key];
 								}
@@ -356,10 +357,12 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						 crc_input_<?=$object_name?> = null;					
 					},
 					beforeProcessing: function(data, status, xhr) {	
-						if (crc_input_<?=$object_name?> == $.md5(xhr.responseText)) {								
-								return false;
-							} else {								
-								crc_input_<?=$object_name?> = $.md5(xhr.responseText);
+						if ($("#reload_grid_<?=$this -> pageid?>").attr("checked") == "checked") {
+							if (crc_input_<?=$object_name?> == $.md5(xhr.responseText)) {								
+									return false;
+								} else {								
+									crc_input_<?=$object_name?> = $.md5(xhr.responseText);
+							}
 						}
 					},
 					editurl:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?type=<?=$type?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=<?=$this ->id_mm_fr_d?>',

@@ -599,6 +599,10 @@ $(function() {
 										obj_clone.calculator('show');
 								})
 						).insertAfter(obj_clone.parent());
+						if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
+							obj_clone.spinner( "option", "disabled" );
+							obj_clone.parent().parent().children('.ui-button').remove();	
+						}
 					} else {
 						$('#clone_' + obj.attr('id')).spinner( 'value', obj.val() );
 					}
@@ -627,6 +631,10 @@ $(function() {
 										obj_clone.calculator('show');
 								})
 						).insertAfter(obj_clone.parent());
+						if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
+							obj_clone.spinner( "option", "disabled" );
+							obj_clone.parent().parent().children('.ui-button').remove();
+						}
 					} else {
 						$('#clone_' + obj.attr('id')).spinner( 'value', obj.val() );
 					}
@@ -655,6 +663,10 @@ $(function() {
 										obj_clone.calculator('show');
 								})
 						).insertAfter(obj_clone.parent());
+						if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
+							obj_clone.spinner( "option", "disabled" );
+							obj_clone.parent().parent().children('.ui-button').remove();
+						}
 					} else {
 						$('#clone_' + obj.attr('id')).spinner( 'value', obj.val() );
 					}
@@ -683,6 +695,11 @@ $(function() {
 										obj_clone.calculator('show');
 								})
 						).insertAfter(obj_clone.parent());
+						
+						if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
+							obj_clone.spinner( "option", "disabled" );
+							obj_clone.parent().parent().children('.ui-button').remove();
+						}
 					} else {
 						$('#clone_' + obj.attr('id')).spinner( 'value', obj.val() );
 					}
@@ -703,6 +720,7 @@ $(function() {
 											obj.removeAttr('checked').button({icons: { primary: 'ui-icon-bullet' }});
 									}
 								});
+								obj.addClass('ui-helper-hidden-accessible');								
 							}	
 							if (obj.attr('checked') == 'checked') {
 								obj.attr('checked','checked').button({icons: { primary: 'ui-icon-check' }}).button( "refresh" );
@@ -727,6 +745,10 @@ $(function() {
 									icons: {primary: 'ui-icon-calendar'},
 									text: false
 								});
+						if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
+								obj.datepicker( "option", "disabled", true );
+								obj.parent().children('.ui-datepicker-trigger').remove();
+						}
 					} else {
 						obj.datepicker( "setDate", obj.val() );					
 					}
@@ -781,6 +803,10 @@ $(function() {
 									icons: {primary: 'ui-icon-calendar'},
 									text: false
 								});
+							if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
+								obj.datepicker( "option", "disabled", true );
+								obj.parent().children('.ui-datepicker-trigger').remove();
+							}
 					} else {
 						obj.datetimepicker( "setDate", obj.val() );					
 					}
@@ -794,6 +820,7 @@ $(function() {
 								header: true,
 								selectedList: obj.attr('h')
 							}).multiselectfilter();
+						
 					} else {
 						if (typeof(obj.attr('multiple')) === "undefined") {
 						var txt = obj.find('option:selected').text();
@@ -805,6 +832,10 @@ $(function() {
 									.children('input').attr('checked','checked').attr('aria-selected',true);
 								}
 							});
+							if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
+								obj.multiselect('disable');
+								obj.multiselect("refresh");	
+							}
 						} else {
 							obj.multiselect("refresh");						
 						}
@@ -835,7 +866,10 @@ $(function() {
 			
 			// Если мы видим поля но не можем изменять
 			if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
-					obj.attr({'name':null,'disabled':'disabled','class':'FormElement ui-widget-content ui-corner-all ui-state-disabled'});
+					obj.attr({'name':null,'disabled':'disabled'}).addClass('FormElement ui-widget-content ui-corner-all ui-state-disabled');
+					if (typeof(obj_clone) !== "undefined") {
+						obj_clone.attr({'name':null,'disabled':'disabled'}).addClass('FormElement ui-widget-content ui-corner-all ui-state-disabled');
+					}
 			}
 		});
 	
