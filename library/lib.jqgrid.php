@@ -340,15 +340,17 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 										export_post_data_<?=$object_name?> = export_post_data_<?=$object_name?> + '&' + key + '=' + postdata[key];
 								}
 							}
-							$(this).jqGrid('clearGridData');
-							function loader_function() {
-								grid_load_<?=$object_name?>_time++;
-								minutes_<?=$object_name?> = (Math.floor(grid_load_<?=$object_name?>_time/60) < 10) ? "0"+Math.floor(grid_load_<?=$object_name?>_time/60) : Math.floor(grid_load_<?=$object_name?>_time/60);
-								seconds_<?=$object_name?> = ((grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60) < 10) ? "0"+(grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60) : (grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60);
-								$("#load_<?=$object_name?>").html("<table style='left:42%;position:absolute;top:47%;width:250px;vertical-align:middle;'><tr><td><img src='<?=ENGINE_HTTP?>/library/ajax-loader.gif'><span style='top:-10px;'></td><td>(" + minutes_<?=$object_name?> +':' + seconds_<?=$object_name?> + ") Ожидаю данные...</td></tr></table>");
+							if ($("#reload_grid_<?=$this -> pageid?>").attr("checked") != "checked") {
+								$(this).jqGrid('clearGridData');							
+								function loader_function() {
+									grid_load_<?=$object_name?>_time++;
+									minutes_<?=$object_name?> = (Math.floor(grid_load_<?=$object_name?>_time/60) < 10) ? "0"+Math.floor(grid_load_<?=$object_name?>_time/60) : Math.floor(grid_load_<?=$object_name?>_time/60);
+									seconds_<?=$object_name?> = ((grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60) < 10) ? "0"+(grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60) : (grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60);
+									$("#load_<?=$object_name?>").html("<table style='left:42%;position:absolute;top:47%;width:250px;vertical-align:middle;'><tr><td><img src='<?=ENGINE_HTTP?>/library/ajax-loader.gif'><span style='top:-10px;'></td><td>(" + minutes_<?=$object_name?> +':' + seconds_<?=$object_name?> + ") Ожидаю данные...</td></tr></table>");
+								}
+								grid_load_<?=$object_name?>_intval = setInterval(loader_function, 1000);
+								loader_function();
 							}
-							grid_load_<?=$object_name?>_intval = setInterval(loader_function, 1000);
-							loader_function();
 					},
 					onPaging: function () {
 						 crc_input_<?=$object_name?> = null;					
@@ -587,7 +589,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 							$('#<?=$object_name?>').jqGrid('setGridParam',{'loadui':'enable'});
 							clearInterval(updater_<?=$object_name?>);							
 							btn.removeAttr("checked");
-					}});;
+					}});
 		$('#reload_grid_<?=$this -> pageid?>').click();
 	<?php
 	}
@@ -679,7 +681,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 																			row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');																			
 																				$('#<?=$button_name?>').attr('grid_row',row_id);
 																				$('#<?=$button_name?>').dialog( 'open' );
-													}
+																	}
 											}
 						});
 			
@@ -692,7 +694,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						resizable:false,
 				buttons: [	
 							{
-								text: 'Да',
+								text: 'Выполнить',
 								click: function () {							
 									$('#ajax_<?=$button_name?>').show();
 									$('.ui-dialog-buttonpane').hide();
@@ -704,10 +706,11 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 											  type: 'POST',
 											  success: function(data){
 														$('.ui-dialog-buttonpane').show();
-														$('#ajax_<?=$button_name?>').hide();
-														$('#<?=$button_name?>').dialog( 'close' );
+														$('#ajax_<?=$button_name?>').hide();														
 														$('li[aria-selected="false"] a[href="#<?=$this -> pageid?>"]').parent().effect('pulsate', {}, 2000);													
+														crc_input_<?=$object_name?> = null;
 														$('#<?=$object_name?>').jqGrid().trigger('reloadGrid', true);
+														$('#<?=$button_name?>').dialog('close');
 												if (data.length > 20) {
 														custom_alert(data);
 												}
@@ -716,22 +719,21 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 									
 								}
 							},{
-								text: 'Нет',
-								click: function () {
-									$('.ui-dialog-buttonpane').show();
-									$('#ajax_<?=$button_name?>').hide();
+								text: 'Отмена',
+								click: function () {								
 									$( this ).dialog( 'close' );
 								}
 						   }						
 						],
 						close:function() {
 							$('.ui-dialog-buttonpane').show();
+							$('#ajax_<?=$button_name?>').hide();
 							$( this ).dialog( 'close' );
 						},
 						open: function() {
 								$('#ajax_<?=$button_name?>').hide();
-								$('.ui-dialog-buttonpane').find('button:contains("Нет")').button({icons: { primary: 'ui-icon-close'}});
-								$('.ui-dialog-buttonpane').find('button:contains("Да")').button({icons: { primary: 'ui-icon-check'}});
+								$('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}});
+								$('.ui-dialog-buttonpane').find('button:contains("Выполнить")').button({icons: { primary: 'ui-icon-check'}});
 								$(this).parent().parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
 								redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
 						}						

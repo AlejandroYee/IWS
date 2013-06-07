@@ -91,7 +91,8 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 										success: function (data) {
 												$('#import_ajax_".$last_grid_name."').hide();												
 												$('#import_".$last_grid_name."').dialog( 'close' );
-												$('#btn_o_".$last_grid_name."').button('option', 'disabled', false );	
+												$('#btn_o_".$last_grid_name."').button('option', 'disabled', false );
+												crc_input_".$last_grid_name." = null;
 												$('#".$last_grid_name."').trigger('reloadGrid');
 												$('#btn_".$last_grid_name."').button('option', 'disabled', true );
 												$('li[aria-selected=\"false\"] a[href=\"#".$this->pageid."\"]').parent().effect('highlight', {}, 3000);

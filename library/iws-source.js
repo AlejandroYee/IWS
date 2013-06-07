@@ -263,7 +263,7 @@ $(function() {
 	$(".help_button").button({icons: {primary: 'ui-icon-help'},text: true}).attr('style','float: right;').appendTo("#tabs .ui-tabs-nav").click(function() {
 				SetTab('Индекс справочного раздела',$(this).attr('url'),'false'); 
 	});
-								
+	
 	// Кнопка закрытия
 	$("#tabs").children(".ui-tabs-nav").append(
 			$('<button>Закрыть все вкладки</button>').attr({
