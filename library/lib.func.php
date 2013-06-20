@@ -140,7 +140,7 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strpos($_SERVER['HTTP_USER_AGENT'], 
 				setcookie("theme_num_last", $theme_number);
 				echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP."/".$theme_first['theme_file'][$theme_number]." \" /> \n";					
 ?>								
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.0.1.min.js?s=<?=SESSION_ID?>"></script>				
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.0.2.min.js?s=<?=SESSION_ID?>"></script>				
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.10.3.custom.min.js?s=<?=SESSION_ID?>"></script>
 				<style type="text/css">											
 						#loading {background:#ffffff url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;height: 100%;width: 100%;position: absolute; z-index: 999999; }		
@@ -188,7 +188,7 @@ if ($main_db)	echo $main_db -> get_settings_val("ROOT_CONFIG_NAME");
 							success: function(data) {	
 								setTimeout(function(){
 										$(location).prop('href','<?=ENGINE_HTTP?>/');	
-								}, 1000);								
+								}, 1000);	
 						}	  
 					});
 		}
