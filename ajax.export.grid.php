@@ -156,9 +156,7 @@
                     $owner      = $main_db -> sql_result($query, "OWNER");
 					$table_name = $main_db -> sql_result($query, "OBJECT_NAME");
 					$str_dt = "Select ".$main_db -> sql_result($query, "F_NAME");
-					$str_dt_f = " from (Select /*+ F  IRST_ROWS*/ rownum r_num, t.* from ".$owner.".".$table_name." t  WHERE 1=1  SqWhere ".$main_db -> sql_result($query, "FORM_WHERE")." ".$s_d_m_Where." )";					
-					$str_count = "Select /*+ F  IRST_ROWS*/ count(*) C_COUNT from ".$owner.".".$table_name." t WHERE 1=1  ".$main_db -> sql_result($query, "FORM_WHERE")." ".$s_d_m_Where."  ";
-                    $str_leafs = "Select t.id_".$table_name." ID from ".$owner.".".$table_name." t left join ".$owner.".".$table_name." t1 on t1.id_parent = t.id_".$table_name." where t1.id_".$table_name." is null";
+					$str_dt_f = " from (Select t.* from ".$owner.".".$table_name." t  WHERE 1=1  SqWhere ".$main_db -> sql_result($query, "FORM_WHERE")." ".$s_d_m_Where." )";	                 
 				} else {
                     $str_dt = $str_dt.", ".$main_db -> sql_result($query, "F_NAME");
                 }
@@ -251,8 +249,8 @@
 					$row_exp++;
                     foreach ($arr_field as $key=>$line){
 						// Вставляем ячейку						
-						$objPHPExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($cell_exp, $row_exp, $main_db -> sql_result($query_dt, $arr_field[$key]));						
-						$cell_exp++;
+						$objPHPExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($cell_exp, $row_exp, $main_db -> sql_result($query_dt, $arr_field[$key]));	
+					$cell_exp++;
                     }
             }
 					

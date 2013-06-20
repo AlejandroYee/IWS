@@ -4,13 +4,11 @@
 * icq: 454169
 */
 class AUTH {
-	function is_user($user = false,$pass = false) {		
+	function is_user($user = false,$pass = false) {	
 		// Пробуем узнать если ли у нас переменная сейсии:
-		if (isset($_SESSION['us_name']) and isset($_SESSION['us_pr'])) {
-		
+		if (isset($_SESSION['us_name']) and isset($_SESSION['us_pr'])) {			
 			// распаковываем пароль
 			$pwd = base64_decode($this->decrypt($_SESSION['us_pr'],session_id()));
-			
 			if (!empty($pwd)) {			
 				// пытаемся приверить пользователя, даже если он пройдет проверку, то потом отвалится от лдап
 				if ($this->check_ldap_user(Convert_quotas($_SESSION['us_name']), $pwd)) {
