@@ -758,6 +758,12 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 	 } else {
 		$export_grid = $object_name;
 	}
+	// дополнительная проверка на наличие файла экспорта:
+	if ( !is_file("xlt/".$XSL_FILE_OUT)) {
+		if (!is_file("xlt/".$XSL_FILE_OUT."m")){
+			$XSL_FILE_OUT = "";
+		}
+	}
 	?>
 	<div id="export_<?=$object_name?>" title='Укажите формат экспорта:'>
 							<label for="themefor">Тип экспорта:</label>
@@ -850,7 +856,28 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 											out_doc = out_doc + slp_str.replace(/[\n\r]/g,"").replace(/^;+/, "") + '\r\n';
 											slp_str = "";
 									});
-									$('#export_<?=$object_name?>').append('<a id="file_content<?=$export_grid?>" href="data:text/plain;base64,' + btoa(unescape(encodeURIComponent(out_doc))) + '" download="content.csv">TableContent</a>');
+									
+									function utf8_decode (aa) {
+										var bb = '', c = 0;
+										for (var i = 0; i < aa.length; i++) {
+											c = aa.charCodeAt(i);
+											if (c > 127) {
+												if (c > 1024) {
+													if (c == 1025) {
+														c = 1016;
+													} else if (c == 1105) {
+														c = 1032;
+													}
+													bb += String.fromCharCode(c - 848);
+												}
+											} else {
+												bb += aa.charAt(i);
+											}
+										}
+										return bb;
+									} 
+									
+									$('#export_<?=$object_name?>').append('<a id="file_content<?=$export_grid?>" href="data:text/plain;base64,' + btoa(unescape(utf8_decode(out_doc))) + '" download="content.csv">TableContent</a>');
 									$('#file_content<?=$export_grid?>')[0].click();
 									$('#file_content<?=$export_grid?>').remove();
 									$('#export_<?=$object_name?>').dialog( 'close' );
