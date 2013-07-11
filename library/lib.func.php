@@ -54,7 +54,14 @@ requre_script_file("auth.".AUTH.".php");
 if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (( auth::get_user() != "") or ($sub_debug))) {
 		$log = str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log);
 		$log = iconv(LOCAL_ENCODING,HTML_ENCODING."//IGNORE",$log);
-		file_put_contents(ENGINE_ROOT."/".HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).">] ".$log."\r\n", FILE_APPEND | LOCK_EX);		
+		file_put_contents(ENGINE_ROOT."/".HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).">] ".$log."\r\n", FILE_APPEND | LOCK_EX);
+		
+		/*// мылим о произошедшей ошибки админу базы:
+		$main_db = new db();
+		if (($main_db) and ()) {
+			$message = "<h3>Произошла ошибка:</h3>".$e."<br><br>Пользователь:<br>".strtoupper(auth::get_user());
+			//mail($main_db -> get_settings_val("RECIPIENT_ADMIN"), 'Произошла ошибка в системе: '.$main_db -> get_settings_val("ROOT_CONFIG_NAME"), $message);
+		}	*/	
 	}
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------
@@ -140,7 +147,7 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strpos($_SERVER['HTTP_USER_AGENT'], 
 				setcookie("theme_num_last", $theme_number);
 				echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP."/".$theme_first['theme_file'][$theme_number]." \" /> \n";					
 ?>								
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.0.2.min.js?s=<?=SESSION_ID?>"></script>				
+				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.0.3.min.js?s=<?=SESSION_ID?>"></script>				
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.10.3.custom.min.js?s=<?=SESSION_ID?>"></script>
 				<style type="text/css">											
 						#loading {background:#ffffff url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;height: 100%;width: 100%;position: absolute; z-index: 999999; }		
