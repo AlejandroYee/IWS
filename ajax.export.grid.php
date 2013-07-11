@@ -78,13 +78,16 @@
 			// Доставем переменные для макросов:
 			$macro_content = $zip->getFromName('xl/vbaProject.bin');			
 
-					// Начинаем считать строки и столбцы
-					$cell_exp = 0;
-					$row_exp = 2;
-					
-					// Говорим что это обьект xls с макросом (для корректного сохранения)
-					$_GET['isaexport'] = 'xlsm';
-		
+			if (!empty($macro_content)) {
+				// Начинаем считать строки и столбцы
+				$cell_exp = 0;
+				$row_exp = 2;
+						
+				// Говорим что это обьект xls с макросом (для корректного сохранения)
+				$_GET['isaexport'] = 'xlsm';
+		    } else {
+				$_GET['isaexport'] = 'xls';			
+			}
 			unset($zip);
 
 		} else {
@@ -273,13 +276,12 @@
         header("Set-Cookie: fileDownload=true");	
 		// формат экспорта:
 		switch ($_GET['isaexport']) {
-				case 'xlsx':						
+				case 'xlsx':
+						$objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel);						
 						header("Content-Type: application/vnd.ms-excel;");
-						header("Content-Disposition: attachment;filename=".str_replace(".xls",".xls",$exp_file)."");
-						header("Cache-Control: max-age=0");
-						$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, "Excel2007");
-						$objWriter -> save($temp_file);
-						echo file_get_contents($temp_file);
+						header("Content-Disposition: attachment;filename=".str_replace(".xls",".xlsx",$exp_file)."");
+						header("Cache-Control: max-age=0");										
+						$objWriter -> save("php://output");	
 				break;
 				case 'xlsm':						
 						header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;");
