@@ -332,7 +332,7 @@ Function FullTrim($txt) {
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------
-// Сохранение масивов и переменных в кеш (с помощью кукисов)
+// Сохранение масивов и переменных в кеш
 //--------------------------------------------------------------------------------------------------------------------------------------------
 function save_to_cache($name, $value, $time = -1) {		
 	if (!isset($_SESSION["ENABLED_CACHE"])) {
@@ -401,7 +401,7 @@ function about($db) {
 	<div class="ui-widget-header ui-state-default about_tabs_pict" style="top:5%; width:90%;text-align :right;position:absolute;border:1px transparent;background: transparent;margin:10px;opacity: 1">
 	<?php
 	$about_logo = $db -> get_settings_val('ROOT_CONFIG_LOGO');
-	if (!empty($about_logo) and is_file(ENGINE_HTTP.DIRECTORY_SEPARATOR.$about_logo)) echo "<img src='".ENGINE_HTTP.DIRECTORY_SEPARATOR.$about_logo."'>";
+	if (is_file(ENGINE_ROOT.DIRECTORY_SEPARATOR.$about_logo)) echo "<img src='".ENGINE_HTTP.DIRECTORY_SEPARATOR.$about_logo."'>";
 	?>
 	</div>
 	<p><b style="font-size:220%;">IWS</b><br><b>Intellectual web system</b><br>
