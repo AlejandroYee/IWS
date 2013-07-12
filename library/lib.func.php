@@ -3,7 +3,14 @@
 * Autor Andrey Lysikov (C) 2013
 * icq: 454169
 */
-define("ENGINE_HTTP","http://".$_SERVER['HTTP_HOST']);
+$scheme = isset($_SERVER['HTTP_SCHEME']) ? $_SERVER['HTTP_SCHEME'] : (
+     (
+  (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') ||
+   443 == $_SERVER['SERVER_PORT']
+     ) ? 'https' : 'http'
+ 
+ );
+define("ENGINE_HTTP",$scheme."://".$_SERVER['HTTP_HOST']);
 define("ENGINE_ROOT",$_SERVER['DOCUMENT_ROOT']);
 define("SESSION_ID",md5(time().rand(time()/100,getrandmax())));
 

@@ -77,17 +77,13 @@
 			$zip -> open($temp_file);
 			// Доставем переменные для макросов:
 			$macro_content = $zip->getFromName('xl/vbaProject.bin');			
-
-			if (!empty($macro_content)) {
-				// Начинаем считать строки и столбцы
-				$cell_exp = 0;
-				$row_exp = 2;
-						
-				// Говорим что это обьект xls с макросом (для корректного сохранения)
-				$_GET['isaexport'] = 'xlsm';
-		    } else {
-				$_GET['isaexport'] = 'xls';			
-			}
+			
+			// Начинаем считать строки и столбцы
+			$cell_exp = 0;
+			$row_exp = 2;
+					
+			// Говорим что это обьект xls с макросом (для корректного сохранения)
+			$_GET['isaexport'] = 'xlsm';		   
 			unset($zip);
 
 		} else {
@@ -284,9 +280,10 @@
 						$objWriter -> save("php://output");	
 				break;
 				case 'xlsm':						
-						header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;");
+						/*header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;");
 						header("Content-Disposition: attachment;filename=".$exp_file."");
 						header("Cache-Control: max-age=0");
+						
 						
 						// Нам нужно собрать данные для макроса из файла экселя:
 						$zip = new ZipArchive; 
@@ -336,6 +333,15 @@
 						// Отдаем пользователю файл
 						echo file_get_contents($temp_file);
 						unlink($temp_file);
+						
+						*/
+						
+						$exp_file  = str_replace(".xlsm",".xls",$exp_file);						
+						header("Content-Type: application/vnd.ms-excel");
+						header("Content-Disposition: attachment;filename=".$exp_file."");
+						header("Cache-Control: max-age=0");
+						$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, "Excel5");
+						$objWriter -> save("php://output");	
 				break;
 				case 'csv':
 						header("Content-type: text/csv");
@@ -347,7 +353,7 @@
                                                                   ->setSheetIndex(0);
 						$objWriter -> save("php://output");	
 				break;
-				case 'xls':
+				case 'xls':						
 						header("Content-Type: application/vnd.ms-excel");
 						header("Content-Disposition: attachment;filename=".$exp_file."");
 						header("Cache-Control: max-age=0");
