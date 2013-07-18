@@ -314,7 +314,7 @@ $(function() {
 			var percent = $(this).attr('percent');							
 			var doc_width_grid = doc_width - 27;
 			
-			if (percent < 90 && percent > 10 ) {
+			if ((percent < 90 && percent > 10 ) || ($(this).attr('percent_saved') > 0)) {
 					var doc_height_grid = (doc_height - main_menu - 93)/100 * percent;
 				} else {
 					var doc_height_grid = doc_height - main_menu - 93;
@@ -370,6 +370,59 @@ $(function() {
 					$(this).remove();
 				});
 		}
+		$.each($(".grid_resizer[form_type$='_DETAIL'] div.ui-jqgrid-titlebar, .detail_tab .ui-tabs-nav"), function() {
+			if ($(this).children("div[control='window']").length < 1) {	
+
+				button_htm_down =  $('<span>').attr({
+											'style':'float:right;cursor: pointer',
+											'class':'ui-icon ui-icon-circle-triangle-n',
+											'title':'Распахнуть на все окно/восстановить'
+										}).click(function() {	
+											upper = $(".ui-tabs-panel[aria-expanded='true'] .grid_resizer:first");											
+											downn = $(".ui-tabs-panel[aria-expanded='true'] .grid_resizer:last,.ui-tabs-panel[aria-expanded='true'] .grid_resizer_tabs");
+											$(".ui-tabs-panel[aria-expanded='true'] .ui-icon-circle-triangle-s").show();
+											
+											if (upper.attr('percent_saved') > 0) {
+												upper.attr('percent',upper.attr('percent_saved')).removeAttr('percent_saved');
+												downn.attr('percent',downn.attr('percent_saved')).removeAttr('percent_saved');
+												downn.show();												
+												$(this).parent().remove();
+											} else {
+												upper.attr('percent_saved',upper.attr('percent')).attr('percent',0);
+												downn.attr('percent_saved',downn.attr('percent')).attr('percent',100);												
+												upper.hide();
+												$(this).hide();
+											}
+											redraw_document($(".ui-tabs-panel[aria-expanded='true']"));	
+											
+										});
+										
+				button_htm_up = $('<span>').attr({
+											'style':'float:right;cursor: pointer',
+											'class':'ui-icon ui-icon-circle-triangle-s',
+											'title':'Свернуть/восстановить'
+										}).click(function() {
+											upper = $(".ui-tabs-panel[aria-expanded='true'] .grid_resizer:first");											
+											downn = $(".ui-tabs-panel[aria-expanded='true'] .grid_resizer:last,.ui-tabs-panel[aria-expanded='true'] .grid_resizer_tabs");
+											$(".ui-tabs-panel[aria-expanded='true'] .ui-icon-circle-triangle-n").show();
+											
+											if (upper.attr('percent_saved') > 0) {
+												upper.attr('percent',upper.attr('percent_saved')).removeAttr('percent_saved');
+												downn.attr('percent',downn.attr('percent_saved')).removeAttr('percent_saved');
+												upper.show();
+												$(this).show();
+											} else {
+												upper.attr('percent_saved',upper.attr('percent')).attr('percent',100);
+												downn.attr('percent_saved',downn.attr('percent')).attr('percent',0);												
+												downn.hide();
+												$(this).hide();
+												$(".ui-tabs-panel[aria-expanded='true'] div[control='window']").appendTo(upper.find('.ui-jqgrid-titlebar'));												
+											}
+											redraw_document($(".ui-tabs-panel[aria-expanded='true']"));	
+										});
+				$(this).append($('<div control="window" style="float:right;"></div>').append(button_htm_up,button_htm_down));
+			}
+		});	
 	}
 	
 	replace_select_opt_group = function (object) {
@@ -460,7 +513,7 @@ $(function() {
 				$(this).children('.ui-resizable-handle').height(5.3).attr('align','center').append(
 						$('<div />').addClass('ui-widget-header ui-state-hover ui-corner-all').height(2).width(150));
 			}
-		});
+		});			
 	}
 
 	//Детальные вкладки
@@ -482,7 +535,6 @@ $(function() {
 		CloseTab($( this ).parent().attr( "aria-controls" ));	
 	});
 				
-	// Хук для полноэкранного расчета высоты вкладок (будем позже на нее опираться)
 	$(document).ready(function () {	
 
 		// Исправление некорректных пробелов в меню для IE8+
