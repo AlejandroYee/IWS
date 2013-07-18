@@ -11,7 +11,7 @@ var $id_mm_fr, $pageid, $main_db;
 
 	// Создаем график
 	function create_chart() {
-			$query = $this -> main_db -> sql_execute("select tf.owner, tf.object_name, tf.name chart_label, tf.id_wb_mm_form id, nvl(tf.chart_x, 1000) chart_x, nvl(tf.chart_y, 350) chart_y, t.name, t.num, ct.name chart_name, ct.type_chart type_chart, t.is_read_only show_values
+			$query = $this -> main_db -> sql_execute("select tf.owner, tf.object_name, tf.name chart_label, decode(tf.chart_x,0,1000,nvl(tf.chart_x, 1000)) chart_x, decode(tf.chart_y,0,350,nvl(tf.chart_y, 350)) chart_y, t.name, t.num, ct.name chart_name, ct.type_chart type_chart, t.is_read_only show_values
 												  from ".DB_USER_NAME.".wb_mm_form tf left join ".DB_USER_NAME.".wb_form_field t on t.id_wb_mm_form = tf.id_wb_mm_form left join ".DB_USER_NAME.".wb_form_field_align ta on ta.id_wb_form_field_align = t.id_wb_form_field_align
 												  left join ".DB_USER_NAME.".wb_chart_type ct on ct.id_wb_chart_type = tf.id_wb_chart_type where tf.id_wb_mm_form = ".$this -> id_mm_fr." order by t.num");
 						
