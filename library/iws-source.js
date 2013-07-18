@@ -1137,20 +1137,22 @@ $.extend($.ech.multiselect.prototype.options, {
 
 // Оверлай для диалогов грида:
 $.extend($.jgrid,{	
-	viewModal : function (selector,o){
+	viewModal : function (selector,o) {
 		create_from_table_elemnts($(selector).find('.FormGrid'));
-		$(selector).dialog( "open" );				
-		var s_width = $(selector)[0].scrollWidth;		
-		
-		if ($(selector).attr('selector_type') == "true" && s_width < 550) {
-				var view_conf = 1.5;								
-			} else {
-				var view_conf = 1;
+		$(selector).dialog( "open" );	
+		if (typeof($(selector).attr('saved_width')) === "undefined") {	
+			var s_width = $(selector)[0].scrollWidth;	
+			if ($(selector).attr('selector_type') == "true" && s_width < 550) {
+					var view_conf = 1.5;								
+				} else {
+					var view_conf = 1;
+			}
+			if (s_width > 0 ) {
+				$(selector).dialog( "option", "width", s_width * view_conf + 25);
+			}
+			$(selector).attr('saved_width','true');			
 		}
-		if (s_width > 0 ) {
-			$(selector).dialog( "option", "width", s_width * view_conf + 25);
-		}	
-		redraw_document($(".ui-tabs-panel[aria-expanded='true']"));		
+		redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
 	},
 	hideModal : function (selector,o) {	
 		$(selector).dialog( "close" );		
