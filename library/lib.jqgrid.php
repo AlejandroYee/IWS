@@ -674,7 +674,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						.jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
 											caption: '<?=$obj_name?>',
 											title: '<?=$label?>',
-											buttonicon: 'ui-icon-flag',
+											buttonicon: 'ui-icon-shuffle',
 											onClickButton : function () {												
 													row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selarrrow');
 																	if ($.isArray(row_id) && row_id != "") {																	
