@@ -56,11 +56,7 @@
 	$k              = 0;
     $str_dt         = "";
 	$qWhere			= "";
-	if(!$sidx) {
-			$sidx = 1;
-		} else {
-			$sidx = trim_fieldname($sidx);
-	}
+	
 	if(isset($_GET['n_level'])) $level = intval($_GET['n_level']);
 	if(isset($_GET['nodeid']))  $node  = intval($_GET['nodeid']);
 	
@@ -89,7 +85,7 @@
               'I',
               'round(' || t.field_name || ', 0) ' || t.field_name,
               t.field_name) f_name,
-       ta.html_txt align_txt, tf.xsl_file_in, t.field_type
+       ta.html_txt align_txt, tf.xsl_file_in, t.field_type, tf.form_order as form_order
 	   from ".DB_USER_NAME.".wb_mm_form tf
 	   left join ".DB_USER_NAME.".wb_form_field t on t.id_wb_mm_form = tf.id_wb_mm_form
 	   left join ".DB_USER_NAME.".wb_form_field_align ta on ta.id_wb_form_field_align = t.id_wb_form_field_align
@@ -102,6 +98,7 @@
 					$str_dt = "select * from (Select max_count_number_99999, ".$main_db -> sql_result($query, "F_NAME",false);
 					$str_dt_f = ",rownum r_num_page from (Select rownum r_num,count(*) over (order by 1) as max_count_number_99999, t.* from ".$owner.".".$table_name." t  WHERE 1=1 SqWhere ".$main_db -> sql_result($query, "FORM_WHERE",false)." ".$s_d_m_Where." ";					
                     $str_leafs = "Select t.id_".$table_name." ID from ".$owner.".".$table_name." t left join ".$owner.".".$table_name." t1 on t1.id_parent = t.id_".$table_name." where t1.id_".$table_name." is null";
+					$order_field = $main_db -> sql_result($query, "FORM_ORDER",false);
 				} else {					
 					 $str_dt = $str_dt.", ".$main_db -> sql_result($query, "F_NAME",false);
                 }
@@ -159,8 +156,20 @@
 				$dt -> total        = 1;  
 				$dt -> records      = 1; 	
 			} else {
+				// Продвинутая сортировка по столбцам
+				if(!$sidx) {
+						// Ордер не задан, берем из поля формы, либо если его там нет то ордер убираем полностью
+						if (!empty($order_field)) {
+							$order_type = " order by ". $order_field;
+						} else {
+							$order_type = " order by 1 "; // сортировка по первому полю ровнум
+						}
+					} else {
+						$order_type = " order by " . trim_fieldname($sidx)." ".$sord;
+				}
+			
 				// Если у нас выставлена постраничная прокрутка то грузим постранично
-				$str_dt = $str_dt.$str_dt_f." order by ".$sidx." ".$sord.")) where r_num_page between ".$start." and ".$stop;
+				$str_dt = $str_dt.$str_dt_f.$order_type.")) where r_num_page between ".$start." and ".$stop;
 			} 
 			
 			end_session();
