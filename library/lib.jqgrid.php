@@ -443,6 +443,47 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 															});
                                                }
 											   
+							}).jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
+                                              caption: 'Копировать',
+                                              title: 'Скопировать выбранную запись в новую запись',
+                                              buttonicon: 'ui-icon-transferthick-e-w',
+                                              onClickButton: function() {
+													if ($('#<?=$object_name?>').attr('new_colmodel') == "true") {
+														var recreate = true;
+														$('#<?=$object_name?>').removeAttr('new_colmodel');
+														} else {
+														var recreate = false;
+													}
+													row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
+                                                    $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{
+																	viewPagerButtons:false,
+																	closeOnEscape:true,
+																	recreateForm:recreate,
+																	reloadAfterSubmit:true,
+																	closeAfterEdit:true,																		
+															     	afterSubmit: function(response, postdata)  {
+																		if (response.responseText.length > 0) {																				
+																			if (response.responseText.length > 20) {
+																				custom_alert(response.responseText);																			
+																			} else {																				
+																				return [true,"Ok",response.responseText];																				
+																			}
+																		} else {
+																			return [true,"Ok"];
+																		}
+																	},
+																	serializeEditData: function (data) {
+																		data.oper = 'add'; 
+																		return data;
+																	},
+																	beforeSubmit : function(postdata, formid) {
+																		if (check_form(formid)) {
+																			return [true,'']; 
+																		} 
+																	}
+													});                                                     
+                                               }
+											   
 							})
 		<?php		}
 					if (isset($ResArray['EDIT_BUTTON'])) { ?>
