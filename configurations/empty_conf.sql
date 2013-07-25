@@ -161,6 +161,7 @@ alter table WB_MM_FORM
 alter table WB_MM_FORM
   add constraint FK_WB_MM_FORM_WB_MAIN_MENU foreign key (ID_WB_MAIN_MENU)
   references WB_MAIN_MENU (ID_WB_MAIN_MENU);
+alter table WB_MM_FORM add form_order VARCHAR2(2000);
 
 prompt
 prompt Creating table WB_FORM_CELLS
@@ -472,7 +473,7 @@ prompt
 create sequence GEN_WB_FORM_FIELD_SYS
 minvalue 1
 maxvalue 9999
-start with 187
+start with 188
 increment by 1
 cache 20;
 
@@ -775,6 +776,7 @@ select t.id_wb_mm_form id_wb_mm_form_view,
        t.action_bat,
        t.chart_rotate_name,
        t.chart_x,
+	   t.form_order,
        t.chart_y,
        t.chart_dec_prec,
        t.height_rate,
@@ -2218,10 +2220,10 @@ begin
   if INSERTING then
     insert into wb_mm_form(id_wb_mm_form, id_wb_main_menu,num,name,id_wb_form_type,action_sql,object_name,xsl_file_in,html_img,
                              xsl_file_out,form_where,id_wb_chart_type,is_read_only,chart_show_name,chart_rotate_name,
-                             chart_x,chart_y,chart_dec_prec,height_rate,owner,edit_button,auto_update)
+                             chart_x,chart_y,chart_dec_prec,height_rate,owner,edit_button,auto_update,form_order)
       values (null,n_id,:new.num,:new.name,:new.id_wb_form_type,:new.action_sql,:new.object_name,:new.xsl_file_in,:new.html_img,
               :new.xsl_file_out,:new.form_where,:new.id_wb_chart_type,:new.is_read_only,:new.chart_show_name,:new.chart_rotate_name,
-              :new.chart_x,:new.chart_y,:new.chart_dec_prec,:new.height_rate,:new.owner,:new.edit_button,:new.auto_update)
+              :new.chart_x,:new.chart_y,:new.chart_dec_prec,:new.height_rate,:new.owner,:new.edit_button,:new.auto_update, upper(:new.form_order))
               returning id_wb_mm_form into l_id;
 		          dbms_session.set_context('CLIENTCONTEXT', 'rowid', l_id);
 
@@ -2247,7 +2249,8 @@ begin
       mf.height_rate       = :new.height_rate,
       mf.owner             = :new.owner,
       mf.edit_button       = :new.edit_button,
-      mf.auto_update       = :new.auto_update
+      mf.auto_update       = :new.auto_update,
+      mf.form_order        = upper(:new.form_order)
       where mf.id_wb_mm_form = l_id;
   else
     delete
@@ -2882,6 +2885,8 @@ insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_nam
 values (-185, -13, 20, '№ п.п.', 'NUM', null, null, 3, 'I', 0, null, 60, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
 values (-186, -13, 0, '# п/п (not display)', 'R_NUM', null, null, 3, 'I', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+values (-187, -2, 25, 'Условие сортировки', 'FORM_ORDER', null, null, 1, 'S', 0, null, 250, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
 prompt 186 records loaded
 prompt Loading WB_ROLE...
 insert into WB_ROLE (id_wb_role, wb_name, name, create_user, create_date, last_user, last_date)
