@@ -96,7 +96,7 @@
                     $owner      = $main_db -> sql_result($query, "OWNER",false);
 					$table_name = $main_db -> sql_result($query, "OBJECT_NAME",false);
 					$str_dt = "select * from (Select max_count_number_99999, ".$main_db -> sql_result($query, "F_NAME",false);
-					$str_dt_f = ",rownum r_num_page from (Select rownum r_num,count(*) over (order by 1) as max_count_number_99999, t.* from ".$owner.".".$table_name." t  WHERE 1=1 SqWhere ".$main_db -> sql_result($query, "FORM_WHERE",false)." ".$s_d_m_Where." ";					
+					$str_dt_f = ",rownum r_num_page from (Select rownum r_num, count(*) over (order by 1) as max_count_number_99999, t.* from ".$owner.".".$table_name." t  WHERE 1=1 SqWhere ".$main_db -> sql_result($query, "FORM_WHERE",false)." ".$s_d_m_Where." ";					
                     $str_leafs = "Select t.id_".$table_name." ID from ".$owner.".".$table_name." t left join ".$owner.".".$table_name." t1 on t1.id_parent = t.id_".$table_name." where t1.id_".$table_name." is null";
 					$order_field = $main_db -> sql_result($query, "FORM_ORDER",false);
 				} else {					
@@ -161,8 +161,10 @@
 						// Ордер не задан, берем из поля формы, либо если его там нет то ордер убираем полностью
 						if (!empty($order_field)) {
 							$order_type = " order by ". $order_field;
+							// при этом у нас добавляется аналитический овер по полю ровнум
+							$str_dt_f  = str_replace("rownum r_num,", "row_number() over (".$order_type.") r_num,",$str_dt_f);
 						} else {
-							$order_type = " order by 1 "; // сортировка по первому полю ровнум
+							$order_type = " order by 1"; // сортировка по первому полю ровнум
 						}
 					} else {
 						$order_type = " order by " . trim_fieldname($sidx)." ".$sord;
