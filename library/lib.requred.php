@@ -467,7 +467,11 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						if (!isset($key['NAME'])) {
 								$res .= "<li>";			
 							} else {
+							if ($parent_id == 0) {
+								$res .= "<li><a onclick=\"".$action."\" class='ui-button ui-widget ui-menubar-link ui-state-default ui-button-text-icon-secondary'>".$icon.$key['NAME']."</a>";	
+							} else {
 								$res .= "<li><a onclick=\"".$action."\" >".$icon.$key['NAME']."</a>";	
+							}
 						}
 						if (isset($key['MENU']) and ( $key['MENU'] > 0)) $res .= $this -> get_tree_main_menu($key['ID'], $sametab);
 						if ($parent_id <> 0) $res .= "</li>\n";	
