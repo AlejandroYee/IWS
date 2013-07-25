@@ -28,7 +28,7 @@ if (isset($_POST['theme'])) {
 }
 
 // Выход пользователя
-if (isset($_GET['act']) and ($_GET['act'] == "logout")) {
+if (isset($_GET['act']) and ($_GET['act'] == "logout")) {	
 	clear_cache();
 	to_log("LIB: User logout....");	
 	Redirect(ENGINE_HTTP);

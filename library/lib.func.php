@@ -179,7 +179,7 @@ if ($main_db)	echo $main_db -> get_settings_val("ROOT_CONFIG_NAME");
 		</div>
 			<input aria-required="true" id="password" class="ui-widget ui-widget-content ui-corner-all" name="password" style="height: 24px;" type="password" /><br><br>
 			<input type="submit" id="submit_settings" style="display: none;">
-			<button>Войти</button>
+			<button>Войти</button>	
 </form>
 <div id="login_theme" style="position:absolute;text-align:center;width:200px;height:20px;top:305px;left:100px">
 	<h6>Случайная тема оформления, называется: "<?=$theme_first['theme_name'][$theme_number]?>"</h6>
@@ -215,7 +215,7 @@ $(document).ready(function () {
 $(window).resize(function () {
 		$("#logon").css({ top: $(window).height()/2 - 175, left: $(window).width()/2 - 200 });			
 });
-$("#logon").css({ top: $(window).height()/2 - 175, left: $(window).width()/2 - 200 });		
+$("#logon").css({ top: $(window).height()/2 - 175, left: $(window).width()/2 - 200 });	
 </script>
 </body>
 <?php
