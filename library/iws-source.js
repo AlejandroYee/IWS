@@ -593,7 +593,7 @@ $(function() {
 	// Проверка значений:
 	check_form = function(formid) {
 		var data_ok = true;
-				$.each(formid.find("input[is_requred='true']"), function() {
+			$.each(formid.find("input[is_requred='true']"), function() {
 					if ($.trim($(this).val()) == "") {									
 						$(this).addClass('ui-state-error');
 						$('#clone_' + $(this).attr('id')).parent().addClass('ui-state-error');
@@ -611,7 +611,7 @@ $(function() {
 			$.each(formid.find("textarea[is_requred='true']"), function() {																			
 					if ($.trim($(this).val()) == "") {
 					$(this).addClass('ui-state-error');		
-					$(this).parent().children('.codemirror').addClass('ui-state-error');																				
+					$(this).parent().children('.ace_scroller').addClass('ui-state-error');																				
 					data_ok = false;
 				}
 			});																						
@@ -628,7 +628,14 @@ $(function() {
 		$.each(formid.find("input, select, textarea"), function() {
 			var obj = $(this);
 			obj.width(obj.attr('w'));
-					
+						
+			// Убираем алертный класс			
+			$(this).removeClass('ui-state-error');
+			$('#clone_' + $(this).attr('id')).parent().removeClass('ui-state-error');
+			$(this).parent().children('.ui-button').removeClass('ui-state-error');	
+			$(this).parent().children('button').removeClass('ui-state-error');			
+			$(this).parent().children('.ace_scroller').removeClass('ui-state-error');	
+			
 			switch (obj.attr('i_type')) {
 			
 				 case 'I': // INTEGER					
@@ -905,7 +912,11 @@ $(function() {
 							resizable: true,
 							value: obj.val(),
 							change: function( element, data ) {								
-								obj.val(data);
+								if(typeof(data) === "object") {
+									obj.val(""); // Бывает такое что возвращается обьект, если он пустой
+								} else {
+									obj.val(data);
+								}
 							}
 						});
 						obj.hide();
