@@ -62,13 +62,6 @@ if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (( auth::get_user(
 		$log = str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log);
 		$log = iconv(LOCAL_ENCODING,HTML_ENCODING."//IGNORE",$log);
 		file_put_contents(ENGINE_ROOT."/".HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).">] ".$log."\r\n", FILE_APPEND | LOCK_EX);
-		
-		/*// мылим о произошедшей ошибки админу базы:
-		$main_db = new db();
-		if (($main_db) and ()) {
-			$message = "<h3>Произошла ошибка:</h3>".$e."<br><br>Пользователь:<br>".strtoupper(auth::get_user());
-			//mail($main_db -> get_settings_val("RECIPIENT_ADMIN"), 'Произошла ошибка в системе: '.$main_db -> get_settings_val("ROOT_CONFIG_NAME"), $message);
-		}	*/	
 	}
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------
@@ -187,11 +180,35 @@ if ($main_db)	echo $main_db -> get_settings_val("ROOT_CONFIG_NAME");
 </div>
 <script type="text/javascript" >
  $(function() {
+ 
+ custom_alert = function (output_msg)
+	{	
+		$("<div />").html(output_msg).dialog({
+			title: 'Ошибка',
+			resizable: false,
+			minWidth: 450,
+			modal: true,
+			
+			buttons: {
+				"Закрыть": function() 
+				{
+					$( this ).dialog( "close" );
+				}
+			},							
+			open: function() {								
+					$(this).parent().css('z-index', 9999).parent().children('.ui-widget-overlay').css('z-index', 105);					
+			}
+		});
+}
+	
     $( "button" )
       .button()
       .click(function( event ) {
-		if ($("#password").val() == "" || $("#username").val() == "")  custom_alert("Необходимо указать имя пользователя и пароль!");		
-		if ($("#password").val() != "" && $("#username").val() != "") {
+		var usr = $("#username").val();
+		var pass = $("#password").val();
+		if (usr.replace(/\s/g,'') == '') custom_alert("Необходимо указать имя пользователя!");		
+		if (pass.replace(/\s/g,'') == '') custom_alert("Необходимо указать пароль!");		
+		if (usr.replace(/\s/g,'') != ''&& pass.replace(/\s/g,'') != '') {
 				$('#loading').show();
 				$.ajax({
 						url: '<?=ENGINE_HTTP?>/ajax.saveparams.php?act=login',
@@ -199,10 +216,16 @@ if ($main_db)	echo $main_db -> get_settings_val("ROOT_CONFIG_NAME");
 						data: { username: $("#username").val(), password:  $("#password").val() },
 						cache: false,
 						type: 'POST',
-							success: function(data) {	
+							success: function(data) {
+								if (data != '') {
+									usr_login = $('<div>').attr({
+																'style':'position:absolute;text-align :center;width:400px;height:50px;border:0px;background:transparent;'																
+															}).append('<h4>Выполняется вход пользователя:<br>' + data  + '</h4>').css({ top: $(window).height()/2 + 10, left: $(window).width()/2 - 200 });
+									$('#loading').append(usr_login);
+								}
 								setTimeout(function(){
 										$(location).prop('href','<?=ENGINE_HTTP?>/');	
-								}, 1000);	
+								}, 3000);	
 						}	  
 					});
 		}
@@ -216,6 +239,7 @@ $(window).resize(function () {
 		$("#logon").css({ top: $(window).height()/2 - 175, left: $(window).width()/2 - 200 });			
 });
 $("#logon").css({ top: $(window).height()/2 - 175, left: $(window).width()/2 - 200 });	
+
 </script>
 </body>
 <?php
@@ -413,7 +437,7 @@ function about($db) {
 	</div>
 	<p><b style="font-size:220%;">IWS</b><br><b>Intellectual web system</b><br>
 	<b>Версия системы:</b> <?=VERSION_ENGINE?><br>
-	<b>Конфигурация:</b><br><?=$db -> get_settings_val('ROOT_CONFIG_NAME')?> версия: <?=$db -> get_settings_val('ROOT_CONFIG_VERSION')?> <br>
+	<b>Конфигурация:</b><br><?=$db -> get_settings_val('ROOT_CONFIG_NAME')?>, версия: <?=$db -> get_settings_val('ROOT_CONFIG_VERSION')?> <br>
 	</p>
 	<p><b>Авторы:</b> Лысиков А.В., Мындра П.А.</p>
 	<b>Подключенные модули:</b><br>

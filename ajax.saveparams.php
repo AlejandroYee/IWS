@@ -48,10 +48,11 @@ if (isset($_GET['act']) and ($_GET['act'] == "cache")) {
 if (isset($_GET['act']) and ($_GET['act'] == "login")) {
 	$pwd = Convert_quotas($_POST['password']);
 	$usr = Convert_quotas($_POST['username']);
-	if (!$user_auth -> is_user($usr,$pwd)) {		
-			$responce = json_encode("done");
+	if (!$user_auth -> is_user($usr,$pwd)) {
+			$udb = new db();
+			$responce = $udb -> user_real_name;			
 		} else {
-			$responce = json_encode("fail");		
+			$responce = "fail";		
 		}		
 		echo $responce;
 exit;
