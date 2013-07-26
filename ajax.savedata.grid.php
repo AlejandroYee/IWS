@@ -73,7 +73,7 @@ while ($main_db -> sql_fetch($query)) {
 			$str_sql_fl .= ",".$main_db -> sql_result($query, "FIELD_NAME");			
 		}
 		// Смотрим на тип переменных						
-		switch ($main_db -> sql_result($query, "FIELD_TYPE")) {
+		switch (strtoupper(trim($main_db -> sql_result($query, "FIELD_TYPE")))) {
 				case 'D':
 						if (stripos($value,":") > 0) {
 								$str_sql_data .= ", to_date('".$value."', 'dd.mm.yyyy hh24:mi:ss')";										
