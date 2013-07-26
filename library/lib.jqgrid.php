@@ -459,7 +459,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 																	viewPagerButtons:false,
 																	closeOnEscape:true,
 																	recreateForm:recreate,
-																	reloadAfterSubmit:true,
+																	reloadAfterSubmit:true,																	
+																	editCaption: "Скопировать запись",
 																	closeAfterEdit:true,																		
 															     	afterSubmit: function(response, postdata)  {
 																		if (response.responseText.length > 0) {																				
