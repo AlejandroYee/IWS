@@ -143,7 +143,17 @@ $(function() {
 				redraw_document(ui.newPanel);
 			}
 	});
-
+	
+	$( "#tabs" ).find( ".ui-tabs-nav" ).sortable({
+      axis: "x",
+	  placeholder: "ui-state-highlight",
+	  distance: 10,
+      stop: function() {
+        $( "#tabs" ).tabs( "refresh" );
+		redraw_document($(".ui-tabs-panel[aria-expanded='true']"));	
+      }
+    }).disableSelection();
+	
 	custom_alert = function (output_msg, title_msg)
 	{	
 		is_modal = false;
