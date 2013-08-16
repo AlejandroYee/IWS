@@ -6,15 +6,15 @@
 require_once("library/lib.func.php");
 requre_script_file("lib.requred.php"); 
 
+//Подключаем формы
+$DataGrid = new Data_form();
 $main_db = new db();
+
 // Смотрим разрешено ли кеширование
 if ($main_db->get_param_view("cache_enable") == "checked") {
 	$_SESSION["ENABLED_CACHE"] = false;
 	to_log("LIB: User disabled cache!");
 }
-
-//Подключаем формы
-$DataGrid = new Data_form();
 
 if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strrpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== false)) { 
 ?>
@@ -91,7 +91,7 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strrpos($_SERVER['HTTP_USER_AGENT'],
 				?> 				
 				<style type="text/css">
 						#loading{background:#fff url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;height:100%;position:absolute;width:100%;z-index:100}
-						html,body{font-size:12px;margin:0;overflow:hidden;padding:0}
+						html,body{font-size:12px;margin:0;overflow:hidden;padding:0;-webkit-transform: translate3d(0, 0, 0);}
 						a{cursor:pointer}
 						.loader_tab{background:url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;height:100%;position:absolute;width:100%;z-index:100}
 						.ui-widget-content{margin:1px;padding:1px}
@@ -208,9 +208,29 @@ break;
 		<script type='text/javascript'>	
 			num_of_mounth = <?=$main_db->get_param_view("num_mounth")?>;	
 		</script>
-	</body>
-</html>
 <?php
+// Предупреждение о предстоящих работах
+if (defined("OFFINE_START_DATE") and defined("OFFINE_END_DATE") and (date("d.m.Y",time()) === date("d.m.Y",OFFINE_START_DATE))) {
+?>
+<div id="dialog_offline" title="Запланированные работы:">
+<p>
+<b>Уважаемый пользователь.</b><br><br>
+C <?=date("H:i:s",OFFINE_START_DATE)?> по <?=date("H:i:s",OFFINE_END_DATE)?><br><br>
+Система будет находится в оффлайне для:<br> 
+<b><?=OFFINE_MESSAGE?> </b><br><br>
+Приносим свои извенения за доставленное неудобство, 
+по возможности завершите работу с системой до указанного времени.
+</p>
+</div>
+<script type='text/javascript'>	
+$(function() {
+    $( "#dialog_offline" ).dialog({ minWidth: 550 });
+  });
+</script>
+<?php
+}
 $main_db -> __destruct();
 $DataGrid -> __destruct();
 ?>
+	</body>
+</html>

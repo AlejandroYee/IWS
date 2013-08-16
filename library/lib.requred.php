@@ -27,6 +27,11 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 	 // Создание связи с ДБ
 	function __construct() { 
 		
+		// Временный оффлайн системы с сообщением
+		if (defined("OFFINE_START_DATE") and defined("OFFINE_END_DATE") and (time() >= OFFINE_START_DATE) and (time() <= OFFINE_END_DATE)) {
+			die(Create_logon_window(true)); // факт офлайна
+		}
+		
 		// Запрос авторизации:
 		$user_auth = new AUTH();
 		if (!$user_auth -> is_user()) {			

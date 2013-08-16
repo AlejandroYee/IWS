@@ -97,7 +97,7 @@ to_log("LIB: New ".SESSION_ID." start ... ");
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Окно авторизации:
 //--------------------------------------------------------------------------------------------------------------------------------------------
-function Create_logon_window() {
+function Create_logon_window($offline = false) {
 clear_cache();
 if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== false)) { 
 ?>
@@ -157,6 +157,7 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strpos($_SERVER['HTTP_USER_AGENT'], 
 <body>
 	<div id="loading"></div>	
 <div id="logon" window_login="logon" class="ui-widget ui-widget-content ui-corner-all" style="position:absolute;text-align :center;width:400px;height:350px;">
+<?php if (!$offline) { ?>
 <h3>
 <?php
 $main_db = new db();
@@ -174,6 +175,16 @@ if ($main_db)	echo $main_db -> get_settings_val("ROOT_CONFIG_NAME");
 			<input type="submit" id="submit_settings" style="display: none;">
 			<button>Войти</button>	
 </form>
+<?php } else {?>
+<p><br><br><br>
+<b>Уважаемый пользователь.</b><br><br>
+C <b><?=date("H:i:s d.m.Y",OFFINE_START_DATE)?></b> по <b><?=date("H:i:s d.m.Y",OFFINE_END_DATE)?></b><br><br>
+Система будет находится в оффлайне для:<br><br>
+<b><?=OFFINE_MESSAGE?> </b><br><br>
+Приносим свои извенения<br>за доставленное неудобство,<br>
+зайдите позже.
+</p>
+<?php } ?>
 <div id="login_theme" style="position:absolute;text-align:center;width:200px;height:20px;top:305px;left:100px">
 	<h6>Случайная тема оформления, называется: "<?=$theme_first['theme_name'][$theme_number]?>"</h6>
 </div>
