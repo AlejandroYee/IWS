@@ -210,7 +210,7 @@ break;
 		</script>
 <?php
 // Предупреждение о предстоящих работах
-if (defined("OFFINE_START_DATE") and defined("OFFINE_END_DATE") and (date("d.m.Y",time()) === date("d.m.Y",OFFINE_START_DATE))) {
+if (defined("OFFINE_START_DATE") and defined("OFFINE_END_DATE") and (date("d.m.Y",time()) === date("d.m.Y",OFFINE_START_DATE)) and (time() <= OFFINE_END_DATE)) {
 ?>
 <div id="dialog_offline" title="Запланированные работы:">
 <p>
