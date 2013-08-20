@@ -32,6 +32,15 @@
 	$i              = 0;
 	$m 				= 0;	
 	$k              = 0;
+	$check			= "";
+	
+	// Дополнительная проверка на пользователя и права доступа:
+	$query = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_mm_form = ".$id_mm_fr." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable'");
+	while ($main_db -> sql_fetch($query)) {
+		$check				= explode(",",strtoupper(trim( $main_db -> sql_result($query, "EDIT_BUTTON") )));;
+	}
+	// если пользователю недоступна форма, то выходим сразу
+	if (empty($check)) die("Доступ для чтения данных запрещен");
 	
 	// Переменные для детальных гридов
 	if (($type == "GRID_FORM_DETAIL") or ( $type == "TREE_GRID_FORM_MASTER") or ( $type == "TREE_GRID_FORM_DETAIL") ) {	

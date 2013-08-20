@@ -21,7 +21,8 @@
 	$str_dt         = "";	
 	$has_parent		= "";
 	$FC_ColorCounter = 0;
-	$strData = "";
+	$check			= "";
+	$strData 		= "";
 	$arr_FCColors = array("1941A5","AFD8F8","F6BD0F","8BBA00","A66EDD","F984A1","CCCC00","999999",
 									  "0099CC","FF0000","006F00","0099FF","FF66CC","669966","7C7CB4","FF9933",
 									  "9900FF","99FFCC","CCCCFF","669900");
@@ -41,6 +42,14 @@
 		$FC_ColorCounter++;
 		return($arr_FCColors[$FC_ColorCounter % count($arr_FCColors)]);
 	}
+	
+	// Дополнительная проверка на пользователя и права доступа:
+	$query = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_mm_form = ".$id." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable'");
+	while ($main_db -> sql_fetch($query)) {
+		$check				= explode(",",strtoupper(trim( $main_db -> sql_result($query, "EDIT_BUTTON") )));;
+	}
+	// если пользователю недоступна форма, то выходим сразу
+	if (empty($check)) die("Доступ для чтения данных запрещен");
 	
 	$query = $main_db -> sql_execute("select tf.owner,
 									   tf.object_name,

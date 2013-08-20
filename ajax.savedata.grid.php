@@ -6,13 +6,13 @@
 require_once("library/lib.func.php");
 requre_script_file("lib.requred.php"); 
 	
+// Проверка на пользователя
 $user_auth = new AUTH();	
 if (!$user_auth -> is_user()) {
 		clear_cache();
 		die("Доступ запрещен");
 	}
 $main_db 			= new db();
-
 $type    			= (isset($_GET['type']))? Convert_quotas($_GET['type']) : "";
 
 // Есть вариант когда указана строка
@@ -25,6 +25,7 @@ $id_mm_fr   		= @intval($_GET['id_mm_fr']);
 $id_mm_fr_d 		= (isset($_GET['id_mm_fr_d']))? Convert_quotas($_GET['id_mm_fr_d']) : "";
 $type_of_past 		= (isset($_POST['oper']))? Convert_quotas($_POST['oper']) : "";
 $Master_Table_ID 	= (isset($_GET['Master_Table_ID']))? Convert_quotas($_GET['Master_Table_ID'])  : "";	
+if (($type == 'GRID_FORM_DETAIL') or ($type == 'TREE_GRID_FORM_DETAIL')) $id_mm_fr = $id_mm_fr_d;
 $file_data_path		= "";
 $action_bat			= "";
 $file_data_action 	= "";
@@ -32,9 +33,29 @@ $str_sql_fl			= "";
 $str_sql_data		= "";
 $str_sql			= "";
 $value				= "";
+$check				= "";
 
+// Дополнительная проверка на пользователя и права доступа:
+$query = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_mm_form = ".$id_mm_fr." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable' and tf.is_read_only = 0");
+while ($main_db -> sql_fetch($query)) {
+	$check				= explode(",",strtoupper(trim( $main_db -> sql_result($query, "EDIT_BUTTON") )));;
+}
+// если пользователю недоступна форма или она только для чтения, то выходим сразу
+if (empty($check)) die("Доступ для изменения запрещен");
 
-if (($type == 'GRID_FORM_DETAIL') or ($type == 'TREE_GRID_FORM_DETAIL')) $id_mm_fr = $id_mm_fr_d;
+// Теперь смотрим есть ли определенные права
+switch ($type_of_past) {
+	case 'add':		
+		if (!array_search("a", $check))  die("Нет привелегий для добавления строк");
+	break;			
+	case 'del': 
+		if (!array_search("d", $check))  die("Нет привелегий для изменения строк");
+	break;
+	case 'edit':
+		if (!array_search("e", $check))  die("Нет привелегий для удаления строк");
+	break;	
+}
+
 $query = $main_db -> sql_execute("select tf.owner, tf.object_name, t.name, t.field_name || '_' || abs(t.id_wb_form_field) field_name_id, t.field_name, decode(trim(t.field_type), 'D', 'to_char('||t.field_name||', ''dd.mm.yyyy hh24:mi:ss'') '||t.field_name,t.field_name) f_name,
 								    ta.html_txt align_txt, tf.xsl_file_in, trim(t.field_type) field_type, tf.action_sql, tf.action_bat from ".DB_USER_NAME.".wb_mm_form tf
 									left join ".DB_USER_NAME.".wb_form_field t on t.id_wb_mm_form = tf.id_wb_mm_form left join ".DB_USER_NAME.".wb_form_field_align ta on ta.id_wb_form_field_align = t.id_wb_form_field_align
@@ -151,7 +172,6 @@ while ($main_db -> sql_fetch($query)) {
 	$owner      = $main_db -> sql_result($query, "OWNER");
 	$table_name = $main_db -> sql_result($query, "OBJECT_NAME");	
 }			
-
 		
 // Если это таблица деталей:
 if (($type == 'GRID_FORM_DETAIL') or ($type == "TREE_GRID_FORM_DETAIL")) { 

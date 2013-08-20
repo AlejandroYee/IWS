@@ -32,9 +32,17 @@ if (isset($_GET['action'])) {
 		$action = "";
 }
 
+// Дополнительная проверка на пользователя и права доступа:
+$query = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_main_menu = ".$id." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable'");
+while ($main_db -> sql_fetch($query)) {
+	$check				= explode(",",strtoupper(trim( $main_db -> sql_result($query, "EDIT_BUTTON") )));;
+}
+// если пользователю недоступна форма, то выходим сразу
+if (empty($check)) die("Доступ сюда запрещен");
+
 // Формирование шапки и меню навигации $Navigation_res
 //--------------------------------------------------------------------------------------------------------------------------------------------
-$query = $main_db->sql_execute("Select level lev, t.id_wb_main_menu, nvl(t.id_parent, 0) id_parent, t.name from ".DB_USER_NAME.".wb_main_menu t start with t.id_wb_main_menu = $id connect by prior t.id_parent = t.id_wb_main_menu order by lev desc");
+$query = $main_db->sql_execute("Select level lev, t.id_wb_main_menu, nvl(t.id_parent, 0) id_parent, t.name from ".DB_USER_NAME.".wb_main_menu t start with t.id_wb_main_menu = ".$id." connect by prior t.id_parent = t.id_wb_main_menu order by lev desc");
 $Navigation_res = "<table style='float: left;'><tr><td>";
 while ($main_db->sql_fetch($query)) { 				
 	if ($main_db->sql_result($query, "ID_PARENT") <> 0 ) {	

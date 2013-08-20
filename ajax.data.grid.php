@@ -56,6 +56,7 @@
 	$k              = 0;
     $str_dt         = "";
 	$qWhere			= "";
+	$check			= "";
 	
 	if(isset($_GET['n_level'])) $level = intval($_GET['n_level']);
 	if(isset($_GET['nodeid']))  $node  = intval($_GET['nodeid']);
@@ -65,6 +66,14 @@
 			$s_d_m_Where     = " AND ".$Master_Table_ID." = ".$id_mm;
 			$id_mm_fr = $id_mm_fr_d;
 	} else 	$s_d_m_Where     = "";
+	
+	// Дополнительная проверка на пользователя и права доступа:
+	$query = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_mm_form = ".$id_mm_fr." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable'");
+	while ($main_db -> sql_fetch($query)) {
+		$check				= explode(",",strtoupper(trim( $main_db -> sql_result($query, "EDIT_BUTTON") )));;
+	}
+	// если пользователю недоступна форма, то выходим сразу
+	if (empty($check)) die("Доступ для чтения данных запрещен");
 
 	// Теперь просто смотрим все поля				
     $query = $main_db -> sql_execute("select tf.owner,
