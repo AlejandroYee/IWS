@@ -29,7 +29,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		
 		// Временный оффлайн системы с сообщением
 		if (defined("OFFINE_START_DATE") and defined("OFFINE_END_DATE") and (time() >= OFFINE_START_DATE) and (time() <= OFFINE_END_DATE)) {
-			die(Create_logon_window(true)); // факт офлайна
+			die(Create_logon_window(true)); // факт офлайна включается заглушка
 		}
 		
 		// Запрос авторизации:
