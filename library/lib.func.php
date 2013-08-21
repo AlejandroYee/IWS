@@ -61,7 +61,7 @@ requre_script_file("auth.".AUTH.".php");
 if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (( auth::get_user() != "") or ($sub_debug))) {
 		$log = str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log);
 		$log = iconv(LOCAL_ENCODING,HTML_ENCODING."//IGNORE",$log);
-		file_put_contents(ENGINE_ROOT."/".HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).">] ".$log."\r\n", FILE_APPEND | LOCK_EX);
+		file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).">] ".$log."\r\n", FILE_APPEND | LOCK_EX);
 	}
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------
@@ -99,7 +99,7 @@ to_log("LIB: New ".SESSION_ID." start ... ");
 //--------------------------------------------------------------------------------------------------------------------------------------------
 function Create_logon_window($offline = false) {
 clear_cache();
-if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== false)) { 
+if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== false)) {
 ?>
 <html class="no-js" lang="en-US">
 <?
@@ -120,6 +120,18 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strpos($_SERVER['HTTP_USER_AGENT'], 
 				<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />				
 				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/library/normalize.css?s=<?=SESSION_ID?>" />
 <?php			
+				// Проверим на старые версии IE
+				if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE 6.0') > 0 or strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE 7.0') > 0 or strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE 8.0') > 0) {
+				?>
+				<script type="text/javascript" >
+				var ieVersion = /*@cc_on (function() {switch(@_jscript_version) {case 1.0: return 3; case 3.0: return 4; case 5.0: return 5; case 5.1: return 5; case 5.5: return 5.5; case 5.6: return 6; case 5.7: return 7; case 5.8: return 8; case 9: return 9; case 10: return 10;}})() || @*/ 0
+				if (ieVersion < 9) {					
+					alert("К сожалению ваша версия Internet Explorer больше не поддерживается и не безопасна.\nОбновите ее, либо обратитесь к вашему системному администратору!");
+					throw new Exception_no_browser("error");
+				}
+				</script>
+				<?php
+				}
 				// Тема не задана! Задаем тему по умомчанию и выводим напоминание пользователю чтобы зашел и сменил
 				if (!is_dir(THEMES_DIR)) die ("Неуказана директория тем в конфигурации!");	
 				if (!is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR."jscript/")) die ("Ошибка конфигурации и привелегий сервера!");
@@ -132,7 +144,7 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strpos($_SERVER['HTTP_USER_AGENT'], 
 					while (false !== ($file_t = readdir($dh_sub))) {
 						if (($file_t == ".") or ($file_t == "..")) continue;						
 						if (strpos($file_t,".css") > 0) { 
-								$theme_first['theme_file'][] = THEMES_DIR."/".$file."/".$file_t;
+								$theme_first['theme_file'][] = THEMES_DIR. DIRECTORY_SEPARATOR .$file. DIRECTORY_SEPARATOR .$file_t;
 								$theme_first['theme_name'][] = $file;
 								break;
 							}	
@@ -145,9 +157,8 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strpos($_SERVER['HTTP_USER_AGENT'], 
 						
 				}
 				setcookie("theme_num_last", $theme_number);
-				echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP."/".$theme_first['theme_file'][$theme_number]." \" /> \n";					
-?>								
-				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.0.3.min.js?s=<?=SESSION_ID?>"></script>				
+				echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP. DIRECTORY_SEPARATOR .$theme_first['theme_file'][$theme_number]." \" /> \n";														
+?>  			<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.0.3.min.js?s=<?=SESSION_ID?>"></script>
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.10.3.custom.min.js?s=<?=SESSION_ID?>"></script>
 				<style type="text/css">											
 						#loading {background:#ffffff url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;height: 100%;width: 100%;position: absolute; z-index: 999999; }		
