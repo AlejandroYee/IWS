@@ -152,7 +152,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					$ResArray['Master_Table_ID'] = "ID_".$this -> return_sql($query, "OBJECT_NAME");							
 					
 					// Форма редонли?
-					$ResArray['fl_table'] = $this -> return_sql($query, "READ_ONLY_FORM");
+					$ResArray['fl_table'] = trim(strtolower($this -> return_sql($query, "READ_ONLY_FORM")));
 					
 					// Кнопочки формы
 					$form_buttons = explode(",",strtoupper(trim($this -> return_sql($query, "EDIT_BUTTON"))));

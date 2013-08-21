@@ -40,8 +40,8 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strrpos($_SERVER['HTTP_USER_AGENT'],
 				<link rel="shortcut icon" type="image/x-icon" href="<?=ENGINE_HTTP?>/<?=$main_db -> get_settings_val("ROOT_CONFIG_FAVICON")?>" />
 				<?php				
 				if (!is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR.THEMES_DIR)) die ("Неуказана директория тем в конфигурации!");	
-				if (!is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR."jscript/")) die ("Ошибка конфигурации и привелегий сервера!"); ?>
-				
+				if (!is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR."jscript/")) die ("Ошибка конфигурации и привелегий сервера!");
+				?>				
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.0.3.min.js?s=<?=SESSION_ID?>" ></script>	
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.10.3.custom.min.js?s=<?=SESSION_ID?>" ></script>
 				<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-timepicker-addon.js?s=<?=SESSION_ID?>" ></script>	
@@ -61,24 +61,29 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strrpos($_SERVER['HTTP_USER_AGENT'],
 				<link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/library/normalize.css?s=<?=SESSION_ID?>" />  				
 				<?php
 				$db_link = new DB();
-				if ((trim($db_link->get_param_view("theme")) != "") and ( is_file(ENGINE_ROOT."/".Convert_quotas($db_link->get_param_view("theme"))) )) {	
-						echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP."/".Convert_quotas($db_link->get_param_view("theme"))."?s=".SESSION_ID." \" /> \n\t\t\t\t";						
+				if ((trim($db_link->get_param_view("theme")) != "") and ( is_file(ENGINE_ROOT . DIRECTORY_SEPARATOR . Convert_quotas($db_link->get_param_view("theme"))) )) {	
+						echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP . DIRECTORY_SEPARATOR . Convert_quotas($db_link->get_param_view("theme"))."?s=".SESSION_ID." \" /> \n\t\t\t\t";						
 				} else {
 				$dh  = opendir(ENGINE_ROOT.DIRECTORY_SEPARATOR.THEMES_DIR.DIRECTORY_SEPARATOR);
 				while (false !== ($file = readdir($dh))) {
-				if (($file == ".") or ($file == "..")) continue;
-				  if (is_dir(THEMES_DIR. DIRECTORY_SEPARATOR . $file)) {
+				if (($file == ".") or ($file == "..")) continue;				
+				  if (is_dir(THEMES_DIR. DIRECTORY_SEPARATOR . $file)) {				  
 					$dh_sub  = opendir(THEMES_DIR. DIRECTORY_SEPARATOR . $file);
 					while (false !== ($file_t = readdir($dh_sub))) {
 						if (($file_t == ".") or ($file_t == "..")) continue;						
-						if (strrpos($file_t,".css") !== false) { $theme_first = THEMES_DIR."/".$file."/".$file_t;break;}	
+						if (strrpos($file_t,".css") !== false) {
+						    // Попытаемся найти дефолтную темку						
+							if (trim(strtolower($file)) == "smoothness") {
+								$theme_first = THEMES_DIR. DIRECTORY_SEPARATOR .$file. DIRECTORY_SEPARATOR .$file_t;	
+							}
+							if (empty($theme_first)) $theme_first = THEMES_DIR. DIRECTORY_SEPARATOR .$file. DIRECTORY_SEPARATOR .$file_t;
+						}	
 						}
 					}
-					if (!empty($theme_first)) { 
-						echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP."/".$theme_first."?s=".SESSION_ID."\" /> \n\t\t\t\t";						
-						break;
-					}
 				  }
+				if (!empty($theme_first)) { 
+					echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP. DIRECTORY_SEPARATOR .$theme_first."?s=".SESSION_ID."\" /> \n\t\t\t\t";					
+				}
 				}
 				unset($dh);				
 				$dh  = opendir(ENGINE_ROOT.DIRECTORY_SEPARATOR."jscript");
@@ -149,8 +154,8 @@ break;
 						if (($file_t == ".") or ($file_t == "..")) continue;
 						$iscss = strpos($file_t,".css");
 						if (!empty($iscss)) {
-								if (trim(THEMES_DIR."/".$file."/".$file_t) == trim($main_db->get_param_view("theme"))) {$selected="selected";} else {$selected="";}
-							echo "<option value=\"".THEMES_DIR."/".$file."/".$file_t."\" $selected>$file</option>\n\t";
+								if (trim(THEMES_DIR. DIRECTORY_SEPARATOR .$file. DIRECTORY_SEPARATOR .$file_t) == trim($main_db->get_param_view("theme"))) {$selected="selected";} else {$selected="";}
+							echo "<option value=\"".THEMES_DIR. DIRECTORY_SEPARATOR .$file. DIRECTORY_SEPARATOR .$file_t."\" $selected>$file</option>\n\t";
 							break;
 						}
 					}				  
