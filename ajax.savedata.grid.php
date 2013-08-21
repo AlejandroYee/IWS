@@ -46,13 +46,13 @@ if (empty($check)) die("Доступ для изменения запрещен"
 // Теперь смотрим есть ли определенные права
 switch ($type_of_past) {
 	case 'add':		
-		if (!array_search("a", $check))  die("Нет привелегий для добавления строк");
+		if (!array_search("A", $check))  die("Нет привелегий для добавления строк");
 	break;			
 	case 'del': 
-		if (!array_search("d", $check))  die("Нет привелегий для изменения строк");
+		if (!array_search("D", $check))  die("Нет привелегий для удаления строк");
 	break;
 	case 'edit':
-		if (!array_search("e", $check))  die("Нет привелегий для удаления строк");
+		if (!array_search("E", $check))  die("Нет привелегий для изменения строк");
 	break;	
 }
 

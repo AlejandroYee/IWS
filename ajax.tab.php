@@ -86,7 +86,7 @@ switch ($action) {
 		$Navigation_res = "<h2 style='float: left;margin:0 5px 0 0;'>Лог файл программы:</h2>";
 		$DataGrid->data_res = "<div class='log_container ui-widget-content'>
 				<textarea name='log_".$tabid."' style='font-family: monospace;'>";
-				$log = explode("\n",file_get_contents(ENGINE_ROOT."/".HAS_DEBUG_FILE));
+				$log = explode("\n",file_get_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE));
 				$DataGrid -> data_res .= implode("\n",$log);
 		$DataGrid->data_res .= "</textarea>
 				<div id='log_".$tabid."' style='font-family: monospace;'></div>
