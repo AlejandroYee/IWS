@@ -38,21 +38,22 @@ $check				= "";
 // Дополнительная проверка на пользователя и права доступа:
 $query = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_mm_form = ".$id_mm_fr." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable' and tf.is_read_only = 0");
 while ($main_db -> sql_fetch($query)) {
-	$check				= explode(",",strtoupper(trim( $main_db -> sql_result($query, "EDIT_BUTTON") )));;
+	$check	= explode(",",strtoupper(trim( $main_db -> sql_result($query, "EDIT_BUTTON") )));;
 }
 // если пользователю недоступна форма или она только для чтения, то выходим сразу
 if (empty($check)) die("Доступ для изменения запрещен");
 
+
 // Теперь смотрим есть ли определенные права
 switch ($type_of_past) {
 	case 'add':		
-		if (!array_search("A", $check))  die("Нет привелегий для добавления строк");
+		if (array_search("A", $check) === false)  die("Нет привелегий для добавления строк");
 	break;			
 	case 'del': 
-		if (!array_search("D", $check))  die("Нет привелегий для удаления строк");
+		if (array_search("D", $check)  === false)  die("Нет привелегий для удаления строк");
 	break;
 	case 'edit':
-		if (!array_search("E", $check))  die("Нет привелегий для изменения строк");
+		if (array_search("E", $check)  === false)  die("Нет привелегий для изменения строк");
 	break;	
 }
 
