@@ -239,12 +239,12 @@ C <b><?=date("H:i:s d.m.Y",OFFINE_START_DATE)?></b> по <b><?=date("H:i:s d.m.Y
 						cache: false,
 						type: 'POST',
 							success: function(data) {
-								if (data != '') {
-									usr_login = $('<div>').attr({
-																'style':'position:absolute;text-align :center;width:400px;height:50px;border:0px;background:transparent;'																
-															}).append('<h4>Выполняется вход пользователя:<br>' + data  + '</h4>').css({ top: $(window).height()/2 + 10, left: $(window).width()/2 - 200 });
-									$('#loading').append(usr_login);
-								}
+								//if (data != '') {
+									//usr_login = $('<div>').attr({
+									//							'style':'position:absolute;text-align :center;width:400px;height:50px;border:0px;background:transparent;'																
+									//						}).append('<h4>Выполняется вход пользователя:<br>' + data  + '</h4>').css({ top: $(window).height()/2 + 10, left: $(window).width()/2 - 200 });
+									//$('#loading').append(usr_login);
+								//}
 								setTimeout(function(){
 										$(location).prop('href','<?=ENGINE_HTTP?>/');	
 								}, 3000);	
