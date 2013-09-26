@@ -24,7 +24,23 @@ header("Set-Cookie: fileDownload=true");
 header("Content-Disposition: attachment;filename=".$main_db -> sql_result($query, strtoupper($name))."");
 header("Cache-Control: max-age=0");
 $file_content = $main_db -> sql_result($query, strtoupper($name)."_CONTENT");	
-echo gzdecode_zip(base64_decode($file_content));						
+// Проверка на декод64
+if (base64_decode($mystring, true)) {
+	//да это контент закодирован base64
+	// Проверяем, возможно он запакован
+	$tmp = base64_decode($file_content);
+	$flags  = ord(substr($tmp,3,1)); 
+	
+	if ((strlen($tmp) < 18 || strcmp(substr($tmp,0,2),"\x1f\x8b")) or ($flags & 31 != $flags)) {
+		// Это точно не сжатие, выводим как есть
+		echo $tmp;	
+	} else {
+		echo gzdecode_zip($tmp);
+	} 
+} else {
+	// Это просто контент, значит просто выводим
+	echo $file_content;	
+}					
 }
 $main_db -> __destruct();
 ?>
