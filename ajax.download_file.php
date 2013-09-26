@@ -9,7 +9,7 @@ requre_script_file("lib.requred.php");
 $user_auth = new AUTH();	
 if (!$user_auth -> is_user()) {
 		clear_cache();
-		die("Доступ запрещен");
+		die("Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰РµРЅ");
 }
 $main_db = new db();
 end_session();
@@ -24,21 +24,21 @@ header("Set-Cookie: fileDownload=true");
 header("Content-Disposition: attachment;filename=".$main_db -> sql_result($query, strtoupper($name))."");
 header("Cache-Control: max-age=0");
 $file_content = $main_db -> sql_result($query, strtoupper($name)."_CONTENT");	
-// Проверка на декод64
+// РџСЂРѕРІРµСЂРєР° РЅР° РґРµРєРѕРґ64
 if (base64_decode($mystring, true)) {
-	//да это контент закодирован base64
-	// Проверяем, возможно он запакован
+	//РґР° СЌС‚Рѕ РєРѕРЅС‚РµРЅС‚ Р·Р°РєРѕРґРёСЂРѕРІР°РЅ base64
+	// РџСЂРѕРІРµСЂСЏРµРј, РІРѕР·РјРѕР¶РЅРѕ РѕРЅ Р·Р°РїР°РєРѕРІР°РЅ
 	$tmp = base64_decode($file_content);
 	$flags  = ord(substr($tmp,3,1)); 
 	
 	if ((strlen($tmp) < 18 || strcmp(substr($tmp,0,2),"\x1f\x8b")) or ($flags & 31 != $flags)) {
-		// Это точно не сжатие, выводим как есть
+		// Р­С‚Рѕ С‚РѕС‡РЅРѕ РЅРµ СЃР¶Р°С‚РёРµ, РІС‹РІРѕРґРёРј РєР°Рє РµСЃС‚СЊ
 		echo $tmp;	
 	} else {
 		echo gzdecode_zip($tmp);
 	} 
 } else {
-	// Это просто контент, значит просто выводим
+	// Р­С‚Рѕ РїСЂРѕСЃС‚Рѕ РєРѕРЅС‚РµРЅС‚, Р·РЅР°С‡РёС‚ РїСЂРѕСЃС‚Рѕ РІС‹РІРѕРґРёРј
 	echo $file_content;	
 }					
 }
