@@ -18,12 +18,12 @@ $data    	= @Convert_quotas($_GET['data']);
 $name    	= @Convert_quotas($_GET['name']);
 $id    		= @intval($_GET['id']);
 
-if ($_GET['encon'] = '0') {
+if ($_GET['encon'] == '0') {
 	$encon = false;
 } else {
 	$encon = true;
 }
- 
+ echo $encon;
 $query = $main_db -> sql_execute("select ".strtoupper($name)."_CONTENT, ".strtoupper($name)." from ".DB_USER_NAME.".".strtoupper($data)." where ID_".strtoupper($data)." = ".$id." and rownum = 1");
 while ($main_db -> sql_fetch($query)) {
 header("Set-Cookie: fileDownload=true");	
