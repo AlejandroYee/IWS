@@ -25,7 +25,7 @@ header("Content-Disposition: attachment;filename=".$main_db -> sql_result($query
 header("Cache-Control: max-age=0");
 $file_content = $main_db -> sql_result($query, strtoupper($name)."_CONTENT");	
 // Проверка на декод64
-if (base64_decode($mystring, true)) {
+if (base64_decode($file_content, true)) {
 	//да это контент закодирован base64
 	// Проверяем, возможно он запакован
 	$tmp = base64_decode($file_content);
