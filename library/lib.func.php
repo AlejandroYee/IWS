@@ -483,7 +483,7 @@ function about($db) {
 		<a href="https://github.com/jquery/globalize" target="_blank">JQuery globalize</a>,
 		<a href="http://ace.ajax.org/" target="_blank">ACE Cloud9 Editor</a>,
 		<a href="https://github.com/ehynds/jquery-ui-multiselect-widget" target="_blank">JQuery UI multiselect</a>,		
-		<a href="http://sourceforge.net/projects/fusioncharts/" target="_blank">FusionCharts free (Under GNU License)</a>
+		<a href="http://www.flotcharts.org/" target="_blank">FlotCharts</a>
 		<a href="http://keith-wood.name/calculator.html" target="_blank">jQuery Calculator</a>
 	</div>
 	<a href="<?=ENGINE_HTTP?>/history.txt" target="_blank"><b>История изменений:</b></a><br>
@@ -688,5 +688,4 @@ if (isset($_SESSION['control_ses'])) {
 	$_SESSION['control_ses_ip'] = get_ip();
 	$_SESSION['control_ses_agent'] = $_SERVER['HTTP_USER_AGENT'];
 }
-
 ?>
