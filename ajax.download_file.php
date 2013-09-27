@@ -18,12 +18,18 @@ $data    	= @Convert_quotas($_GET['data']);
 $name    	= @Convert_quotas($_GET['name']);
 $id    		= @intval($_GET['id']);
 
+if ($_GET['encon'] = '0') {
+	$encon = false;
+} else {
+	$encon = true;
+}
+ 
 $query = $main_db -> sql_execute("select ".strtoupper($name)."_CONTENT, ".strtoupper($name)." from ".DB_USER_NAME.".".strtoupper($data)." where ID_".strtoupper($data)." = ".$id." and rownum = 1");
 while ($main_db -> sql_fetch($query)) {
 header("Set-Cookie: fileDownload=true");	
 header("Content-Disposition: attachment;filename=".$main_db -> sql_result($query, strtoupper($name))."");
 header("Cache-Control: max-age=0");
-$file_content = $main_db -> sql_result($query, strtoupper($name)."_CONTENT");	
+$file_content = $main_db -> sql_result($query, strtoupper($name)."_CONTENT",$encon);	
 // Проверка на декод64
 if (base64_decode($file_content, true)) {
 	//да это контент закодирован base64
