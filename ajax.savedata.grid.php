@@ -192,7 +192,7 @@ if (!is_numeric ($id_mm)) {
 	$id_mm = "";
 	
 	// пробегаемся по массиву и смотрим  на типы числе или
-	foreach($tmp as $key => $val) if (!is_numeric ($val)) {
+	foreach($tmp as $val) if (!is_numeric ($val)) {
 		$id_mm .= "'".$val."',";			
 	} else {
 		$id_mm .= $val.",";			

@@ -56,15 +56,13 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	}
 	
 	function textarea_element($field_text,$field_name,$name,$width,$count_element, $requred) {
-		$output = "";
 		$field_name_short = strtolower($field_name."_".$this->pageid);
 		return "<p style='text-align :left;'><label for='".$field_name_short."' >".FullTrim($name)."</label>
 					  <textarea id='".$field_name_short."' h='".$count_elemen."' is_requred='".$requred."' i_type='M' name='".$field_name."' role='textbox' multiline='true' class='FormElement ui-widget-content ui-corner-all'></textarea>
 					</p>";
 	}
 	function select_element($field_text,$field_name,$name,$width,$count_element, $requred) {
-		$output = "";
-		$field_name_short = strtolower($field_name."_".$this->pageid);
+		$output = "";		
 		if ($count_element <= 1) {						
 						$output .= "<p>
 								<label for='".$field_name."' >".FullTrim($name)."</label>
@@ -99,10 +97,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	}
 	// link or email
 	function link_element($field_text,$field_name,$name) {
-		$output = "";
-		$field_name_short = strtolower($field_name."_".$this->pageid);
-						$output .= "<p><a href='".$field_text."'>".FullTrim($name)."</a></p>";						
-	return $output;
+		return "<p><a href='".$field_text."'>".FullTrim($name)."</a></p>";						
 	}
 	
 	// Checkbox

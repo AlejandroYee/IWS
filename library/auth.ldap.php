@@ -79,8 +79,7 @@ class AUTH {
 
 	private function decrypt($str, $key)
 	{   
-		$str = mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, $str, MCRYPT_MODE_ECB);
-		$block = mcrypt_get_block_size('des', 'ecb');
+		$str = mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, $str, MCRYPT_MODE_ECB);		
 		$pad = ord($str[($len = strlen($str)) - 1]);
 		return substr($str, 0, strlen($str) - $pad);
 	}

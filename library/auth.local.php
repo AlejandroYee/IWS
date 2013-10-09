@@ -7,6 +7,8 @@ class AUTH {
 	function is_user($user = false,$pass = false) {		
 		// Обычная заглушка
 		$_COOKIE['us_name'] = AUTH_USER_NAME;
+                $pass = "";
+                $user = "";
 		return true;
 	}
 	

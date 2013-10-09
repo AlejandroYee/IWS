@@ -23,8 +23,8 @@ var $id_mm_fr, $pageid, $main_db;
 								$chartId		= $this -> pageid ."_chart_". $this -> main_db -> sql_result($query, "ID");
 								$url = "ajax.data.chart.php?id=".$this -> id_mm_fr."";
 			}
-			
-			return "<div id='".$chartId."_div_".$this -> pageid."' name='".$chartId."_".$this -> pageid."' swf='".ENGINE_HTTP."/charts/FCF_".$chart_name.".swf' x='".$chart_X."' y='".$chart_Y."' label='".$chart_label."' url = 'ajax.data.chart.php?id=".$this -> id_mm_fr."' class='chart_data_".$this -> pageid."' align=\"center\">
+						
+			return "<div id='".$chartId."_div_".$this -> pageid."' name='".$chartId."_".$this -> pageid."' schart_name='".$chart_name."' x='".$chart_X."' y='".$chart_Y."' label='".$chart_label."' url = 'ajax.data.chart.php?id=".$this -> id_mm_fr."' class='chart_data_".$this -> pageid."' align=\"center\">
 				  </div>";
 	}
 	

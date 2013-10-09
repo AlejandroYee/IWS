@@ -57,10 +57,7 @@
     $str_dt         = "";
 	$qWhere			= "";
 	$check			= "";
-	
-	if(isset($_GET['n_level'])) $level = intval($_GET['n_level']);
-	if(isset($_GET['nodeid']))  $node  = intval($_GET['nodeid']);
-	
+        
 	// Переделываем запрос для детального грида
 	if (($type == "GRID_FORM_DETAIL") or ($type == "TREE_GRID_FORM_DETAIL")) {		
 			$s_d_m_Where     = " AND ".$Master_Table_ID." = ".$id_mm;
@@ -192,7 +189,7 @@
 					if (!array_search($id_, $arr_field)) { $dt->rows[$m]['id'] = $k; } else $dt->rows[$m]['id'] = $main_db -> sql_result($query_dt, $id_);					
 					$dt_cell = array();
 					$r = 0;				
-                    foreach ($arr_field as $key=>$line) {
+                    foreach ($arr_field as $key => $line) {
                         switch ($arr_field_type[$key]) {
 							case 'L':
 								$td_val = $main_db -> sql_result($query_dt, $arr_field[$key]);								

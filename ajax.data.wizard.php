@@ -148,24 +148,24 @@ foreach($_POST as $k => $v) {
 			case "M":	
 				$input .= $this -> textarea_element(
 										$content_value,
-										strtolower($main_db -> sql_result($query_tmp, "FIELD_NAME")),
-										$main_db -> sql_result($query_tmp, "NAME"),
-										$main_db -> sql_result($query_tmp, "WIDTH"),
-										$main_db -> sql_result($query_tmp, "COUNT_ELEMENT"),
+										strtolower($main_db -> sql_result($query, "FIELD_NAME")),
+										$main_db -> sql_result($query, "NAME"),
+										$main_db -> sql_result($query, "WIDTH"),
+										$main_db -> sql_result($query, "COUNT_ELEMENT"),
 										$main_db -> sql_result($query, "IS_REQURED")
 										);				
 			break;
 			case "B":	
 				$output .= $this -> checkbox_element($content_value,
-										strtolower($main_db -> sql_result($query_tmp, "FIELD_NAME")),
-										$main_db -> sql_result($query_tmp, "NAME"),
+										strtolower($main_db -> sql_result($query, "FIELD_NAME")),
+										$main_db -> sql_result($query, "NAME"),
 										$main_db -> sql_result($query, "IS_REQURED")
 										);				
 			break;
 			case "C":	
 				$output .= $this -> number_element($content_value,
-										strtolower($main_db -> sql_result($query_tmp, "FIELD_NAME")),
-										$main_db -> sql_result($query_tmp, "NAME"),
+										strtolower($main_db -> sql_result($query, "FIELD_NAME")),
+										$main_db -> sql_result($query, "NAME"),
 										"C",
 										$main_db -> sql_result($query, "IS_REQURED"),
 										$main_db -> sql_result($query, "WIDTH")
@@ -173,8 +173,8 @@ foreach($_POST as $k => $v) {
 			break;
 			case "I":	
 				$output .= $this -> number_element($content_value,
-										strtolower($main_db -> sql_result($query_tmp, "FIELD_NAME")),
-										$main_db -> sql_result($query_tmp, "NAME"),
+										strtolower($main_db -> sql_result($query, "FIELD_NAME")),
+										$main_db -> sql_result($query, "NAME"),
 										"I",
 										$main_db -> sql_result($query, "IS_REQURED"),
 										$main_db -> sql_result($query, "WIDTH")
@@ -182,8 +182,8 @@ foreach($_POST as $k => $v) {
 			break;
 			case "N":	
 				$output .= $this -> number_element($content_value,
-										strtolower($main_db -> sql_result($query_tmp, "FIELD_NAME")),
-										$main_db -> sql_result($query_tmp, "NAME"),
+										strtolower($main_db -> sql_result($query, "FIELD_NAME")),
+										$main_db -> sql_result($query, "NAME"),
 										"N",
 										$main_db -> sql_result($query, "IS_REQURED"),
 										$main_db -> sql_result($query, "WIDTH")
@@ -191,8 +191,8 @@ foreach($_POST as $k => $v) {
 			break;
 			case "NL":	
 				$output .= $this -> number_element($content_value,
-										strtolower($main_db -> sql_result($query_tmp, "FIELD_NAME")),
-										$main_db -> sql_result($query_tmp, "NAME"),
+										strtolower($main_db -> sql_result($query, "FIELD_NAME")),
+										$main_db -> sql_result($query, "NAME"),
 										"NL",
 										$main_db -> sql_result($query, "IS_REQURED"),
 										$main_db -> sql_result($query, "WIDTH")
@@ -200,14 +200,14 @@ foreach($_POST as $k => $v) {
 			break;			
 			case "A":	
 				$output .= $this -> link_element($content_value,
-										strtolower($main_db -> sql_result($query_tmp, "FIELD_NAME")),
-										$main_db -> sql_result($query_tmp, "NAME")
+										strtolower($main_db -> sql_result($query, "FIELD_NAME")),
+										$main_db -> sql_result($query, "NAME")
 										);				
 			break;
 			case "E":	
 				$output .= $this -> link_element("mailto:".$content_value,
-										strtolower($main_db -> sql_result($query_tmp, "FIELD_NAME")),
-										$main_db -> sql_result($query_tmp, "NAME")
+										strtolower($main_db -> sql_result($query, "FIELD_NAME")),
+										$main_db -> sql_result($query, "NAME")
 										);				
 			break;	
 			default:

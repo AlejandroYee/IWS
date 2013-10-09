@@ -223,7 +223,7 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 	public function get_param_view($param_name) {
 		$is_found = false;
 		$arr_field = explode(";",$this -> user_pref);
-			foreach ($arr_field as $key => $line) {
+			foreach ($arr_field as $line) {
 				$sub_line = explode(":", $line);
 				if ($sub_line[0] == strtolower(trim($param_name))) {
 					// Есть старый параметр, заменяем:
@@ -249,7 +249,7 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 		// Проверка на ключ
 		if (strtolower(trim($value)) == 'on' ) $value = "checked";
 		$arr_field = explode(";",$this -> user_pref);
-			foreach ($arr_field as $key => $line) {
+			foreach ($arr_field as $line) {
 				// Смотрим значения:
 				$sub_line = explode(":", $line);
 				if ($sub_line[0] == strtolower(trim($param_name))) {

@@ -59,8 +59,7 @@ function to_log($log,$sub_debug = false) {
 requre_script_file("auth.".AUTH.".php");
 
 if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (( auth::get_user() != "") or ($sub_debug))) {
-		$log = str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log);
-		$log = iconv(LOCAL_ENCODING,HTML_ENCODING."//IGNORE",$log);
+		$log = iconv(LOCAL_ENCODING,HTML_ENCODING."//IGNORE",str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log));
 		file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).">] ".$log."\r\n", FILE_APPEND | LOCK_EX);
 	}
 }
@@ -70,19 +69,17 @@ if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (( auth::get_user(
 class TIMER {
     private $starttime;
     function __construct() {
-	    $mtime = microtime ();
-        $mtime = explode (' ', $mtime);
+        $mtime = explode (' ', microtime ());
         $mtime = $mtime[1] + $mtime[0];
         $this -> starttime = $mtime;
     }
 	
-	static function get_about() {
-		return "Отладочная информация и DEBUG";
-	}
+    static function get_about() {
+            return "Отладочная информация и DEBUG";
+    }
 	
     function __destruct() {
-        $mtime = microtime ();
-        $mtime = explode (' ', $mtime);
+        $mtime = explode (' ', microtime ());
         $mtime = $mtime[1] + $mtime[0];
         $endtime = $mtime;
         $totaltime = round (($endtime - $this ->starttime), 5);
@@ -91,7 +88,7 @@ class TIMER {
 }
 
 // Запускаем клас времени и дебагер
-$timer = new TIMER();
+new TIMER();
 to_log("LIB: Session ".SESSION_ID." start ... ");
 
 //--------------------------------------------------------------------------------------------------------------------------------------------
@@ -124,7 +121,7 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strpos($_SERVER['HTTP_USER_AGENT'], 
 				if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE 6.0') > 0 or strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE 7.0') > 0 or strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE 8.0') > 0) {
 				?>
 				<script type="text/javascript" >
-				var ieVersion = /*@cc_on (function() {switch(@_jscript_version) {case 1.0: return 3; case 3.0: return 4; case 5.0: return 5; case 5.1: return 5; case 5.5: return 5.5; case 5.6: return 6; case 5.7: return 7; case 5.8: return 8; case 9: return 9; case 10: return 10;}})() || @*/ 0
+				var ieVersion = /*@cc_on (function() {switch(@_jscript_version) {case 1.0: return 3; case 3.0: return 4; case 5.0: return 5; case 5.1: return 5; case 5.5: return 5.5; case 5.6: return 6; case 5.7: return 7; case 5.8: return 8; case 9: return 9; case 10: return 10;}})() || @*/ 0;
 				if (ieVersion < 9) {					
 					alert("К сожалению ваша версия Internet Explorer больше не поддерживается и не безопасна.\nОбновите ее, либо обратитесь к вашему системному администратору!");
 					throw new Exception_no_browser("error");
@@ -132,6 +129,7 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strpos($_SERVER['HTTP_USER_AGENT'], 
 				</script>
 				<?php
 				}
+                                $theme_first = array();
 				// Тема не задана! Задаем тему по умомчанию и выводим напоминание пользователю чтобы зашел и сменил
 				if (!is_dir(THEMES_DIR)) die ("Неуказана директория тем в конфигурации!");	
 				if (!is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR."jscript/")) die ("Ошибка конфигурации и привелегий сервера!");
@@ -203,8 +201,7 @@ C <b><?=date("H:i:s d.m.Y",OFFINE_START_DATE)?></b> по <b><?=date("H:i:s d.m.Y
 <script type="text/javascript" >
  $(function() {
  
- custom_alert = function (output_msg)
-	{	
+ custom_alert = function (output_msg) {	
 		$("<div />").html(output_msg).dialog({
 			title: 'Ошибка',
 			resizable: false,
@@ -221,16 +218,16 @@ C <b><?=date("H:i:s d.m.Y",OFFINE_START_DATE)?></b> по <b><?=date("H:i:s d.m.Y
 					$(this).parent().css('z-index', 9999).parent().children('.ui-widget-overlay').css('z-index', 105);					
 			}
 		});
-}
+};
 	
     $( "button" )
       .button()
       .click(function( event ) {
 		var usr = $("#username").val();
 		var pass = $("#password").val();
-		if (usr.replace(/\s/g,'') == '') custom_alert("Необходимо указать имя пользователя!");		
-		if (pass.replace(/\s/g,'') == '') custom_alert("Необходимо указать пароль!");		
-		if (usr.replace(/\s/g,'') != ''&& pass.replace(/\s/g,'') != '') {
+		if (usr.replace(/\s/g,'') === '') custom_alert("Необходимо указать имя пользователя!");		
+		if (pass.replace(/\s/g,'') === '') custom_alert("Необходимо указать пароль!");		
+		if (usr.replace(/\s/g,'') !== ''&& pass.replace(/\s/g,'') !== '') {
 				$('#loading').show();
 				$.ajax({
 						url: '<?=ENGINE_HTTP?>/ajax.saveparams.php?act=login',
@@ -339,9 +336,10 @@ function get_ip() {
 //--------------------------------------------------------------------------------------------------------------------------------------------
 Function css_get_value($css_file, $section, $value) { 
 	$found = false;
+        $matches = array();
 	$css_content = "{";
 	$lines = file($css_file);
-		foreach ($lines as $line_num => $line) {
+		foreach ($lines as $line) {
 			// Ищем раздел
 			if ($found) $css_content .= trim($line)."\n";
 			if (strpos(strtolower($line), strtolower($section." {"))) $found = true;
@@ -349,7 +347,7 @@ Function css_get_value($css_file, $section, $value) {
 				// Нашли секцию, разбиваем:
 				preg_match_all('/\s*([-\w]+)\s*:?\s*(.*?)\s*;/m', $css_content, $matches);
 				// Ищем нужную:
-				foreach ($matches[0] as $sec => $sec_line) {
+				foreach ($matches[0] as $sec_line) {
 					if (strpos(strtolower($sec_line), strtolower($value))) {
 						// Нашли ключь
 						$result = explode(" ", $sec_line);
@@ -400,11 +398,9 @@ function save_to_cache($name, $value, $time = -1) {
 // Загрузка переменной из кеша если она там есть:
 //--------------------------------------------------------------------------------------------------------------------------------------------
 function load_from_cache($name, $is_array = true) {	
-		if (isset($_SESSION[strtoupper($name)])  and !isset($_SESSION["ENABLED_CACHE"])) {
-				// Кукие есть, загружаем их, загружаем их в массив и выходим.
-				$to_menu = $_SESSION[strtoupper($name)];				
+		if (isset($_SESSION[strtoupper($name)])  and !isset($_SESSION["ENABLED_CACHE"])) {				
 				// Распаковываем без проверки чексум, баг firefox'a
-				$to_menu = json_decode(gzinflate(substr(base64_decode($to_menu),10,-8)), $is_array);		 			
+				$to_menu = json_decode(gzinflate(substr(base64_decode($_SESSION[strtoupper($name)]),10,-8)), $is_array);		 			
 				// Проверяем есть ли данные, если есть то перемещаем их в массив
 				if (!empty($to_menu)) {
 					to_log("LIB: ".strtoupper($name)." from cache");
@@ -427,7 +423,7 @@ function clear_cache($name = false) {
 				session_destroy();	
 				session_start();
 				$_SESSION['us_name'] = $us;
-				$_SESSION['us_pr']	 = $ps;
+				$_SESSION['us_pr']   = $ps;
 			} else {
 				// Задана переменная для отчистки. Зачищаем:
 				unset($name);
@@ -507,11 +503,6 @@ function gzdecode_zip($data) {
   if ($flags & 31 != $flags) {    
     return null;
   }
-
-  $mtime = unpack("V", substr($data,4,4));
-  $mtime = $mtime[1];
-  $xfl   = substr($data,8,1);
-  $os    = substr($data,8,1);
   $headerlen = 10;
   $extralen  = 0;
   $extra     = "";
@@ -521,12 +512,11 @@ function gzdecode_zip($data) {
       return false;   
     }
     $extralen = unpack("v",substr($data,8,2));
-    $extralen = $extralen[1];
-    if ($len - $headerlen - 2 - $extralen < 8) {
+    if ($len - $headerlen - 2 - $extralen[1] < 8) {
       return false;   
     }
-    $extra = substr($data,10,$extralen);
-    $headerlen += 2 + $extralen;
+    $extra = substr($data,10,$extralen[1]);
+    $headerlen += 2 + $extralen[1];
   }
 
   $filenamelen = 0;
@@ -536,7 +526,7 @@ function gzdecode_zip($data) {
     if ($len - $headerlen - 1 < 8) {
       return false; 
     }
-    $filenamelen = strpos(substr($data,8+$extralen),chr(0));
+    $filenamelen = strpos(substr($data,8+$extralen[1]),chr(0));
     if ($filenamelen === false || $len - $headerlen - $filenamelen - 1 < 8) {
       return false;   
     }
@@ -551,7 +541,7 @@ function gzdecode_zip($data) {
     if ($len - $headerlen - 1 < 8) {
       return false;  
     }
-    $commentlen = strpos(substr($data,8+$extralen+$filenamelen),chr(0));
+    $commentlen = strpos(substr($data,8+$extralen[1]+$filenamelen),chr(0));
     if ($commentlen === false || $len - $headerlen - $commentlen - 1 < 8) {
       return false;  
     }
@@ -567,8 +557,7 @@ function gzdecode_zip($data) {
     }
     $calccrc = crc32(substr($data,0,$headerlen)) & 0xffff;
     $headercrc = unpack("v", substr($data,$headerlen,2));
-    $headercrc = $headercrc[1];
-    if ($headercrc != $calccrc) {
+    if ($headercrc[1] != $calccrc) {
       return false;  
     }
     $headerlen += 2;
@@ -576,11 +565,8 @@ function gzdecode_zip($data) {
 
  
   $datacrc = unpack("V",substr($data,-8,4));
-  $datacrc = $datacrc[1];
   $isize = unpack("V",substr($data,-4));
-  $isize = $isize[1];
-
- 
+  
   $bodylen = $len-$headerlen-8;
   if ($bodylen < 1) {
    
@@ -599,7 +585,7 @@ function gzdecode_zip($data) {
         return false;
     }
   } 
-  if ($isize != strlen($data) || crc32($data) != $datacrc) {
+  if ($isize[1] != strlen($data) || crc32($data) != $datacrc[1]) {
     return false;
   }
   return $data;
@@ -610,18 +596,17 @@ function gzdecode_zip($data) {
 //--------------------------------------------------------------------------------------------------------------------------------------------
 function get_select_data($db, $sql, $rowid) {
 
-// заменяем ровид если передан
-$sql = str_ireplace(":rowid",$rowid,$sql);	
+	
 // Проверяем кодировку
-
-$sql = iconv(HTML_ENCODING,LOCAL_ENCODING."//TRANSLIT", $sql);
+$sql = iconv(HTML_ENCODING,LOCAL_ENCODING."//TRANSLIT", str_ireplace(":rowid",$rowid,$sql));
 					
 // Выполняем запрос на получение данных:
 $query = $db -> sql_execute($sql);	
 $level 		= 0;
-$countgroup = 0;
-$i			= 0;
+$countgroup     = 0;
+$i		= 0;
 $rezult		= "";
+$sd_options_content = array();
 
 while ($db -> sql_fetch($query)) {
 	// поддержка опт группы (optgroup):

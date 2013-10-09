@@ -9,7 +9,7 @@
 header("Content-Type: text/html; charset=".strtolower(HTML_ENCODING));
 header("Cache-Control: private,no-cache,no-store");
 header("Pragma: no-cache");
-define("VERSION_ENGINE","v2.00 RC19");
+define("VERSION_ENGINE","v2.00 Final Release");
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Подключаем необходимые модули
 //--------------------------------------------------------------------------------------------------------------------------------------------
@@ -174,10 +174,8 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		while ($this-> db_conn-> sql_fetch($query)) {
                 $str_block = $this -> return_sql($query, "ACTION_SQL");
                 if (!empty($str_block)) {
-					$res = oci_parse($this-> db_conn -> link, $str_block); 
-					 while ($this-> db_conn-> sql_fetch($query1)) 
-								oci_bind_by_name($res , $this -> return_sql($query1, "FIELD_NAME"), $arr_value[$this -> return_sql($query1, "FIELD_NAME")]);
-					oci_execute ($res);					
+					$query1 = oci_parse($this-> db_conn -> link, $str_block); 
+					oci_execute ($query1);					
 				}
         }       
     }
