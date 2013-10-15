@@ -35,7 +35,7 @@ if (isset($_GET['action'])) {
 // Дополнительная проверка на пользователя и права доступа:
 $query = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_main_menu = ".$id." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable'");
 while ($main_db -> sql_fetch($query)) {
-	$check				= explode(",",strtoupper(trim( $main_db -> sql_result($query, "EDIT_BUTTON") )));;
+	$check				= explode(",",strtoupper(trim( $main_db -> sql_result($query, "EDIT_BUTTON") )));
 }
 // если пользователю недоступна форма, то выходим сразу
 if (empty($check) and empty($action)) die("Доступ сюда запрещен");
