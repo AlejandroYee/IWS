@@ -460,7 +460,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								if ($sametab != 'false') {
 									$parenttab = "parent.";
 								}
-								$action =  $parenttab."SetTab('".@$key['NAME']."','".ENGINE_HTTP."/ajax.tab.php?id=".$key['ID']."&pid=".$key['PARENT']."','".$sametab."'); "; 
+								$action =  $parenttab."SetTab('".@$key['NAME']."','".ENGINE_HTTP."/ajax.tab.php?id=".$key['ID']."&pid=".$key['PARENT']."','".$sametab."') "; 
 						}
 						if ($parent_id == 0)  $icon = ""; 	
 						if (isset($key['ICON']) and !empty($key['ICON'])) $icon = $key['ICON'];
