@@ -514,7 +514,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 						minWidth: 450,
 						minHeight: 100,						
 						closeOnEscape: true,
-						resizable:false,
+						resizable:true,
 						appendTo: $('#".$this->pageid." .tab_main_content'),						
 						close:function() {
 							$(this).parent().parent().children('.ui-widget-overlay').remove();
