@@ -17,15 +17,17 @@ $type    			= (isset($_GET['type']))? Convert_quotas($_GET['type']) : "";
 
 // Есть вариант когда указана строка
 if (!isset($_GET['id_mm'])) {
-	$id_mm			= @Convert_quotas($_POST['id']);
+	$id_mm			= Convert_quotas($_POST['id']);
 }  else {
-	$id_mm  		= @Convert_quotas($_GET['id_mm']);
+	$id_mm  		= Convert_quotas($_GET['id_mm']);
 }
-$id_mm_fr   		= @intval($_GET['id_mm_fr']); 
+$id_mm_fr   		= intval($_GET['id_mm_fr']); 
 $id_mm_fr_d 		= (isset($_GET['id_mm_fr_d']))? Convert_quotas($_GET['id_mm_fr_d']) : "";
 $type_of_past 		= (isset($_POST['oper']))? Convert_quotas($_POST['oper']) : "";
 $Master_Table_ID 	= (isset($_GET['Master_Table_ID']))? Convert_quotas($_GET['Master_Table_ID'])  : "";	
-if (($type == 'GRID_FORM_DETAIL') or ($type == 'TREE_GRID_FORM_DETAIL')) $id_mm_fr = $id_mm_fr_d;
+if (($type == 'GRID_FORM_DETAIL') or ($type == 'TREE_GRID_FORM_DETAIL')) {
+    $id_mm_fr = $id_mm_fr_d;
+}
 $file_data_path		= "";
 $action_bat			= "";
 $file_data_action 	= "";
@@ -38,23 +40,31 @@ $check				= "";
 // Дополнительная проверка на пользователя и права доступа:
 $query = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_mm_form = ".$id_mm_fr." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable' and tf.is_read_only = 0");
 while ($main_db -> sql_fetch($query)) {
-	$check	= explode(",",strtoupper(trim( $main_db -> sql_result($query, "EDIT_BUTTON") )));;
+	$check	= explode(",",strtoupper(trim( $main_db -> sql_result($query, "EDIT_BUTTON") )));
 }
 // если пользователю недоступна форма или она только для чтения, то выходим сразу
-if (empty($check)) die("Доступ для изменения запрещен");
+if (empty($check)) {
+    die("Доступ для изменения запрещен");
+}
 
 
 // Теперь смотрим есть ли определенные права
 switch ($type_of_past) {
 	case 'add':		
-		if (array_search("A", $check) === false)  die("Нет привелегий для добавления строк");
-	break;			
+            if (array_search("A", $check) === false) {
+            die("Нет привелегий для добавления строк");
+        }
+        break;			
 	case 'del': 
-		if (array_search("D", $check)  === false)  die("Нет привелегий для удаления строк");
-	break;
+            if (array_search("D", $check) === false) {
+            die("Нет привелегий для удаления строк");
+        }
+        break;
 	case 'edit':
-		if (array_search("E", $check)  === false)  die("Нет привелегий для изменения строк");
-	break;	
+            if (array_search("E", $check) === false) {
+            die("Нет привелегий для изменения строк");
+        }
+        break;	
 }
 
 $query = $main_db -> sql_execute("select tf.owner, tf.object_name, t.name, t.field_name || '_' || abs(t.id_wb_form_field) field_name_id, t.field_name, decode(trim(t.field_type), 'D', 'to_char('||t.field_name||', ''dd.mm.yyyy hh24:mi:ss'') '||t.field_name,t.field_name) f_name,
@@ -112,20 +122,20 @@ while ($main_db -> sql_fetch($query)) {
 				break;
 				case 'I':
 					if (trim($value) <> "") {
-							$str_sql_data .= ",".@intval($value);
+							$str_sql_data .= ",".intval($value);
 						} else {
 							$str_sql_data .= ", null";
 						}
 				break;
 				case 'B':
-					if (@intval($value) <> 1) {
+					if (intval($value) <> 1) {
 							$str_sql_data .= ", 0";
 						} else {
 							$str_sql_data .= ", 1";
 						}
 				break;
 				case 'N':
-						$str_sql_data .= ",".@floatval(str_replace(",",".",$value));
+						$str_sql_data .= ",".floatval(str_replace(",",".",$value));
 				break;
 				case 'P':
 					if (!empty($value)) {
@@ -133,10 +143,10 @@ while ($main_db -> sql_fetch($query)) {
 					}
 				break;
 				case 'C':
-						$str_sql_data .= ",".@floatval(str_replace(",",".",$value));
+						$str_sql_data .= ",".floatval(str_replace(",",".",$value));
 				break;
 				case 'NL':
-						$str_sql_data .= ",".@floatval(str_replace(",",".",$value));
+						$str_sql_data .= ",".floatval(str_replace(",",".",$value));
 				break;
 				case 'F':						
 						if (isset($_FILES[$main_db -> sql_result($query, "FIELD_NAME")])) {
@@ -165,7 +175,7 @@ while ($main_db -> sql_fetch($query)) {
 				break;
 				
 				default:
-						$str_sql_data .= ",'".@Convert_quotas(str_replace("'","''",$value))."' ";
+						$str_sql_data .= ",'".  Convert_quotas(str_replace("'","''",$value))."' ";
 				break;
 		}
 	}	
@@ -249,7 +259,7 @@ if (!empty($file_data_action)) {
 // Если задано выполнение команды, то выполняем
 if (!empty($action_bat)) {
 	end_session();
-	@exec($action_bat);
+	exec($action_bat);
 }
 
 // Отправляем что обновление данных выполнено для файлов
