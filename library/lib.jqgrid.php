@@ -174,6 +174,9 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						case 'E':
 							$ResArray['EDIT_BUTTON'] = true;
 						break;
+                                            	case 'C':
+							$ResArray['COPY_BUTTON'] = true;
+						break;
 						case 'D':
 							$ResArray['DELETE_BUTTON'] = true;
 						break;
@@ -449,7 +452,10 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 															});
                                                }
 											   
-							}).jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
+							})
+                                         <?php		}
+                                              if (isset($ResArray['COPY_BUTTON'])) { ?>              
+                                              .jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
                                               caption: 'Копировать',
                                               title: 'Скопировать выбранную запись в новую запись',
                                               buttonicon: 'ui-icon-transferthick-e-w',
