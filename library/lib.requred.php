@@ -174,9 +174,8 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		while ($this-> db_conn-> sql_fetch($query)) {
                 $str_block = $this -> return_sql($query, "ACTION_SQL");
                 if (!empty($str_block)) {
-					$query1 = oci_parse($this-> db_conn -> link, $str_block); 
-					oci_execute ($query1);					
-				}
+                        $this->db_conn->sql_execute($str_block); 			
+                  }
         }       
     }
 	 
