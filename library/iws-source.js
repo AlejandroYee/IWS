@@ -154,35 +154,28 @@ $(function() {
       }
     }).disableSelection();
 	
-	custom_alert = function (output_msg, title_msg)
-	{	
-		is_modal = false;
-		if (!title_msg) {
-			title_msg = 'Ошибка';
-			is_modal = true;
-			st = "ui-state-error";
-		}
-		if (!output_msg)
-			output_msg = '';
+	custom_alert = function (output_msg)
+	{
+            
+                title_msg = 'Внимание:';		
+                if (output_msg.search('ORA-') != -1) title_msg = 'SQL Ошибка конфигурации:';
+                if (output_msg.search('запрещен') != -1) title_msg = 'Аунтефикация:';
+		if (!output_msg) output_msg = '';
 
 		$("<div />").html(output_msg).dialog({
 			title: title_msg,
 			resizable: false,
 			minWidth: 450,
-			modal: is_modal,
-			
-			buttons: {
-				"Закрыть": function() 
-				{
+			modal: true,
+			dialogClass: "alert",
+                        
+			buttons: {                            	
+				"Закрыть": function() {
 					$( this ).dialog( "close" );
 				}
 			},							
 			open: function() {								
-					$(this).parent().css('z-index', 9999).parent().children('.ui-widget-overlay').css('z-index', 105);
-					if (st != "") {
-						$(this).addClass(st);
-						$(this).dialog({ dialogClass: "alert" });
-					}
+					$(this).parent().css('z-index', 9999).parent().children('.ui-widget-overlay').css('z-index', 105);					
 			}
 		});
 	}
