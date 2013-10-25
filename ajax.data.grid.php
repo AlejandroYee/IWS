@@ -235,6 +235,6 @@
 				$dt -> total        = $total_pages;  
 				$dt -> records      = $count;	
 			}
-			echo json_encode($dt);			
+			echo jsonencode($dt);			
 $main_db -> __destruct();
 ?>

@@ -131,6 +131,6 @@ if (!empty($action_bat)) {
 	@exec($action_bat);
 }
 
-echo json_encode("done");
+echo jsonencode("done");
 $main_db -> __destruct();
 ?>
