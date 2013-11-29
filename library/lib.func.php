@@ -27,6 +27,7 @@ Error_Reporting(E_ALL);
 require_once(ENGINE_ROOT."/config.".$_SERVER['HTTP_HOST'].".php");
 set_error_handler('my_error_handler');
 set_exception_handler('my_exception_handler');
+register_shutdown_function('end_timer');
 
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // exception
@@ -60,37 +61,38 @@ requre_script_file("auth.".AUTH.".php");
 
 if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (( auth::get_user() != "") or ($sub_debug))) {
 		$log = iconv(LOCAL_ENCODING,HTML_ENCODING."//IGNORE",str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log));
-		file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).">] ".$log."\r\n", FILE_APPEND | LOCK_EX);
+		$_SESSION[strtoupper("log_".SESSION_ID)].= "[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).">] ".$log."\r\n";
 	}
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Класс подсчета времени выполнения
 //--------------------------------------------------------------------------------------------------------------------------------------------	
-class TIMER {
-    private $starttime;
-    function __construct() {
+
+if (!isset($starttime)) {
         $mtime = explode (' ', microtime ());
         $mtime = $mtime[1] + $mtime[0];
-        $this -> starttime = $mtime;
-    }
-	
-    static function get_about() {
-            return "Отладочная информация и DEBUG";
-    }
-	
-    function __destruct() {
+        $_SESSION[strtoupper("timer_".SESSION_ID)] = $mtime;
+        to_log("LIB: Session ".SESSION_ID." start ... ");
+}
+
+function end_timer()
+{
+    if (isset($_SESSION[strtoupper("timer_".SESSION_ID)])) {
         $mtime = explode (' ', microtime ());
         $mtime = $mtime[1] + $mtime[0];
         $endtime = $mtime;
-        $totaltime = round(($endtime - $this ->starttime), 4,PHP_ROUND_HALF_ODD);
-        to_log("LIB: Session ".SESSION_ID." end, worktime ".$totaltime);
-    }
+        $totaltime = round($endtime - $_SESSION[strtoupper("timer_".SESSION_ID)], 4,PHP_ROUND_HALF_ODD);
+        unset($_SESSION[strtoupper("timer_".SESSION_ID)]);
+        to_log("LIB: Session ".SESSION_ID." end, worktime ".$totaltime." s.");        
+   }  
+   
+   if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (( auth::get_user() != "") or ($sub_debug))) {
+    // Сбрасываем лог на диск:
+    file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,$_SESSION[strtoupper("log_".SESSION_ID)], FILE_APPEND | LOCK_EX);
+    unset($_SESSION[strtoupper("log_".SESSION_ID)]);
+   }
 }
-
-// Запускаем клас времени и дебагер
-new TIMER();
-to_log("LIB: Session ".SESSION_ID." start ... ");
-
+             
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Окно авторизации:
 //--------------------------------------------------------------------------------------------------------------------------------------------
