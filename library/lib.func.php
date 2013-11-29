@@ -82,7 +82,7 @@ class TIMER {
         $mtime = explode (' ', microtime ());
         $mtime = $mtime[1] + $mtime[0];
         $endtime = $mtime;
-        $totaltime = round (($endtime - $this ->starttime), 5);
+        $totaltime = round(($endtime - $this ->starttime), 4,PHP_ROUND_HALF_ODD);
         to_log("LIB: Session ".SESSION_ID." end, worktime ".$totaltime);
     }
 }
