@@ -286,9 +286,9 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 									load_".$this->pageid."_intval = setInterval(loader_function, 1000);
 									loader_function();
 									$.get('ajax.saveparams.php?&id_mm_fr=".$this->id_mm_fr."&' + qString, function(data) {										
-										clearInterval(load_".$this->pageid."_intval);
-										load_".$this->pageid."_time = 0;
-										$('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>Данные успешно обработаны!</h2>');
+										clearInterval(load_".$this->pageid."_intval);										
+										$('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>Данные успешно обработаны,<br>Длительность обработки ' + minutes_".$this->pageid." +' минут(а), ' + seconds_".$this->pageid." + 'секунд.</h2>');
+                                                                                load_".$this->pageid."_time = 0;    
 										$('li[aria-selected=\"false\"] a[href=\"#".$this->pageid."\"]').parent().effect('pulsate', {}, 2000);
 										$('#show_parameters-".$this->pageid."').button('option','disabled',false);
 										if (data.length > 20) {
@@ -472,7 +472,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 						$output .= "
 								clearInterval(load_".$this->pageid."_intval);
 								load_".$this->pageid."_time = 0;
-								$('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>Данные успешно обработаны!</h2>');
+                                                                $('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>Данные успешно обработаны,<br>Длительность обработки ' + minutes_".$this->pageid." +' минут(а), ' + seconds_".$this->pageid." + 'секунд.</h2>');
 								$('li[aria-selected=\"false\"] a[href=\"#".$this->pageid."\"]').parent().effect('pulsate', {}, 2000);
 								$('#show_parameters-".$this->pageid."').button('option','disabled',false);
 												
