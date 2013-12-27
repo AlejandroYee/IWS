@@ -634,7 +634,7 @@ function load_from_cache($name, $is_array = true) {
 				$to_menu = jsondecode(gzinflate(substr(base64_decode($_SESSION[strtoupper($name)]),10,-8)), $is_array);		 			
 				// Проверяем есть ли данные, если есть то перемещаем их в массив
 				if (!empty($to_menu)) {
-					to_log("LIB: ".strtoupper($name)." from cache");
+					to_log("LIB: ".strtoupper($name)." loaded from cache");
 					return $to_menu;
 				}
 			} else {
