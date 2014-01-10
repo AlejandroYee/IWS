@@ -61,7 +61,8 @@ requre_script_file("auth.".AUTH.".php");
 
 if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (( auth::get_user() != "") or ($sub_debug))) {
 		$log = iconv(LOCAL_ENCODING,HTML_ENCODING."//IGNORE",str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log));
-		$_SESSION[strtoupper("log_".SESSION_ID)].= "[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).">] ".$log."\r\n";
+		if (!isset($_SESSION[strtoupper("log_".SESSION_ID)])) $_SESSION[strtoupper("log_".SESSION_ID)] = null; 
+                $_SESSION[strtoupper("log_".SESSION_ID)].= "[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).">] ".$log."\r\n";
 	}
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------
@@ -98,17 +99,9 @@ function end_timer()
 //--------------------------------------------------------------------------------------------------------------------------------------------
 function Create_logon_window($offline = false) {
 clear_cache();
-if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== false)) {
-?>
-<html class="no-js" lang="en-US">
-<?
-} else {
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html class="no-js" lang="en-US">
-<?
-}
-?>
 			<head>
 				<meta charset="<?php echo strtolower(HTML_ENCODING); ?>">
 				<title>IWS Login</title>
@@ -124,9 +117,14 @@ if (isset($_SERVER['HTTP_USER_AGENT']) &&  (strpos($_SERVER['HTTP_USER_AGENT'], 
 				?>
 				<script type="text/javascript" >
 				var ieVersion = /*@cc_on (function() {switch(@_jscript_version) {case 1.0: return 3; case 3.0: return 4; case 5.0: return 5; case 5.1: return 5; case 5.5: return 5.5; case 5.6: return 6; case 5.7: return 7; case 5.8: return 8; case 9: return 9; case 10: return 10;}})() || @*/ 0;
-				if (ieVersion < 9) {					
-					alert("К сожалению ваша версия Internet Explorer больше не поддерживается и не безопасна.\nОбновите ее, либо обратитесь к вашему системному администратору!");
-					throw new Exception_no_browser("error");
+				 if (ieVersion == 0) { // IE 11 FIX
+                                     if (!!window.MSStream) {
+                                      ieVersion = 11;
+                                    }    
+                                 }
+                                if (ieVersion < 9) {					
+					alert("К сожалению ваша версия Internet Explorer больше не поддерживается и не безопасна.\nОбновите ее, либо обратитесь к вашему системному администратору!");				
+                                        throw new Exception_no_browser("error");
 				}
 				</script>
 				<?php
@@ -238,12 +236,6 @@ C <b><?=date("H:i:s d.m.Y",OFFINE_START_DATE)?></b> по <b><?=date("H:i:s d.m.Y
 						cache: false,
 						type: 'POST',
 							success: function(data) {
-								//if (data != '') {
-									//usr_login = $('<div>').attr({
-									//							'style':'position:absolute;text-align :center;width:400px;height:50px;border:0px;background:transparent;'																
-									//						}).append('<h4>Выполняется вход пользователя:<br>' + data  + '</h4>').css({ top: $(window).height()/2 + 10, left: $(window).width()/2 - 200 });
-									//$('#loading').append(usr_login);
-								//}
 								setTimeout(function(){
 										$(location).prop('href','<?=ENGINE_HTTP?>/');	
 								}, 3000);	

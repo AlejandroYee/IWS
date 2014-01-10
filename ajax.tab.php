@@ -83,7 +83,9 @@ switch ($action) {
 	break;
 	
 	case "get_debug":			
-		$Navigation_res = "<h2 style='float: left;margin:0 5px 0 0;'>Лог файл программы:</h2>";
+		$Navigation_res = "<h2 style='float: left;margin:0 5px 0 0;'>Лог файл программы:</h2>";            
+                $DataGrid -> Param_res = "<button id='log-lean' tabid='".$tabid."' class='clear_log_button' style='float: right;' title='Отчистка лог файла, удалаются все дебаг данные из лога. Страница перезагрузится!'>Отчистить лог файл</button>";
+                    
 		$DataGrid->data_res = "<div class='log_container ui-widget-content'>
 				<textarea name='log_".$tabid."' style='font-family: monospace;'>";
 				$log = explode("\n",file_get_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE));
@@ -136,6 +138,23 @@ switch ($action) {
 							primary: "ui-icon-refresh"
 						}}).click(function() {
 							SetTab('','<?=ENGINE_HTTP?>/ajax.tab.php?action=' + $(this).attr('act') + '&id=' + $(this).attr('s_id') + '&pid=' + $(this).attr('s_pid'),$(this).attr('tabid'));	
+					});
+                                        
+                                        $(".clear_log_button").button({
+						icons: {
+							primary: "ui-icon-trash"
+						}}).click(function() {   
+                                                tabid = $(this).attr('tabid');
+                                                        $.ajax({
+                                                                url: '<?=ENGINE_HTTP?>/ajax.saveparams.php?act=clear_log_file',
+                                                                processData: false,
+                                                                datatype:'json',
+                                                                cache: false,
+                                                                type: 'GET',
+                                                                success: function(data){
+                                                                      SetTab('','<?=ENGINE_HTTP?>/ajax.tab.php?action=get_debug',tabid);		
+                                                                }	  
+                                                              });
 					});
 </script>					
 <?php

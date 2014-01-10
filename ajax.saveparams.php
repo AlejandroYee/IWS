@@ -64,6 +64,14 @@ if (!$user_auth -> is_user()) {
 	die("Доступ запрещен");
 }
 
+// Отчистка лога
+if (isset($_GET['act']) and ($_GET['act'] == "clear_log_file")) {
+   if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" )) {
+     file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).">] Cleared log file!\r\n", LOCK_EX);
+    }
+   exit;        
+}
+
 if (isset($_GET['id_mm_fr'])) {
 	$id_mm_fr     = intval($_GET['id_mm_fr']);
 } else {
