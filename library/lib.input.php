@@ -1,11 +1,20 @@
 <?php
 /*
-* Autor Andrey Lysikov (C) 2013
-* icq: 454169
+* Autor Andrey Lysikov (C) 2014
+* Licensed under the MIT license:
+*   http://www.opensource.org/licenses/mit-license.php
+* Part of IWS system
 */
 class INPUT extends DATA_FORM {
 var $db_conn, $id_mm_fr, $id_mm, $pageid;
-
+	
+	//--------------------------------------------------------------------------------------------------------------------------------------------
+	// Обрезка пробелов в строке, включая html пробел
+	//--------------------------------------------------------------------------------------------------------------------------------------------
+	Function FullTrim($txt) {
+					return trim(str_replace("&nbsp;","",$txt));
+	}
+	
 	// Описываем элементы данных
 	//-----------------------------------------------------------------------------------------------------------------------------------------------	
 	function data_element($field_text, $field_name, $name, $requred) {
@@ -16,7 +25,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 			$query_d = $this->db_conn->sql_execute("select to_char(".$field_text.", 'dd.mm.yyyy') def_date from dual");
 				while ($this-> db_conn-> sql_fetch($query_d))  {					
 					$output .= "
-					<p><label for='".$field_name_short."' >".FullTrim($name)."</label>
+					<p><label for='".$field_name_short."' >".$this->FullTrim($name)."</label>
 						<input type='text' class='date_".$this->pageid." FormElement ui-widget-content ui-corner-all' i_type='D' is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d, "DEF_DATE")."' />
 					</p>
 					";
@@ -32,7 +41,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 			$query_d = $this->db_conn->sql_execute("select to_char(".$field_text.", 'dd.mm.yyyy') def_date from dual");
 						while ($this-> db_conn-> sql_fetch($query_d))  {					
 							$output .= "
-							<p><label for='".$field_name_short."' >".FullTrim($name)."</label>
+							<p><label for='".$field_name_short."' >".$this->FullTrim($name)."</label>
 								<input type='text' class='date_time_".$this->pageid." FormElement ui-widget-content ui-corner-all' i_type='DT' is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d, "DEF_DATE")."' />
 							</p>
 							";
@@ -44,40 +53,43 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 		$field_name_short = strtolower($field_name."_".$this->pageid);
 			if (!empty($field_text) and (strpos($field_text,"input")  == 0)) {			
 				$query_d = $this->db_conn->sql_execute("select (".$field_text.") str_val from dual");	
-				while ($this-> db_conn-> sql_fetch($query_d))  $str_val = $this -> return_sql($query_d, "STR_VAL");
+				while ($this-> db_conn-> sql_fetch($query_d))  {
+                                        $str_val = $this -> return_sql($query_d, "STR_VAL");
+                                }
 			} else {
 				$str_val = "";
 			}
 				
-		return "<p><label for='".$field_name_short."' >".FullTrim($name)."</label>
+		return "<p><label for='".$field_name_short."' >".$this->FullTrim($name)."</label>
 					<input type='text' class='FormElement ui-widget-content ui-corner-all' is_requred='".$requred."' id='".$field_name_short."' size='".round($width/8)."' name='".$field_name."' value='".$str_val."' />
 			</p>
 			";
 	}
 	
-	function textarea_element($field_text,$field_name,$name,$width,$count_element, $requred) {
+	function textarea_element($field_name,$name,$count_element, $requred) {
 		$field_name_short = strtolower($field_name."_".$this->pageid);
-		return "<p style='text-align :left;'><label for='".$field_name_short."' >".FullTrim($name)."</label>
-					  <textarea id='".$field_name_short."' h='".$count_elemen."' is_requred='".$requred."' i_type='M' name='".$field_name."' role='textbox' multiline='true' class='FormElement ui-widget-content ui-corner-all'></textarea>
+		return "<p style='text-align :left;'><label for='".$field_name_short."' >".$this->FullTrim($name)."</label>
+					  <textarea id='".$field_name_short."' h='".$count_element."' is_requred='".$requred."' i_type='M' name='".$field_name."' role='textbox' multiline='true' class='FormElement ui-widget-content ui-corner-all'></textarea>
 					</p>";
 	}
 	function select_element($field_text,$field_name,$name,$width,$count_element, $requred) {
 		$output = "";		
 		if ($count_element <= 1) {						
 						$output .= "<p>
-								<label for='".$field_name."' >".FullTrim($name)."</label>
+								<label for='".$field_name."' >".$this->FullTrim($name)."</label>
 								<select id=\"".$field_name."-".$this->pageid."\"  i_type='SB' is_requred='".$requred."' name=\"".$field_name."\" h='1' w='".$width."' >";
 					} else {
 						
 						$output .= "<p>
-								<label for='".$field_name."' >".FullTrim($name)."</label>
+								<label for='".$field_name."' >".$this->FullTrim($name)."</label>
 								<select id=\"".$field_name."-".$this->pageid."\" multiple='multiple' i_type='SB' name=\"".$field_name."[]\" h='".$count_element."' w='".$width."'>";
 					}
 					
 						$query_d = $this -> db_conn->sql_execute($field_text);
-						while ($this-> db_conn-> sql_fetch($query_d)) 
+						while ($this-> db_conn-> sql_fetch($query_d)) { 
 								$output .= "<option ".$this -> return_sql($query_d, "FL_SELECTED")." value=".$this -> return_sql($query_d, "ID").">".$this -> return_sql($query_d, "NAME");
-					$output .= "</select></p>";
+                                                }
+                                                $output .= "</select></p>";
 	return $output;
 	}
 	
@@ -88,23 +100,25 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 					// проверка на пустой филд
 					if (empty($field_text)) $field_text = "null";
 					$query_d = $this->db_conn->sql_execute("select (".$field_text.") def_num from dual");
-						while ($this-> db_conn-> sql_fetch($query_d)) $value = $this -> return_sql($query_d, "DEF_NUM");
-						$output .= "<p><label for=\"".$field_name_short."\">".FullTrim($name)."</label>
+						while ($this-> db_conn-> sql_fetch($query_d)) {
+                                                        $value = $this -> return_sql($query_d, "DEF_NUM");
+                                                }        
+						$output .= "<p><label for=\"".$field_name_short."\">".$this->FullTrim($name)."</label>
 						<input type='text'  class='FormElement ui-widget-content ui-corner-all' i_type='".$num_culture."' w='".$width."' is_requred='".$requred."' id='".$field_name_short."' value='".$value."' name='".$field_name."' /></p>";
 						
 					
 	return $output;
 	}
 	// link or email
-	function link_element($field_text,$field_name,$name) {
-		return "<p><a href='".$field_text."'>".FullTrim($name)."</a></p>";						
+	function link_element($field_text,$name) {
+		return "<p><a href='".$field_text."'>".$this->FullTrim($name)."</a></p>";						
 	}
 	
 	// Checkbox
-	function checkbox_element($field_text,$field_name,$name,$requred) {
+	function checkbox_element($field_name,$name,$requred) {
 		$output = "";
 		$field_name_short = strtolower($field_name."_".$this->pageid);
-						$output .= "<p><label for=\"".$field_name_short."\">".FullTrim($name)."</label>
+						$output .= "<p><label for=\"".$field_name_short."\">".$this->FullTrim($name)."</label>
 						<input type='checkbox'  is_requred='".$requred."' class='FormElement ui-widget-content ui-corner-all' i_type='B' is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' /></p>";
 						
 					
@@ -175,18 +189,15 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 										);				
 			break;
 			case "M":	
-				$output .= $this -> textarea_element($this -> return_sql($query_tmp, "FIELD_TXT"),
-										$this -> return_sql($query_tmp, "FIELD_NAME"),
+				$output .= $this -> textarea_element($this -> return_sql($query_tmp, "FIELD_NAME"),
 										$this -> return_sql($query_tmp, "NAME"),
-										$this -> return_sql($query_tmp, "WIDTH"),
 										$this -> return_sql($query_tmp, "COUNT_ELEMENT"),
 										$this -> return_sql($query_tmp, "IS_REQURED")
 										);				
 			break;
 			// new
 			case "B":	
-				$output .= $this -> checkbox_element($this -> return_sql($query_tmp, "FIELD_TXT"),
-										$this -> return_sql($query_tmp, "FIELD_NAME"),
+				$output .= $this -> checkbox_element($this -> return_sql($query_tmp, "FIELD_NAME"),
 										$this -> return_sql($query_tmp, "NAME"),
 										$this -> return_sql($query_tmp, "IS_REQURED")
 										);				
@@ -229,13 +240,11 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 			break;			
 			case "A":	
 				$output .= $this -> link_element($this -> return_sql($query_tmp, "FIELD_TXT"),
-										$this -> return_sql($query_tmp, "FIELD_NAME"),
 										$this -> return_sql($query_tmp, "NAME")
 										);				
 			break;
 			case "E":	
 				$output .= $this -> link_element("mailto:".$this -> return_sql($query_tmp, "FIELD_TXT"),
-										$this -> return_sql($query_tmp, "FIELD_NAME"),
 										$this -> return_sql($query_tmp, "NAME")
 										);				
 			break;	
@@ -379,10 +388,14 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	function Creare_wizard_from () {
 	$output ="";
 	$inputs_form = "";
-	$query_tmp = $this->db_conn->sql_execute("select ft.name, t.id_wb_mm_form id from ".DB_USER_NAME.".wb_mm_form t left join ".DB_USER_NAME.".wb_form_type ft on ft.id_wb_form_type = t.id_wb_form_type where t.id_wb_main_menu = ".$this -> id_mm." and ft.name like 'GRID%' and rownum = 1 order by t.num");
-		while ($this-> db_conn-> sql_fetch($query_tmp)) $gridname = strtolower($this -> return_sql($query_tmp, "NAME")."_".$this -> return_sql($query_tmp, "ID")."_".$this ->pageid);
-	$query_tmp = $this->db_conn->sql_execute("select ft.name, t.id_wb_mm_form id from ".DB_USER_NAME.".wb_mm_form t left join ".DB_USER_NAME.".wb_form_type ft on ft.id_wb_form_type = t.id_wb_form_type where t.id_wb_main_menu = ".$this -> id_mm." and ft.name like 'CHARTS%' and rownum = 1 order by t.num");
-		while ($this-> db_conn-> sql_fetch($query_tmp)) $chartname = strtolower($this -> return_sql($query_tmp, "NAME")."_".$this -> return_sql($query_tmp, "ID")."_".$this ->pageid);
+	$query_tmp2 = $this->db_conn->sql_execute("select ft.name, t.id_wb_mm_form id from ".DB_USER_NAME.".wb_mm_form t left join ".DB_USER_NAME.".wb_form_type ft on ft.id_wb_form_type = t.id_wb_form_type where t.id_wb_main_menu = ".$this -> id_mm." and ft.name like 'GRID%' and rownum = 1 order by t.num");
+		while ($this-> db_conn-> sql_fetch($query_tmp2)) {
+                    $gridname = strtolower($this -> return_sql($query_tmp2, "NAME")."_".$this -> return_sql($query_tmp2, "ID")."_".$this ->pageid);
+                }    
+	$query_tmp1 = $this->db_conn->sql_execute("select ft.name, t.id_wb_mm_form id from ".DB_USER_NAME.".wb_mm_form t left join ".DB_USER_NAME.".wb_form_type ft on ft.id_wb_form_type = t.id_wb_form_type where t.id_wb_main_menu = ".$this -> id_mm." and ft.name like 'CHARTS%' and rownum = 1 order by t.num");
+		while ($this-> db_conn-> sql_fetch($query_tmp1)) {
+                    $chartname = strtolower($this -> return_sql($query_tmp1, "NAME")."_".$this -> return_sql($query_tmp1, "ID")."_".$this ->pageid);
+                }
 	// Собираем все формы в одну кучу
 	$query_tmp = $this->db_conn->sql_execute("select  t.*, ft.name as form_type from ".DB_USER_NAME.".wb_mm_form t left join ".DB_USER_NAME.".wb_form_type ft on ft.id_wb_form_type = t.id_wb_form_type where t.id_wb_main_menu = ".$this -> id_mm." and  (ft.name like 'INPUT_%' or ft.name = 'WIZARD_FORM') order by t.num");
 	while ($this-> db_conn-> sql_fetch($query_tmp)) {
@@ -581,5 +594,4 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	function __destruct() {
 		$this-> db_conn ->__destruct();	
 	}
-} // END CLASS
-?>
+}

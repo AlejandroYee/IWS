@@ -1,7 +1,9 @@
 <?php
 /*
-* Autor Andrey Lysikov (C) 2013
-* icq: 454169
+* Autor Andrey Lysikov (C) 2014
+* Licensed under the MIT license:
+*   http://www.opensource.org/licenses/mit-license.php
+* Part of IWS system
 */
 class JQGRID extends DATA_FORM{
 var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
@@ -16,7 +18,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 	$ResArray['TREE_EMPTY_DATA'] = "";				
 		
 	// Проверяем на наличие в кеше:
-	$load_data = load_from_cache("grid_". abs($this->id_mm_fr));
+	$load_data = BasicFunctions::load_from_cache("grid_". abs($this->id_mm_fr));
 	if ($load_data) {	
 		return $load_data;
 	} else {
@@ -71,7 +73,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 									$multi_str = " multiple:true, h:3, ";
 							}							
 							$main_dbs = new db();
-								$sd_options_content = get_select_data($main_dbs, $this -> return_sql($query, "FIELD_TXT"), 'null');	
+								$sd_options_content = BasicFunctions::get_select_data($main_dbs, $this -> return_sql($query, "FIELD_TXT"), 'null');	
 							$main_dbs -> __destruct();						
 							$edit_options .= ", i_type:'SB', input_type:'select', ".$multi_str." value: '".$sd_options_content."'";
 							$sd_options = "searchoptions: {value: ':;".$sd_options_content."'}, ";
@@ -101,7 +103,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						'".trim(str_ireplace(array("(not display)","#")," ",$this -> return_sql($query, "NAME")))."'";
 					
 					// Проверяем на служебные поля
-					if (trim_fieldname($this -> return_sql($query, "FIELD_NAME")) == "ID_".$this -> return_sql($query, "OBJECT_NAME") ) {
+					if (BasicFunctions::trim_fieldname($this -> return_sql($query, "FIELD_NAME")) == "ID_".$this -> return_sql($query, "OBJECT_NAME") ) {
 							$hidden = "hidden: true, ";
 							if ($inv_view_table == 0) {
 										$hidden = "hidden: false,";
@@ -114,9 +116,9 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					}
 					
 					// Спрятать ID_CONTROL_LOAD_DATA если включены служебные поля
-					if ((trim_fieldname($this -> return_sql($query, "FIELD_NAME")) == "ID_CONTROL_LOAD_DATA") and ($inv_view_table <> 1)) {							
+					if ((BasicFunctions::trim_fieldname($this -> return_sql($query, "FIELD_NAME")) == "ID_CONTROL_LOAD_DATA") and ($inv_view_table <> 1)) {							
 										$hidden = "hidden: true, ";
-					} else if(in_array(trim_fieldname($this -> return_sql($query, "FIELD_NAME")), $filed_sys_hiden)) { 
+					} else if(in_array(BasicFunctions::trim_fieldname($this -> return_sql($query, "FIELD_NAME")), $filed_sys_hiden)) { 
 						$hidden = "hidden: true, ";
 					}
 						
@@ -157,7 +159,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					$form_buttons = explode(",",strtoupper(trim($this -> return_sql($query, "EDIT_BUTTON"))));
 					
 					// Определяющая уровня для дерева
-					if ( trim_fieldname($this -> return_sql($query, "FIELD_NAME")) == "NAME") {
+					if ( BasicFunctions::trim_fieldname($this -> return_sql($query, "FIELD_NAME")) == "NAME") {
 						$ResArray['TREE_LEV_NAME'] = $this -> return_sql($query, "FIELD_NAME");
 					}
 					// Добавляем данные для пустой строки
@@ -189,7 +191,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 				$ResArray['TREE_EMPTY_DATA'] = "{0:[".trim($ResArray['TREE_EMPTY_DATA'],",")."]}";
 				$ResArray['colNames'] = "[".trim($ResArray['colNames'], ",")."]";
 				$ResArray['colModel'] = "[".trim($ResArray['colModel'], ",")."]";					
-				save_to_cache("grid_". abs($this->id_mm_fr), $ResArray);
+				BasicFunctions::save_to_cache("grid_". abs($this->id_mm_fr), $ResArray);
 				return $ResArray;		
 		}
 	}
@@ -323,7 +325,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                                 grid_load_<?=$object_name?>_time++;
                                                                 minutes_<?=$object_name?> = (Math.floor(grid_load_<?=$object_name?>_time/60) < 10) ? "0"+Math.floor(grid_load_<?=$object_name?>_time/60) : Math.floor(grid_load_<?=$object_name?>_time/60);
                                                                 seconds_<?=$object_name?> = ((grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60) < 10) ? "0"+(grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60) : (grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60);
-                                                                $("#load_<?=$object_name?>").html("<table style='left:42%;position:absolute;top:47%;width:250px;vertical-align:middle;'><tr><td><img src='<?=ENGINE_HTTP?>/library/ajax-loader.gif'><span style='top:-10px;'></td><td>(" + minutes_<?=$object_name?> +':' + seconds_<?=$object_name?> + ") Ожидаю данные...</td></tr></table>");
+                                                                $("#load_<?=$object_name?>").html("<table style='left:42%;position:absolute;top:47%;width:250px;vertical-align:middle;'><tr><td><img src='<?=ENGINE_HTTP?>/library/ajax-loader-tab.gif'><span style='top:-10px;'></td><td>(" + minutes_<?=$object_name?> +':' + seconds_<?=$object_name?> + ") Ожидаю данные...</td></tr></table>");
                                                         }
                                                         grid_load_<?=$object_name?>_intval = setInterval(loader_function, 1000);
                                                         loader_function();
@@ -403,7 +405,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                             })	
                             .jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
                                   caption: 'Просмотр',
-                                  title: 'Просмотреть выделенную запись',
+                                  id: '<?=$object_name?>_view_button',
+                                  title: 'Просмотреть выделенную запись (Кнопка V, ENTER)',
                                   buttonicon: 'ui-icon-document',
                                   onClickButton: function(){
                                                     row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');                                                               
@@ -417,7 +420,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					if (isset($ResArray['ADD_BUTTON'])) { ?>
 					.jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
                                               caption: 'Добавить',
-                                              title: 'Добавить новую запись',
+                                              id: '<?=$object_name?>_add_button',
+                                              title: 'Добавить новую запись (Кнопка A, INS)',
                                               buttonicon: 'ui-icon-plus',
                                               onClickButton: function(){
 													if ($('#<?=$object_name?>').attr('new_colmodel') == "true") {
@@ -457,7 +461,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               if (isset($ResArray['COPY_BUTTON'])) { ?>              
                                               .jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
                                               caption: 'Копировать',
-                                              title: 'Скопировать выбранную запись в новую запись',
+                                              id: '<?=$object_name?>_copy_button',
+                                              title: 'Скопировать выбранную запись в новую запись (Кнопка C)',
                                               buttonicon: 'ui-icon-transferthick-e-w',
                                               onClickButton: function() {
 													if ($('#<?=$object_name?>').attr('new_colmodel') == "true") {
@@ -502,7 +507,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					if (isset($ResArray['EDIT_BUTTON'])) { ?>
 					.jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
                                               caption: 'Изменить',
-                                              title: 'Изменить выделенную запись',
+                                              id: '<?=$object_name?>_edit_button',
+                                              title: 'Изменить выделенную запись (Кнопка E)',
                                               buttonicon: 'ui-icon-pencil',
                                               onClickButton: function(){
 																if ($('#<?=$object_name?>').attr('new_colmodel') == "true") {
@@ -537,7 +543,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					if (isset($ResArray['DELETE_BUTTON'])) {?>
 					.jqGrid('navGrid','#Page_-<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
                                               caption: 'Удалить',
-                                              title: 'Удалить выделенную запись',
+                                              id: '<?=$object_name?>_delite_button',
+                                              title: 'Удалить выделенную запись (Кнопка D, DEL)',
                                               buttonicon: 'ui-icon-close',
                                               onClickButton: function(){
 																row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selarrrow');
@@ -593,7 +600,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		?>		
 		   .jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
                                               caption: 'Отфильтровать',
-                                              title: 'Поиск по ключевым словам',
+                                              id: '<?=$object_name?>_filter_button',
+                                              title: 'Поиск по ключевым словам (Кнопка F)',
                                               buttonicon: 'ui-icon-search',
                                               onClickButton: function(){
 									$('#<?=$object_name?>').jqGrid()[0].toggleToolbar();	
@@ -601,7 +609,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		<?php
 		}
 		?>				
-		.hideCol(['r_num']);	
+		.hideCol(['r_num']).jqGrid('bindKeys', {'scrollingRows':false});	
                                         
 						$('#pg_Pager_<?=$object_name?>').children('.ui-pg-table').removeAttr( 'style' ).css('width','100%');
 						$('#Pager_<?=$object_name?>_left').removeAttr( 'style' );
@@ -649,8 +657,62 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		$('#reload_grid_<?=$this -> pageid?>').click();
 	<?php
 	}
-	// Закрываем скрипт	
 	?>
+          // События при нажатии кнопок:
+          $('#<?=$object_name?>').keyup(function(eventObject){
+              console.log(eventObject);
+             switch (eventObject.keyCode)
+            {
+                case 86: // view
+		 $('#<?=$object_name?>_view_button').click();	
+		break;
+                case 45: // add
+		  $('#<?=$object_name?>_add_button').click();	
+		break;
+                case 65: // add
+		  $('#<?=$object_name?>_add_button').click();	
+		break;
+                case 69: // edit
+		  $('#<?=$object_name?>_edit_button').click();	
+		break;
+                case 67: // copy
+		   $('#<?=$object_name?>_copy_button').click();	
+		break;                
+                case 46: // del
+                   $('#<?=$object_name?>_delite_button').click();
+		break;
+                case 68: // del
+                   $('#<?=$object_name?>_delite_button').click();
+		break;
+                case 70: // filter
+                   $('#<?=$object_name?>_filter_button').click();
+		break;           
+                case 32: // treee
+                   ids =  $('#<?=$object_name?>').jqGrid('getGridParam', 'selrow');
+                   tree_leaf =  $('#<?=$object_name?>').jqGrid('getRowData', ids).isLeaf;                   
+                   if (typeof(tree_leaf) !== 'undefined' || tree_leaf  === "false") {
+                       $('#'+ids).find('.treeclick').click();  
+                   }
+		break;  
+                 case 40: // down
+		 if (eventObject.ctrlKey === false) {
+                     toppos = $('#<?=$object_name?>').find('#' + $('#<?=$object_name?>').jqGrid('getGridParam', 'selrow')).position().top;
+                     toppos = toppos - $('#<?=$object_name?>').parent().parent().height()/2;
+                     $('#<?=$object_name?>').parent().parent().scrollTop(toppos); 
+                     $('#<?=$object_name?>').find('.ui-state-hover').removeClass('ui-state-hover');
+                     
+                 }
+		break;  
+                case 38: // down
+		 if (eventObject.ctrlKey === false) {
+                     toppos = $('#<?=$object_name?>').find('#' + $('#<?=$object_name?>').jqGrid('getGridParam', 'selrow')).position().top;
+                     toppos = toppos - $('#<?=$object_name?>').parent().parent().height()/2;
+                     $('#<?=$object_name?>').parent().parent().scrollTop(toppos); 
+                     $('#<?=$object_name?>').find('.ui-state-hover').removeClass('ui-state-hover');
+                 }
+		break;  
+        };
+          });      
 	});
 	 </script>
 	 <?php
@@ -718,7 +780,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 	?>	
 		<div id="<?=$button_name?>" title="Выполнить?">
 			<p><?=$label?></p>
-			<div id= 'ajax_<?=$button_name?>' ><img src='/library/ajax-loader.gif' style='padding-bottom: 4px; vertical-align: middle;' > Выполняю...</div>	
+			<div id= 'ajax_<?=$button_name?>' ><img src='/library/ajax-loader-tab.gif' style='padding-bottom: 4px; vertical-align: middle;' > Выполняю...</div>	
 		</div>
 		<script type="text/javascript">		
 		$(function() {	
@@ -836,7 +898,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 							<input type='checkbox' id='export_filtered_<?=$object_name?>'>
 								<label for='export_filtered_<?=$object_name?>' style='font-size:80%' >Применить фильтр и сортировку</label><br><br>						
 							<div id="export_ajax_<?=$object_name?>" >
-								<img src="<?=ENGINE_HTTP?>/library/ajax-loader.gif" style="padding-bottom: 4px; vertical-align: middle;" > Экспортирую...
+								<img src="<?=ENGINE_HTTP?>/library/ajax-loader-tab.gif" style="padding-bottom: 4px; vertical-align: middle;" > Экспортирую...
 							</div>
 					</div>
 					<script type="text/javascript">		

@@ -1,7 +1,9 @@
 <?php
 /*
-* Autor Andrey Lysikov (C) 2013
-* icq: 454169
+* Autor Andrey Lysikov (C) 2014
+* Licensed under the MIT license:
+*   http://www.opensource.org/licenses/mit-license.php
+* Part of IWS system
 */
 class AUTH {
 	function is_user($user = false,$pass = false) {	
@@ -11,7 +13,7 @@ class AUTH {
 			$pwd = base64_decode($this->decrypt($_SESSION['us_pr'],session_id()));
 			if (!empty($pwd)) {			
 				// пытаемся приверить пользователя, даже если он пройдет проверку, то потом отвалится от лдап
-				if ($this->check_ldap_user(Convert_quotas($_SESSION['us_name']), $pwd)) {
+				if ($this->check_ldap_user(BasicFunctions::Convert_quotas($_SESSION['us_name']), $pwd)) {
 					// все хорошо, работаем дальше
 					return true;
 				}
@@ -55,7 +57,7 @@ class AUTH {
 			if(@ldap_bind($ldap,$user."@".AUTH_DOMAIN,$pass)) {
 				return true;	
 			} else {
-				to_log("ERR: User login failed! Broken user name or password.");
+				BasicFunctions::to_log("ERR: User login failed! Broken user name or password.");
 				return false;
 			}
 	   }
@@ -84,4 +86,3 @@ class AUTH {
 		return substr($str, 0, strlen($str) - $pad);
 	}
 }
-?>

@@ -1,14 +1,16 @@
 <?php
 /*
-* Autor Andrey Lysikov (C) 2013
-* icq: 454169
+* Autor Andrey Lysikov (C) 2014
+* Licensed under the MIT license:
+*   http://www.opensource.org/licenses/mit-license.php
+* Part of IWS system
 */
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Файл содержимого вкладок и управления ими
 //--------------------------------------------------------------------------------------------------------------------------------------------
 require_once("library/lib.func.php");
-requre_script_file("lib.requred.php"); 
-requre_script_file("lib.help.php");	
+BasicFunctions::requre_script_file("lib.requred.php"); 
+BasicFunctions::requre_script_file("lib.help.php");	
 
 // Инициализация
 $DataGrid = new Data_form();
@@ -16,26 +18,15 @@ $main_db = new Db();
 $s_help = new Help();
 
 // Проверяем переменные на инжекты и приводим в нужный формат
-if (isset($_GET['id'])) {
-	$id=intval($_GET['id']);
-	$pid=intval($_GET['pid']);	
-} else {
-	$pid = 0;
-	$id  = 0;
-}
-
-$tabid=Convert_quotas($_GET['tabid']);	
-
-if (isset($_GET['action'])) {	
-		$action = Convert_quotas($_GET['action']);
-	} else {
-		$action = "";
-}
+$pid    = filter_input(INPUT_GET, 'pid',FILTER_SANITIZE_NUMBER_INT);
+$id     = filter_input(INPUT_GET, 'id',FILTER_SANITIZE_NUMBER_INT);
+$tabid  = filter_input(INPUT_GET, 'tabid',FILTER_SANITIZE_STRING); 
+$action = filter_input(INPUT_GET, 'action',FILTER_SANITIZE_STRING);
 
 // Дополнительная проверка на пользователя и права доступа:
-$query = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_main_menu = ".$id." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable'");
-while ($main_db -> sql_fetch($query)) {
-	$check				= explode(",",strtoupper(trim( $main_db -> sql_result($query, "EDIT_BUTTON") )));
+$query_check = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_main_menu = ".$id." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable'");
+while ($main_db -> sql_fetch($query_check)) {
+	$check	= explode(",",strtoupper(trim( $main_db -> sql_result($query_check, "EDIT_BUTTON") )));
 }
 // если пользователю недоступна форма, то выходим сразу
 if (empty($check) and empty($action)) die("Доступ сюда запрещен");
@@ -160,4 +151,3 @@ switch ($action) {
 <?php
 $main_db -> __destruct();
 $DataGrid -> __destruct();
-?>

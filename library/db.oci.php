@@ -1,7 +1,9 @@
 <?
 /*
-* Autor Andrey Lysikov (C) 2013
-* icq: 454169
+* Autor Andrey Lysikov (C) 2014
+* Licensed under the MIT license:
+*   http://www.opensource.org/licenses/mit-license.php
+* Part of IWS system
 */
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Класс базы данных для связи с ORACLE DB
@@ -14,22 +16,22 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 	
 		if (!$ora) {		
 			$err_array = oci_error();				
-			to_log("ERR: ".$err_array['message']);
+			BasicFunctions::to_log("ERR: ".$err_array['message']);
 			die("<p align='left' >".iconv(LOCAL_ENCODING,HTML_ENCODING,str_replace(array("\r\n", "\n",),"<br>",str_replace(array("    ","   ","  ")," ",$err_array['message'])))."</p>");
 		
 		} else {
 		
             $this->link = $ora;	
 				// Проверяем на присутсвие пользователя в базе:
-				$load_data = load_from_cache("user_prefs");
+				$load_data = BasicFunctions::load_from_cache("user_prefs");
 				if ($load_data) {
 							$this -> user_real_name = $load_data['real_name'];
 							$this -> user_pref = $load_data['userprf'];								
 					} else {				
 						if (DB_USER_NAME != "wb") { // костыль если используется пользователь WB!
-								$query = OCI_Parse($this->link,"select t.id_wb_user, t.name, t.param_view from ".DB_USER_NAME.".wb_user t where t.wb_name = upper('".Convert_quotas(auth::get_user())."')");
+								$query = OCI_Parse($this->link,"select t.id_wb_user, t.name, t.param_view from ".DB_USER_NAME.".wb_user t where t.wb_name = upper('".auth::get_user()."')");
 							} else {
-								$query = OCI_Parse($this->link,"select t.id_wb_user, t.name, t.param_view from wb_user t where t.wb_name = upper('".Convert_quotas(auth::get_user())."')");
+								$query = OCI_Parse($this->link,"select t.id_wb_user, t.name, t.param_view from wb_user t where t.wb_name = upper('".auth::get_user()."')");
 						}
 						OCI_Execute($query);
 						while (oci_fetch($query)) {
@@ -37,14 +39,14 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 							$this -> user_pref = oci_result($query,"PARAM_VIEW");							
 							$load_data['real_name'] = $this -> user_real_name;
 							$load_data['userprf'] = $this -> user_pref;
-							save_to_cache("user_prefs", $load_data, null);
+							BasicFunctions::save_to_cache("user_prefs", $load_data, null);
 						}
 				}
 				// ОК, регистрируемся в системе
 				if (DB_USER_NAME != "wb") { // костыль если используется пользователь WB!
-					OCI_Execute(OCI_Parse($this->link,"begin ".DB_USER_NAME.".wb.save_wb_user(upper('".Convert_quotas(auth::get_user())."')); end;"));
+					OCI_Execute(OCI_Parse($this->link,"begin ".DB_USER_NAME.".wb.save_wb_user(upper('".auth::get_user()."')); end;"));
 				} else {
-					OCI_Execute(OCI_Parse($this->link,"begin wb.save_wb_user(upper('".Convert_quotas(auth::get_user())."')); end;"));
+					OCI_Execute(OCI_Parse($this->link,"begin wb.save_wb_user(upper('".auth::get_user()."')); end;"));
 				}
 				// При написани вьюх Павел неуказал формат для функций to_number, по этому мы жестко привязываемся к тому что на сервере формат
 				// дробной части начинается на точку.
@@ -92,13 +94,15 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 	// Загрузка параметров системы
 	//------------------------------------------------------------------------------------------------------------------------------------------------
 	public function get_settings_val($param_name) {
-		$load_data = load_from_cache($param_name);
+		$load_data = BasicFunctions::load_from_cache($param_name);
 		if ($load_data) {
 			return $load_data;
 		} else {
 			$query = $this->sql_execute("Select ".DB_USER_NAME.".wb_sett.get_settings_val_char(upper('".$param_name."')) column_value from dual");
-				while ($this-> sql_fetch($query)) $param_value = $this->sql_result($query, "COLUMN_VALUE");   
-			save_to_cache($param_name, $param_value, null);
+				while ($this-> sql_fetch($query)) {
+                                    $param_value = $this->sql_result($query, "COLUMN_VALUE"); 
+                                }
+			BasicFunctions::save_to_cache($param_name, $param_value, null);
 			return $param_value;
 		}
 		
@@ -107,14 +111,16 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 	// Загрузка срузку нескольких параметров системы в массив
 	//------------------------------------------------------------------------------------------------------------------------------------------------
 	public function get_settings_many_val($param_name) {
-		$load_data = load_from_cache($param_name);
+		$load_data = BasicFunctions::load_from_cache($param_name);
 		if ($load_data) {
 			return $load_data;
 		} else {
 			$query = $this->sql_execute("Select t.column_value from table(".DB_USER_NAME.".wb_sett.get_settings_many_val_char(upper('".$param_name."'))) t");
 			$param_value = array();
-				while ($this-> sql_fetch($query)) $param_value[] =  $this->sql_result($query, "COLUMN_VALUE");
-			save_to_cache($param_name, $param_value, null);
+				while ($this-> sql_fetch($query)) { 
+                                        $param_value[] =  $this->sql_result($query, "COLUMN_VALUE");
+                                }
+			BasicFunctions::save_to_cache($param_name, $param_value, null);
 			return $param_value;
 		}
 	}
@@ -137,7 +143,7 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 			$sql =  str_ireplace(array("wb.wb.","WB.WB."),"wb.", $sql);
 		}
 	
-		to_log("SQL: <".$this->link."> ".trim(strtolower($sql),";").";");
+		BasicFunctions::to_log("SQL: <".$this->link."> ".trim(strtolower($sql),";").";");
 		
 		$rowid = "";
 		
@@ -159,24 +165,26 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 					if (OCI_Execute($res)) {
 							$res2 = OCI_Parse($this->link,"select SYS_CONTEXT ('CLIENTCONTEXT', 'rowid' ) as row_id from dual");
 							OCI_Execute($res2);
-							while (OCI_Fetch($res2)) $rowid = oci_result($res2,'ROW_ID');							
+							while (OCI_Fetch($res2)) {
+                                                            $rowid = oci_result($res2,'ROW_ID');                                                        
+                                                        }							
 						} else {
 							$err_array = oci_error($res);					
 							// если нет то умираем
-							to_log("ERR: ".$err_array['message']);
+							BasicFunctions::to_log("ERR: ".$err_array['message']);
 							die("<p align='left' >".iconv(LOCAL_ENCODING,HTML_ENCODING,str_replace(array("\r\n", "\n",),"<br>",str_replace(array("    ","   ","  ")," ",$err_array['message'])))."</p>");
 						}
 				} else {					
 					$err_array = oci_error($res);					
 					// если нет то умираем
-					to_log("ERR: ". $err_array['message'],true);
+					BasicFunctions::to_log("ERR: ". $err_array['message'],true);
 					die("<p align='left' >".iconv(LOCAL_ENCODING,HTML_ENCODING,str_replace(array("\r\n", "\n",),"<br>",str_replace(array("    ","   ","  ")," ",$err_array['message'])))."</p>");
 				}
 		}
 		
 		// Если был ретурнинг то отдаем вместо ресурса вернувшиеся значение
 		if (!empty($rowid)) {
-					to_log("SQL: <".$this->link."> returning id ".$rowid." is a reached!");
+					BasicFunctions::to_log("SQL: <".$this->link."> returning id ".$rowid." is a reached!");
 					return $rowid;
 			} else {		
 					// Возвращаем ресурс для извлечения данных
@@ -185,7 +193,7 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 	}
 	
 	// Парсинг строк в таблице
-	public function sql_fetch($sql) { return @OCI_Fetch($sql); }
+	public function sql_fetch($sql) { return OCI_Fetch($sql); }
 	
 	
 	// Возвращаем значение нужного столбца, в случае чего перекодируем
@@ -233,13 +241,14 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 			}
 	    
 		// Необходимо вернуть значения по умолчанию
-		if (!$is_found)
+		if (!$is_found) {
 			switch (strtolower(trim($param_name))) {
 				case "editabled": return "checked"; break;
 				case "num_mounth": return "3"; break;
 				case "render_type": return "2"; break;
 				case "num_reck": return "100"; break;
 			}
+                }
 	}
 	
 	// Сохраняем пользовательские параметры в базу
@@ -247,7 +256,9 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 		$sub_line_new = "";
 		$is_found = false;
 		// Проверка на ключ
-		if (strtolower(trim($value)) == 'on' ) $value = "checked";
+		if (strtolower(trim($value)) == 'on' ) { 
+                    $value = "checked";
+                }
 		$arr_field = explode(";",$this -> user_pref);
 			foreach ($arr_field as $line) {
 				// Смотрим значения:
@@ -271,5 +282,4 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 		}
 	}
 	
-} // END CLASS
-?>
+} 

@@ -1,7 +1,9 @@
 <?php
 /*
-* Autor Andrey Lysikov (C) 2013
-* icq: 454169
+* Autor Andrey Lysikov (C) 2014
+* Licensed under the MIT license:
+*   http://www.opensource.org/licenses/mit-license.php
+* Part of IWS system
 */
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Определение дополнительных элементов
@@ -9,13 +11,11 @@
 header("Content-Type: text/html; charset=".strtolower(HTML_ENCODING));
 header("Cache-Control: private,no-cache,no-store");
 header("Pragma: no-cache");
-define("VERSION_ENGINE","v2.00 Final Release");
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Подключаем необходимые модули
 //--------------------------------------------------------------------------------------------------------------------------------------------
 require_once("lib.func.php");
-requre_script_file("db.".DB.".php");
-requre_script_file("auth.".AUTH.".php");
+BasicFunctions::requre_script_file("db.".DB.".php");
 
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Основной класс
@@ -29,19 +29,21 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		
 		// Временный оффлайн системы с сообщением
 		if (defined("OFFINE_START_DATE") and defined("OFFINE_END_DATE") and (time() >= OFFINE_START_DATE) and (time() <= OFFINE_END_DATE)) {
-			die(Create_logon_window(true)); // факт офлайна включается заглушка
+			die(BasicFunctions::Create_logon_window(true)); // факт офлайна включается заглушка
 		}
 		
 		// Запрос авторизации:
 		$user_auth = new AUTH();
 		if (!$user_auth -> is_user()) {			
-			die(Create_logon_window());
+			die(BasicFunctions::Create_logon_window());
 		}
 		 // Соединение с ДБ
 		$this -> db_conn = new DB();
 		
 		// Для использования кеширования, нужно сразу загрузить меню
-		if (empty($this -> main_menu)) $this -> set_tree_main_menu_from_db();
+		if (empty($this -> main_menu)) {
+                        $this -> set_tree_main_menu_from_db();
+                }        
 	}
 	
 	 // Метод завершения
@@ -50,19 +52,6 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		if (is_object($this->db_conn)) {
 				$this->db_conn->__destruct();
 		}                
-		//--------------------------------------------------------------------------------------------------------------------------------------------	
-		// Сборщик мусора из сейсий хпх
-		//--------------------------------------------------------------------------------------------------------------------------------------------
-		/*$dir = session_save_path(); 
-		if (!empty($dir)) {
-			$tmp_files_array = scandir($dir);
-			foreach ($tmp_files_array as $file) {
-				if (($file == ".") or ($file == "..")) continue; // на всякий случай чтобы не грохнуть директорию
-				if ((strrpos($file,"sess_") !== false) and (filesize($file) < 2)) {
-					if (unlink($dir . DIRECTORY_SEPARATOR . $file)) to_log("CLEANER: Removed tmp session file: ".$file);
-				}
-			}
-		}*/
 	}
 	
 	// Короткая форма для сокращения текста обращений к ДБ
@@ -83,7 +72,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		return "		
 		<div id=\"import_".$last_grid_name."\" title='".$file_name."'>
 			<input id = 'upload_ajax_".$last_grid_name."' name='".$file."' class='FormElement' type='file'><br>
-			<div id= 'import_ajax_".$last_grid_name."' ><img src='/library/ajax-loader.gif' style='padding-bottom: 4px; vertical-align: middle;' > Прикрепляю...</div>	
+			<div id= 'import_ajax_".$last_grid_name."' ><img src='/library/ajax-loader-tab.gif' style='padding-bottom: 4px; vertical-align: middle;' > Прикрепляю...</div>	
 		</div>
 		<script type=\"text/javascript\">
 		$(function() {			
@@ -201,7 +190,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 				$this-> id_mm_fr = $this -> return_sql($query, "ID");
 				$this-> id_mm_fr_d  = $this -> return_sql($query, "ID_D");				
 				$object_name = strtolower($this -> return_sql($query, "TYPE")."_".abs($this -> return_sql($query, "ID"))."_".$this ->pageid);	
-				
+                                
 				// Начинаем создавать формы				
 				switch ($this -> return_sql($query, "TYPE")) {
                     case "INPUT_FORM": 
@@ -245,7 +234,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					
 					// Форма прикрепления файла к строке грида
 					case "INPUT_FORM_UPLOAD":
-						if (isset($grid)) {
+						if (isset($grid) and isset($last_grid_name)) {
 							$this -> data_res .= $this -> append_file_to_grid($last_grid_name);
 						}
 					break;
@@ -292,7 +281,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						
 						// Создаем детальный грид
 						$grid = new JQGRID($this -> id_mm_fr, $this ->id_mm_fr_d, $this -> id_mm, $this -> pageid, $this -> grid_main_name);
-						$this -> data_res .= regex_javascript( $grid -> greate_grid($this -> return_sql($query, "TYPE"),
+						$this -> data_res .= BasicFunctions::regex_javascript( $grid -> greate_grid($this -> return_sql($query, "TYPE"),
 																					"local",
 																					$object_name,$this -> return_sql($query, "XSL_FILE_OUT"),
 																					$this -> return_sql($query, "HEIGHT_RATE"),
@@ -310,7 +299,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						
 						// Создаем детальный грид
 						$grid = new JQGRID($this -> id_mm_fr, $this ->id_mm_fr_d, $this -> id_mm, $this -> pageid, $this -> grid_main_name);
-						$this -> data_res .= regex_javascript($grid -> greate_grid($this -> return_sql($query, "TYPE"),
+						$this -> data_res .= BasicFunctions::regex_javascript($grid -> greate_grid($this -> return_sql($query, "TYPE"),
 																"local",
 																$object_name,
 																$this -> return_sql($query, "XSL_FILE_OUT"),
@@ -334,9 +323,9 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					
 					// Создаем гриды
 						if (empty($IsInputform)) {
-								$this -> data_res .= regex_javascript($grid -> greate_grid($this -> return_sql($query, "TYPE"),"json", $object_name,$this -> return_sql($query, "XSL_FILE_OUT"),$heigth_rate,$this -> return_sql($query, "ID"),$this -> return_sql($query, "AUTO_UPDATE")));								
+								$this -> data_res .= BasicFunctions::regex_javascript($grid -> greate_grid($this -> return_sql($query, "TYPE"),"json", $object_name,$this -> return_sql($query, "XSL_FILE_OUT"),$heigth_rate,$this -> return_sql($query, "ID"),$this -> return_sql($query, "AUTO_UPDATE")));								
 							} else {
-								$this -> data_res .= regex_javascript($grid -> greate_grid($this -> return_sql($query, "TYPE"),"local", $object_name,$this -> return_sql($query, "XSL_FILE_OUT"),$heigth_rate,$this -> return_sql($query, "ID"),$this -> return_sql($query, "AUTO_UPDATE")));
+								$this -> data_res .= BasicFunctions::regex_javascript($grid -> greate_grid($this -> return_sql($query, "TYPE"),"local", $object_name,$this -> return_sql($query, "XSL_FILE_OUT"),$heigth_rate,$this -> return_sql($query, "ID"),$this -> return_sql($query, "AUTO_UPDATE")));
 						}	
 						
 					// Сохраняем предыдущий обьект
@@ -346,8 +335,8 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 				}			
             }
 			// Здесь мы создаем финальную обвязку:
-			if (isset($chart)) $this -> data_res .= regex_javascript($chart -> set_script());
-			if ($count_detail_forms > 1)  $this -> data_res .= regex_javascript($grid -> create_detail_tab_script());
+			if (isset($chart)) $this -> data_res .= BasicFunctions::regex_javascript($chart -> set_script());
+			if ($count_detail_forms > 1)  $this -> data_res .= BasicFunctions::regex_javascript($grid -> create_detail_tab_script());
 			
 			// Флаг что входные данные загружены
 			if ($IsInputform == 0 ) $this -> data_res .= "<script type=\"text/javascript\"> var data_".$this -> pageid."_loaded = 1;  </script>";
@@ -365,7 +354,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		// Обычно соединение с базой очень меделенное, плюс кеширование с помощью кукисов, лайв гдето час
 		function set_tree_main_menu_from_db() {		
 			// Проверяем если у нас закешированный кукис:
-			$load_data = load_from_cache("main_menu",true);
+			$load_data = BasicFunctions::load_from_cache("main_menu",true);
 			if ($load_data) {
 					$this -> main_menu = $load_data;
 					return true;
@@ -402,7 +391,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						$this -> main_menu[$this -> return_sql($query, "ID_WB_MAIN_MENU")]['PARENT'] = $last_num + 1;
 						$this -> main_menu[$this -> return_sql($query, "ID_WB_MAIN_MENU")]['ICON'] = "<span class='ui-icon ui-icon-note'></span>";	
 						// Возможность посмотреть лог программы:
-						if (@HAS_DEBUG_FILE <> "") {
+						if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" )) {
 							$this -> main_menu[$last_num + 5]['ID'] = $last_num + 5;
 							$this -> main_menu[$last_num + 5]['NAME'] = "Посмотреть лог программы...";
 							$this -> main_menu[$last_num + 5]['ICON'] = "<span class='ui-icon ui-icon-script'></span>";
@@ -435,7 +424,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 				$this -> main_menu[$last_num + 8]['PARENT'] = $last_num + 1;
 				
 				// Кешируем меню
-				save_to_cache("main_menu",$this -> main_menu);
+				BasicFunctions::save_to_cache("main_menu",$this -> main_menu);
 		}
 
 		static function get_about() {
@@ -459,7 +448,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								if ($sametab != 'false') {
 									$parenttab = "parent.";
 								}
-								$action =  $parenttab."SetTab('".@$key['NAME']."','".ENGINE_HTTP."/ajax.tab.php?id=".$key['ID']."&pid=".$key['PARENT']."','".$sametab."') "; 
+								$action =  $parenttab."SetTab('".$key['NAME']."','".ENGINE_HTTP."/ajax.tab.php?id=".$key['ID']."&pid=".$key['PARENT']."','".$sametab."') "; 
 						}
 						if ($parent_id == 0)  $icon = ""; 	
 						if (isset($key['ICON']) and !empty($key['ICON'])) $icon = $key['ICON'];
@@ -484,5 +473,4 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 				return  $res; 
 			}				
 		}	
-} // END CLASS
-?>
+}

@@ -1,30 +1,32 @@
 <?
 /*
-* Autor Andrey Lysikov (C) 2013
-* icq: 454169
+* Autor Andrey Lysikov (C) 2014
+* Licensed under the MIT license:
+*   http://www.opensource.org/licenses/mit-license.php
+* Part of IWS system
 */
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Экспорт:
 //--------------------------------------------------------------------------------------------------------------------------------------------
 	require_once("library/lib.func.php");
-	requre_script_file("lib.requred.php"); 
-
+	BasicFunctions::requre_script_file("lib.requred.php"); 
+        BasicFunctions::requre_script_file("auth.".AUTH.".php");
 	header("Set-Cookie: fileDownload=false");
 
 	$user_auth = new AUTH();	
 	if (!$user_auth -> is_user()) {
-			clear_cache();
+			BasicFunctions::clear_cache();
 			die("Доступ запрещен");
 	}
 	$main_db = new db();
 	
-	end_session();  // Закрываем сейсию для паралельного исполнния
+	BasicFunctions::end_session();  // Закрываем сейсию для паралельного исполнния
 	
-	$type    	= @Convert_quotas($_GET['type']);
+	$type    	= @BasicFunctions::Convert_quotas($_GET['type']);
 	$id_mm      = @intval($_GET['id_mm']); 
 	$id_mm_fr   = @intval($_GET['id_mm_fr']); 
 	$id_mm_fr_d = @intval($_GET['id_mm_fr_d']); 
-	$pageid		= @Convert_quotas($_GET['pageid']); 
+	$pageid		= @BasicFunctions::Convert_quotas($_GET['pageid']); 
 
 	$qWhere		= "";
 	$arr_field      = array();
@@ -49,7 +51,7 @@
 			if (is_numeric($_GET['id'])) {			 
 					$s_d_m_Where  = " AND ID_".$Master_Table_ID." = ".intval($_GET['id']);
 				} else {
-					$s_d_m_Where  = " AND ID_".$Master_Table_ID." = '".Convert_quotas($_GET['id'])."'";
+					$s_d_m_Where  = " AND ID_".$Master_Table_ID." = '".BasicFunctions::Convert_quotas($_GET['id'])."'";
 			}
 			//$id_mm_fr = $id_mm_fr_d;
 	} else {
@@ -229,21 +231,21 @@
 				// Мы можем передать данные в формате <тип поиска>><данные>
 				$s_opts = explode(">",$v);
 				$v = iconv(HTML_ENCODING,LOCAL_ENCODING,trim(@$s_opts[1])); // кодировочку меняем				
-				$type_field = @$arr_field_type[in_array_search(trim_fieldname($k), $arr_field)];
+				$type_field = @$arr_field_type[in_array_search(BasicFunctions::trim_fieldname($k), $arr_field)];
 				if ($v != "" ) if ( $type_field == "D" ) {
 									// Дата может быть нескольких форматов
 									if (stripos($v,":") > 0) {
-										$qWhere .= " AND t.".trim_fieldname($k)." = to_date('".$v."', 'dd.mm.yyyy hh24:mi:ss') ";
+										$qWhere .= " AND t.".BasicFunctions::trim_fieldname($k)." = to_date('".$v."', 'dd.mm.yyyy hh24:mi:ss') ";
 									} else {
-										$qWhere .= " AND t.".trim_fieldname($k)." = to_date('".$v."', 'dd.mm.yyyy') ";
+										$qWhere .= " AND t.".BasicFunctions::trim_fieldname($k)." = to_date('".$v."', 'dd.mm.yyyy') ";
 									}								
 								} else switch (trim($s_opts[0])) { // Смотрим что за логическая операция
-											case "NOT": $qWhere .= " AND lower(t.".trim_fieldname($k).") != lower('".$v."') "; break;
-											case "MORE": $qWhere .= " AND lower(t.".trim_fieldname($k).") > lower('".$v."') "; break;
-											case "MINI": $qWhere .= " AND lower(t.".trim_fieldname($k).") < lower('".$v."') "; break;
-											case "EQUAL": $qWhere .= " AND lower(t.".trim_fieldname($k).") = lower('".$v."') "; break;
-											case "LIKE": $qWhere .= " AND lower(t.".trim_fieldname($k).") LIKE lower('%".$v."%') "; break;
-											case "undefined": $qWhere .= " AND lower(t.".trim_fieldname($k).") = lower('".$v."') "; break;
+											case "NOT": $qWhere .= " AND lower(t.".BasicFunctions::trim_fieldname($k).") != lower('".$v."') "; break;
+											case "MORE": $qWhere .= " AND lower(t.".BasicFunctions::trim_fieldname($k).") > lower('".$v."') "; break;
+											case "MINI": $qWhere .= " AND lower(t.".BasicFunctions::trim_fieldname($k).") < lower('".$v."') "; break;
+											case "EQUAL": $qWhere .= " AND lower(t.".BasicFunctions::trim_fieldname($k).") = lower('".$v."') "; break;
+											case "LIKE": $qWhere .= " AND lower(t.".BasicFunctions::trim_fieldname($k).") LIKE lower('%".$v."%') "; break;
+											case "undefined": $qWhere .= " AND lower(t.".BasicFunctions::trim_fieldname($k).") = lower('".$v."') "; break;
 											case "NONE": break;
 										}										
 						

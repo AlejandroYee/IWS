@@ -1,7 +1,9 @@
 <?php
 /*
-* Autor Andrey Lysikov (C) 2013
-* icq: 454169
+* Autor Andrey Lysikov (C) 2014
+* Licensed under the MIT license:
+*   http://www.opensource.org/licenses/mit-license.php
+* Part of IWS system
 */
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Вывод данных для графиков
@@ -79,5 +81,4 @@ var $id_mm_fr, $pageid, $main_db;
 		});
 		</script>";	
 	}
-} // END CLASS		
-?>
+} 

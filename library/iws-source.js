@@ -1,6 +1,5 @@
 /*
-* Copyright (c) 2013 - Andrey Boomer - andrey.boomer at gmail.com
-* icq: 454169
+* Autor Andrey Lysikov (C) 2014
 * Licensed under the MIT license:
 *   http://www.opensource.org/licenses/mit-license.php
 * Part of IWS system
@@ -27,19 +26,20 @@ var UA=window.navigator.userAgent,
 	SafariV = UA.match(SafariV),
 	IE = UA.match(IEB),
 	Opera = UA.match(OperaB);
-		
 		if ((!Opera=="")&(!OperaV=="")) browser[0]=OperaV[0].replace(/Version/, "Opera")
 				else 
-					if (!Opera=="")	browser[0]=Opera[0]
-						else
-							if (!IE=="") browser[0] = IE[0]
-								else 
-									if (!Firefox=="") browser[0]=Firefox[0]
-										else
-											if (!Chrome=="") browser[0] = Chrome[0]
-												else
-													if ((!Safari=="")&&(!SafariV=="")) browser[0] = Safari[0].replace("Version", "Safari");
-
+		if (!Opera=="")	browser[0]=Opera[0]
+				else
+		if (!IE=="") browser[0] = IE[0]
+				else 
+		if (!Firefox=="") browser[0]=Firefox[0]
+				else
+		if (!Chrome=="") browser[0] = Chrome[0]
+				else
+		if ((!Safari=="")&&(!SafariV=="")) browser[0] = Safari[0].replace("Version", "Safari")
+                                else
+                if (!!window.MSStream) browser[0] = "Internet Explorer IE11";
+            
 	var outputData;
 	
 	if (browser[0] != null) outputData = browser[0].split(browserSplit);
@@ -145,7 +145,7 @@ $(function() {
 	});
 	
 	$( "#tabs" ).find( ".ui-tabs-nav" ).sortable({
-      axis: "x",
+          axis: "x",
 	  placeholder: "ui-state-highlight",
 	  distance: 10,
       stop: function() {
@@ -236,13 +236,15 @@ $(function() {
 		if (same_tab == 'false') {
 			$("#tabs").tabs("option", "active",$('#tabs').children('.ui-tabs-nav li').length - 1);
 		}						
-		// ставим тригер на загрузку содержимого вкладки во фрейм						
+		// ставим тригер на загрузку содержимого вкладки во фрейм
+                redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
 		$.ajax({
 			  url: tabContentUrl,							  
 			  type: 'GET',
 			  success: function(data){				
 				if($(data).find("div[window_login='logon']").length == 0) {
-					$('#'+id).empty().css('text-align','left').append(data);
+					$('#'+id).empty().css('text-align','left');
+                                        $('#'+id).append($(data).fadeIn(300));
 					redraw_document($(".ui-tabs-panel[aria-expanded='true']"));				
 				} else {		 		
 					// Нам вернули страницу авторизации. отчищаем документ
@@ -254,12 +256,12 @@ $(function() {
 	}					
 
 	// Закрываем вкладку
-	CloseTab = function (id_tab) {
-		$("#ui-" + id_tab).parent().closest( "li" ).remove();
-		$('#' + id_tab).remove();
+	CloseTab = function (id_tab) {            
+		$("#ui-" + id_tab).parent().closest( "li" ).remove();		
+                $('#' + id_tab).remove();
 		$( "#tabs" ).tabs( "refresh" );
 		$('.ui-tabs-panel').css('overflow','hidden');
-		redraw_document();
+		redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
 	}
 
 	// Кнопка справки если есть:
@@ -300,7 +302,7 @@ $(function() {
 
 		//  Основные оверлеи
 		$(".dialog_jqgrid_overlay,.ui-widget-overlay").height(doc_height - main_menu - 85).width(doc_width - 24).offset({ top: main_menu + 30 + 50, left: 12 });
-		
+                 
 		// Содержимое контейнера		
 		id_tab.find(".tab_main_content").height(doc_height - main_menu - 90).width(doc_width - 20);
 		
@@ -987,12 +989,12 @@ $(function() {
 		modal: true,
 		minWidth:650,
 		closeOnEscape: true,
-		resizable:false,						
+		resizable:false,                
 		close:function() {
 			$( this ).dialog( "close" );
 		},
 		open: function() {								
-				$(this).parent().css('z-index', 110).parent().children('.ui-widget-overlay').css('z-index', 105);
+			$(this).parent().css('z-index', 110).parent().children('.ui-widget-overlay').css('z-index', 105); 
 		}
 	});	
 
@@ -1055,60 +1057,6 @@ $(function() {
 				}	  
 			});	
 	}
-
-Globalize.addCultureInfo( "ru-RU", "default", {
-	name: "ru-RU",
-	englishName: "Russian (Russia)",
-	nativeName: "русский (Россия)",
-	language: "ru",
-	numberFormat: {
-		",": "",
-		".": ",",
-		negativeInfinity: "-бесконечность",
-		positiveInfinity: "бесконечность",
-		percent: {
-			pattern: ["-n%","n%"],
-			",": "",
-			".": ","
-		},
-		currency: {
-			pattern: ["-n$","n$"],
-			",": "",
-			".": ",",
-			symbol: "р."
-		}
-	},
-	calendars: {
-		standard: {
-			"/": ".",
-			firstDay: 1,
-			days: {
-				names: ["воскресенье","понедельник","вторник","среда","четверг","пятница","суббота"],
-				namesAbbr: ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"],
-				namesShort: ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"]
-			},
-			months: {
-				names: ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь",""],
-				namesAbbr: ["янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек",""]
-			},
-			monthsGenitive: {
-				names: ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря",""],
-				namesAbbr: ["янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек",""]
-			},
-			AM: null,
-			PM: null,
-			patterns: {
-				d: "dd.MM.yyyy",
-				D: "d MMMM yyyy 'г.'",
-				t: "H:mm",
-				T: "H:mm:ss",
-				f: "d MMMM yyyy 'г.' H:mm",
-				F: "d MMMM yyyy 'г.' H:mm:ss",
-				Y: "MMMM yyyy"
-			}
-		}
-	}
-});
 	
 $.calculator.regional['ru'] = {
 	decimalChar: ',',
@@ -1976,5 +1924,5 @@ $.jgrid.extend({
 			}  
 	} 	
 	
-	}); 
+	}); 	 	
 });

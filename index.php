@@ -1,10 +1,12 @@
 <?php
 /*
-* Autor Andrey Lysikov (C) 2013
-* icq: 454169
+* Autor Andrey Lysikov (C) 2014
+* Licensed under the MIT license:
+*   http://www.opensource.org/licenses/mit-license.php
+* Part of IWS system
 */
 require_once("library/lib.func.php");
-requre_script_file("lib.requred.php"); 
+BasicFunctions::requre_script_file("lib.requred.php"); 
 
 //Подключаем формы
 $DataGrid = new Data_form();
@@ -13,7 +15,7 @@ $main_db = new db();
 // Смотрим разрешено ли кеширование
 if ($main_db->get_param_view("cache_enable") == "checked") {
 	$_SESSION["ENABLED_CACHE"] = false;
-	to_log("LIB: User disabled cache!");
+	BasicFunctions::to_log("LIB: User disabled cache!");
 }
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -30,8 +32,12 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
         <link rel="Bookmark" type="image/x-icon" href="<?=ENGINE_HTTP?>/<?=$main_db -> get_settings_val("ROOT_CONFIG_FAVICON")?>" />
         <link rel="shortcut icon" type="image/x-icon" href="<?=ENGINE_HTTP?>/<?=$main_db -> get_settings_val("ROOT_CONFIG_FAVICON")?>" />
         <?php				
-        if (!is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR.THEMES_DIR)) die ("Неуказана директория тем в конфигурации!");	
-        if (!is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR."jscript/")) die ("Ошибка конфигурации и привелегий сервера!");
+        if (!is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR.THEMES_DIR)) {
+			die ("Неуказана директория тем в конфигурации!");
+	    }
+        if (!is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR."jscript/")) {
+			die ("Ошибка конфигурации и привелегий сервера!");
+		}
         ?>				
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.0.3.min.js?s=<?=SESSION_ID?>" ></script>	
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.10.3.custom.min.js?s=<?=SESSION_ID?>" ></script>
@@ -48,7 +54,7 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.flot.js?s=<?=SESSION_ID?>" ></script>				
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/ace.js?s=<?=SESSION_ID?>" ></script>		
 <?
-    if (trim(strtolower($_SERVER['HTTP_HOST'])) == 'bianca.test') { // Для дебага Онли
+    if (trim(strtolower(filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL))) == 'bianca.test') { // Для дебага Онли
           ?>                    	        <script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws-source.js?s=<?=SESSION_ID?>" ></script> <?
     } else {
           ?>                    	        <script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.js?s=<?=SESSION_ID?>" ></script> <?
@@ -57,8 +63,8 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
                                 <link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/library/normalize.css?s=<?=SESSION_ID?>" />  				
 				<?php
 				$db_link = new DB();
-				if ((trim($db_link->get_param_view("theme")) != "") and ( is_file(ENGINE_ROOT . DIRECTORY_SEPARATOR . Convert_quotas($db_link->get_param_view("theme"))) )) {	
-						echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP . DIRECTORY_SEPARATOR . Convert_quotas($db_link->get_param_view("theme"))."?s=".SESSION_ID." \" /> \n\t\t\t\t";						
+				if ((trim($db_link->get_param_view("theme")) != "") and ( is_file(ENGINE_ROOT . DIRECTORY_SEPARATOR . $db_link->get_param_view("theme")) )) {	
+						echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP . DIRECTORY_SEPARATOR . $db_link->get_param_view("theme")."?s=".SESSION_ID." \" /> \n\t\t\t\t";						
 				} else {
 				$dh  = opendir(ENGINE_ROOT.DIRECTORY_SEPARATOR.THEMES_DIR.DIRECTORY_SEPARATOR);
 				while (false !== ($file = readdir($dh))) {
@@ -91,7 +97,7 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
 				}
 				?> 				
 				<style type="text/css">
-						#loading{background:#fff url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;height:100%;position:absolute;width:100%;z-index:100}
+						#loading{background:#fff url(<?=ENGINE_HTTP?>/library/ajax-loader-tab.gif) no-repeat center center;height:100%;position:absolute;width:100%;z-index:100}
 						html,body{font-size:12px;margin:0;overflow:hidden;padding:0;-webkit-transform: translate3d(0, 0, 0);}
 						a{cursor:pointer}
 						.loader_tab{background:url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;height:100%;position:absolute;width:100%;z-index:100}
@@ -114,9 +120,9 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
 						.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label{text-align:left}
 						.ui-search-toolbar{border-color:transparent}
 						.ui-jqgrid tr.jqgrow,.ui-state-active{cursor:default}	
-						li, li li, li li li {list-style-type: none; }   						
+						li, li li, li li li {list-style-type: none; } 
 <?php 
-if (($main_db->get_param_view("render_type") > 2) and isset($_SERVER['HTTP_USER_AGENT']) and (!strrpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == "")) $main_db -> set_param_view("render_type",2); // Проверка на эксплорер
+if (($main_db->get_param_view("render_type") > 2) and (!strrpos(HTTP_USER_AGENT, 'MSIE') == "")) $main_db -> set_param_view("render_type",2); // Проверка на эксплорер
 switch ($main_db->get_param_view("render_type")) {
 case 2: // для ie максимальный режим
 echo "						* {border-radius: 0 !important;box-shadow: none !important;}";
@@ -180,7 +186,7 @@ break;
 		<input type="submit" id="submit_settings" style="display: none;">		
 	</form>
 	</div>
-	<?=about($main_db)?>
+	<?=BasicFunctions::about($main_db)?>
 	<table cellpadding="0" cellspacing="0" style="border:0px;padding:0px;margin:0px;width:100%"><tr>
 	<td class="ui-widget ui-widget-header main_menu">
 		<div id="Menubar" style="border:0px;">			

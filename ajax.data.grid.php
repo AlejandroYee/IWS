@@ -1,62 +1,54 @@
 <?
 /*
-* Autor Andrey Lysikov (C) 2013
-* icq: 454169
+* Autor Andrey Lysikov (C) 2014
+* Licensed under the MIT license:
+*   http://www.opensource.org/licenses/mit-license.php
+* Part of IWS system
 */
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Вывод данных для грида
 //--------------------------------------------------------------------------------------------------------------------------------------------
 	require_once("library/lib.func.php");
-	requre_script_file("lib.requred.php"); 
+	BasicFunctions::requre_script_file("lib.requred.php");
+	BasicFunctions::requre_script_file("auth.".AUTH.".php");
+	BasicFunctions::requre_script_file("lib.json.php");
+	
 	header("Content-type: text/script;charset=".HTML_ENCODING);
 
   	// Начальные переменные
 	$user_auth = new AUTH();	
 	if (!$user_auth -> is_user()) {
-			clear_cache();
+			BasicFunctions::clear_cache();
 			die("Доступ запрещен");
 	}	
 	$main_db = new db();
+	if (filter_input(INPUT_GET, 'id_mm',FILTER_VALIDATE_FLOAT)) {
+		$id_mm      	 = filter_input(INPUT_GET, 'id_mm',FILTER_SANITIZE_NUMBER_FLOAT); 
+	} else {
+		$id_mm      	 = "'" .filter_input(INPUT_GET, 'id_mm',FILTER_SANITIZE_MAGIC_QUOTES). "'"; 
+	}
+        $type    	 = filter_input(INPUT_GET, 'type',FILTER_SANITIZE_STRING);
+	$id_mm_fr   	 = filter_input(INPUT_GET, 'id_mm_fr',FILTER_SANITIZE_NUMBER_INT); 
+	$id_mm_fr_d 	 = filter_input(INPUT_GET, 'id_mm_fr_d',FILTER_SANITIZE_NUMBER_INT);	
+	$page_ 	 	 = filter_input(INPUT_GET, 'page',FILTER_SANITIZE_NUMBER_INT);  
+	$limit 		 = filter_input(INPUT_GET, 'rows',FILTER_SANITIZE_NUMBER_INT);  
+	$sidx 		 = filter_input(INPUT_GET, 'sidx',FILTER_SANITIZE_STRING);                   
+	$sord 		 = filter_input(INPUT_GET, 'sord',FILTER_SANITIZE_STRING); 
+        $pageid          = filter_input(INPUT_GET, 'pageid',FILTER_SANITIZE_NUMBER_INT); 
+	$idx		 = filter_input(INPUT_GET, 'idx',FILTER_SANITIZE_NUMBER_INT);
+	$Master_Table_ID = filter_input(INPUT_GET, 'Master_Table_ID',FILTER_SANITIZE_STRING);
 	
-	$type    		 = @Convert_quotas($_GET['type']);
-	if (is_numeric($_GET['id_mm'])) {
-		$id_mm      	 = @intval($_GET['id_mm']); 
-	} else {
-		$id_mm      	 = "'" .@Convert_quotas($_GET['id_mm']). "'"; 
-	}
-	$id_mm_fr   	 = @intval($_GET['id_mm_fr']); 
-	$id_mm_fr_d 	 = @intval($_GET['id_mm_fr_d']);	
-	$page_ 	 		 = @intval($_GET['page']);  
-	$limit 			 = @intval($_GET['rows']);  
-	$sidx 			 = @Convert_quotas($_GET['sidx']);                   
-	$sord 			 = @Convert_quotas($_GET['sord']); 
-	
-	if (isset($_GET['pageid'])) {	
-		$pageid			 = @Convert_quotas($_GET['pageid']); 
-	} else {
-		$pageid			 = "";
-	}
-	if (isset($_GET['idx'])) {
-		$idx			 = Convert_quotas($_GET['idx']);
-	} else {
-		$idx			 =  "";
-	}
-	if (isset($_GET['Master_Table_ID'])) {
-		$Master_Table_ID			 = Convert_quotas($_GET['Master_Table_ID']);
-	} else {
-		$Master_Table_ID			 =  "";
-	}	
 	
 	// Переменные для инициализации
 	$arr_field      = array();
-    $arr_field_type = array();
-	$count			= 0;
-	$i 				= 0;	
-	$m 				= 0;	
+        $arr_field_type = array();
+	$count		= 0;
+	$i 		= 0;	
+	$m 		= 0;	
 	$k              = 0;
-    $str_dt         = "";
-	$qWhere			= "";
-	$check			= "";
+        $str_dt         = "";
+	$qWhere		= "";
+	$check		= "";
         
 	// Переделываем запрос для детального грида
 	if (($type == "GRID_FORM_DETAIL") or ($type == "TREE_GRID_FORM_DETAIL")) {		
@@ -65,10 +57,10 @@
 	} else 	$s_d_m_Where     = "";
 	
 	// Дополнительная проверка на пользователя и права доступа:
-	$query = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_mm_form = ".$id_mm_fr." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable'");
-	while ($main_db -> sql_fetch($query)) {
-		$check				= explode(",",strtoupper(trim( $main_db -> sql_result($query, "EDIT_BUTTON") )));;
-	}
+	$query_check = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_mm_form = ".$id_mm_fr." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable'");
+	while ($main_db -> sql_fetch($query_check)) {
+		$check	= explode(",",strtoupper(trim( $main_db -> sql_result($query_check, "EDIT_BUTTON"))));
+        }
 	// если пользователю недоступна форма, то выходим сразу
 	if (empty($check)) die("Доступ для чтения данных запрещен");
 
@@ -99,11 +91,11 @@
 		
     while ($main_db -> sql_fetch($query)) {
 				if ($str_dt=="") {
-                    $owner      = $main_db -> sql_result($query, "OWNER",false);
+                                        $owner      = $main_db -> sql_result($query, "OWNER",false);
 					$table_name = $main_db -> sql_result($query, "OBJECT_NAME",false);
 					$str_dt = "select * from (Select max_count_number_99999, ".$main_db -> sql_result($query, "F_NAME",false);
 					$str_dt_f = ",rownum r_num_page from (Select rownum r_num, count(*) over (order by 1) as max_count_number_99999, t.* from ".$owner.".".$table_name." t  WHERE 1=1 SqWhere ".$main_db -> sql_result($query, "FORM_WHERE",false)." ".$s_d_m_Where." ";					
-                    $str_leafs = "Select t.id_".$table_name." ID from ".$owner.".".$table_name." t left join ".$owner.".".$table_name." t1 on t1.id_parent = t.id_".$table_name." where t1.id_".$table_name." is null";
+                                        $str_leafs = "Select t.id_".$table_name." ID from ".$owner.".".$table_name." t left join ".$owner.".".$table_name." t1 on t1.id_parent = t.id_".$table_name." where t1.id_".$table_name." is null";
 					$order_field = $main_db -> sql_result($query, "FORM_ORDER",false);
 				} else {					
 					 $str_dt = $str_dt.", ".$main_db -> sql_result($query, "F_NAME",false);
@@ -112,29 +104,30 @@
                 $arr_field[$i]      = $main_db -> sql_result($query, "FIELD_NAME",false);
                 $arr_field_type[$i] = trim($main_db -> sql_result($query, "FIELD_TYPE",false));			
     }     	
-
-			// Разбираем переменные для поиска			
-			if (@$_GET['_search'] != "false") foreach($_GET as $k=>$v) {
+			// Разбираем переменные для поиска
+			if (filter_input(INPUT_GET, '_search',FILTER_VALIDATE_BOOLEAN))
+                                foreach(filter_input_array(INPUT_GET) as $k => $v) {
 				// Мы можем передать данные в формате <тип поиска>><данные>
 				$s_opts = explode(">",$v);
 					if (isset($s_opts[1])) {
-					$v = iconv(HTML_ENCODING,LOCAL_ENCODING,trim($s_opts[1])); // кодировочку меняем
-						if (array_search(trim_fieldname($k), $arr_field, true)) {
-							$type_field = $arr_field_type[array_search(trim_fieldname($k), $arr_field)];						
+					$v = iconv(HTML_ENCODING,LOCAL_ENCODING,trim(strip_tags(html_entity_decode($s_opts[1])))); // кодировочку меняем
+						if (array_search(BasicFunctions::trim_fieldname($k), $arr_field, true)) {
+							$type_field = $arr_field_type[array_search(BasicFunctions::trim_fieldname($k), $arr_field)];
+                                                        $k = strip_tags(html_entity_decode(BasicFunctions::trim_fieldname($k)));
 							if ($v != "" ) if (( $type_field == "DT" ) or ( $type_field == "D" )) {
 									// Дата может быть нескольких форматов
 									if (stripos($v,":") > 0) {
-										$qWhere .= " AND t.".trim_fieldname($k)." = to_date('".$v."', 'dd.mm.yyyy hh24:mi:ss') ";
+										$qWhere .= " AND t.".$k." = to_date('".$v."', 'dd.mm.yyyy hh24:mi:ss') ";
 									} else {
-										$qWhere .= " AND t.".trim_fieldname($k)." = to_date('".$v."', 'dd.mm.yyyy') ";
+										$qWhere .= " AND t.".$k." = to_date('".$v."', 'dd.mm.yyyy') ";
 									}								
 								} else switch (trim($s_opts[0])) { // Смотрим что за логическая операция
-											case "NOT": $qWhere .= " AND lower(t.".trim_fieldname($k).") != lower('".$v."') "; break;
-											case "MORE": $qWhere .= " AND lower(t.".trim_fieldname($k).") > lower('".$v."') "; break;
-											case "MINI": $qWhere .= " AND lower(t.".trim_fieldname($k).") < lower('".$v."') "; break;
-											case "EQUAL": $qWhere .= " AND lower(t.".trim_fieldname($k).") = lower('".$v."') "; break;
-											case "LIKE": $qWhere .= " AND lower(t.".trim_fieldname($k).") LIKE lower('%".$v."%') "; break;
-											case "undefined": $qWhere .= " AND lower(t.".trim_fieldname($k).") = lower('".$v."') "; break;
+											case "NOT": $qWhere .= " AND lower(t.".$k.") != lower('".$v."') "; break;
+											case "MORE": $qWhere .= " AND lower(t.".$k.") > lower('".$v."') "; break;
+											case "MINI": $qWhere .= " AND lower(t.".$k.") < lower('".$v."') "; break;
+											case "EQUAL": $qWhere .= " AND lower(t.".$k.") = lower('".$v."') "; break;
+											case "LIKE": $qWhere .= " AND lower(t.".$k.") LIKE lower('%".$v."%') "; break;
+											case "undefined": $qWhere .= " AND lower(t.".$k.") = lower('".$v."') "; break;
 											case "NONE": break;
 										}										
 						}
@@ -173,14 +166,14 @@
 							$order_type = " order by 1"; // сортировка по первому полю ровнум
 						}
 					} else {
-						$order_type = " order by " . trim_fieldname($sidx)." ".$sord;
+						$order_type = " order by " . BasicFunctions::trim_fieldname($sidx)." ".$sord;
 				}
 			
 				// Если у нас выставлена постраничная прокрутка то грузим постранично
 				$str_dt = $str_dt.$str_dt_f.$order_type.")) where r_num_page between ".$start." and ".$stop;
 			} 
 			
-			end_session();
+			BasicFunctions::end_session();
 			
 			$query_dt = $main_db -> sql_execute($str_dt);					
             while ($main_db -> sql_fetch($query_dt)) {
@@ -198,8 +191,8 @@
 								break;
 							default:
 								$td_val = $main_db -> sql_result($query_dt, $arr_field[$key]);
-								if ($arr_field[$key]=='LEV')       $td_level_val     = $td_val-1;
-							    if ($arr_field[$key]=='ID_PARENT') $td_id_parent_val = $td_val; 							
+								if ($arr_field[$key] == 'LEV')       $td_level_val     = $td_val-1;
+							        if ($arr_field[$key] == 'ID_PARENT') $td_id_parent_val = $td_val; 							
 							break;
 						}
 						
@@ -213,11 +206,11 @@
 					
 					if  (($type == "TREE_GRID_FORM") or ($type == "TREE_GRID_FORM_MASTER") or ($type == "TREE_GRID_FORM_DETAIL"))  {
 						$dt_cell[$r] = $td_level_val;
-						$r = $r + 1;						
+						$r++;						
 						// Определяем родителя
 						if ($td_id_parent_val == '') {$parent = NULL;} else $parent = $td_id_parent_val;
 						$dt_cell[$r] = $parent;
-						$r = $r + 1;
+						$r++;
 						
 						// Определяем является ли выбранный узел "листом"
 						if(in_array($dt->rows[$m]['id'], $leafs)) { $dt_cell[$r] = TRUE; } else $dt_cell[$r] = FALSE;					
@@ -234,7 +227,8 @@
 				$dt -> page         = $page_;  
 				$dt -> total        = $total_pages;  
 				$dt -> records      = $count;	
-			}
-			echo jsonencode($dt);			
+			}			                              
+			
+            $json = new json();
+	    echo $json -> jsonencode($dt);			
 $main_db -> __destruct();
-?>

@@ -1,52 +1,57 @@
 <?php
 /*
-* Autor Andrey Lysikov (C) 2013
-* icq: 454169
+* Autor Andrey Lysikov (C) 2014
+* Licensed under the MIT license:
+*   http://www.opensource.org/licenses/mit-license.php
+* Part of IWS system
 */
 require_once("library/lib.func.php");
-requre_script_file("lib.requred.php"); 
+BasicFunctions::requre_script_file("lib.requred.php"); 
+BasicFunctions::requre_script_file("auth.".AUTH.".php");
 	
 // Проверка на пользователя
 $user_auth = new AUTH();	
 if (!$user_auth -> is_user()) {
-		clear_cache();
+		BasicFunctions::clear_cache();
 		die("Доступ запрещен");
 	}
-$main_db 			= new db();
-$type    			= (isset($_GET['type']))? Convert_quotas($_GET['type']) : "";
+        
+$main_db 	= new db();
 
-// Есть вариант когда указана строка
-if (!isset($_GET['id_mm'])) {
-	$id_mm			= Convert_quotas($_POST['id']);
-}  else {
-	$id_mm  		= Convert_quotas($_GET['id_mm']);
+$type                   = filter_input(INPUT_GET, 'type',FILTER_SANITIZE_STRING);
+$id_mm                  = filter_input(INPUT_GET, 'id_mm',FILTER_SANITIZE_STRING);
+$id_mm_fr   		= filter_input(INPUT_GET, 'id_mm_fr',FILTER_SANITIZE_NUMBER_INT); 
+$id_mm_fr_d 		= filter_input(INPUT_GET, 'id_mm_fr_d',FILTER_SANITIZE_NUMBER_INT);
+$type_of_past 		= filter_input(INPUT_POST, 'oper',FILTER_SANITIZE_STRING); 
+$oper    		= filter_input(INPUT_GET, 'oper',FILTER_SANITIZE_STRING); 
+$Master_Table_ID 	= filter_input(INPUT_GET, 'Master_Table_ID',FILTER_SANITIZE_STRING);
+
+if (empty($id_mm)) {
+    $id_mm      	= filter_input(INPUT_POST, 'id',FILTER_SANITIZE_STRING);
 }
-$id_mm_fr   		= intval($_GET['id_mm_fr']); 
-$id_mm_fr_d 		= (isset($_GET['id_mm_fr_d']))? Convert_quotas($_GET['id_mm_fr_d']) : "";
-$type_of_past 		= (isset($_POST['oper']))? Convert_quotas($_POST['oper']) : "";
-$Master_Table_ID 	= (isset($_GET['Master_Table_ID']))? Convert_quotas($_GET['Master_Table_ID'])  : "";	
+
 if (($type == 'GRID_FORM_DETAIL') or ($type == 'TREE_GRID_FORM_DETAIL')) {
     $id_mm_fr = $id_mm_fr_d;
 }
+
 $file_data_path		= "";
-$action_bat			= "";
+$action_bat		= "";
 $file_data_action 	= "";
-$str_sql_fl			= "";
+$str_sql_fl		= "";
 $str_sql_data		= "";
-$str_sql			= "";
-$value				= "";
-$check				= "";
+$str_sql		= "";
+$value			= "";
+$check			= "";
 
 // Дополнительная проверка на пользователя и права доступа:
-$query = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_mm_form = ".$id_mm_fr." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable' and tf.is_read_only = 0");
-while ($main_db -> sql_fetch($query)) {
-	$check	= explode(",",strtoupper(trim( $main_db -> sql_result($query, "EDIT_BUTTON") )));
+$query_check = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_mm_form = ".$id_mm_fr." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable' and tf.is_read_only = 0");
+while ($main_db -> sql_fetch($query_check)) {
+	$check	= explode(",",strtoupper(trim( $main_db -> sql_result($query_check, "EDIT_BUTTON") )));
 }
 // если пользователю недоступна форма или она только для чтения, то выходим сразу
 if (empty($check)) {
     die("Доступ для изменения запрещен");
 }
-
 
 // Теперь смотрим есть ли определенные права
 switch ($type_of_past) {
@@ -74,13 +79,17 @@ $query = $main_db -> sql_execute("select tf.owner, tf.object_name, t.name, t.fie
 									
 // Формируем поля для запроса
 while ($main_db -> sql_fetch($query)) {
-	if (($main_db -> sql_result($query, "FIELD_NAME") <> "R_NUM") and (isset($_POST[$main_db -> sql_result($query, "FIELD_NAME_ID")]) or isset($_FILES[$main_db -> sql_result($query, "FIELD_NAME")]))) {
+	if (($main_db -> sql_result($query, "FIELD_NAME") <> "R_NUM") and ( filter_input(INPUT_POST, $main_db -> sql_result($query, "FIELD_NAME_ID"),FILTER_SANITIZE_STRING) or
+                isset($_FILES[$main_db -> sql_result($query, "FIELD_NAME")]))) {
+            
 		// Вдруг у нас значения в виде массива:
-		if (isset($_POST[$main_db -> sql_result($query, "FIELD_NAME_ID")])) if (is_array($_POST[$main_db -> sql_result($query, "FIELD_NAME_ID")])) {
-			$value = implode(",",$_POST[$main_db -> sql_result($query, "FIELD_NAME_ID")]);
-		} else {
-			$value = $_POST[$main_db -> sql_result($query, "FIELD_NAME_ID")];
-		}		
+		$field_name_id = filter_input(INPUT_POST, $main_db -> sql_result($query, "FIELD_NAME_ID"),FILTER_SANITIZE_STRING);
+                if (!empty($field_name_id))
+                   if (is_array($field_name_id)) {
+			$value = implode(",",$field_name_id);
+                    } else {
+                        $value = $field_name_id;
+                    }		
 		$value = iconv(HTML_ENCODING,LOCAL_ENCODING, $value); // кодировочку меняем				
 		// Если родительский дерева и мы обновляем запись, то:
 		if ((($type == "TREE_GRID_FORM_MASTER") or ($type == "TREE_GRID_FORM") or ($type == "TREE_GRID_FORM_DETAIL")) and ($main_db -> sql_result($query, "FIELD_NAME") == "ID_PARENT")) {			
@@ -139,7 +148,7 @@ while ($main_db -> sql_fetch($query)) {
 				break;
 				case 'P':
 					if (!empty($value)) {
-						$str_sql_data .= ",'".Convert_quotas(md5($value))."'";
+						$str_sql_data .= ",'".md5($value)."'";
 					}
 				break;
 				case 'C':
@@ -151,13 +160,13 @@ while ($main_db -> sql_fetch($query)) {
 				case 'F':						
 						if (isset($_FILES[$main_db -> sql_result($query, "FIELD_NAME")])) {
 							if(!rename($_FILES[$main_db -> sql_result($query, "FIELD_NAME")]['tmp_name'], UPLOAD_DIR . "/" . $main_db -> sql_result($query, "XSL_FILE_IN") . "/" . iconv(HTML_ENCODING,LOCAL_ENCODING,$id_mm."_".$_FILES[$main_db -> sql_result($query, "FIELD_NAME")]['name']))) {
-								to_log("ERR: Filed upload file!");
+								BasicFunctions::to_log("ERR: Filed upload file!");
 							}
 							$file_data_field = $main_db -> sql_result($query, "XSL_FILE_IN");
 							$str_sql_data .= ", '".iconv(HTML_ENCODING,LOCAL_ENCODING,$_FILES[$main_db -> sql_result($query, "FIELD_NAME")]['name'])."'";
 							$file_data_action = $main_db -> sql_result($query, "ACTION_SQL");
 							$action_bat = $main_db -> sql_result($query, "ACTION_BAT");
-							$type_of_past = Convert_quotas($_GET['oper']);
+							$type_of_past = $oper;
 						} else {
 							$str_sql_data .= ", null";
 						}
@@ -168,14 +177,14 @@ while ($main_db -> sql_fetch($query)) {
 							$file_data_path = $_FILES[$main_db -> sql_result($query, "FIELD_NAME")]['tmp_name'];
 							$file_data_field = $main_db -> sql_result($query, "FIELD_NAME")."_CONTENT";
 							$file_data_action = $main_db -> sql_result($query, "ACTION_SQL");
-							$type_of_past = Convert_quotas($_GET['oper']);
+							$type_of_past = $oper;
 						} else {
 							$str_sql_data .= ", null";
 						}
 				break;
 				
 				default:
-						$str_sql_data .= ",'".  Convert_quotas(str_replace("'","''",$value))."' ";
+						$str_sql_data .= ",'".$value."' ";
 				break;
 		}
 	}	
@@ -192,24 +201,22 @@ if (($type == 'GRID_FORM_DETAIL') or ($type == "TREE_GRID_FORM_DETAIL")) {
 		} else {
 			$str_sql_data .= ", '".$id_mm."' ";
 	}	
-	$id_mm = Convert_quotas($_POST['id']);
+	$id_mm = filter_input(INPUT_POST, 'id',FILTER_SANITIZE_STRING);
 }
 
 // Проверяем на массим входящюю переменную строки:
 if (!is_numeric ($id_mm)) {
 	// Если у нас не число, то возможно переданы числа или текст через зяпятую. проверяем и формируем:
-	$tmp=explode(",",$id_mm);
-	$id_mm = "";
-	
+	$tmp=explode(",",$id_mm);	
 	// пробегаемся по массиву и смотрим  на типы числе или
 	foreach($tmp as $val) if (!is_numeric ($val)) {
-		$id_mm .= "'".$val."',";			
+		$id_mm1 .= "'".$val."',";			
 	} else {
-		$id_mm .= $val.",";			
+		$id_mm1 .= $val.",";			
 	}
 	
 	// Чистим от последней запятой, и выполняем
-	$id_mm = trim($id_mm,",");
+	$id_mm = trim($id_mm1,",");
 }
 
 // Смотрим на текущие действие
@@ -240,7 +247,7 @@ if (!empty($file_data_path) and !empty($file_data_field)) {
 	// Отчищаем клоб и загружаем данные	
 	$main_db_2 = new db(true);	
 	$main_db_2 -> sql_execute("update ".$owner.".".$table_name." set ".$file_data_field." = null where ID_".$table_name." = '$id_mm'");
-	to_log("Load binary file to ".$owner.".".$table_name." ... WHERE ID_".$table_name." = ".$id_mm);					
+	BasicFunctions::to_log("Load binary file to ".$owner.".".$table_name." ... WHERE ID_".$table_name." = ".$id_mm);					
 	$filedata = str_split(base64_encode(gzencode(file_get_contents($file_data_path))), 2048);
 		 foreach($filedata as $File_data_str) {
 			$main_db_2 -> sql_execute("update ".$owner.".".$table_name." set ".$file_data_field." = ".$file_data_field." || '".$File_data_str."' WHERE ID_".$table_name." = '$id_mm'");
@@ -251,20 +258,20 @@ if (!empty($file_data_path) and !empty($file_data_field)) {
 // Файл загружен, если есть скрипт в загрузке то запускаем его:
 if (!empty($file_data_action)) {
 	$main_db_2 = new db(true);	
-		end_session();
+		BasicFunctions::end_session();
 		$return_id = $main_db_2 -> sql_execute(str_replace(":ID_".$table_name,"'$id_mm'",$file_data_action));	
 	$main_db_2 -> __destruct();	
 }
 
 // Если задано выполнение команды, то выполняем
 if (!empty($action_bat)) {
-	end_session();
+	BasicFunctions::end_session();
 	exec($action_bat);
 }
 
 // Отправляем что обновление данных выполнено для файлов
 if (is_resource($return_id)) {
-	if (!empty($file_data_field)) if (isset($_SERVER['HTTP_USER_AGENT']) && (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') === false)) {
+	if (!empty($file_data_field)) if (strpos(HTTP_USER_AGENT, 'MSIE') === false) {
 			echo $return_id;  
 		} else {
 			echo "&nbsp;&nbsp;";// Отправляем пустую строку эксплореру, для формальности загрузки данных
@@ -273,4 +280,3 @@ if (is_resource($return_id)) {
 	echo $return_id;
 }
 $main_db -> __destruct();
-?>

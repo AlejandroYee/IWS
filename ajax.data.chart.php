@@ -1,14 +1,16 @@
 <?php
 /*
-* Autor Andrey Lysikov (C) 2013
-* icq: 454169
+* Autor Andrey Lysikov (C) 2014
+* Licensed under the MIT license:
+*   http://www.opensource.org/licenses/mit-license.php
+* Part of IWS system
 */
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Вывод данных для графика
 //--------------------------------------------------------------------------------------------------------------------------------------------
 	require_once("library/lib.func.php");
-	requre_script_file("lib.requred.php"); 
-	
+	BasicFunctions::requre_script_file("lib.requred.php"); 
+	BasicFunctions::requre_script_file("auth.".AUTH.".php");
 	
   	// Начальные переменные
 	$id 			= @intval($_GET['id']);  
@@ -29,12 +31,12 @@
 	
 	$user_auth = new AUTH();	
 	if (!$user_auth -> is_user()) {
-			clear_cache();
+			BasicFunctions::clear_cache();
 			die("Доступ запрещен");
 	}
 	
 	$main_db = new db();
-	end_session();
+	BasicFunctions::end_session();
 	
 	function getFCColor() 
 	{
@@ -118,7 +120,6 @@
 								}
 								$chart_label        = $main_db -> sql_result($query, "CHART_LABEL");
 								$chart_name         = $main_db -> sql_result($query, "CHART_NAME");
-								$type_chart         = $main_db -> sql_result($query, "TYPE_CHART");
 			}
 						
 			$m = 0; 
@@ -165,8 +166,8 @@
 				
 				// Заголовки графика
 				$strXML = "<graph caption='".$chart_label."' divlinecolor='F47E00' ".$legend."  numVDivLines='".count($arrDataCat[$arr_field[1]])."' vDivLineAlpha='10' \n";
-				$strXML .= "rotateNames='".$rotate_name."' showBorder = '0'  formatNumberScale='0' decimalSeparator='' setAdaptiveYMin='1' thousandSeparator=' ' bgColor='".trim(css_get_value($main_db -> get_param_view("theme"),'ui-widget-content', 'background'), "#;")."' \n";
-				$strXML .= "outCnvBaseFontColor='".trim(css_get_value($main_db -> get_param_view("theme"),'ui-widget-content', 'color'), "#;")."' showValues='".$show_name."' decimalPrecision='".$chart_dec_prec."' > \n";
+				$strXML .= "rotateNames='".$rotate_name."' showBorder = '0'  formatNumberScale='0' decimalSeparator='' setAdaptiveYMin='1' thousandSeparator=' ' \n";
+				$strXML .= " showValues='".$show_name."' decimalPrecision='".$chart_dec_prec."' > \n";
 						
 				// Формируем категории графика
 				$strCategories = "<categories>\n";

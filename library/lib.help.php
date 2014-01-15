@@ -1,7 +1,9 @@
 <?php
 /*
-* Autor Andrey Lysikov (C) 2013
-* icq: 454169
+* Autor Andrey Lysikov (C) 2014
+* Licensed under the MIT license:
+*   http://www.opensource.org/licenses/mit-license.php
+* Part of IWS system
 */
 class HELP extends DATA_FORM {
 		//--------------------------------------------------------------------------------------------------------------------------------------------
@@ -58,5 +60,4 @@ class HELP extends DATA_FORM {
 		static function get_about() {
 			return "Помощь и подсистема справки";
 		}
-} // END CLASS
-?>
+}
