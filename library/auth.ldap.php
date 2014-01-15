@@ -13,7 +13,7 @@ class AUTH {
 			$pwd = base64_decode($this->decrypt($_SESSION['us_pr'],session_id()));
 			if (!empty($pwd)) {			
 				// пытаемся приверить пользователя, даже если он пройдет проверку, то потом отвалится от лдап
-				if ($this->check_ldap_user(BasicFunctions::Convert_quotas($_SESSION['us_name']), $pwd)) {
+				if ($this->check_ldap_user($_SESSION['us_name'], $pwd)) {
 					// все хорошо, работаем дальше
 					return true;
 				}

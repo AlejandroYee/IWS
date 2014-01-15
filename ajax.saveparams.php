@@ -30,6 +30,9 @@ if ($act ==  "cache") {
 	exit;
 }
 
+BasicFunctions::requre_script_file("auth.".AUTH.".php");
+$user_auth = new AUTH();
+
 // Вход пользователя
 if ($act == "login") {
 	$pwd = filter_input(INPUT_POST, 'password',FILTER_SANITIZE_STRING);
@@ -43,9 +46,6 @@ if ($act == "login") {
 		echo $responce;
 exit;
 }
-
-BasicFunctions::requre_script_file("auth.".AUTH.".php");
-$user_auth = new AUTH();
 
 if (!$user_auth -> is_user()) {
 	BasicFunctions::clear_cache();

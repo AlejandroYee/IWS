@@ -12,11 +12,11 @@
 	BasicFunctions::requre_script_file("db.".DB.".php");
 	header("Content-type: text/script;charset=".HTML_ENCODING);
 	
-        $parent_id  = filter_input(INPUT_GET, 'parent_id',FILTER_SANITIZE_STRING);
-	$value_name = filter_input(INPUT_GET, 'value_name',FILTER_SANITIZE_STRING);
-	$value_id   = substr($value_name, strrpos($value_name, "_") + 1);
-	
-	$result_array = "";
+        $parent_id      = filter_input(INPUT_GET, 'parent_id',FILTER_SANITIZE_STRING);
+	$value_name     = trim_fieldname(filter_input(INPUT_GET, 'value_name',FILTER_SANITIZE_STRING));
+	$value_id       = substr($value_name, strrpos($value_name, "_") + 1);
+	$select         = "";
+	$result_array   = "";
         
 	$main_db = new db();
 	
