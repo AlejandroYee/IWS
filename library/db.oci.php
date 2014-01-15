@@ -139,11 +139,11 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 	// Выполнение скрипта пользователя
 	public function sql_execute($sql) { 
 	
-		if (DB_USER_NAME == "wb") {		 // костыль если пользователь WB!
+		if (strtolower(DB_USER_NAME) == "wb") {		 // костыль если пользователь WB!
 			$sql =  str_ireplace(array("wb.wb.","WB.WB."),"wb.", $sql);
 		}
 	
-		BasicFunctions::to_log("SQL: <".$this->link."> ".trim(strtolower($sql),";").";");
+		BasicFunctions::to_log("SQL: <".$this->link."> ".trim($sql).";");
 		
 		$rowid = "";
 		
@@ -198,7 +198,7 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 	
 	// Возвращаем значение нужного столбца, в случае чего перекодируем
 	public function sql_result($sql,$name,$encoding = true) {
-		$res 	= oci_result($sql,$name);
+		$res 	= oci_result($sql,  strtoupper($name));
 		$val	= "";	
 		
 		// Если результат CLOB или BLOB

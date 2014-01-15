@@ -15,7 +15,7 @@ class AUTH {
 			
 			if (!empty($pwd)) {	
 				if (!defined("AUTH_DB_USER_NAME")) {
-                                        define("AUTH_DB_USER_NAME",BasicFunctions::Convert_quotas($_SESSION['us_name']));
+                                        define("AUTH_DB_USER_NAME",$_SESSION['us_name']);
                                 }        
 				if (!defined("AUTH_DB_PASSWORD")) {
                                         define("AUTH_DB_PASSWORD",$pwd);	

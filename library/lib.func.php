@@ -420,7 +420,7 @@ class BasicFunctions {
                     ?>
                     </div>
                     <p><b style="font-size:220%;">IWS</b><br><b>Intellectual web system</b><br>
-                    <b>Версия системы:</b> <?=VERSION_ENGINE?> &copy;<?=date("Y")?><br>
+                    <b>Версия системы:</b> <?=VERSION_ENGINE?> <?=date("Y")?><br>
                     <b>Конфигурация:</b><br><?=$db -> get_settings_val('ROOT_CONFIG_NAME')?>, версия: <?=$db -> get_settings_val('ROOT_CONFIG_VERSION')?> <br>
                     </p>
                     <p><b>Авторы:</b> Лысиков А.В., Мындра П.А.</p>
@@ -443,7 +443,6 @@ class BasicFunctions {
                             <a href="http://jqueryui.com/" target="_blank">JQuery UI</a>,
                             <a href="http://trentrichardson.com/examples/timepicker/" target="_blank">JQuery TimePicker</a>,
                             <a href="https://github.com/johnculviner/jquery.fileDownload" target="_blank">JQuery fileDownload</a>,
-                            <a href="https://github.com/jquery/globalize" target="_blank">JQuery globalize</a>,
                             <a href="http://ace.ajax.org/" target="_blank">ACE Cloud9 Editor</a>,
                             <a href="https://github.com/ehynds/jquery-ui-multiselect-widget" target="_blank">JQuery UI multiselect</a>,		
                             <a href="http://www.flotcharts.org/" target="_blank">FlotCharts</a>

@@ -660,7 +660,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 	?>
           // События при нажатии кнопок:
           $('#<?=$object_name?>').keyup(function(eventObject){
-              console.log(eventObject);
+                      //console.log(eventObject);
              switch (eventObject.keyCode)
             {
                 case 86: // view
