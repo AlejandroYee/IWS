@@ -627,7 +627,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 											height: 120,
 											header: false,
 											selectedList: 1
-									});					
+									}).addClass('<?=$this->pageid?>');					
 							
 		<?php
 		// Если нужна автоширина, то запускаем перерасчет
@@ -757,7 +757,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 				$('#detail_tab_<?=$this -> pageid?> ul').append("<li><a href='#detail_content_" + i + "_<?=$this -> pageid?>'>" + grid_name + "</a></li>");
 				$(this).find('.ui-jqgrid-titlebar').remove();
 				// Перемещаем грид во вкладку
-				$('#detail_content_' + i + '_<?=$this -> pageid?>').append($(this).removeClass( "grid_resizer" ).addClass( "grid_resizer_tabs" ));
+				$('#detail_content_' + i + '_<?=$this -> pageid?>').append($(this).removeClass( "grid_resizer" ).addClass( "grid_resizer_tabs" ).attr({detail_sub_tab:true}));
 			});
 			
 			// Говорим создать вкладки
@@ -1026,7 +1026,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					
 							
 				// для селекта экспорта	
-				$("#select_export_<?=$object_name?>").multiselect({multiple: false, minWidth:300,header: false, selectedList: 1})
+				$("#select_export_<?=$object_name?>").multiselect({multiple: false, minWidth:300,header: false, selectedList: 1}).addClass('<?=$this->pageid?>')
 						.bind('multiselectclick multiselectcheckall multiselectuncheckall', function( event, ui ){
 								var checkedValues = $.map($(this).multiselect('getChecked'), function( input ){
 									return input.value;

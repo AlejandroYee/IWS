@@ -168,8 +168,8 @@ class BasicFunctions {
                                             }
                                             setcookie("theme_num_last", $theme_number);
                                             echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"". ENGINE_HTTP . DIRECTORY_SEPARATOR .$theme_first['theme_file'][$theme_number]." \" /> \n";														
-            ?>  			<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.0.3.min.js?s=<?=SESSION_ID?>"></script>
-                                            <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.10.3.custom.min.js?s=<?=SESSION_ID?>"></script>
+            ?>  			<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.1.min.js?s=<?=SESSION_ID?>"></script>
+                                            <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.10.4.custom.min.js?s=<?=SESSION_ID?>"></script>
                                             <style type="text/css">											
                                                             #loading {background:#ffffff url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;height: 100%;width: 100%;position: absolute; z-index: 999999; }		
                                                             html, body {padding: 0px; margin: 0px; overflow:hidden; font-size: 12px;}
