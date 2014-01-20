@@ -13,7 +13,7 @@ class HELP extends DATA_FORM {
 			$res = "";
 				// Смотрим дальше:				
 				foreach ($this -> main_menu as $key)
-					if ($key['PARENT'] == $parent_id) {		
+					if ($key['PARENT'] == $parent_id) {
 						if ((isset($key['MENU']) and ( $key['MENU'] > 0)) and ($key['PARENT'] == 0)) {
 								if (is_file(iconv(HTML_ENCODING,LOCAL_ENCODING,ENGINE_ROOT. DIRECTORY_SEPARATOR .HELP_FOLDER. DIRECTORY_SEPARATOR .$key['ID']."-".$key['NAME'].".html"))) {
 									// это корневой индекс	(папки)

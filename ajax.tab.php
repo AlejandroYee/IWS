@@ -13,9 +13,10 @@ BasicFunctions::requre_script_file("lib.requred.php");
 BasicFunctions::requre_script_file("lib.help.php");	
 
 // Инициализация
-$DataGrid = new Data_form();
 $main_db = new Db();
 $s_help = new Help();
+$DataGrid = new Data_form();
+
 
 // Проверяем переменные на инжекты и приводим в нужный формат
 $pid    = filter_input(INPUT_GET, 'pid',FILTER_SANITIZE_NUMBER_INT);
@@ -23,13 +24,18 @@ $id     = filter_input(INPUT_GET, 'id',FILTER_SANITIZE_NUMBER_INT);
 $tabid  = filter_input(INPUT_GET, 'tabid',FILTER_SANITIZE_STRING); 
 $action = filter_input(INPUT_GET, 'action',FILTER_SANITIZE_STRING);
 
+if(!$id or empty($id)) {
+   $pid = 0;
+   $id  = 0;
+}
+
 // Дополнительная проверка на пользователя и права доступа:
 $query_check = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_main_menu = ".$id." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable'");
 while ($main_db -> sql_fetch($query_check)) {
-	$check	= explode(",",strtoupper(trim( $main_db -> sql_result($query_check, "EDIT_BUTTON") )));
+        $check	= explode(",",strtoupper(trim( $main_db -> sql_result($query_check, "EDIT_BUTTON") )));
 }
-// если пользователю недоступна форма, то выходим сразу
-if (empty($check) and empty($action)) die("Доступ сюда запрещен");
+
+if (empty($check) and empty($action)) die("Доступ сюда запрещен");  
 
 // Формирование шапки и меню навигации $Navigation_res
 //--------------------------------------------------------------------------------------------------------------------------------------------
@@ -49,8 +55,8 @@ while ($main_db->sql_fetch($query)) {
 				$text_width = $main_db->sql_result($query, "NAME"); // Для автоподстройки длины
 		}			
 }
-$Navigation_res .= "</td></tr></table>";
 
+$Navigation_res .= "</td></tr></table>";
 // Возможно что это специфичная вкладка, смотрим:
 //--------------------------------------------------------------------------------------------------------------------------------------------	
 switch ($action) {
@@ -106,8 +112,8 @@ switch ($action) {
 				";
 	break;
 	// Для всех остальных случаем выводим стандартную обвязку
-	default:
-		$DataGrid -> Create_Table_Space($id,$pid,$tabid);
+	default:              	
+            $DataGrid -> Create_Table_Space($id,$pid,$tabid);
 	break;
 }
 ?>
