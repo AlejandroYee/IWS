@@ -213,6 +213,83 @@ $(function() {
 		}
 	}
 	
+        // Отрисовка,перерисовка графиков
+        plot_graph = function (self_obj) { 
+          
+            // Заполняем графики						
+            $.ajax({
+              url: self_obj.attr('url'),							  
+              type: 'GET',
+              success: function(data) {	 
+                  var obj = jQuery.parseJSON(data); 
+                  var chart_render = $('#' + self_obj.attr('id'));
+                  var options = {
+                        grid:   {hoverable: true, clickable: true },
+                        legend: {                           
+                            backgroundOpacity:0.8,
+                            show: obj.legend
+                        },                      
+                        xaxis: obj.xaxis,
+                        yaxes: obj.yaxis,
+                        canvas:true,
+                        zoom: {interactive: true },
+			pan: {interactive: false },
+                        crosshair: {
+				mode: "xy"
+			}
+                    };  
+                    $.extend(options, obj.options);
+                   if (self_obj.children().length == 0) {
+                            $.plot(chart_render, obj.data,options); 
+                            chart_render.bind( "plothover", function( e, pos, item ) {
+                                 var isTooltip = chart_render.is( ":ui-tooltip" );
+                                 var ttPos = $.ui.tooltip.prototype.options.position;                        
+                                 if ( item !== null && isTooltip === false ) {
+                                     var label = item.series.label,
+                                         data = item.datapoint[1],
+                                         data0 = item.series.data[item.dataIndex][0],                                         
+                                         content = label + ": " + data0 + ", " + data,
+                                         evtPos;
+                                     evtPos = $.extend( ttPos, {
+                                         of: {
+                                             pageX: item.pageX,
+                                             pageY: item.pageY,
+                                             preventDefault: $.noop
+                                         }
+                                     });
+                                     chart_render.tooltip({position: evtPos,
+                                                     content: content,
+                                                     items: '*'})
+                                           .tooltip( "open" );
+                                 } else if ( item === null && isTooltip === true ) {
+                                     chart_render.tooltip( "destroy" );
+                                 }
+                             });
+                       $('<div><b>'+ obj.chart_label+ '</b></div>').insertBefore(self_obj);                      
+                 } else {
+                     // пушим данные для обновления
+                    $.plot(chart_render, obj.data,options);         
+                }  
+                // поворачиваем надписи
+                if (obj.xaxis.labelAngle > 0) {
+                    var calculate_data = 3;
+                    self_obj.find(".flot-x-axis").children(".flot-tick-label").css({
+                        "-webkit-transform": "translateX(50%) rotate(" + obj.xaxis.labelAngle + "deg)",
+                        "-moz-transform": "translateX(50%) rotate(" + obj.xaxis.labelAngle + "deg)",
+                        "-ms-transform": "translateX(50%) rotate(" + obj.xaxis.labelAngle + "deg)",
+                        "-o-transform": "translateX(50%) rotate(" + obj.xaxis.labelAngle + "deg)",
+                        "transform": "translateX(50%) rotate(" + obj.xaxis.labelAngle + "deg)",
+                        "transform-origin": calculate_data + "px " + calculate_data + "px 0px",
+                        "-ms-transform-origin": calculate_data + "px " + calculate_data + "px 0px",
+                        "-moz-transform-origin": calculate_data + "px " + calculate_data + "px 0px",
+                        "-webkit-transform-origin": calculate_data + "px " + calculate_data + "px 0px",
+                        "-o-transform-origin": calculate_data + "px " + calculate_data + "px 0px"
+                    });
+                  }
+            }
+          });
+        };   
+        
 	// Функция добавления вкладок и содержимого через аякс
 	SetTab = function (tabTitle,tabContentUrl,same_tab) {
 		// Если предан флаг, то просто перезагружаем вкладу
@@ -512,7 +589,7 @@ $(function() {
                                                     objjj.parent().children("div[form_type='TREE_GRID_FORM_DETAIL']").attr('percent', lgrid);
                                                     objjj.parent().children("div[form_type='TABED_GRID_FORM']").attr('percent', lgrid).children('.ui-tabs-panel').children('.grid_resizer_tabs').attr('percent', lgrid);
                                                 break;
-                                                case "GRID_FORM":
+                                                default:
                                                     objjj.parent().children("div[form_type='GRID_FORM']").attr('percent', lgrid);
                                                 break;
                                             }
@@ -609,12 +686,12 @@ $(function() {
 		doc_width = $(window).width() - 2;
 		redraw_document($(".ui-tabs-panel[aria-expanded='true']"));			
 	});
-
+        
 	// Проверка значений:
 	check_form = function(formid) {
 		var data_ok = true;
 			$.each(formid.find("input[is_requred='true']"), function() {
-					if ($.trim($(this).val()) == "") {									
+					if ($.trim($(this).val()) === "") {									
 						$(this).addClass('ui-state-error');
 						$('#clone_' + $(this).attr('id')).parent().addClass('ui-state-error');
 						$(this).parent().children('.ui-button').addClass('ui-state-error');	
@@ -622,14 +699,14 @@ $(function() {
 				}
 			});
 			$.each(formid.find("select[is_requred='true']"), function() {																			
-				if ($.trim($(this).val()) == "") {
+				if ($.trim($(this).val()) === "") {
 					$(this).addClass('ui-state-error');																				
 					$(this).parent().children('button').addClass('ui-state-error');	
 					data_ok = false;
 				}
 			});		
 			$.each(formid.find("textarea[is_requred='true']"), function() {																			
-					if ($.trim($(this).val()) == "") {
+					if ($.trim($(this).val()) === "") {
 					$(this).addClass('ui-state-error');		
 					$(this).parent().children('.ace_scroller').addClass('ui-state-error');																				
 					data_ok = false;
@@ -641,14 +718,16 @@ $(function() {
 				custom_alert("необходимо заполнить все выделенные поля!");
 				return false;
 		}
-	}
+	};
 	
 	// создание элементов и контроллов на странице
 	create_from_table_elemnts = function (formid) {
                     
             // при создании элементов нам нужно узнать вкладку чтобы потом при закрытии удалить корректно
-            var spl_text = formid.attr('id').split('_');
-            var spl_tabid = spl_text[spl_text.length-2] + '_' + spl_text[spl_text.length-1]; 
+           if (formid.attr('id') > 0 ) {
+                var spl_text = formid.attr('id').split('_');
+                var spl_tabid = spl_text[spl_text.length-2] + '_' + spl_text[spl_text.length-1]; 
+          }
                 // разбираем элементы
 		$.each(formid.find("input, select, textarea"), function() {
 			var obj = $(this);
@@ -1075,10 +1154,10 @@ $(function() {
 						$('#' + gridname).attr('new_colmodel',true);
 				}	  
 			});	
-	}
-	
-$.calculator.regional['ru'] = {
-	decimalChar: ',',
+	}	
+
+$.calculator.regionalOptions['ru'] = {
+	decimalChar: '.',
 	buttonText: '...', buttonStatus: 'Открыть калькулятор',
 	closeText: 'Закрыть', closeStatus: 'Закрыть калькулятор',
 	useText: 'OK', useStatus: 'Использовать текущее значение в поле',
@@ -1097,10 +1176,8 @@ $.calculator.regional['ru'] = {
 	base16Text: 'Шест', base16Status: 'Шестнадцатиричный',
 	degreesText: 'Град', degreesStatus: 'Градусы',
 	radiansText: 'Рад', radiansStatus: 'Радианы',
-	isRTL: false
-};
-
-$.calculator.setDefaults($.calculator.regional['ru']);
+	isRTL: false};
+$.calculator.setDefaults($.calculator.regionalOptions['ru']);
 									
 $.extend($.ech.multiselectfilter.prototype.options, {
 	label: "Фильтр:",

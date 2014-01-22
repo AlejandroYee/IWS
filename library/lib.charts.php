@@ -22,12 +22,11 @@ var $id_mm_fr, $pageid, $main_db;
 								$chart_Y        = $this -> main_db -> sql_result($query, "CHART_Y");								
 								$chart_label    = $this -> main_db -> sql_result($query, "CHART_LABEL");
 								$chart_name     = $this -> main_db -> sql_result($query, "CHART_NAME");
-								$chartId		= $this -> pageid ."_chart_". $this -> main_db -> sql_result($query, "ID");
-								$url = "ajax.data.chart.php?id=".$this -> id_mm_fr."";
+								$chartId	= $this -> pageid ."_chart_". $this -> id_mm_fr;
+								$url = ENGINE_HTTP . "/ajax.data.chart.php?id=".$this -> id_mm_fr;
 			}
 						
-			return "<div id='".$chartId."_div_".$this -> pageid."' name='".$chartId."_".$this -> pageid."' schart_name='".$chart_name."' x='".$chart_X."' y='".$chart_Y."' label='".$chart_label."' url = 'ajax.data.chart.php?id=".$this -> id_mm_fr."' class='chart_data_".$this -> pageid."' align=\"center\">
-				  </div>";
+			return "<div id='".$chartId."' name='".$chartId."' schart_name='".$chart_name."' label='".$chart_label."' url = '".$url."' class='chart_data_".$this -> pageid."' style=\"height: ".$chart_Y."px; width: ".$chart_X."px;\"></div>";
 	}
 	
 	// Конструктор
@@ -42,7 +41,7 @@ var $id_mm_fr, $pageid, $main_db;
 	}
 	
 	static function get_about() {
-		return "Графики FLASH и HTML5";
+		return "Графики JS и HTML5";
 	}
 	
 	// Процедура запуска графиков:
@@ -59,25 +58,18 @@ var $id_mm_fr, $pageid, $main_db;
 			set_resizers();			
 		}
 			redraw_document();
-			//Таймер ввода данных
-			var chart_".$this -> pageid."_intval = setInterval(function() {
-				if( data_".$this -> pageid."_loaded > 0 ) {
-					// Просматриваем графики на странице:			
-					$.each( $('.chart_data_".$this -> pageid."') , function() {
-							var self = $(this);
-							// Заполняем графки						
-							$.get(self.attr('url'),function(data) {
-								var chart_".$this -> pageid." = new FusionCharts(self.attr('swf'),self.attr('label'), self.attr('x'), self.attr('y'));
-								chart_".$this -> pageid.".setTransparent(\"transparent\"); 
-								chart_".$this -> pageid.".setDataXML(data);
-								chart_".$this -> pageid.".render(self.attr('id'));	
-								self.children().attr('id',self.attr('name'));	
-							});	
-							self.parent().css('overflow-y','auto');
-					});
-				clearInterval(chart_".$this -> pageid."_intval);
-				}
-			}, 1000);		
+                        
+                        //Таймер ввода данных
+                        var chart_".$this -> pageid."_intval = setInterval(function() {						
+                            if( typeof(data_".$this -> pageid."_loaded) === 'undefined' || data_".$this -> pageid."_loaded > 0 ) {
+                                    // Просматриваем графики на странице:			
+                                    $.each( $('.chart_data_".$this -> pageid."') , function() {
+                                            plot_graph($(this));                                                           
+                                            $(this).parent().css('overflow-y','auto').attr({'align':'center'});
+                                    });
+                            clearInterval(chart_".$this -> pageid."_intval);
+                            }
+                    }, 500);  
 		});
 		</script>";	
 	}

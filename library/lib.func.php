@@ -176,7 +176,7 @@ class BasicFunctions {
                                             </style>						 
             </head>
             <body>
-                    <div id="loading"></div>	
+            <div id="loading"></div>            
             <div id="logon" window_login="logon" class="ui-widget ui-widget-content ui-corner-all" style="position:absolute;text-align :center;width:400px;height:350px;">
             <?php if (!$offline) { ?>
             <h3>
@@ -199,22 +199,25 @@ class BasicFunctions {
                                     <button>Войти</button>	
             </form>
             <?php } else {?>
-            <p><br><br><br>
-            <b>Уважаемый пользователь.</b><br><br>
-            C <b><?=date("H:i:s d.m.Y",OFFINE_START_DATE)?></b> по <b><?=date("H:i:s d.m.Y",OFFINE_END_DATE)?></b><br><br>
-            Система будет находится в оффлайне для:<br><br>
-            <b><?=OFFINE_MESSAGE?> </b><br><br>
-            Приносим свои извенения<br>за доставленное неудобство,<br>
-            зайдите позже.
-            </p>
-            <?php } ?>
-            <div id="login_theme" style="position:absolute;text-align:center;width:200px;height:20px;top:305px;left:100px">
-                    <h6>Случайная тема оформления, называется: "<?=$theme_first['theme_name'][$theme_number]?>"</h6>
-            </div>
-            </div>
+                <p><br><br><br>
+                <b>Уважаемый пользователь.</b><br><br>
+                C <b><?=date("H:i:s d.m.Y",OFFINE_START_DATE)?></b> по <b><?=date("H:i:s d.m.Y",OFFINE_END_DATE)?></b><br><br>
+                Система будет находится в оффлайне для:<br><br>
+                <b><?=OFFINE_MESSAGE?> </b><br><br>
+                Приносим свои извенения<br>за доставленное неудобство,<br>
+                зайдите позже.
+                </p>
+                <?php } ?>
+                <div id="login_theme" style="position:absolute;text-align:center;width:200px;height:20px;top:280px;left:100px">
+                        <h6>Случайная тема оформления, называется: "<?=$theme_first['theme_name'][$theme_number]?>"</h6>
+                </div>
+                <div id="login_theme" style="position:absolute;text-align:center;width:200px;height:20px;top:315px;left:100px">
+                        <h6 id="about">IWS: <?=VERSION_ENGINE?>@<?=date("Y")?></h6>
+                </div>
+            </div>   
             <script type="text/javascript" >
              $(function() {
-
+            
              custom_alert = function (output_msg) {	
                             $("<div />").html(output_msg).dialog({
                                     title: 'Ошибка',
@@ -261,10 +264,16 @@ class BasicFunctions {
               });
             $(document).ready(function () {	
                     $('#loading').fadeOut(300);		
-            });	  
+                }).keyup(function(eventObject){
+                    if (eventObject.keyCode === 13) {                        
+                            $( "button" ).click();
+                      }
+             });
+             
             $(window).resize(function () {
                             $("#logon").css({ top: $(window).height()/2 - 175, left: $(window).width()/2 - 200 });			
             });
+            
             $("#logon").css({ top: $(window).height()/2 - 175, left: $(window).width()/2 - 200 });	
 
             </script>

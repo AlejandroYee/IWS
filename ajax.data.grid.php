@@ -230,5 +230,5 @@
 			}			                              
 			
             $json = new json();
-	    echo $json -> jsonencode($dt);			
+	    echo $json -> jsonencode($dt);
 $main_db -> __destruct();

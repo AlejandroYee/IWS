@@ -8,207 +8,155 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Вывод данных для графика
 //--------------------------------------------------------------------------------------------------------------------------------------------
-	require_once("library/lib.func.php");
-	BasicFunctions::requre_script_file("lib.requred.php"); 
-	BasicFunctions::requre_script_file("auth.".AUTH.".php");
+require_once("library/lib.func.php");
+BasicFunctions::requre_script_file("lib.requred.php"); 
+BasicFunctions::requre_script_file("auth.".AUTH.".php");
+BasicFunctions::requre_script_file("lib.json.php");
+
+header("Content-type: text/script;charset=".HTML_ENCODING);
+
+// Начальные переменные
+$id 		= filter_input(INPUT_GET, 'id',FILTER_SANITIZE_NUMBER_INT);
+$dt             = (object)''; 
+$dt_cell        = array();
+$dt_obj         = array();
+$dt_cat         = array();
+$axis_y_pos     = array();
+$showaxis       = true;
+
+$user_auth = new AUTH();	
+if (!$user_auth -> is_user()) {
+                BasicFunctions::clear_cache();
+                die("Доступ запрещен");
+}
 	
-  	// Начальные переменные
-	$id 			= @intval($_GET['id']);  
-	$arr_field      = array();
-	$arr_field_cat  = array();
-	$arrData        = array();
-	$arrDataCat     = array();
-	$i              = 0;
-	$k              = 0;
-	$str_dt         = "";	
-	$has_parent		= "";
-	$FC_ColorCounter = 0;
-	$check			= "";
-	$strData 		= "";
-	$arr_FCColors = array("1941A5","AFD8F8","F6BD0F","8BBA00","A66EDD","F984A1","CCCC00","999999",
-									  "0099CC","FF0000","006F00","0099FF","FF66CC","669966","7C7CB4","FF9933",
-									  "9900FF","99FFCC","CCCCFF","669900");
+$main_db = new db();
+BasicFunctions::end_session();
+		
+// Дополнительная проверка на пользователя и права доступа:
+$query_check = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_mm_form = ".$id." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable'");
+while ($main_db -> sql_fetch($query_check)) {
+        $check	= explode(",",strtoupper(trim( $main_db -> sql_result($query_check, "EDIT_BUTTON") )));
+}
+
+if (empty($check)) die("Доступ для чтения данных запрещен");
 	
-	$user_auth = new AUTH();	
-	if (!$user_auth -> is_user()) {
-			BasicFunctions::clear_cache();
-			die("Доступ запрещен");
-	}
 	
-	$main_db = new db();
-	BasicFunctions::end_session();
-	
-	function getFCColor() 
-	{
-		global $FC_ColorCounter,$arr_FCColors; 
-		$FC_ColorCounter++;
-		return($arr_FCColors[$FC_ColorCounter % count($arr_FCColors)]);
-	}
-	
-	// Дополнительная проверка на пользователя и права доступа:
-	$query = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_mm_form = ".$id." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable'");
-	while ($main_db -> sql_fetch($query)) {
-		$check				= explode(",",strtoupper(trim( $main_db -> sql_result($query, "EDIT_BUTTON") )));;
-	}
-	// если пользователю недоступна форма, то выходим сразу
-	if (empty($check)) die("Доступ для чтения данных запрещен");
-	
-	$query = $main_db -> sql_execute("select tf.owner,
-									   tf.object_name,
-									   tf.name chart_label,
-									   nvl(tf.CHART_show_name, 0)   is_show_name,
-									   nvl(tf.CHART_rotate_name, 0) is_rotate_name,
-									   nvl(tf.CHART_X, 1000) CHART_X,
-									   nvl(tf.CHART_Y,  350) CHART_Y,
-									   nvl(tf.CHART_DEC_PREC,  0) CHART_DEC_PREC,
-									   (Select u.object_type
-										  from user_objects u
-										  where u.object_name = upper(tf.object_name)) object_type,
-									   nvl2(tf.form_where, 'AND '||tf.form_where, null) form_where, 
-									   t.name,
-									   nvl(substr(t.name, 1, instr(t.name, '@') - 1), t.name) l_name,
-									   nvl(substr(t.name, instr(t.name, '@') + 1), t.name) s_name,
-									   t.field_name,
-									   decode(t.field_type, 'D', 'to_char('||t.field_name||', ''dd.mm.yyyy hh24:mi:ss'') '||t.field_name
+$query_korrdinates = $main_db -> sql_execute("select tf.owner, tf.object_name, tf.name chart_label, nvl(tf.CHART_show_name, 0) as is_show_name,
+				 decode(nvl(tf.CHART_rotate_name, 0),1,90,0) is_rotate_name, nvl(tf.CHART_X, 1000) CHART_X, nvl(tf.CHART_Y,  350) CHART_Y,
+				 nvl(tf.CHART_DEC_PREC,  0) CHART_DEC_PREC, (Select u.object_type from user_objects u where u.object_name = upper(tf.object_name)) object_type,
+				 nvl2(tf.form_where, 'AND '||tf.form_where, null) form_where,  t.name, nvl(substr(t.name, 1, instr(t.name, '@') - 1), t.name) l_name,
+				 nvl(substr(t.name, instr(t.name, '@') + 1), t.name) s_name, t.field_name, decode(t.field_type, 'D', 'to_char('||t.field_name||', ''dd.mm.yyyy hh24:mi:ss'') '||t.field_name
 														   ,'I', 'round('||t.field_name||', 0) '||t.field_name
 															   ,t.field_name) f_name,
-									   t.name axis_name,
-									   ta.html_txt align_txt,
-									   decode(ta.html_txt, 'left', 1, 0) axisOnLeft,
-									   /*t.FL_HTML_CODE,*/
-									   tf.xsl_file_in,
-									   t.field_type,
-									   t.num,
-									   ct.name chart_name,
-									   ct.type_chart type_chart
-								  from ".DB_USER_NAME.".wb_mm_form tf
-								  left join ".DB_USER_NAME.".wb_form_field t on t.id_wb_mm_form = tf.id_wb_mm_form
-								  left join ".DB_USER_NAME.".wb_form_field_align ta on ta.id_wb_form_field_align = t.id_wb_form_field_align
-								  left join ".DB_USER_NAME.".wb_chart_type ct on ct.id_wb_chart_type = tf.id_wb_chart_type
-								  where tf.id_wb_mm_form = ".$id."
-								order by t.num");
-						
-			while ($main_db -> sql_fetch($query)) {
-								$show_name      = $main_db -> sql_result($query, "IS_SHOW_NAME");
-								$rotate_name    = $main_db -> sql_result($query, "IS_ROTATE_NAME");
-								$chart_X        = $main_db -> sql_result($query, "CHART_X");
-								$chart_Y        = $main_db -> sql_result($query, "CHART_Y");
-								$chart_dec_prec = intval($main_db-> sql_result($query, "CHART_DEC_PREC"));
-								if ($str_dt=="") {
-									$owner      = $main_db -> sql_result($query, "OWNER");
-									$table_name = $main_db -> sql_result($query, "OBJECT_NAME");
-									$form_where = $main_db -> sql_result($query, "FORM_WHERE");
-									$str_dt = "Select ".$main_db -> sql_result($query, "F_NAME");
-									$AxisName = $main_db -> sql_result($query, "AXIS_NAME");
-									$str_dt_f = " from (Select rownum r_num, t.* from ".$owner.".".$table_name." t ) where 1 = 1 ".$form_where." ";
-								} else {
-									$str_dt = $str_dt.", ".$main_db -> sql_result($query, "F_NAME");
-								}
-							
-								if ($main_db -> sql_result($query, "NUM") == "0") {
-									$str_category = "Select ".$main_db -> sql_result($query, "F_NAME")." NAME_CAT from ".$owner.".".$table_name." where 1 = 1 ".$form_where." ";
-									$arr_field_cat[0]  = $main_db -> sql_result($query, "FIELD_NAME");
-									$arr_num[0]        = $main_db -> sql_result($query, "NUM");
-								} else {
-									$i = $i + 1;
-									$arr_num[$i]        = $main_db -> sql_result($query, "NUM");
-									$arr_field[$i]      = $main_db -> sql_result($query, "FIELD_NAME");																
-									$arr_l_name[$i]     = $main_db -> sql_result($query, "L_NAME");
-									$arr_s_name[$i]     = $main_db -> sql_result($query, "S_NAME");
-									$align_txt[$i]      = $main_db -> sql_result($query, "ALIGN_TXT");
-									$axisOnLeft[$i]     = $main_db -> sql_result($query, "AXISONLEFT");
-								}
-								$chart_label        = $main_db -> sql_result($query, "CHART_LABEL");
-								$chart_name         = $main_db -> sql_result($query, "CHART_NAME");
-			}
-						
-			$m = 0; 
-			$query = $main_db -> sql_execute($str_dt.$str_dt_f);			
-							
-			while ($main_db -> sql_fetch($query)) {
-				foreach ($arr_field as $key=>$line) {
-						$arrDataCat[$arr_field[$key]][$m] = $main_db -> sql_result($query, $arr_field_cat[0]);
-						$arrData[$arr_field[$key]][$m]    = $main_db -> sql_result($query, $arr_field[$key]);
-					}
-				$m++;  
-			} 
-				// Специфичные параметры для графиков
-				switch (trim($chart_name)) { 
-					case "MultiAxisLine":
-						$field = "name";
-						$legend = "showLegend='0'";
-						$has_parent = "";
-						$labels = false;
-						$Set = false;
-					break;
-					case "MSColumn3DLineDY": //MSColumn2DLineDY
-						$field = "label";
-						$legend = "showLegend='1' xAxisName='".$AxisName."' ";
-						$has_parent = "parentYaxis='S'";
-						$labels = true;
-						$Set = false;
-					break;
-					case "Pie3D":
-						$field = "name";
-						$legend = "showLegend='1' useEllipsesWhenOverflow='0'  pieSliceDepth='30' xAxisName='".$AxisName."' ";
-						$has_parent = "";
-						$labels = false;
-						$Set = true;
-					break;
-					default:
-						$field = "name";
-						$legend = "showLegend='1' xAxisName='".$AxisName."' ";
-						$has_parent = "";
-						$labels = false;
-						$Set = false;
-					break;
-				}
+				 t.name axis_name, ta.html_txt align_txt, ta.html_txt as axisOnLeft,  /*t.FL_HTML_CODE,*/
+				 tf.xsl_file_in, t.field_type, row_number() over(ORDER BY t.num)-1 as num, ct.name chart_name, ct.id_wb_chart_type as chart_id
+				 from ".DB_USER_NAME.".wb_mm_form tf
+                                 left join ".DB_USER_NAME.".wb_form_field t on t.id_wb_mm_form = tf.id_wb_mm_form
+				 left join ".DB_USER_NAME.".wb_form_field_align ta on ta.id_wb_form_field_align = t.id_wb_form_field_align
+				 left join ".DB_USER_NAME.".wb_chart_type ct on ct.id_wb_chart_type = tf.id_wb_chart_type
+				 where tf.id_wb_mm_form = ".$id." order by t.num");
 				
-				// Заголовки графика
-				$strXML = "<graph caption='".$chart_label."' divlinecolor='F47E00' ".$legend."  numVDivLines='".count($arrDataCat[$arr_field[1]])."' vDivLineAlpha='10' \n";
-				$strXML .= "rotateNames='".$rotate_name."' showBorder = '0'  formatNumberScale='0' decimalSeparator='' setAdaptiveYMin='1' thousandSeparator=' ' \n";
-				$strXML .= " showValues='".$show_name."' decimalPrecision='".$chart_dec_prec."' > \n";
-						
-				// Формируем категории графика
-				$strCategories = "<categories>\n";
-				foreach ($arrDataCat[$arr_field[1]] as $key => $line) {
-					$strCategories .= " <category ".$field."='".trim($arrDataCat[$arr_field[1]][$key])."' />\n";
-				}
-				$strCategories .= "</categories>\n";
-							
-				// Для каждого типа данных делаем легенду
-				foreach ($arr_field as $key => $line) {		
-					if ($chart_name =='MultiAxisLine') {
-						$strData .= "<axis title='".$arr_s_name[$key]."' titlePos='".$align_txt[$key]."' axisOnLeft='".$axisOnLeft[$key]."' divlineisdashed='1' >\n";
-					}
-					// Только для первой записи парент
-					if ($arr_num[$key] <> 1) {
-						$has_parent ="";
-					}
-					$strData .= "<dataset seriesName='" . $arr_l_name[$key] . "' color='". getFCColor() ."' ".$has_parent." >\n";
-					
-					// Прогружаем данные
-					foreach ($arrDataCat[$arr_field[$key]] as $key2 => $line2) {
-						if ($labels) {
-							$label="name='".trim($arrDataCat[$arr_field[1]][$key])."'";
-						} else {
-							$label="";
-						}
-						$strData .= "<set value='".round($arrData[$arr_field[$key]][$key2],$chart_dec_prec)."' ".$label." />\n";
-					}
-					$strData .= "</dataset>\n";		
-					if ($chart_name =='MultiAxisLine') {
-						$strData .= "</axis>";			
-					}
-				}
-				if($Set) {
-					 $strCategories = "";
-					 $strData ="";
-					 foreach ($arrDataCat[$arr_field[$key]] as $key2 => $line2) {
-						$strData .= "<set  value='".round($arrData[$arr_field[$key]][$key2],$chart_dec_prec)."' name='".trim($arrDataCat[$arr_field[1]][$key])."' />\n";
-					 }
-				}
-				$strXML .= $strCategories . $strData .  "</graph>";
-echo $strXML;
-$main_db -> __destruct();										
-?>
+while ($main_db -> sql_fetch($query_korrdinates)) {
+                
+                $field_name = $main_db -> sql_result($query_korrdinates, "F_NAME");
+                $field_num = $main_db -> sql_result($query_korrdinates, "NUM");
+                
+                $str_dt = "Select ".$field_name." from ( "
+                        . "Select rownum r_num, t.* from ".$main_db -> sql_result($query_korrdinates, "OWNER").".".$main_db -> sql_result($query_korrdinates, "OBJECT_NAME")." t ) "
+                        . "where 1 = 1 ".$main_db -> sql_result($query_korrdinates, "FORM_WHERE");
+                
+                $dt -> chart_label    = $main_db -> sql_result($query_korrdinates, "CHART_LABEL");
+                $dt -> legend         = boolval($main_db -> sql_result($query_korrdinates, "is_show_name"));                 
+                
+                $m = 0; 
+                $query_data = $main_db -> sql_execute($str_dt);	
+                while ($main_db -> sql_fetch($query_data)) {
+                        if ($field_num == 0) {
+                            switch (trim($main_db -> sql_result($query_korrdinates, "FIELD_TYPE"))) {			
+                                    // Поле ввода ДАТА
+                                    case "D": 
+                                           $dt_cat[$m] = strtotime($main_db -> sql_result($query_data, $field_name))."000";
+                                           $dt -> xaxis        = array( "mode" => "time",  "timeformat" => "%d.%m.%Y", "timezone" => "browser","labelHeight"=> 75,"labelAngle"=>intval($main_db -> sql_result($query_korrdinates, "is_rotate_name")));
+                                    break;
+                                    // Поле ввода ДАТА и ВРЕМЯ
+                                    case "DT":
+                                          $dt_cat[$m] = strtotime($main_db -> sql_result($query_data, $field_name))."000";
+                                          $dt -> xaxis        = array( "mode" => "time",  "timeformat" => "%d.%m.%Y %H:%M:%S", "timezone" => "browser","labelHeight"=> 75,"labelAngle"=>intval($main_db -> sql_result($query_korrdinates, "is_rotate_name")));
+                                    break;			
+                                    case "C":	
+                                           $dt_cat[$m] = $main_db -> sql_result($query_data, $field_name)." руб.";
+                                           $dt -> xaxis = array( "mode" => "categories","labelHeight"=> 75,"labelAngle"=>intval($main_db -> sql_result($query_korrdinates, "is_rotate_name")));		
+                                    break;		
+                                    default:
+                                           $dt_cat[$m] = $main_db -> sql_result($query_data, $field_name);
+                                           $dt -> xaxis = array( "mode" => "categories","labelHeight"=> 75,"labelAngle"=>intval($main_db -> sql_result($query_korrdinates, "is_rotate_name")));
+                                    break;
+                            }        
+                        } else {
+                            $dt_cell[$field_num][$m] = $main_db -> sql_result($query_data, $field_name);
+                        }
+                        $m++; 
+                }
+                $dt_row             = (object)'';
+                $dt_row -> label    = $main_db -> sql_result($query_korrdinates, "L_NAME");                                
+                
+                if ($field_num > 0) {
+                    $tmp_array =  array();
+                    for ($m = 0; $m < count($dt_cat); $m++) {    
+                        $tmp_array[$m][0] = $dt_cat[$m];
+                        $tmp_array[$m][1] = $dt_cell[$field_num][$m];
+                    }
+                    $dt_row -> xaxis      = 1; 
+                    $dt_row -> yaxis      = intval($field_num);
+                    $dt_row -> data       = $tmp_array; 
+                    $axis_y_pos[$field_num-1] = (object) array( "position" => $main_db -> sql_result($query_korrdinates, "axisOnLeft"),"show"=>$showaxis);
+                }   
+                
+                switch (intval($main_db -> sql_result($query_korrdinates, "CHART_ID"))) {
+                    case 12: 
+                        $showaxis           = false;
+                        $dt -> legend       = true;
+                        $dt_row -> lines    = array( "show" => true, "fill" => false);
+                        if ($field_num > 0) {    $dt_obj[$field_num-1] = $dt_row; }  
+                    break;
+                    case 20: 
+                        $showaxis           = true;
+                        $dt -> legend       = true;
+                        $dt_row -> lines    = array( "show" => true, "fill" => true);
+                        if ($field_num > 0) {    $dt_obj[$field_num-1] = $dt_row; }  
+                    break;
+                    case 4: 
+                        $showaxis           = true;
+                        $dt -> legend       = false;                         
+                        $dt -> options      = (object) array("series" => (object) array("pie" => (object) array( "show" => true, "fill" => true,"tilt"=> 0.3,
+                                                                         "shadow" => array("top" => 20, "left" => 0,"alpha" => 0.03)))); 
+                        
+                        // преобразовываем масив данных
+                        for ($m = 0; $m < count($dt_cat); $m++) { 
+                           $dt_obj[$m]       = (object) array("label"=>$dt_cat[$m],"data"=>$dt_cell[$field_num][$m]);
+                        };                         
+                    break;
+                    case 18: 
+                        $showaxis           = false;
+                        $dt -> legend       = false;
+                        $dt_row -> bars     = array( "show" => true, "fill" => true);
+                        if ($field_num > 0) {    $dt_obj[$field_num-1] = $dt_row; }  
+                    break;
+                    default:
+                        $showaxis           = true;
+                        $dt -> legend       = true;
+                        $dt_row -> lines   = array( "show" => true, "fill" => false);
+                        if ($field_num > 0) {    $dt_obj[$field_num-1] = $dt_row; }  
+                    break;
+                }
+}
+
+// формируем доп опции для y осей кроме первой
+$dt -> yaxis = $axis_y_pos; 
+$dt -> data =  $dt_obj;
+/*$json = new json();
+echo $json -> jsonencode($dt);*/
+
+echo json_encode ($dt,JSON_PRETTY_PRINT);
+$main_db -> __destruct();

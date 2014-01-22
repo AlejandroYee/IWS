@@ -296,7 +296,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 									loader_function();
 									$.get('ajax.saveparams.php?&id_mm_fr=".$this->id_mm_fr."&' + qString, function(data) {										
 										clearInterval(load_".$this->pageid."_intval);										
-										$('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>Данные успешно обработаны,<br>Длительность обработки ' + minutes_".$this->pageid." +' минут(а), ' + seconds_".$this->pageid." + 'секунд.</h2>');
+										$('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>Данные успешно обработаны,<br>Длительность обработки ' + minutes_".$this->pageid." +' минут(а), ' + seconds_".$this->pageid." + ' секунд.</h2>');
                                                                                 load_".$this->pageid."_time = 0;    
 										$('li[aria-selected=\"false\"] a[href=\"#".$this->pageid."\"]').parent().effect('pulsate', {}, 2000);
 										$('#show_parameters-".$this->pageid."').button('option','disabled',false);
@@ -309,13 +309,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 									$.get('ajax.saveparams.php?&id_mm_fr=".$this->id_mm_fr."&' + qString, function(data) {if (data.length > 20) {custom_alert(data);}});
 									if (data_".$this -> pageid."_loaded > 0) {
 										$.each( $('#".$this->pageid." .tab_main_content .chart_data_".$this -> pageid."') , function() {
-											var self = $(this);					
-											$.get(self.attr('url'),function(data) {													
-													document.getElementById(self.attr('name')).SetVariable('_root.dataURL','');
-													document.getElementById(self.attr('name')).SetVariable('_root.isNewData','1');
-													document.getElementById(self.attr('name')).SetVariable('_root.newData',data);
-													document.getElementById(self.attr('name')).TGotoLabel('/', 'JavaScriptHandler'); 													
-											});	
+											plot_graph($(this));  	
 										});
 									}
 									data_".$this -> pageid."_loaded = 1;
@@ -327,14 +321,8 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 									$output .= "
 									$.get('ajax.saveparams.php?&id_mm_fr=".$this->id_mm_fr."&' + qString, function(data) {if (data.length > 20) {custom_alert(data);}});
 									if (data_".$this -> pageid."_loaded > 0) {
-										$.each( $('#".$this->pageid." .tab_main_content .chart_data_".$this -> pageid."') , function() {
-											var self = $(this);					
-											$.get(self.attr('url'),function(data) {													
-													document.getElementById(self.attr('name')).SetVariable('_root.dataURL','');
-													document.getElementById(self.attr('name')).SetVariable('_root.isNewData','1');
-													document.getElementById(self.attr('name')).SetVariable('_root.newData',data);
-													document.getElementById(self.attr('name')).TGotoLabel('/', 'JavaScriptHandler'); 													
-											});	
+										$.each( $('#".$this->pageid." .tab_main_content .chart_data_".$this -> pageid."') , function() {																
+											plot_graph($(this));  
 										});
 									}
 									$('#show_parameters-".$this->pageid."').button('option','disabled',false);
@@ -485,7 +473,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 						$output .= "
 								clearInterval(load_".$this->pageid."_intval);
 								load_".$this->pageid."_time = 0;
-                                                                $('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>Данные успешно обработаны,<br>Длительность обработки ' + minutes_".$this->pageid." +' минут(а), ' + seconds_".$this->pageid." + 'секунд.</h2>');
+                                                                $('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>Данные успешно обработаны,<br>Длительность обработки ' + minutes_".$this->pageid." +' минут(а), ' + seconds_".$this->pageid." + ' секунд.</h2>');
 								$('li[aria-selected=\"false\"] a[href=\"#".$this->pageid."\"]').parent().effect('pulsate', {}, 2000);
 								$('#show_parameters-".$this->pageid."').button('option','disabled',false);
 												
