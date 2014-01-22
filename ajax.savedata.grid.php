@@ -90,7 +90,7 @@ while ($main_db -> sql_fetch($query)) {
                     } else {
                         $value = $field_name_id;
                     }		
-		$value = iconv(HTML_ENCODING,LOCAL_ENCODING, $value); // кодировочку меняем				
+		$value =  iconv(HTML_ENCODING,LOCAL_ENCODING,$value); // кодировочку меняем
 		// Если родительский дерева и мы обновляем запись, то:
 		if ((($type == "TREE_GRID_FORM_MASTER") or ($type == "TREE_GRID_FORM") or ($type == "TREE_GRID_FORM_DETAIL")) and ($main_db -> sql_result($query, "FIELD_NAME") == "ID_PARENT")) {			
 			// только если добавляем запись:
@@ -182,7 +182,6 @@ while ($main_db -> sql_fetch($query)) {
 							$str_sql_data .= ", null";
 						}
 				break;
-				
 				default:
 						$str_sql_data .= ",'".$value."' ";
 				break;
