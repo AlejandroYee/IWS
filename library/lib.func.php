@@ -15,7 +15,7 @@ define("ENGINE_ROOT",  filter_input(INPUT_SERVER, 'DOCUMENT_ROOT',FILTER_SANITIZ
 define("SESSION_ID",md5(time().rand(time()/100,getrandmax())));
 define("HTTP_USER_AGENT",filter_input(INPUT_SERVER, 'HTTP_USER_AGENT',FILTER_SANITIZE_STRING));
 define("SESSION_LIFE_TIME", 10800);
-define("VERSION_ENGINE","v2.00 Final Release");
+define("VERSION_ENGINE","v2.0.0 Final Release");
 
 // Переопределение времени выполнения
 ini_set('max_execution_time', 2100);
