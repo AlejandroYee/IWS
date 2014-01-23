@@ -6,7 +6,7 @@
 * Part of IWS system
 */
 
-if (filter_input(INPUT_SERVER, 'HTTP_SCHEME') and (filter_input(INPUT_SERVER, 'HTTPS',FILTER_VALIDATE_BOOLEAN) != "false")) {
+if (filter_input(INPUT_SERVER, 'HTTPS',FILTER_VALIDATE_BOOLEAN) > 0) {
     define("ENGINE_HTTP",  "https://" .filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL));
 } else {    
     define("ENGINE_HTTP",  "http://" .filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL));
@@ -44,6 +44,13 @@ function my_error_handler($no,$str,$file,$line) {
 		my_exception_handler(" '".$str."' файл: ".$file." строка: ".$line); 
 	}
     return true;		
+}
+
+// для старых версий php < 5.5
+if (!function_exists('boolval')) {
+        function boolval($val) {
+                return (bool) $val;
+        }
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------
