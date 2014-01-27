@@ -83,8 +83,8 @@ while ($main_db -> sql_fetch($query)) {
                 isset($_FILES[$main_db -> sql_result($query, "FIELD_NAME")]))) {
             
 		// Вдруг у нас значения в виде массива:
-		$field_name_id = filter_input(INPUT_POST, $main_db -> sql_result($query, "FIELD_NAME_ID"),FILTER_SANITIZE_STRING,FILTER_NULL_ON_FAILURE);
-                if (trim($field_name) != "") {
+		$field_name_id = filter_input(INPUT_POST, $main_db -> sql_result($query, "FIELD_NAME_ID"),FILTER_SANITIZE_STRING,FILTER_NULL_ON_FAILURE);                
+                if (trim($field_name_id) != "") {
                    if (is_array($field_name_id)) {
 			$value = implode(",",$field_name_id);
                     } else {
