@@ -424,12 +424,12 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               title: 'Добавить новую запись (Кнопка A, INS)',
                                               buttonicon: 'ui-icon-plus',
                                               onClickButton: function(){
-													if ($('#<?=$object_name?>').attr('new_colmodel') == "true") {
-														var recreate = true;
-														$('#<?=$object_name?>').removeAttr('new_colmodel');
-														} else {
-														var recreate = false;
-													}
+                                                                                                                        if ($('#<?=$object_name?>').attr('new_colmodel') === "false" || typeof($('#<?=$object_name?>').attr('new_colmodel')) === "undefined" ) {                                                                                                                               
+                                                                                                                                var recreate = false;														
+                                                                                                                                    } else {
+                                                                                                                                var recreate = true;
+                                                                                                                                $('#<?=$object_name?>').removeAttr('new_colmodel');
+                                                                                                                        }
                                                       $('#<?=$object_name?>').jqGrid('editGridRow','new',{
 																viewPagerButtons:false,
 																closeOnEscape:true,
@@ -465,12 +465,12 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               title: 'Скопировать выбранную запись в новую запись (Кнопка C)',
                                               buttonicon: 'ui-icon-transferthick-e-w',
                                               onClickButton: function() {
-													if ($('#<?=$object_name?>').attr('new_colmodel') == "true") {
-														var recreate = true;
-														$('#<?=$object_name?>').removeAttr('new_colmodel');
-														} else {
-														var recreate = false;
-													}
+                                                                                                                        if ($('#<?=$object_name?>').attr('new_colmodel') === "false" || typeof($('#<?=$object_name?>').attr('new_colmodel')) === "undefined" ) {                                                                                                                               
+                                                                                                                                var recreate = false;														
+                                                                                                                                    } else {
+                                                                                                                                var recreate = true;
+                                                                                                                                $('#<?=$object_name?>').removeAttr('new_colmodel');
+                                                                                                                        }
 													row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
                                                     $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{
 																	viewPagerButtons:false,
@@ -511,17 +511,17 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               title: 'Изменить выделенную запись (Кнопка E)',
                                               buttonicon: 'ui-icon-pencil',
                                               onClickButton: function(){
-																if ($('#<?=$object_name?>').attr('new_colmodel') == "true") {
-																	var recreate = true;
-																	$('#<?=$object_name?>').removeAttr('new_colmodel');
-																	} else {
-																	var recreate = false;
-																}
+                                                                                                                        if ($('#<?=$object_name?>').attr('new_colmodel') === "false" || typeof($('#<?=$object_name?>').attr('new_colmodel')) === "undefined" ) {                                                                                                                               
+                                                                                                                                var recreate = false;														
+                                                                                                                                    } else {
+                                                                                                                                var recreate = true;
+                                                                                                                                $('#<?=$object_name?>').removeAttr('new_colmodel');
+                                                                                                                        }
 																row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
                                                                 $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{
 																	viewPagerButtons:false,
-																	closeOnEscape:true,
-																	recreateForm:recreate,
+																	closeOnEscape: true,
+																	recreateForm: recreate,
 																	reloadAfterSubmit:false,
 																	closeAfterEdit:true,																		
 															     	afterSubmit: function(response, postdata)  {
