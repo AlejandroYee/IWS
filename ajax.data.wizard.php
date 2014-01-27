@@ -84,9 +84,9 @@ if (filter_input(INPUT_GET, 'finish',FILTER_VALIDATE_BOOLEAN)) {
 // формируем массив спрятанных форм с пришедшими данными:
 foreach(filter_input_array(INPUT_POST,FILTER_SANITIZE_STRING) as $k => $v) {
 	if (is_array($v)) {
-		echo "<input type='hidden' name='".BasicFunctions::Convert_quotas(strtolower($k))."' value = '".BasicFunctions::Convert_quotas(ext_implode(",",$v))."' >\n";
+		echo "<input type='hidden' name='".strtolower($k)."' value = '".ext_implode(",",$v)."' >\n";
 	} else {
-		echo "<input type='hidden' name='".BasicFunctions::Convert_quotas(strtolower($k))."' value = '".BasicFunctions::Convert_quotas($v)."' >\n";
+		echo "<input type='hidden' name='".strtolower($k)."' value = '".$v."' >\n";
 	}
 }
 

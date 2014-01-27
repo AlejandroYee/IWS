@@ -88,8 +88,8 @@ if (empty($check)) die("Доступ запрещен");
 
 $query_val = $main_db->sql_execute("select t.field_name from ".DB_USER_NAME.".wb_form_field t where t.id_wb_mm_form = ".$id_mm_fr." order by t.num");
     while ($main_db-> sql_fetch($query_val)) {
-                $field_name = filter_input(INPUT_GET, $main_db->sql_result($query_val, "FIELD_NAME"),FILTER_SANITIZE_STRING);
-		if (!empty($field_name)) {
+                $field_name = filter_input(INPUT_GET, $main_db->sql_result($query_val, "FIELD_NAME"),FILTER_SANITIZE_STRING,FILTER_NULL_ON_FAILURE);                
+		if (trim($field_name) != "") {
 			if (is_array($field_name)) {
                                     $arr_value[$main_db->sql_result($query_val, "FIELD_NAME")] = implode(",",$field_name);
                             } else {			
@@ -102,7 +102,7 @@ $query = $main_db->sql_execute("select t.action_sql,t.action_bat from ".DB_USER_
 	    $str_block = $main_db->sql_result($query, "ACTION_SQL");
 		$action_bat	= $main_db->sql_result($query, "ACTION_BAT");
 		$query_tmp = $main_db->sql_execute("select t.field_name from ".DB_USER_NAME.".wb_form_field t where t.id_wb_mm_form = ".$id_mm_fr."  order by t.num");
-                while ($main_db-> sql_fetch($query_tmp)) {                       
+                while ($main_db-> sql_fetch($query_tmp)) {  
 					if (isset($arr_value[$main_db->sql_result($query_tmp, "FIELD_NAME")])) {
 						$str_block = str_ireplace(":".$main_db->sql_result($query_tmp, "FIELD_NAME"),"'".$arr_value[$main_db->sql_result($query_tmp, "FIELD_NAME")]."'",$str_block);	
 					}

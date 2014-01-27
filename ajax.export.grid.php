@@ -22,11 +22,11 @@
 	
 	BasicFunctions::end_session();  // Закрываем сейсию для паралельного исполнния
 	
-	$type    	= @BasicFunctions::Convert_quotas($_GET['type']);
+	$type    	= $_GET['type'];
 	$id_mm      = @intval($_GET['id_mm']); 
 	$id_mm_fr   = @intval($_GET['id_mm_fr']); 
 	$id_mm_fr_d = @intval($_GET['id_mm_fr_d']); 
-	$pageid		= @BasicFunctions::Convert_quotas($_GET['pageid']); 
+	$pageid		= $_GET['pageid']; 
 
 	$qWhere		= "";
 	$arr_field      = array();
@@ -51,7 +51,7 @@
 			if (is_numeric($_GET['id'])) {			 
 					$s_d_m_Where  = " AND ID_".$Master_Table_ID." = ".intval($_GET['id']);
 				} else {
-					$s_d_m_Where  = " AND ID_".$Master_Table_ID." = '".BasicFunctions::Convert_quotas($_GET['id'])."'";
+					$s_d_m_Where  = " AND ID_".$Master_Table_ID." = '".$_GET['id']."'";
 			}
 			//$id_mm_fr = $id_mm_fr_d;
 	} else {

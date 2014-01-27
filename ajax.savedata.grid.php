@@ -83,13 +83,14 @@ while ($main_db -> sql_fetch($query)) {
                 isset($_FILES[$main_db -> sql_result($query, "FIELD_NAME")]))) {
             
 		// Вдруг у нас значения в виде массива:
-		$field_name_id = filter_input(INPUT_POST, $main_db -> sql_result($query, "FIELD_NAME_ID"),FILTER_SANITIZE_STRING);
-                if (!empty($field_name_id))
+		$field_name_id = filter_input(INPUT_POST, $main_db -> sql_result($query, "FIELD_NAME_ID"),FILTER_SANITIZE_STRING,FILTER_NULL_ON_FAILURE);
+                if (trim($field_name) != "") {
                    if (is_array($field_name_id)) {
 			$value = implode(",",$field_name_id);
                     } else {
                         $value = $field_name_id;
-                    }		
+                    }	
+                }
 		$value =  iconv(HTML_ENCODING,LOCAL_ENCODING,$value); // кодировочку меняем
 		// Если родительский дерева и мы обновляем запись, то:
 		if ((($type == "TREE_GRID_FORM_MASTER") or ($type == "TREE_GRID_FORM") or ($type == "TREE_GRID_FORM_DETAIL")) and ($main_db -> sql_result($query, "FIELD_NAME") == "ID_PARENT")) {			
