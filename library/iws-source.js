@@ -971,7 +971,6 @@ $(function() {
 								obj.parent().children('.ui-datepicker-trigger').remove();
 							}
 					} else {
-                                                console.log(obj.val());
 						obj.datetimepicker( "setDate", obj.val() );					
 					}
 				break;		
