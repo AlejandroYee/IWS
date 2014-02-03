@@ -54,8 +54,14 @@ class AUTH {
 		$ldap = ldap_connect(AUTH_DOMAIN,AUTH_PORT);
 		if ($ldap) {		
 			ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
-			if(@ldap_bind($ldap,$user."@".AUTH_DOMAIN,$pass)) {
-				return true;	
+			if(ldap_bind($ldap,$user."@".AUTH_DOMAIN,$pass)) {				
+                             $result = ldap_search($ldap,"DC=".AUTH_DOMAIN.".RU","(SN=".$user.")");
+                             if($result) {
+                                return true;
+                             } else {
+                                BasicFunctions::to_log("ERR: User login failed! Broken password.");
+				return false;
+                             }
 			} else {
 				BasicFunctions::to_log("ERR: User login failed! Broken user name or password.");
 				return false;
