@@ -37,11 +37,13 @@ $user_auth = new AUTH();
 if ($act == "login") {
 	$pwd = filter_input(INPUT_POST, 'password',FILTER_SANITIZE_STRING);
 	$usr = filter_input(INPUT_POST, 'username',FILTER_SANITIZE_STRING);
-	if (!$user_auth -> is_user($usr,$pwd)) {
+	$user_auth -> is_user($usr,$pwd);
+        if ($user_auth -> is_user()) {
 			$udb = new db();
-			$responce = $udb -> user_real_name;			
-		} else {
-			$responce = "fail";		
+			$responce = "true";
+		} else {                        
+			$responce = "false";
+                        BasicFunctions::to_log("ERR: USER LOGIN FILED!",$usr);
 		}		
 		echo $responce;
 exit;
