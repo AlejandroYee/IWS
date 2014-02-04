@@ -304,8 +304,14 @@ $(function() {
 				var id = 'tabs_' + counttab;	
                                 sumtab++;
 				$( "#tabs").children(".ui-tabs-nav" ).append(
-								$('<li />').append($('<a />').attr({ href: '#' + id, title: tabTitle, id: 'ui-' + id })
-								.text(trim_text(tabTitle,40,3))).append('<span class="ui-icon ui-icon-close" style="float:left"></span>'));
+								$('<li />')                                                                
+                                                                .append ($('<a />')
+                                                                            .attr({ href: '#' + id, title: tabTitle, id: 'ui-' + id })                                                                            
+                                                                            .text(trim_text(tabTitle,40,3))
+                                                                            .append('<span class="ui-icon ui-icon-document" style="float:left;top:5px"></span>')
+                                                                         )
+                                                                .append('<span class="ui-icon ui-icon-close" style="float:left"></span>')
+                                                                );                                                                
 				$( "#tabs" ).append( $("<div />").attr({'id': id,'style': 'overflow:hide;width:' + (doc_width - 18) + 'px'}) );
 		}
 		$('#'+id).append("<div class='loader_tab' style='overflow:hide'><div>");												
@@ -423,7 +429,10 @@ $(function() {
                                     } else {
                                             var coeffd_filtr = 55 + add_to_koeff;
                             }
-                        }
+                        } else {
+                            // для деревьев кроме мастер дерева
+                             var coeffd_filtr = 82;
+                        }                        
 			self.height(doc_height_grid).width(doc_width_grid);   
 			self.height(doc_height_grid).children('.ui-jqgrid').height(doc_height_grid - 2).width(doc_width_grid)
 										.children('.ui-jqgrid-pager').height(25).width(doc_width_grid)
