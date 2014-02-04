@@ -258,9 +258,9 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	$output .= "	
     </form>
 	</div>
-	<script type=\"text/javascript\">
+	<script type=\"text/javascript\">";
+        $output .= BasicFunctions::regex_javascript("
 				$(function() { 			
-				
 					// Преобразовываемся:
 					create_from_table_elemnts($('#form_parameters_".$this->pageid."'));			
 					
@@ -277,61 +277,70 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 								text: 'Применить',
 								click: function () {
 								if (check_form($('#form_parameters_".$this->pageid."'))) {
-									var qString = $('#form_parameters_".$this->pageid."').serialize();	
+									var qString = $('#form_parameters_".$this->pageid."').serialize();
+                                                                        var self_dialog = $(this);
+                                                                        $('#ajax_".$this->pageid."').show();
 									$('#show_parameters-".$this->pageid."').button('option','disabled',true);
-									$( this ).dialog( 'close' );	
-									";									
+                                                                        $('#cancel_".$this->pageid."').button('option','disabled',true); 
+                                                                        $('#save_".$this->pageid."').button('option','disabled',true); 
+									");									
 				if ($c_count < 2 ) {
-						$output .= "
+                                                    $output .= BasicFunctions::regex_javascript("
 									$('#".$this->pageid." .tab_main_content .CaptionTD').remove();
 									$('#".$this->pageid." .tab_main_content').append('<div class=\"ui-widget CaptionTD\" style=\"height: 80%;width: 99%;vertical-align: middle;\"></div>');
 									var load_".$this->pageid."_time = 0;
+                                                                        $('#ui-".$this->pageid." span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
 									function loader_function() {
 													load_".$this->pageid."_time++;
 													minutes_".$this->pageid." = (Math.floor(load_".$this->pageid."_time/60) < 10) ? '0'+Math.floor(load_".$this->pageid."_time/60) : Math.floor(load_".$this->pageid."_time/60);
 													seconds_".$this->pageid." = ((load_".$this->pageid."_time - minutes_".$this->pageid."*60) < 10) ? '0'+(load_".$this->pageid."_time - minutes_".$this->pageid."*60) : (load_".$this->pageid."_time - minutes_".$this->pageid."*60);										
-													$('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>(' + minutes_".$this->pageid." +':' + seconds_".$this->pageid." + ') Данные обрабатываются ... </h2>');
+													$('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>(' + minutes_".$this->pageid." +':' + seconds_".$this->pageid." + ') Данные обрабатываются ... </h2>');                                                                                                        
 									}	
 									load_".$this->pageid."_intval = setInterval(loader_function, 1000);
 									loader_function();
 									$.get('ajax.saveparams.php?&id_mm_fr=".$this->id_mm_fr."&' + qString, function(data) {										
 										clearInterval(load_".$this->pageid."_intval);										
 										$('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>Данные успешно обработаны,<br>Длительность обработки ' + minutes_".$this->pageid." +' минут(а), ' + seconds_".$this->pageid." + ' секунд.</h2>');
-                                                                                load_".$this->pageid."_time = 0;    
+                                                                                load_".$this->pageid."_time = 0;
+                                                                                $('#ui-".$this->pageid." span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
 										$('li[aria-selected=\"false\"] a[href=\"#".$this->pageid."\"]').parent().effect('pulsate', {}, 2000);
-										$('#show_parameters-".$this->pageid."').button('option','disabled',false);
 										if (data.length > 20) {
 												custom_alert(data);
 										}
+                                                                                $('#ui-".$this->pageid." span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');
+                                                                                self_dialog.dialog('close');
+                                                                                
 									});
-									";
-				} else if (($c_count > 1) and isset($gridname)) {	$output .= "
-									$.get('ajax.saveparams.php?&id_mm_fr=".$this->id_mm_fr."&' + qString, function(data) {if (data.length > 20) {custom_alert(data);}});
-									if (data_".$this -> pageid."_loaded > 0) {
-										$.each( $('#".$this->pageid." .tab_main_content .chart_data_".$this -> pageid."') , function() {
-											plot_graph($(this));  	
-										});
-									}
-									data_".$this -> pageid."_loaded = 1;
-									$('#show_parameters-".$this->pageid."').button('option','disabled',false);
-									$('#".$gridname."').jqGrid('setGridParam',{datatype:'json'});	
-									$('#".$gridname."').trigger('reloadGrid');
-									";
+									");
 				} else {
-									$output .= "
-									$.get('ajax.saveparams.php?&id_mm_fr=".$this->id_mm_fr."&' + qString, function(data) {if (data.length > 20) {custom_alert(data);}});
-									if (data_".$this -> pageid."_loaded > 0) {
-										$.each( $('#".$this->pageid." .tab_main_content .chart_data_".$this -> pageid."') , function() {																
-											plot_graph($(this));  
-										});
-									}
-									$('#show_parameters-".$this->pageid."').button('option','disabled',false);
-									data_".$this -> pageid."_loaded = 1;
-									";				
-				}
-				$output .= "	 }
-								}
-											
+                                                             $output .= BasicFunctions::regex_javascript("
+                                                                        $('#ui-".$this->pageid." span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+									$.get('ajax.saveparams.php?&id_mm_fr=".$this->id_mm_fr."&' + qString, function(data) {
+                                                                                 if (data.length > 20) {
+                                                                                        custom_alert(data);
+                                                                                 }
+                                                                                 $.each( $('#".$this->pageid." .tab_main_content .chart_data_".$this -> pageid."') , function() {
+                                                                                            plot_graph($(this));  	
+                                                                                 });
+                                                                                 $('#ui-".$this->pageid." span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');
+                                                                                 ");
+                                                                if (($c_count > 1) and isset($gridname)) {
+                                                                    $output .= BasicFunctions::regex_javascript(
+                                                                                       "$('#ui-".$this->pageid." span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+                                                                                        $('#".$gridname."').jqGrid('setGridParam',{datatype:'json'});	
+                                                                                        $('#".$gridname."').trigger('reloadGrid');"
+                                                                            );  
+
+                                                                }  
+                                                             $output .= BasicFunctions::regex_javascript(
+                                                                          "data_".$this -> pageid."_loaded = 1;                                                                           
+                                                                           self_dialog.dialog('close');
+                                                                        });									 
+									");
+				} 
+                $output .= BasicFunctions::regex_javascript("
+                                                             }
+                                                            }				
 							},
 							{
 								text: 'Отмена',
@@ -341,31 +350,36 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 							 }							
 						],
 						close:function() {
+                                                        $('#show_parameters-".$this->pageid."').button('option','disabled',false);                                                        
+                                                        $('#cancel_".$this->pageid."').button('option','disabled',false); 
+                                                        $('#save_".$this->pageid."').button('option','disabled',false);
+                                                        $('#ajax_".$this->pageid."').remove(); 
 							$(this).parent().parent().children('.ui-widget-overlay').remove();
-							$( this ).dialog( 'close' );
+							$(this).dialog( 'close' );
 						},
 						open: function() {
-								$('.ui-dialog-buttonpane').find('button:contains(\"Отмена\")').button({icons: { primary: 'ui-icon-close'}});
-								$('.ui-dialog-buttonpane').find('button:contains(\"Применить\")').button({icons: { primary: 'ui-icon-disk'}});
+                                                                var self = $(this).parent();
+								self.children('.ui-dialog-buttonpane').find('button:contains(\"Отмена\")').button({icons: { primary: 'ui-icon-close'}}).attr({id:'cancel_".$this->pageid."'});
+								self.children('.ui-dialog-buttonpane').find('button:contains(\"Применить\")').button({icons: { primary: 'ui-icon-disk'}}).attr({id:'save_".$this->pageid."'});
 								$($('<div />').attr({'class':'ui-widget-overlay ui-front dialog_jqgrid_overlay ui-corner-all',
-													 'style':'position:absolute;'})).prependTo($(this).parent().parent());
+													 'style':'position:absolute;'})).prependTo(self.parent());
+                                                                self.children('.ui-dialog-buttonpane').append(\"<div id= 'ajax_".$this->pageid."' style='position:relative;top:15px;left:10px'><img src='/library/ajax-loader-tab.gif' style='padding-bottom: 4px; vertical-align: middle;' > Сохраняю...</div>\");
+                                                                $('#ajax_".$this->pageid."').hide();    
 								redraw_document();
 						}
 					});
 					$('#show_parameters-".$this->pageid."').button({
-					     icons: {
-							primary: 'ui-icon-info'
-						}})
+					     icons: {primary: 'ui-icon-info'}})
 						.button()
 						.click(function() {
-						$( '#param-".$this->pageid."').dialog('open');
+						$('#param-".$this->pageid."').dialog('open');
 					});					
 				
 				setTimeout(function() {
-						$( '#param-".$this->pageid."').dialog('open');						
-					}, 500);
-				});
-	</script>	
+                                    $('#param-".$this->pageid."').dialog('open');
+                                }, 500);
+                    });");
+	$output .= "</script>	
 	<button id=\"show_parameters-".$this->pageid."\"  style=\"float: right;margin:0 5px 0 0;\">Задать параметры</button>";	
 	if (empty($show_form)) $output = ""; // Если форма пустая, то просто обнуляем содержимое вывода
 	return $output;	
@@ -392,27 +406,21 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 							<form id = 'wizard_parameters_".$this -> pageid."' name = 'wizard_parameters_".$this -> pageid."' >
 								<div id='ajaxload_".$this -> pageid."' ><img src='/library/ajax-loader.gif' style='padding-bottom: 4px; vertical-align: middle;' > Загружаю...</div>	
 								<div id='wizard_form_".$this -> pageid."_content'>
-								
-								</div>
-							</form>
-							<div>
-								<div class=\"ui-widget-header\" style = \"height: 1px;\"></div><br>								
-								<button id ='button_back_".$this -> pageid."' >назад</button>
-								<button id ='button_next_".$this -> pageid."' >вперед</button>
-								<button id ='button_close_".$this -> pageid."' >Отмена</button>
-							</div>
-							</div>";
+                                                                    
+								</div></form>
+							<div><div class=\"ui-widget-header\" style = \"height: 1px;\"></div><br>
+                                                        <button id ='button_back_".$this -> pageid."' >назад</button>&ensp;<button id ='button_next_".$this -> pageid."' >вперед</button>&ensp;<button id ='button_close_".$this -> pageid."' >Отмена</button>
+							</div></div>";
 		} else {
 			$inputs_form .= "'".$this -> return_sql($query_tmp, "ID_WB_MM_FORM")."',";
 		}
 	}	
 	
-	$output .= "
-	<script type=\"text/javascript\">
-	$(function() {
+	$output .= "<script type=\"text/javascript\">" . BasicFunctions::regex_javascript(
+	"$(function() {
 	var form_list_".$this->pageid." = [".trim($inputs_form,',')."];
 	var form_list_now_".$this->pageid.";
-	
+            
 	// Функция возвращает значения и управляет кнопками в диалоге
 	get_num_mm = function (action) {
 		if (action === 'next') {				
@@ -444,59 +452,68 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 		if (counter === undefined) {
 			// Загрузку делать ненужно отдаем на выполнение скрипт:
 			$('#show_parameters-".$this->pageid."').button('option','disabled',true);
-			$('#wizard_form_".$this->pageid."').dialog('close');
-			var qstring = $('#wizard_parameters_".$this -> pageid."').serialize();";
+                        $('#ui-".$this->pageid." span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+                        $('#button_back_".$this -> pageid."').button('option','disabled', true );
+                        $('#button_next_".$this -> pageid."').button('option','disabled', true ); 
+                        var qstring = $('#wizard_parameters_".$this -> pageid."').serialize();
+                        $('#wizard_form_".$this -> pageid."_content').empty();
+			$('#ajaxload_".$this -> pageid."').show();
+			");
 			if(!isset($gridname) and !isset($chartname)) {
-				$output .= "$('#".$this->pageid." .tab_main_content .CaptionTD').remove();											
+				$output .= BasicFunctions::regex_javascript(
+                                        "$('#".$this->pageid." .tab_main_content .CaptionTD').remove();											
 						$('#".$this->pageid." .tab_main_content').append('<div class=\"ui-widget CaptionTD\" style=\"height: 80%;width: 99%;vertical-align: middle;\"></div>');
-						var load_".$this->pageid."_time = 0;
+						var load_".$this->pageid."_time = 0;                                                 
 						function loader_function() {
 										load_".$this->pageid."_time++;
 										minutes_".$this->pageid." = (Math.floor(load_".$this->pageid."_time/60) < 10) ? '0'+Math.floor(load_".$this->pageid."_time/60) : Math.floor(load_".$this->pageid."_time/60);
 										seconds_".$this->pageid." = ((load_".$this->pageid."_time - minutes_".$this->pageid."*60) < 10) ? '0'+(load_".$this->pageid."_time - minutes_".$this->pageid."*60) : (load_".$this->pageid."_time - minutes_".$this->pageid."*60);										
-										$('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>(' + minutes_".$this->pageid." +':' + seconds_".$this->pageid." + ') Данные обрабатываются ... </h2>');
+										$('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>(' + minutes_".$this->pageid." +':' + seconds_".$this->pageid." + ') Данные обрабатываются ... </h2>');                                                                                    
 						}							
 						load_".$this->pageid."_intval = setInterval(loader_function, 1000);
 						loader_function();
-				";
+                                                $('#wizard_form_".$this->pageid."').dialog('close');
+				");
 			}
-			$output .= "			
+			$output .= BasicFunctions::regex_javascript("			
 			$.ajax({
 					url:'".ENGINE_HTTP."/ajax.data.wizard.php?id_mm_fr=' + form_list_now_".$this->pageid."  + '&finish=true&pageid=".$this -> pageid."&id_mm=".$this -> id_mm."',
 					type: 'POST',
 					data: qstring,
 					success: function(data, status) {
-					";
+                                        $('#ui-".$this->pageid." span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
+					");
 					if(isset($gridname)) {
-						$output .= "$('#".$gridname."').jqGrid('setGridParam',{datatype:'json'});$('#".$gridname."').trigger('reloadGrid');";
+						$output .= BasicFunctions::regex_javascript("
+                                                        $('#ui-".$this->pageid." span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+                                                        $('#".$gridname."').jqGrid('setGridParam',{datatype:'json'});
+                                                        $('#".$gridname."').trigger('reloadGrid');");
 					} else if(!isset($gridname) and !isset($chartname)) {
-						$output .= "
+						$output .= BasicFunctions::regex_javascript("
 								clearInterval(load_".$this->pageid."_intval);
 								load_".$this->pageid."_time = 0;
-                                                                $('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>Данные успешно обработаны,<br>Длительность обработки ' + minutes_".$this->pageid." +' минут(а), ' + seconds_".$this->pageid." + ' секунд.</h2>');
-								$('li[aria-selected=\"false\"] a[href=\"#".$this->pageid."\"]').parent().effect('pulsate', {}, 2000);
+                                                                $('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>Данные успешно обработаны,<br>Длительность обработки ' + minutes_".$this->pageid." +' минут(а), ' + seconds_".$this->pageid." + ' секунд.</h2>');								
+                                                                $('li[aria-selected=\"false\"] a[href=\"#".$this->pageid."\"]').parent().effect('pulsate', {}, 2000);
 								$('#show_parameters-".$this->pageid."').button('option','disabled',false);
 												
-						";
+						");
 					}
-					$output .= "
-						$.each( $('#".$this->pageid." .tab_main_content .chart_data_".$this -> pageid."') , function() {
-											var self = $(this);					
-											$.get(self.attr('url'),function(data) {													
-													document.getElementById(self.attr('name')).SetVariable('_root.dataURL','');
-													document.getElementById(self.attr('name')).SetVariable('_root.isNewData','1');
-													document.getElementById(self.attr('name')).SetVariable('_root.newData',data);
-													document.getElementById(self.attr('name')).TGotoLabel('/', 'JavaScriptHandler'); 													
-											});	
+					$output .= BasicFunctions::regex_javascript("
+						$.each( $('#".$this->pageid." .tab_main_content .chart_data_".$this -> pageid."') , function() {																
+							plot_graph($(this));  
 						});
-						$('#show_parameters-".$this->pageid."').button('option','disabled',false);
-						data_".$this -> pageid."_loaded = 1;
-					if (data.length > 20) {custom_alert(data);}
+					$('#show_parameters-".$this->pageid."').button('option','disabled',false);
+					data_".$this -> pageid."_loaded = 1;                                            
+					if (data.length > 20) {custom_alert(data);}                                        
+                                        $('#wizard_form_".$this->pageid."').dialog('close');                                        
 					}
 			});
 			} else {
 				form_list_now_".$this->pageid." = counter;				
 				// Нужно загрузить форму
+                                $('#ui-".$this->pageid." span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+                                $('#button_back_".$this -> pageid."').button('option','disabled', true );
+                                $('#button_next_".$this -> pageid."').button('option','disabled', true );    
 				var self = $('#wizard_form_".$this -> pageid."_content');
 				var qstring = $('#wizard_parameters_".$this -> pageid."').serialize();				
 				self.empty();
@@ -504,7 +521,10 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 				$.post('".ENGINE_HTTP."/ajax.data.wizard.php?id_mm_fr=' + counter  + '&pageid=".$this -> pageid."&id_mm=".$this -> id_mm."',qstring, function(data) {
 					$('#ajaxload_".$this -> pageid."').hide();
 					self.append(data);
-					create_from_table_elemnts(self);	
+					create_from_table_elemnts(self);
+                                        $('#button_back_".$this -> pageid."').button('option','disabled', false );
+                                        $('#button_next_".$this -> pageid."').button('option','disabled', false );  
+                                        $('#ui-".$this->pageid." span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');
 				});	
 		}
 	}
@@ -519,6 +539,8 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 						appendTo: $('#".$this->pageid." .tab_main_content'),						
 						close:function() {
 							$(this).parent().parent().children('.ui-widget-overlay').remove();
+                                                        $('#button_back_".$this -> pageid."').button('option','disabled', false );
+                                                        $('#button_next_".$this -> pageid."').button('option','disabled', false ); 
 							$(this).dialog('close');
 						},
 						open: function() {
@@ -564,9 +586,9 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 		
 			setTimeout(function() {
 				$('#wizard_form_".$this->pageid."').dialog('open');
-				}, 500);
-	});
-	</script>	
+			}, 500);
+	});").
+	"</script>	
 	<button id=\"show_parameters-".$this->pageid."\"  style=\"float: right;margin:0 5px 0 0;\">Задать параметры</button>";
 	return $output;		
 	}	

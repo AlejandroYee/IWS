@@ -214,7 +214,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		var grid_load_<?=$object_name?>_intval;
 		var grid_load_<?=$object_name?>_time = 0;
 		
-		$(function() {	
+		$(function() {	                        
 			$('#<?=$object_name?>').jqGrid({										
                                 rownumbers: true,	
                                 shrinkToFit:false,						
@@ -309,11 +309,14 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                         };
                                         clearInterval(grid_load_<?=$object_name?>_intval);
                                         grid_load_<?=$object_name?>_time = 0;						
-                                        $("#load_<?=$object_name?>").html(" ");
+                                        $("#load_<?=$object_name?>").html(" ");                                        
                                 },
                                 beforeRequest: function() {
                                                 var postdata = $(this).getGridParam('postData');
-                                            export_post_data_<?=$object_name?> = '';
+                                                export_post_data_<?=$object_name?> = '';
+                                                if ( typeof(data_<?=$this -> pageid?>_loaded) === 'undefined' || data_<?=$this -> pageid?>_loaded > 0 ) {
+                                                    $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+                                                }
                                                 for( key in postdata ) {
                                                         if(postdata.hasOwnProperty(key)) {
                                                                         export_post_data_<?=$object_name?> = export_post_data_<?=$object_name?> + '&' + key + '=' + postdata[key];
@@ -327,14 +330,19 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                                 seconds_<?=$object_name?> = ((grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60) < 10) ? "0"+(grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60) : (grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60);
                                                                 $("#load_<?=$object_name?>").html("<table style='left:42%;position:absolute;top:47%;width:250px;vertical-align:middle;'><tr><td><img src='<?=ENGINE_HTTP?>/library/ajax-loader-tab.gif'><span style='top:-10px;'></td><td>(" + minutes_<?=$object_name?> +':' + seconds_<?=$object_name?> + ") Ожидаю данные...</td></tr></table>");
                                                         }
-                                                        grid_load_<?=$object_name?>_intval = setInterval(loader_function, 1000);
+                                                        grid_load_<?=$object_name?>_intval = setInterval(loader_function, 1000);                                                        
                                                         loader_function();
                                                 }
                                 },
                                 onPaging: function () {
-                                         crc_input_<?=$object_name?> = null;					
+                                         crc_input_<?=$object_name?> = null;                                         
                                 },
-                                beforeProcessing: function(data, status, xhr) {	
+                                loadComplete: function (data) {
+                                       if (typeof(data.scalar) !== 'undefined') {
+                                            $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');
+                                        }
+                                },
+                                beforeProcessing: function(data, status, xhr) {                                    
                                         if ($("#reload_grid_<?=$this -> pageid?>").attr("checked") == "checked") {
                                                 if (crc_input_<?=$object_name?> == $.md5(xhr.responseText)) {								
                                                                 return false;
@@ -410,7 +418,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                   buttonicon: 'ui-icon-document',
                                   onClickButton: function(){
                                                     row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');                                                               
-                                                                                                                    $('#<?=$object_name?>').jqGrid('viewGridRow',row_id,{viewPagerButtons:true, recreateForm:false, closeOnEscape:true});
+                                                           $('#<?=$object_name?>').jqGrid('viewGridRow',row_id,{viewPagerButtons:true, recreateForm:false, closeOnEscape:true});
                                                  }											
                                             })					
                             .jqGrid('navSeparatorAdd','#Pager_<?=$object_name?>')
@@ -424,36 +432,38 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               title: 'Добавить новую запись (Кнопка A, INS)',
                                               buttonicon: 'ui-icon-plus',
                                               onClickButton: function(){
-                                                                                                                        if ($('#<?=$object_name?>').attr('new_colmodel') === "false" || typeof($('#<?=$object_name?>').attr('new_colmodel')) === "undefined" ) {                                                                                                                               
-                                                                                                                                var recreate = false;														
-                                                                                                                                    } else {
-                                                                                                                                var recreate = true;
-                                                                                                                                $('#<?=$object_name?>').removeAttr('new_colmodel');
-                                                                                                                        }
+                                                                if ($('#<?=$object_name?>').attr('new_colmodel') === "false" || typeof($('#<?=$object_name?>').attr('new_colmodel')) === "undefined" ) {                                                                                                                               
+                                                                        var recreate = false;														
+                                                                            } else {
+                                                                        var recreate = true;
+                                                                        $('#<?=$object_name?>').removeAttr('new_colmodel');
+                                                                }
                                                       $('#<?=$object_name?>').jqGrid('editGridRow','new',{
-																viewPagerButtons:false,
-																closeOnEscape:true,
-																addedrow:'last',
-																recreateForm: recreate,
-																reloadAfterSubmit:false,
-																closeAfterAdd:true,																
-																	afterSubmit: function(response, postdata) {																	
-																		if (response.responseText.length > 0) {																				
-																			if (response.responseText.length > 20) {
-																				custom_alert(response.responseText);																			
-																			} else {																				
-																				return [true,"Ok",response.responseText];																				
-																			}
-																		} else {
-																			return [true,"Ok"];
-																		}
-																	},
-																	beforeSubmit : function(postdata, formid) {																					
-																		if (check_form(formid)) {
-																			return [true,'']; 
-																		} 
-																	}
-															});
+                                                                                        viewPagerButtons:false,
+                                                                                        closeOnEscape:true,
+                                                                                        addedrow:'last',
+                                                                                        recreateForm: recreate,
+                                                                                        reloadAfterSubmit:false,
+                                                                                        closeAfterAdd:true,																
+                                                                                                afterSubmit: function(response, postdata) {
+                                                                                                    $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
+                                                                                                        if (response.responseText.length > 0) {																				
+                                                                                                                if (response.responseText.length > 20) {
+                                                                                                                        custom_alert(response.responseText);																			
+                                                                                                                } else {																				
+                                                                                                                        return [true,"Ok",response.responseText];																				
+                                                                                                                }
+                                                                                                        } else {
+                                                                                                                return [true,"Ok"];
+                                                                                                        }
+                                                                                                  },
+                                                                                                beforeSubmit : function(postdata, formid) {																					
+                                                                                                        if (check_form(formid)) {
+                                                                                                                $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+                                                                                                                return [true,'']; 
+                                                                                                        } 
+                                                                                                }
+                                                                                });
                                                }
 											   
 							})
@@ -465,41 +475,43 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               title: 'Скопировать выбранную запись в новую запись (Кнопка C)',
                                               buttonicon: 'ui-icon-transferthick-e-w',
                                               onClickButton: function() {
-                                                                                                                        if ($('#<?=$object_name?>').attr('new_colmodel') === "false" || typeof($('#<?=$object_name?>').attr('new_colmodel')) === "undefined" ) {                                                                                                                               
-                                                                                                                                var recreate = false;														
-                                                                                                                                    } else {
-                                                                                                                                var recreate = true;
-                                                                                                                                $('#<?=$object_name?>').removeAttr('new_colmodel');
-                                                                                                                        }
-													row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
+                                                                        if ($('#<?=$object_name?>').attr('new_colmodel') === "false" || typeof($('#<?=$object_name?>').attr('new_colmodel')) === "undefined" ) {                                                                                                                               
+                                                                                var recreate = false;														
+                                                                                    } else {
+                                                                                var recreate = true;
+                                                                                $('#<?=$object_name?>').removeAttr('new_colmodel');
+                                                                        }
+									row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
                                                     $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{
-																	viewPagerButtons:false,
-																	closeOnEscape:true,
-																	recreateForm:recreate,
-																	reloadAfterSubmit:true,																	
-																	editCaption: "Скопировать запись",
-																	closeAfterEdit:true,																		
-															     	afterSubmit: function(response, postdata)  {
-																		if (response.responseText.length > 0) {																				
-																			if (response.responseText.length > 20) {
-																				custom_alert(response.responseText);																			
-																			} else {																				
-																				return [true,"Ok",response.responseText];																				
-																			}
-																		} else {
-																			return [true,"Ok"];
-																		}
-																	},
-																	serializeEditData: function (data) {
-																		data.oper = 'add'; 
-																		return data;
-																	},
-																	beforeSubmit : function(postdata, formid) {
-																		if (check_form(formid)) {
-																			return [true,'']; 
-																		} 
-																	}
-													});                                                     
+                                                                                viewPagerButtons:false,
+                                                                                closeOnEscape:true,
+                                                                                recreateForm:recreate,
+                                                                                reloadAfterSubmit:true,																	
+                                                                                editCaption: "Скопировать запись",
+                                                                                closeAfterEdit:true,																		
+                                                                        afterSubmit: function(response, postdata)  {
+                                                                                $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
+                                                                                        if (response.responseText.length > 0) {																				
+                                                                                                if (response.responseText.length > 20) {
+                                                                                                        custom_alert(response.responseText);																			
+                                                                                                } else {																				
+                                                                                                        return [true,"Ok",response.responseText];																				
+                                                                                                }
+                                                                                        } else {
+                                                                                                return [true,"Ok"];
+                                                                                        }
+                                                                              },
+                                                                                serializeEditData: function (data) {
+                                                                                        data.oper = 'add'; 
+                                                                                        return data;
+                                                                                },
+                                                                                beforeSubmit : function(postdata, formid) {
+                                                                                        if (check_form(formid)) {
+                                                                                                $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+                                                                                                return [true,'']; 
+                                                                                        } 
+                                                                                }
+                                                });                                                     
                                                }
 											   
 							})
@@ -511,32 +523,34 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               title: 'Изменить выделенную запись (Кнопка E)',
                                               buttonicon: 'ui-icon-pencil',
                                               onClickButton: function(){
-                                                                                                                        if ($('#<?=$object_name?>').attr('new_colmodel') === "false" || typeof($('#<?=$object_name?>').attr('new_colmodel')) === "undefined" ) {                                                                                                                               
-                                                                                                                                var recreate = false;														
-                                                                                                                                    } else {
-                                                                                                                                var recreate = true;
-                                                                                                                                $('#<?=$object_name?>').removeAttr('new_colmodel');
-                                                                                                                        }
-																row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
+                                                                        if ($('#<?=$object_name?>').attr('new_colmodel') === "false" || typeof($('#<?=$object_name?>').attr('new_colmodel')) === "undefined" ) {                                                                                                                               
+                                                                                var recreate = false;														
+                                                                                    } else {
+                                                                                var recreate = true;
+                                                                                $('#<?=$object_name?>').removeAttr('new_colmodel');
+                                                                        }
+									row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
                                                                 $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{
-																	viewPagerButtons:false,
-																	closeOnEscape: true,
-																	recreateForm: recreate,
-																	reloadAfterSubmit:false,
-																	closeAfterEdit:true,																		
-															     	afterSubmit: function(response, postdata)  {
-																		if (response.responseText.length > 0) {
-																			custom_alert(response.responseText);																			
-																		} else {
-																			return [true,"Ok"];
-																		}
-																	},
-																	beforeSubmit : function(postdata, formid) {
-																		if (check_form(formid)) {
-																			return [true,'']; 
-																		} 
-																	}
-																});
+                                                                                viewPagerButtons:false,
+                                                                                closeOnEscape: true,
+                                                                                recreateForm: recreate,
+                                                                                reloadAfterSubmit:false,
+                                                                                closeAfterEdit:true,																		
+                                                                        afterSubmit: function(response, postdata)  {
+                                                                            $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
+                                                                                        if (response.responseText.length > 0) {
+                                                                                                custom_alert(response.responseText);																			
+                                                                                        } else {
+                                                                                                return [true,"Ok"];
+                                                                                        }       
+                                                                                },
+                                                                                beforeSubmit : function(postdata, formid) {
+                                                                                        if (check_form(formid)) {
+                                                                                                $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+                                                                                                return [true,'']; 
+                                                                                        } 
+                                                                                }
+                                                                        });
                                                              }                                              
 							})
 		<?php		}
@@ -547,29 +561,39 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               title: 'Удалить выделенную запись (Кнопка D, DEL)',
                                               buttonicon: 'ui-icon-close',
                                               onClickButton: function(){
-																row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selarrrow');
-																if ($.isArray(row_id) && row_id != "") {																	
-																		 $('#<?=$object_name?>').jqGrid('delGridRow',row_id,{closeAfterDel: true,closeOnEscape:true, recreateForm:false,reloadAfterSubmit:false,															
-																			afterSubmit: function(response, postdata)  {
-																				if (response.responseText.length > 0) {
-																					custom_alert(response.responseText);
-																				} else {
-																					return [true,''];
-																				}
-																			}
-																		});																	
-																} else {
-																		row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
-																		  $('#<?=$object_name?>').jqGrid('delGridRow',row_id,{closeAfterDel: true,closeOnEscape:true, recreateForm:true,reloadAfterSubmit:false,																
-																			afterSubmit: function(response, postdata)  {
-																				if (response.responseText.length > 0) {
-																					custom_alert(response.responseText);
-																				} else {
-																					return [true,''];
-																				}
-																			}
-																		});
-																}	
+                                                                row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selarrrow');
+                                                                if ($.isArray(row_id) && row_id != "") {																	
+                                                                                 $('#<?=$object_name?>').jqGrid('delGridRow',row_id,{closeAfterDel: true,closeOnEscape:true, recreateForm:false,reloadAfterSubmit:false,															
+                                                                                        afterSubmit: function(response, postdata)  {
+                                                                                            $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
+                                                                                                if (response.responseText.length > 0) {
+                                                                                                        custom_alert(response.responseText);
+                                                                                                } else {
+                                                                                                        return [true,''];
+                                                                                                }
+                                                                                          },
+                                                                                        beforeSubmit : function(postdata, formid) {
+                                                                                                        $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+                                                                                                        return [true,'']; 
+                                                                                        }
+                                                                                });																	
+                                                                } else {
+                                                                                row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
+                                                                                  $('#<?=$object_name?>').jqGrid('delGridRow',row_id,{closeAfterDel: true,closeOnEscape:true, recreateForm:true,reloadAfterSubmit:false,																
+                                                                                        afterSubmit: function(response, postdata)  {
+                                                                                            $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
+                                                                                                if (response.responseText.length > 0) {
+                                                                                                        custom_alert(response.responseText);
+                                                                                                } else {
+                                                                                                        return [true,''];
+                                                                                                }                                                                                               
+                                                                                        },
+                                                                                        beforeSubmit : function(postdata, formid) {                                                                                                
+                                                                                                        $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+                                                                                                        return [true,'']; 
+                                                                                        }
+                                                                                });
+                                                                }	
                                                              }                                              
 							})
 		<?php
@@ -815,6 +839,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								text: 'Выполнить',
 								click: function () {							
 									$('#ajax_<?=$button_name?>').show();
+                                                                        $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
 									$('.ui-dialog-buttonpane').hide();
 											$.ajax({
 											  url: '<?=ENGINE_HTTP?>/ajax.saveparams.php?id_mm_fr=<?=$id?>&rowid=' + $('#<?=$button_name?>').attr('grid_row'),
@@ -828,6 +853,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 														$('li[aria-selected="false"] a[href="#<?=$this -> pageid?>"]').parent().effect('pulsate', {}, 2000);													
 														crc_input_<?=$object_name?> = null;
 														$('#<?=$object_name?>').jqGrid().trigger('reloadGrid', true);
+                                                                                                                $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
 														$('#<?=$button_name?>').dialog('close');
 												if (data.length > 20) {
 														custom_alert(data);
@@ -863,6 +889,115 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 	ob_end_clean();
 	return $data;
 	}
+        
+        //------------------------------------------------------------------------------------------------------------------------------------------------
+        //  Добавление файла к строке в гриде
+	//------------------------------------------------------------------------------------------------------------------------------------------------	
+	function append_file_to_grid($last_grid_name) {
+		$query_d = $this->db_conn->sql_execute("select t.name, t.field_name  from ".DB_USER_NAME.".wb_mm_form tf left join ".DB_USER_NAME.".wb_form_field t on t.id_wb_mm_form = tf.id_wb_mm_form
+				where tf.id_wb_mm_form = ".$this -> id_mm_fr." and t.is_read_only = 0 and rownum = 1 order by t.num");
+		while ($this-> db_conn-> sql_fetch($query_d)) 	{
+				$file = $this -> return_sql($query_d, "FIELD_NAME");					
+				$s_opts = explode("@",$this -> return_sql($query_d, "NAME"));
+				$file_name = $s_opts[0];	
+		}
+                ob_start();
+                ob_implicit_flush();                
+                ?>
+                <div id="import_<?=$last_grid_name?>" title="<?=$file_name?>" >
+                        <input id="upload_ajax_<?=$last_grid_name?>" name="<?=$file?>" type="file"><br>
+                        <div id="import_ajax_<?=$last_grid_name?>" ><img src="<?=ENGINE_HTTP?>/library/ajax-loader-tab.gif" style="padding-bottom: 4px; vertical-align: middle;" > Прикрепляю... </div>
+                </div>
+		<script type="text/javascript">
+		$(function() {
+                
+                        $('#<?=$last_grid_name?>')
+				.jqGrid('navSeparatorAdd','#Pager_<?=$last_grid_name?>')
+				.jqGrid('navGrid','#Page_-<?=$last_grid_name?>').jqGrid('navButtonAdd','#Pager_<?=$last_grid_name?>',{
+                                              caption: 'Прикрепить файл...',
+                                              title: 'Позволяет прикрепить файл к выделеной строке',
+                                              buttonicon: 'ui-icon-arrowthickstop-1-s',
+                                              onClickButton: function() {
+                                                                var row_id = $('#<?=$last_grid_name?>').jqGrid ('getGridParam', 'selrow');
+                                                                if (row_id 	!= null) {
+                                                                        $('#upload_ajax_<?=$last_grid_name?>').jInputFile({url:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?id_mm_fr=<?=$this -> id_mm_fr?>&oper=edit&id_mm=' + row_id});
+                                                                        $('#import_<?=$last_grid_name?>').dialog('open');																	
+                                                                }
+                                                             }                                              
+			});                          
+			$('#import_ajax_<?=$last_grid_name?>').hide();
+			$('#upload_ajax_<?=$last_grid_name?>').jInputFile({
+                                                                filename: '<?=$file?>',
+                                                                width: 370,
+                                                                selected:function() {
+                                                                        $('#btn_<?=$last_grid_name?>').button('option', 'disabled', false );										
+                                                                },
+                                                                success: function (data) {
+                                                                                $('#import_ajax_<?=$last_grid_name?>').hide();												
+                                                                                $('#import_<?=$last_grid_name?>').dialog( 'close');
+                                                                                $('#btn_o_<?=$last_grid_name?>').button('option', 'disabled', false );
+                                                                                crc_input_<?=$last_grid_name?> = null;
+                                                                                $('#ui-<?$this->pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');     
+                                                                                $('#<?=$last_grid_name?>').trigger('reloadGrid');
+                                                                                $('#btn_<?=$last_grid_name?>').button('option', 'disabled', true );
+                                                                                $('li[aria-selected="false"] a[href="#<?=$this->pageid?>"]').parent().effect('highlight', {}, 3000);
+                                                                                if (data.length > 20) {
+                                                                                                custom_alert(data);
+                                                                                }
+                                                                }
+			});
+			$('#import_<?=$last_grid_name?>').dialog({
+						autoOpen: false,
+						modal: true,
+						minWidth:400,
+						closeOnEscape: true,
+						appendTo: $('#<?=$this->pageid?> .tab_main_content'),	
+						resizable:false,
+						buttons:[	
+							    {
+								text: 'Загрузить',
+								disabled: true,
+								click: function () {
+                                                                        $('#ui-<?$this->pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+									$('#upload_ajax_<?=$last_grid_name?>').jInputFile('submit');
+									$('#btn_o_<?=$last_grid_name?>').button('option', 'disabled', true );
+									$('#btn_<?=$last_grid_name?>').button('option', 'disabled', true );									
+									$('#import_ajax_<?=$last_grid_name?>').show();
+								}
+								},
+								{
+								text: 'Отмена',
+								click: function () {
+									$('#upload_ajax_<?=$last_grid_name?>').jInputFile('clear');
+									$('#btn_<?=$last_grid_name?>').button('option', 'disabled', true );	
+									$('#btn_o_<?=$last_grid_name?>').button('option', 'disabled', false );	
+									$('#import_ajax_<?=$last_grid_name?>').hide();
+									$( this ).dialog( 'close' );
+								}
+							   }						
+						],
+						close:function() {			
+							$('#upload_ajax_<?=$last_grid_name?>').jInputFile('clear');
+							$('#btn_<?=$last_grid_name?>').button('option', 'disabled', true );	
+							$('#import_ajax_<?=$last_grid_name?>').hide();
+							$( this ).dialog( 'close' );
+						},
+						open: function() {
+								$(this).parent().children('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_o_<?=$last_grid_name?>');
+								$(this).parent().children('.ui-dialog-buttonpane').find('button:contains("Загрузить")').button({icons: { primary: 'ui-icon-arrowthickstop-1-s'}}).prop('id','btn_<?=$last_grid_name?>');
+								$(this).parent().parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
+								redraw_document();
+						}			
+			});			
+		});
+             </script>;
+        <?php
+	$data = ob_get_contents ();
+	ob_end_clean();
+	return $data;        
+	}
+	
+        
 	//-----------------------------------------------------------------------------------------------------------------------------------------------	
 	// Функция формирования скриптов и форм для экспорта
 	//-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1072,4 +1207,3 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		$this-> db_conn ->__destruct();	
 	}
 } // END CLASS
-?>

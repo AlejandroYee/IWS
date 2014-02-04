@@ -125,35 +125,36 @@ switch ($action) {
 <div class="tab_main_content">
 	<?=$DataGrid->data_res?>
 </div>
-<script type='text/javascript'>	
+<script type='text/javascript'>
+<?php
+    echo BasicFunctions::regex_javascript("
 					// Дополнительно меню во вкладке
-					$(".navigate_submenu").menu();	
+					$('.navigate_submenu').menu();	
 					
 					// Кнопка перезагрузки фкладки
-					$(".reload_button").button({
+					$('.reload_button').button({
 						icons: {
-							primary: "ui-icon-refresh"
+							primary: 'ui-icon-refresh'
 						}}).click(function() {
-							SetTab('','<?=ENGINE_HTTP?>/ajax.tab.php?action=' + $(this).attr('act') + '&id=' + $(this).attr('s_id') + '&pid=' + $(this).attr('s_pid'),$(this).attr('tabid'));	
+							SetTab('','".ENGINE_HTTP."/ajax.tab.php?action=' + $(this).attr('act') + '&id=' + $(this).attr('s_id') + '&pid=' + $(this).attr('s_pid'),$(this).attr('tabid'));	
 					});
                                         
-                                        $(".clear_log_button").button({
+                                        $('.clear_log_button').button({
 						icons: {
-							primary: "ui-icon-trash"
+							primary: 'ui-icon-trash'
 						}}).click(function() {   
                                                 tabid = $(this).attr('tabid');
                                                         $.ajax({
-                                                                url: '<?=ENGINE_HTTP?>/ajax.saveparams.php?act=clear_log_file',
+                                                                url: '".ENGINE_HTTP."/ajax.saveparams.php?act=clear_log_file',
                                                                 processData: false,
                                                                 datatype:'json',
                                                                 cache: false,
                                                                 type: 'GET',
                                                                 success: function(data){
-                                                                      SetTab('','<?=ENGINE_HTTP?>/ajax.tab.php?action=get_debug',tabid);		
+                                                                      SetTab('','".ENGINE_HTTP."/ajax.tab.php?action=get_debug',tabid);		
                                                                 }	  
                                                               });
-					});
-</script>					
-<?php
+					});");
+echo "</script>";					
 $main_db -> __destruct();
 $DataGrid -> __destruct();

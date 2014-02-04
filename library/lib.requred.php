@@ -58,104 +58,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 	function return_sql($query,$param)	{
 			return $this ->db_conn ->sql_result($query,$param);
 	}
-	
-	//  Добавление файла к строке в гриде
-	//------------------------------------------------------------------------------------------------------------------------------------------------	
-	function append_file_to_grid($last_grid_name) {
-		$query_d = $this->db_conn->sql_execute("select t.name, t.field_name  from ".DB_USER_NAME.".wb_mm_form tf left join ".DB_USER_NAME.".wb_form_field t on t.id_wb_mm_form = tf.id_wb_mm_form
-				where tf.id_wb_mm_form = ".$this -> id_mm_fr." and t.is_read_only = 0 and rownum = 1 order by t.num");
-		while ($this-> db_conn-> sql_fetch($query_d)) 	{
-				$file = $this -> return_sql($query_d, "FIELD_NAME");					
-				$s_opts = explode("@",$this -> return_sql($query_d, "NAME"));
-				$file_name = $s_opts[0];	
-			}
-		return "		
-		<div id=\"import_".$last_grid_name."\" title='".$file_name."'>
-			<input id = 'upload_ajax_".$last_grid_name."' name='".$file."' class='FormElement' type='file'><br>
-			<div id= 'import_ajax_".$last_grid_name."' ><img src='/library/ajax-loader-tab.gif' style='padding-bottom: 4px; vertical-align: middle;' > Прикрепляю...</div>	
-		</div>
-		<script type=\"text/javascript\">
-		$(function() {			
-			$('#import_ajax_".$last_grid_name."').hide();
-			$('#upload_ajax_".$last_grid_name."').jInputFile({
-										filename: '".$file."',
-										selected:function() {
-											$('#btn_".$last_grid_name."').button('option', 'disabled', false );										
-										},
-										success: function (data) {
-												$('#import_ajax_".$last_grid_name."').hide();												
-												$('#import_".$last_grid_name."').dialog( 'close' );
-												$('#btn_o_".$last_grid_name."').button('option', 'disabled', false );
-												crc_input_".$last_grid_name." = null;
-												$('#".$last_grid_name."').trigger('reloadGrid');
-												$('#btn_".$last_grid_name."').button('option', 'disabled', true );
-												$('li[aria-selected=\"false\"] a[href=\"#".$this->pageid."\"]').parent().effect('highlight', {}, 3000);
-												if (data.length > 20) {
-														custom_alert(data);
-												}
-										}
-									});
-			$('#import_".$last_grid_name."').dialog({
-						autoOpen: false,
-						modal: true,
-						minWidth:300,
-						closeOnEscape: true,
-						appendTo: $('#".$last_grid_name."').parent().parent().parent(),	
-						resizable:false,
-						buttons:[	
-							    {
-								text: 'Загрузить',
-								disabled: true,
-								click: function () {
-									$('#upload_ajax_".$last_grid_name."').jInputFile('submit');
-									$('#btn_o_".$last_grid_name."').button('option', 'disabled', true );
-									$('#btn_".$last_grid_name."').button('option', 'disabled', true );									
-									$('#import_ajax_".$last_grid_name."').show();
-								}
-								},
-								{
-								text: 'Отмена',
-								click: function () {
-									$('#upload_ajax_".$last_grid_name."').jInputFile('clear');
-									$('#btn_".$last_grid_name."').button('option', 'disabled', true );	
-									$('#btn_o_".$last_grid_name."').button('option', 'disabled', false );	
-									$('#import_ajax_".$last_grid_name."').hide();
-									$( this ).dialog( 'close' );
-								}
-							   }						
-						],
-						close:function() {			
-							$('#upload_ajax_".$last_grid_name."').jInputFile('clear');
-							$('#btn_".$last_grid_name."').button('option', 'disabled', true );	
-							$('#import_ajax_".$last_grid_name."').hide();
-							$( this ).dialog( 'close' );
-						},
-						open: function() {
-								$(this).parent().children('.ui-dialog-buttonpane').find('button:contains(\"Отмена\")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_o_".$last_grid_name."');
-								$(this).parent().children('.ui-dialog-buttonpane').find('button:contains(\"Загрузить\")').button({icons: { primary: 'ui-icon-arrowthickstop-1-s'}}).prop('id','btn_".$last_grid_name."');
-								$(this).parent().parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
-								redraw_document($(\".ui-tabs-panel[aria-expanded='true']\"));
-						}			
-			});
-			
-			$('#".$last_grid_name."')
-				.jqGrid('navSeparatorAdd','#Pager_".$last_grid_name."')
-				.jqGrid('navGrid','#Page_-".$last_grid_name."').jqGrid('navButtonAdd','#Pager_".$last_grid_name."',{
-                                              caption: 'Прикрепить файл...',
-                                              title: 'Позволяет прикрепить файл к выделеной строке',
-                                              buttonicon: 'ui-icon-arrowthickstop-1-s',
-                                              onClickButton: function(){
-																var row_id = $('#".$last_grid_name."').jqGrid ('getGridParam', 'selrow');
-																if (row_id 	!= null) {
-																$('#upload_ajax_".$last_grid_name."').jInputFile({url:'".ENGINE_HTTP."/ajax.savedata.grid.php?id_mm_fr=".$this -> id_mm_fr."&oper=edit&id_mm=' + row_id});
-																	$('#import_".$last_grid_name."').dialog('open');																	
-																}
-                                                             }                                              
-							});	
-		});</script>\n";
-	}
 		
-	
 	// Оставлено для совместимости с более старыми версиями
 	//------------------------------------------------------------------------------------------------------------------------------------------------	
 	function execute_pl_sql_block() {        
@@ -235,7 +138,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					// Форма прикрепления файла к строке грида
 					case "INPUT_FORM_UPLOAD":
 						if (isset($grid) and isset($last_grid_name)) {
-							$this -> data_res .= $this -> append_file_to_grid($last_grid_name);
+							$this -> data_res .= $grid -> append_file_to_grid($last_grid_name);
 						}
 					break;
 					
@@ -250,8 +153,8 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					case "PL_SQL_FORM": 
 						$this -> data_res .= $this -> execute_pl_sql_block();
 						$this -> data_res .= "	<script type=\"text/javascript\">
-																	$('#".$this->pageid."').append('<div style=\"height: 100%;width: 100%;vertical-align: middle;\"><h2>Скрипт выполнен!/h2></div>');
-												</script>";
+										 $('#".$this->pageid."').append('<div style=\"height: 100%;width: 100%;vertical-align: middle;\"><h2>Скрипт выполнен!/h2></div>');
+									</script>";
 					break;	
 					
 					// Форма выгрузки файла
