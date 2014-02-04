@@ -7,18 +7,18 @@
 */
 class AUTH {
 	function is_user($user = false,$pass = false) {	
+            $ret_val = false;
 		// Пробуем узнать если ли у нас переменная сейсии:
-		if (isset($_SESSION['us_name']) and isset($_SESSION['us_pr'])) {			
+		if (isset($_SESSION['us_name']) and isset($_SESSION['us_pr']) and $user == false and $pass == false) {			
 			// распаковываем пароль
 			$pwd = base64_decode($this->decrypt($_SESSION['us_pr'],session_id()));
 			if (!empty($pwd)) {			
 				// пытаемся приверить пользователя, даже если он пройдет проверку, то потом отвалится от лдап
 				if ($this->check_ldap_user($_SESSION['us_name'], $pwd)) {
-					// все хорошо, работаем дальше
-					return true;
-				}
-			}
-		}
+					$ret_val = true;				
+                                }
+                        }
+                }
 		
 		// Возможно нам передали логин пароль
 		if (($user != false) and ($pass != false)) {
@@ -26,16 +26,13 @@ class AUTH {
 				// пытаемся приверить пользователя по ldap
 				if ($this->check_ldap_user($pass, $pwd)) {
 					if ($this -> save_user($user,$pass)) {
-						// все хорошо, работаем дальше
-						return true;
-					} else {
-						return false;
+						$ret_val = true;
 					}
 				}				
 			}
 		}	
 		
-		return false;
+		return $ret_val;
 	}
 
 	static function get_user() {
@@ -54,16 +51,9 @@ class AUTH {
 		$ldap = ldap_connect(AUTH_DOMAIN,AUTH_PORT);
 		if ($ldap) {		
 			ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
-			if(ldap_bind($ldap,$user."@".AUTH_DOMAIN,$pass)) {				
-                             $result = ldap_search($ldap,"DC=".AUTH_DOMAIN.".RU","(SN=".$user.")");
-                             if($result) {
+			if(ldap_bind($ldap,$user."@".AUTH_DOMAIN,$pass)) {
                                 return true;
-                             } else {
-                                BasicFunctions::to_log("ERR: User login failed! Broken password.");
-				return false;
-                             }
 			} else {
-				BasicFunctions::to_log("ERR: User login failed! Broken user name or password.");
 				return false;
 			}
 	   }
