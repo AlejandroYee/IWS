@@ -93,16 +93,20 @@ class BasicFunctions {
             // Логирование
             //--------------------------------------------------------------------------------------------------------------------------------------------
             public static function to_log($log,$sub_debug = false) {
-
+                
             BasicFunctions::requre_script_file("auth.".AUTH.".php");
-
-            if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (( auth::get_user() != "") or ($sub_debug))) {
-                            $log = iconv(LOCAL_ENCODING,HTML_ENCODING."//IGNORE",str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log));
+            $log = iconv(LOCAL_ENCODING,HTML_ENCODING."//IGNORE",str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log));
+            if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (auth::get_user() != "")) {
                             if (!isset($_SESSION[strtoupper("log_".SESSION_ID)])) {
                                     $_SESSION[strtoupper("log_".SESSION_ID)] = null;
                             }
                             $_SESSION[strtoupper("log_".SESSION_ID)].= "[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).">] ".$log."\r\n";
                     }
+            // для случаев когда неавторизированны
+            if ($sub_debug and (empty(auth::get_user()))) {
+                file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." <".strtoupper($sub_debug).">] ".$log."\r\n", FILE_APPEND | LOCK_EX);                
+            }
+                    
             }
 
             //--------------------------------------------------------------------------------------------------------------------------------------------
@@ -178,13 +182,15 @@ class BasicFunctions {
             ?>  			<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.1.min.js?s=<?=SESSION_ID?>"></script>
                                             <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.10.4.custom.min.js?s=<?=SESSION_ID?>"></script>
                                             <style type="text/css">											
-                                                            #loading {background:#ffffff url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;height: 100%;width: 100%;position: absolute; z-index: 999999; }		
+                                                            #loading {background:#ffffff url(<?=ENGINE_HTTP?>/library/ajax-loader-tab.gif) no-repeat center center;height: 100%;width: 100%;position: absolute; z-index: 999999; }	
+                                                            #loading2 {background:#ffffff url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;height: 100%;width: 100%;position: absolute; z-index: 99; }
                                                             html, body {padding: 0px; margin: 0px; overflow:hidden; font-size: 12px;}
                                             </style>						 
             </head>
             <body>
             <div id="loading"></div>            
             <div id="logon" window_login="logon" class="ui-widget ui-widget-content ui-corner-all" style="position:absolute;text-align :center;width:400px;height:350px;">
+            <div id="loading2" class="ui-widget ui-widget-content ui-corner-all"></div>  
             <?php if (!$offline) { ?>
             <h3>
             <?php
@@ -223,66 +229,79 @@ class BasicFunctions {
                 </div>
             </div>   
             <script type="text/javascript" >
-             $(function() {
-            
-             custom_alert = function (output_msg) {	
-                            $("<div />").html(output_msg).dialog({
-                                    title: 'Ошибка',
-                                    resizable: false,
-                                    minWidth: 450,
-                                    modal: true,
+        <?php
+             echo BasicFunctions::regex_javascript("$(function() {            
+                    custom_alert = function (output_msg) {	
+                                   $('<div />').html(output_msg).dialog({
+                                           title: 'Ошибка',
+                                           resizable: false,
+                                           minWidth: 450,
+                                           modal: true,
+                                           buttons: {
+                                                   'Закрыть': function() 
+                                                   {
+                                                           $( this ).dialog( 'close' );
+                                                           $('#loading2').fadeOut(300);
+                                                   }
+                                           },							
+                                           open: function() {								
+                                                           $(this).parent().css('z-index', 9999).parent().children('.ui-widget-overlay').css('z-index', 105);					
+                                           }
+                                   });
+                   };
 
-                                    buttons: {
-                                            "Закрыть": function() 
-                                            {
-                                                    $( this ).dialog( "close" );
-                                            }
-                                    },							
-                                    open: function() {								
-                                                    $(this).parent().css('z-index', 9999).parent().children('.ui-widget-overlay').css('z-index', 105);					
-                                    }
-                            });
-            };
-
-                $( "button" )
+                $( 'button')
                   .button()
                   .click(function( event ) {
-                            var usr = $("#username").val();
-                            var pass = $("#password").val();
-                            if (usr.replace(/\s/g,'') === '') custom_alert("Необходимо указать имя пользователя!");		
-                            if (pass.replace(/\s/g,'') === '') custom_alert("Необходимо указать пароль!");		
-                            if (usr.replace(/\s/g,'') !== ''&& pass.replace(/\s/g,'') !== '') {
-                                            $('#loading').show();
-                                            $.ajax({
-                                                            url: '<?=ENGINE_HTTP?>/ajax.saveparams.php?act=login',
+                            var usr = $('#username').val();
+                            var pass = $('#password').val();
+                            $('#loading2').fadeIn(300);
+                            setTimeout(function(){ 
+                            if (usr.replace(/\s/g,'') === '') custom_alert('Необходимо указать имя пользователя!');		
+                            if (pass.replace(/\s/g,'') === '') custom_alert('Необходимо указать пароль!');		
+                            if (usr.replace(/\s/g,'') !== '' && pass.replace(/\s/g,'') !== '') {                                                                        	                                
+                                        $.ajax({
+                                                            url: '".ENGINE_HTTP."/ajax.saveparams.php?act=login',
                                                             datatype:'json',
-                                                            data: { username: $("#username").val(), password:  $("#password").val() },
+                                                            data: { username: $('#username').val(), password:  $('#password').val() },
                                                             cache: false,
                                                             type: 'POST',
                                                                     success: function(data) {
-                                                                            setTimeout(function(){
-                                                                                            $(location).prop('href','<?=ENGINE_HTTP?>/');	
-                                                                            }, 3000);	
-                                                            }	  
-                                                    });
+                                                                          if (data != 'true') {                                                                              
+                                                                              custom_alert('Неверное имя пользователя или пароль!');
+                                                                           } else {   
+                                                                                $('#logon').fadeOut(400);
+                                                                                setTimeout(function() {                                                                                
+                                                                                     $('#loading').fadeIn(300);
+                                                                                }, 500);                                                            
+                                                                                setTimeout(function() {                                                                                     
+                                                                                     $(location).prop('href','".ENGINE_HTTP."/');
+                                                                                }, 3000);                                                                                
+                                                                          }	
+                                                                    }
+                                            });
                             }
+                            }, 2000);
                             return false;
                   });
               });
-            $(document).ready(function () {	
-                    $('#loading').fadeOut(300);		
-                }).keyup(function(eventObject){
+            $(document).ready(function () {
+                    $('#loading2').hide();
+                    $('#loading').fadeOut(500);		
+                });
+                
+            $('#password').keyup(function(eventObject){
                     if (eventObject.keyCode === 13) {                        
-                            $( "button" ).click();
+                            $('button').click();
                       }
              });
              
             $(window).resize(function () {
-                            $("#logon").css({ top: $(window).height()/2 - 175, left: $(window).width()/2 - 200 });			
+              $('#logon').css({ top: $(window).height()/2 - 175, left: $(window).width()/2 - 200 });			
             });
             
-            $("#logon").css({ top: $(window).height()/2 - 175, left: $(window).width()/2 - 200 });	
-
+            $('#logon').css({ top: $(window).height()/2 - 175, left: $(window).width()/2 - 200 });");	
+        ?>
             </script>
             </body>
             <?php
