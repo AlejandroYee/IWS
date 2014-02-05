@@ -190,7 +190,7 @@ class BasicFunctions {
             <body>
             <div id="loading"></div>            
             <div id="logon" window_login="logon" class="ui-widget ui-widget-content ui-corner-all" style="position:absolute;text-align :center;width:400px;height:350px;">
-            <div id="loading2" class="ui-widget ui-widget-content ui-corner-all"></div>  
+            <div id="loading2" class="ui-widget ui-widget-content ui-corner-all" style="border:0"></div>  
             <?php if (!$offline) { ?>
             <h3>
             <?php
