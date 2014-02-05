@@ -15,7 +15,7 @@ define("ENGINE_ROOT",  filter_input(INPUT_SERVER, 'DOCUMENT_ROOT',FILTER_SANITIZ
 define("SESSION_ID",md5(time().rand(time()/100,getrandmax())));
 define("HTTP_USER_AGENT",filter_input(INPUT_SERVER, 'HTTP_USER_AGENT',FILTER_SANITIZE_STRING));
 define("SESSION_LIFE_TIME", 10800);
-define("VERSION_ENGINE","v2.0.1 Final Release");
+define("VERSION_ENGINE","v2.0.3 Final Release");
 
 // Переопределение времени выполнения
 ini_set('max_execution_time', 2100);
@@ -179,7 +179,7 @@ class BasicFunctions {
                                             }
                                             setcookie("theme_num_last", $theme_number);
                                             echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"". ENGINE_HTTP . DIRECTORY_SEPARATOR .$theme_first['theme_file'][$theme_number]." \" /> \n";														
-            ?>  			<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.1.min.js?s=<?=SESSION_ID?>"></script>
+            ?>  			<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.1.0.min.js?s=<?=SESSION_ID?>"></script>
                                             <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.10.4.custom.min.js?s=<?=SESSION_ID?>"></script>
                                             <style type="text/css">											
                                                             #loading {background:#ffffff url(<?=ENGINE_HTTP?>/library/ajax-loader-tab.gif) no-repeat center center;height: 100%;width: 100%;position: absolute; z-index: 999999; }	
