@@ -103,7 +103,7 @@ class BasicFunctions {
                             $_SESSION[strtoupper("log_".SESSION_ID)].= "[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).">] ".$log."\r\n";
                     }
             // для случаев когда неавторизированны
-            if ($sub_debug and (empty(auth::get_user()))) {
+            if ($sub_debug and (auth::get_user() == "")) {
                 file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." <".strtoupper($sub_debug).">] ".$log."\r\n", FILE_APPEND | LOCK_EX);                
             }
                     
