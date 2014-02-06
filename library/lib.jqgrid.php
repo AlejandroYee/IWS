@@ -24,7 +24,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 	} else {
 		
 		$filed_sys_hiden = array_merge_recursive($this -> db_conn -> get_settings_many_val('SETTINGS_VIEW_INVISIBLE_SYS_FIELDS'),
-											 $this -> db_conn -> get_settings_many_val('SETTINGS_VIEW_INVISIBLE_AUDIT_FIELDS'));							
+				  $this -> db_conn -> get_settings_many_val('SETTINGS_VIEW_INVISIBLE_AUDIT_FIELDS'));							
 		$inv_view_table = $this -> db_conn  -> get_settings_val('SETTINGS_VIEW_INVISIBL_ID_TABLE');
 
 		// Запрос в базу сразу с возвратом необходимых тегов и скриптов, тамже считаем длину текстовых полей
@@ -1020,7 +1020,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 							<select id="select_export_<?=$object_name?>" name="select_export_<?=$object_name?>" >
 	<?php
 	if (!empty($XSL_FILE_OUT)) {
-			echo "<option value='old' selected>Экспорт данных по шаблону</option>\n";	
+			echo "<option value='xlsm' selected>Экспорт данных по шаблону с макросами</option>\n";	
 			$ex_sel = "";
 		} else {
 			$ex_sel = "selected";
