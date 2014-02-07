@@ -92,21 +92,21 @@ class BasicFunctions {
             //--------------------------------------------------------------------------------------------------------------------------------------------
             // Логирование
             //--------------------------------------------------------------------------------------------------------------------------------------------
-            public static function to_log($log,$sub_debug = false) {
-                
-            BasicFunctions::requre_script_file("auth.".AUTH.".php");
-            $log = iconv(LOCAL_ENCODING,HTML_ENCODING."//IGNORE",str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log));
-            if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (auth::get_user() != "")) {
-                            if (!isset($_SESSION[strtoupper("log_".SESSION_ID)])) {
-                                    $_SESSION[strtoupper("log_".SESSION_ID)] = null;
-                            }
-                            $_SESSION[strtoupper("log_".SESSION_ID)].= "[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).">] ".$log."\r\n";
-                    }
-            // для случаев когда неавторизированны
-            if ($sub_debug and (auth::get_user() == "")) {
-                file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." <".strtoupper($sub_debug).">] ".$log."\r\n", FILE_APPEND | LOCK_EX);                
-            }
-                    
+            public static function to_log($log,$sub_debug = false) {                
+            if (!stripos($log,"mdpf")) {                               
+                BasicFunctions::requre_script_file("auth.".AUTH.".php");
+                $log = iconv(LOCAL_ENCODING,HTML_ENCODING."//IGNORE",str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log));
+                if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (auth::get_user() != "")) {
+                                if (!isset($_SESSION[strtoupper("log_".SESSION_ID)])) {
+                                        $_SESSION[strtoupper("log_".SESSION_ID)] = null;
+                                }
+                                $_SESSION[strtoupper("log_".SESSION_ID)].= "[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).">] ".$log."\r\n";
+                        }
+                // для случаев когда неавторизированны
+                if ($sub_debug and (auth::get_user() == "")) {
+                    file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." <".strtoupper($sub_debug).">] ".$log."\r\n", FILE_APPEND | LOCK_EX);                
+                }
+            }      
             }
 
             //--------------------------------------------------------------------------------------------------------------------------------------------
@@ -479,6 +479,7 @@ class BasicFunctions {
                             <a href="http://trentrichardson.com/examples/timepicker/" target="_blank">JQuery TimePicker</a>,
                             <a href="https://github.com/johnculviner/jquery.fileDownload" target="_blank">JQuery fileDownload</a>,
                             <a href="http://ace.ajax.org/" target="_blank">ACE Cloud9 Editor</a>,
+                            <a href="https://github.com/jasonday/printThis" target="_blank">PrintThis</a>,
                             <a href="https://github.com/ehynds/jquery-ui-multiselect-widget" target="_blank">JQuery UI multiselect</a>,		
                             <a href="http://www.flotcharts.org/" target="_blank">FlotCharts</a>
                             <a href="http://keith-wood.name/calculator.html" target="_blank">jQuery Calculator</a>

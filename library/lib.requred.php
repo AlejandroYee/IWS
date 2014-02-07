@@ -82,7 +82,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		$this-> pageid = $pagetab;
 				
 			$query = $this->db_conn->sql_execute("Select count(*) over() c_count, mf.form_where, mf.object_name, mf.height_rate as  height_rate,mf.auto_update, mf.id_wb_mm_form id,mf.action_sql,
-					nvl(mf.name, mm.name) name, ft.name type, mf.xsl_file_out, max(case when ft.name like '%_DETAIL' then mf.id_wb_mm_form else null end) over(order by mm.id_wb_main_menu) id_d
+					nvl(mf.name, mm.name) name, ft.name type, mf.xsl_file_in, max(case when ft.name like '%_DETAIL' then mf.id_wb_mm_form else null end) over(order by mm.id_wb_main_menu) id_d
 					from ".DB_USER_NAME.".wb_main_menu mm inner join ".DB_USER_NAME.".wb_mm_form mf  on mf.id_wb_main_menu = mm.id_wb_main_menu left join ".DB_USER_NAME.".wb_form_type ft on ft.id_wb_form_type = mf.id_wb_form_type
 					where mm.id_wb_main_menu = ".$id." and exists (Select 1 from ".DB_USER_NAME.".wb_mm_role mr inner join ".DB_USER_NAME.".wb_role_user ru on ru.id_wb_role = mr.id_wb_role and ru.id_wb_user = ".DB_USER_NAME.".wb.get_wb_user_id
 					where mr.id_wb_main_menu   = mm.id_wb_main_menu and mr.id_wb_access_type = 1) order by mf.num");
@@ -96,7 +96,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                 
 				// Начинаем создавать формы				
 				switch ($this -> return_sql($query, "TYPE")) {
-                    case "INPUT_FORM": 
+                                case "INPUT_FORM": 
 						if ($is_wizard_form == 0 ) {
 							require_once(ENGINE_ROOT."/library/lib.input.php");
 							$input = new INPUT($this -> id_mm_fr, $this -> id_mm, $this -> pageid);
@@ -138,7 +138,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					// Форма прикрепления файла к строке грида
 					case "INPUT_FORM_UPLOAD":
 						if (isset($grid) and isset($last_grid_name)) {
-							$this -> data_res .= $grid -> append_file_to_grid($last_grid_name);
+							$this -> data_res .= $grid -> append_file_to_grid($last_grid_name, $this->id_mm_fr);
 						}
 					break;
 					
@@ -186,7 +186,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						$grid = new JQGRID($this -> id_mm_fr, $this ->id_mm_fr_d, $this -> id_mm, $this -> pageid, $this -> grid_main_name);
 						$this -> data_res .= BasicFunctions::regex_javascript( $grid -> greate_grid($this -> return_sql($query, "TYPE"),
 																					"local",
-																					$object_name,$this -> return_sql($query, "XSL_FILE_OUT"),
+																					$object_name,$this -> return_sql($query, "XSL_FILE_IN"),
 																					$this -> return_sql($query, "HEIGHT_RATE"),
 																					$this -> return_sql($query, "ID"),
 																					$this -> return_sql($query, "AUTO_UPDATE")));									
@@ -205,7 +205,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						$this -> data_res .= BasicFunctions::regex_javascript($grid -> greate_grid($this -> return_sql($query, "TYPE"),
 																"local",
 																$object_name,
-																$this -> return_sql($query, "XSL_FILE_OUT"),
+																$this -> return_sql($query, "XSL_FILE_IN"),
 																$this -> return_sql($query, "HEIGHT_RATE"),
 																$this -> return_sql($query, "ID"),
 																$this -> return_sql($query, "AUTO_UPDATE")));									
@@ -226,9 +226,9 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					
 					// Создаем гриды
 						if (empty($IsInputform)) {
-								$this -> data_res .= BasicFunctions::regex_javascript($grid -> greate_grid($this -> return_sql($query, "TYPE"),"json", $object_name,$this -> return_sql($query, "XSL_FILE_OUT"),$heigth_rate,$this -> return_sql($query, "ID"),$this -> return_sql($query, "AUTO_UPDATE")));								
+								$this -> data_res .= BasicFunctions::regex_javascript($grid -> greate_grid($this -> return_sql($query, "TYPE"),"json", $object_name,$this -> return_sql($query, "XSL_FILE_IN"),$heigth_rate,$this -> return_sql($query, "ID"),$this -> return_sql($query, "AUTO_UPDATE")));								
 							} else {
-								$this -> data_res .= BasicFunctions::regex_javascript($grid -> greate_grid($this -> return_sql($query, "TYPE"),"local", $object_name,$this -> return_sql($query, "XSL_FILE_OUT"),$heigth_rate,$this -> return_sql($query, "ID"),$this -> return_sql($query, "AUTO_UPDATE")));
+								$this -> data_res .= BasicFunctions::regex_javascript($grid -> greate_grid($this -> return_sql($query, "TYPE"),"local", $object_name,$this -> return_sql($query, "XSL_FILE_IN"),$heigth_rate,$this -> return_sql($query, "ID"),$this -> return_sql($query, "AUTO_UPDATE")));
 						}	
 						
 					// Сохраняем предыдущий обьект

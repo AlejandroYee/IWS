@@ -42,8 +42,7 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.1.0.min.js?s=<?=SESSION_ID?>" ></script>	
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.10.4.custom.min.js?s=<?=SESSION_ID?>" ></script>
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-timepicker-addon.js?s=<?=SESSION_ID?>" ></script>	
-        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-timepicker-ru.js?s=<?=SESSION_ID?>" ></script>	
-        
+        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-timepicker-ru.js?s=<?=SESSION_ID?>" ></script>
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.jqGrid.min.js?s=<?=SESSION_ID?>" ></script>				
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.fileUpload.js?s=<?=SESSION_ID?>" ></script>						
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.jqGrid.locale-ru.js?s=<?=SESSION_ID?>" ></script>	
@@ -51,7 +50,9 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.fileDownload.js?s=<?=SESSION_ID?>" ></script>	
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.ui.menubar.js?s=<?=SESSION_ID?>" ></script>
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.calculator.min.js?s=<?=SESSION_ID?>" ></script>				
-        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.flot.min.js?s=<?=SESSION_ID?>" ></script>		
+        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.flot.min.js?s=<?=SESSION_ID?>" ></script>	
+        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.printThis.js?s=<?=SESSION_ID?>" ></script> 
+        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.ui-contextmenu.js?s=<?=SESSION_ID?>" ></script>         
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/ace.js?s=<?=SESSION_ID?>" ></script>	
         
 <?

@@ -80,7 +80,8 @@ $query = $main_db -> sql_execute("select tf.owner, tf.object_name, t.name, t.fie
 // Формируем поля для запроса
 while ($main_db -> sql_fetch($query)) {
    	if (($main_db -> sql_result($query, "FIELD_NAME") <> "R_NUM") and ( filter_input(INPUT_POST, $main_db -> sql_result($query, "FIELD_NAME_ID"),FILTER_UNSAFE_RAW) != null or
-                isset($_FILES[$main_db -> sql_result($query, "FIELD_NAME")]))) {            
+                isset($_FILES[$main_db -> sql_result($query, "FIELD_NAME")]))) {
+            
 		// Вдруг у нас значения в виде массива:
 		$field_name_id = filter_input(INPUT_POST, $main_db -> sql_result($query, "FIELD_NAME_ID"),FILTER_SANITIZE_STRING,FILTER_NULL_ON_FAILURE);  
                 if (trim($field_name_id) != "") {
@@ -113,6 +114,7 @@ while ($main_db -> sql_fetch($query)) {
 		} else {
 			$str_sql_fl .= ",".$main_db -> sql_result($query, "FIELD_NAME");			
 		}
+                    
 		// Смотрим на тип переменных						
 		switch (strtoupper(trim($main_db -> sql_result($query, "FIELD_TYPE")))) {
 				case 'D':

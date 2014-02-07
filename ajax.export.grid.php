@@ -52,8 +52,9 @@
 	$m 		= 0;	
 	$k              = 0;
 	$check		= "";	 
-        $cell_exp = 0;
-        $row_exp = 1;
+        $cell_exp       = 0;
+        $cell_exp_first = 0;
+        $row_exp        = 2;        
         
 	// Дополнительная проверка на пользователя и права доступа:
 	$query_check = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_mm_form = ".$id_mm_fr." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable'");
@@ -88,56 +89,55 @@
 	}
 
         if (empty($exp_file)) {
-              $exp_file = $exp_name." (".date("d-m-Y").").xls";	// Если имени файла нет то берем текущую дату и формируем
-        }                
+              $exp_file = $exp_name." (".date("d-m-Y").").".$isaexport;	// Если имени файла нет то берем текущую дату и формируем
+        }  
                 
-        if (($isaexport == 'xlsm') and 
-               (is_file(ENGINE_ROOT.DIRECTORY_SEPARATOR."xlt".DIRECTORY_SEPARATOR.$exp_file) or 
-                is_file(ENGINE_ROOT.DIRECTORY_SEPARATOR."xlt".DIRECTORY_SEPARATOR.$exp_file."m"))) { 
-            
-                        if (strpos($exp_file,".xlsm") == false) $exp_file .= "m";                        
+        if (is_file(ENGINE_ROOT.DIRECTORY_SEPARATOR."xlt".DIRECTORY_SEPARATOR.$exp_file) and ($isaexport == 'xlsm')) {                     
 			$temp_file = tempnam(sys_get_temp_dir(), rand(5, 15) . $exp_file);			
 			file_put_contents($temp_file,file_get_contents("xlt/". $exp_file));
-			$objReader = PHPExcel_IOFactory::createReader('Excel2007');                        
+                        $filetype = PHPExcel_IOFactory::identify($temp_file);
+			$objReader = PHPExcel_IOFactory::createReader($filetype);                        
 			$objPHPExcel = $objReader -> load($temp_file);
                         $objPHPExcel->getProperties()->setCreator($main_db -> get_realname())
                                 ->setLastModifiedBy($main_db -> get_realname())
-                                ->setCategory("Data export file");      
-                        $row_exp = 2;
+                                ->setCategory("Data export file"); 
+                        if (!$objPHPExcel->hasMacros()) {                            
+                            $isaexport = 'xlsx';
+                            $exp_file = substr($exp_file,0,strrpos($exp_file, '.')).".".$isaexport;
+                        }
         } else {    
-            $temp_file = tempnam(sys_get_temp_dir(), rand(5, 15) . $exp_name);
+            $exp_file = substr($exp_file,0,strrpos($exp_file, '.')).".".$isaexport;
+            $temp_file = tempnam(sys_get_temp_dir(), rand(5, 15) . $exp_file);
             $objPHPExcel = new PHPExcel();
             $objPHPExcel->getProperties()->setCreator($main_db -> get_realname())
                     ->setLastModifiedBy($main_db -> get_realname())
-                    ->setTitle($exp_name)
+                    ->setTitle($exp_file)
                     ->setCategory("Data export file");
         }
 	
         if  ($isaexport != 'csv') {
+              
             // Заполняем поля заголовка если они есть
-            $exp_query = $main_db -> sql_execute("select t.name,t.field_txt, t.field_name,t.xls_position_col,t.xls_position_row,t.field_type
+            $exp_query = $main_db -> sql_execute("select t.name,t.field_txt, t.field_name,  nvl(t.xls_position_col,1) as xls_position_col,
+                                                            nvl(t.xls_position_row,rownum +1) as xls_position_row,t.field_type
                                 from ".DB_USER_NAME.".wb_form_cells t where t.id_wb_mm_form = ".$id_mm_fr." and t.type_cells = 'H' order by t.num");
             while ($main_db -> sql_fetch($exp_query)) {				
                                             // получаем значение
                                             $exp_query_custom = $main_db -> sql_execute("Select 1 X,".$main_db -> sql_result($exp_query, "FIELD_TXT")." PARAM from dual");
+                                            $main_db -> sql_result($exp_query, "NAME");
                                             
                                             while ($main_db -> sql_fetch($exp_query_custom)) {	
-                                                            $objPHPExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($cell_exp,$row_exp,str_replace("&nbsp;", " ",$main_db -> sql_result($exp_query_custom, "NAME")." ".$main_db -> sql_result($exp_query_custom, "PARAM",false)));
-                                                            $objPHPExcel->setActiveSheetIndex(0)->setSelectedCellByColumnAndRow($cell_exp,$row_exp);
+                                                            $objPHPExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($cell_exp,$row_exp,str_replace("&nbsp;", " ",$main_db -> sql_result($exp_query, "NAME")." ".$main_db -> sql_result($exp_query_custom, "PARAM",false)));
+                                                            $objPHPExcel->setActiveSheetIndex(0)->setSelectedCellByColumnAndRow($main_db -> sql_result($exp_query, "xls_position_col"),$main_db -> sql_result($exp_query, "xls_position_row"));
                                                             $objPHPExcel->setActiveSheetIndex(0)->getStyle($objPHPExcel->setActiveSheetIndex(0)->getActiveCell())->getFont()->setBold(true);
                                             $row_exp++;									
                                             }					
              }	
-
-        }          
+          $row_exp++;   
+        } else {
+          $row_exp--;
+        }
         
-        // Делаем отступ в 2 строки
-        if ($isaexport != 'csv') $row_exp = $row_exp + 2;   
-
-        // Если это шаблон то делаем отступ только в одну строку
-        if($objPHPExcel->hasMacros())$row_exp = $row_exp - 1;	    
-      
-				
 	// Запоминаем стратовую позицию данных
 	$row_exp_zag = 	$row_exp;
 	
@@ -156,10 +156,10 @@
         }           
                 
 	// Запрос списка столбцов и их имен
-        $query = $main_db -> sql_execute("select tf.owner,tf.object_name,tf.XSL_FILE_IN, tf.XSL_FILE_OUT, t.name, round(t.width/3) as l_width,
+        $query = $main_db -> sql_execute("select tf.owner,tf.object_name, t.name, round(t.width/3) as l_width,
                        decode(t.field_type, 'D', 'to_char('||t.field_name||', ''dd.mm.yyyy hh24:mi:ss'') '||t.field_name, 'I', 'round('||t.field_name||', 0) '||t.field_name, t.field_name) f_name,
                        nvl2(tf.form_where, 'AND '||tf.form_where, null) form_where,  t.field_type,
-                       t.field_name, ta.html_txt align_txt,t.XLS_POSITION_COL,t.XLS_POSITION_ROW
+                       t.field_name, ta.html_txt align_txt, nvl(t.xls_position_col,t.num) as xls_position_col, nvl(t.xls_position_row,2) as xls_position_row
                   from ".DB_USER_NAME.".wb_mm_form tf
                   left join ".DB_USER_NAME.".wb_form_field t on t.id_wb_mm_form = tf.id_wb_mm_form
                   left join ".DB_USER_NAME.".wb_form_field_align ta on ta.id_wb_form_field_align = t.id_wb_form_field_align
@@ -169,6 +169,7 @@
 		if ((intval($param_value) <> 1) and ($main_db -> sql_result($query, "FIELD_NAME") == "ID_CONTROL_LOAD_DATA")) continue;	
                 
                 if (empty($str_dt)) {
+                    $cell_exp_first = $main_db -> sql_result($query, "xls_position_col") - 1;
                     $owner      = $main_db -> sql_result($query, "OWNER");
                     $table_name = $main_db -> sql_result($query, "OBJECT_NAME");
                     $str_dt     = "Select ".$main_db -> sql_result($query, "F_NAME");
@@ -177,9 +178,12 @@
                     $str_dt = $str_dt.", ".$main_db -> sql_result($query, "F_NAME");
                 }
                 
+                if ($isaexport != 'csv' ) $row_exp = intval($main_db -> sql_result($query, "xls_position_row"));
+                $cell_exp = intval($main_db -> sql_result($query, "xls_position_col")) - 1;                
+                
                 $arr_field[$cell_exp] = $main_db -> sql_result($query, "FIELD_NAME");
                 $arr_field_type[$cell_exp] = $main_db -> sql_result($query, "FIELD_TYPE");
-
+                
                 // Используем ячейки только при нормальном экспорте, если кустом или csv то неиспользуем
                 if ($isaexport != 'csv' or !$objPHPExcel->hasMacros()) {
                     
@@ -206,30 +210,28 @@
 
                 // Указываем Формат для всего столбца начиная с текущей строки:					
                 switch ($main_db -> sql_result($query, "FIELD_TYPE")) {
-                        case 'S':   $Cell_format[$cell_exp] = PHPExcel_Style_NumberFormat::FORMAT_GENERAL ; break;
-                        case 'D':  $Cell_format[$cell_exp] = PHPExcel_Style_NumberFormat::FORMAT_DATE_DDMMYYYY; break;
+                        case 'S': $Cell_format[$cell_exp] = PHPExcel_Style_NumberFormat::FORMAT_GENERAL ; break;
+                        case 'D': $Cell_format[$cell_exp] = PHPExcel_Style_NumberFormat::FORMAT_DATE_DDMMYYYY; break;
                         case 'N': $Cell_format[$cell_exp] = PHPExcel_Style_NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1; break;
-                        default:   $Cell_format[$cell_exp] = PHPExcel_Style_NumberFormat::FORMAT_GENERAL ; break;
-                }										
-                // инкрементируем значение ячейки
-                $cell_exp++;
+                        default:  $Cell_format[$cell_exp] = PHPExcel_Style_NumberFormat::FORMAT_GENERAL ; break;
+                }	
 	}			
 			
-        if ($isaexport != 'csv' or !$objPHPExcel->hasMacros()) {	
-
-                // Обьединяем ячейки для заголовка таблици
-                $objPHPExcel->setActiveSheetIndex(0)->setSelectedCellByColumnAndRow(0,$row_exp-1); //выбираем откуда     
-                $F_rom = $objPHPExcel->setActiveSheetIndex(0)->getActiveCell();
-                $objPHPExcel->setActiveSheetIndex(0)->setSelectedCellByColumnAndRow($cell_exp-1,$row_exp-1); //выбираем куда                
-                $T_o = $objPHPExcel->setActiveSheetIndex(0)->getActiveCell();
-                $objPHPExcel->setActiveSheetIndex(0)->mergeCells($F_rom.":".$T_o);
-
+        if ($isaexport != 'csv' and !$objPHPExcel->hasMacros()) {	
+                for ($i = 1; $i < $row_exp; $i++) {
+                    // Обьединяем ячейки для заголовка таблици
+                    $objPHPExcel->setActiveSheetIndex(0)->setSelectedCellByColumnAndRow(0,$i); //выбираем откуда     
+                    $F_rom = $objPHPExcel->setActiveSheetIndex(0)->getActiveCell();
+                    $objPHPExcel->setActiveSheetIndex(0)->setSelectedCellByColumnAndRow($cell_exp,$i); //выбираем куда                
+                    $T_o = $objPHPExcel->setActiveSheetIndex(0)->getActiveCell();
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells($F_rom.":".$T_o);
+                }
                 // Рисуем заголовок таблици обьеденяя все ячейка столбцов в одну		
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(0,$row_exp - 1, $exp_title);
                 $objPHPExcel->setActiveSheetIndex(0)->setSelectedCellByColumnAndRow(0,$row_exp - 1);
                 $objPHPExcel->setActiveSheetIndex(0)->getStyle($objPHPExcel->setActiveSheetIndex(0)->getActiveCell())->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);	
                 $objPHPExcel->setActiveSheetIndex(0)->getStyle($objPHPExcel->setActiveSheetIndex(0)->getActiveCell())->getFont()->setBold(true);
-                $objPHPExcel->setActiveSheetIndex(0)->getStyle($objPHPExcel->setActiveSheetIndex(0)->getActiveCell())->getFont()->setSize(14);	
+                $objPHPExcel->setActiveSheetIndex(0)->getStyle($objPHPExcel->setActiveSheetIndex(0)->getActiveCell())->getFont()->setSize(14);    
         } 
             
         // Разбираем переменные для поиска			
@@ -267,7 +269,7 @@
         // Теперь загружаем данные в табличку
         $query_dt = $main_db -> sql_execute($str_dt.str_replace("SqWhere", $qWhere,$str_dt_f));			
         while ($main_db -> sql_fetch($query_dt)) {
-                    $cell_exp = 0;
+                    $cell_exp = $cell_exp_first;
                     $row_exp++;
              foreach ($arr_field as $key=>$line){
                     // Вставляем ячейку						
@@ -283,7 +285,7 @@
                     $objPHPExcel->setActiveSheetIndex(0)->setSelectedCellByColumnAndRow($i,$row_exp); //выбираем куда                    
                     $T_o = $objPHPExcel->setActiveSheetIndex(0)->getActiveCell();			
                     // Применяем стиль и формат постолбцам
-                    $objPHPExcel->setActiveSheetIndex(0)->getStyle($F_rom.":".$T_o)->getNumberFormat()->setFormatCode($Cell_format[$i]);					
+                    if (isset($Cell_format[$i])) $objPHPExcel->setActiveSheetIndex(0)->getStyle($F_rom.":".$T_o)->getNumberFormat()->setFormatCode($Cell_format[$i]);					
                     if (isset($Cell_format_align[$i])) $objPHPExcel->setActiveSheetIndex(0)->getStyle($F_rom.":".$T_o)->getAlignment()->setHorizontal($Cell_format_align[$i]);					
                     $objPHPExcel->setActiveSheetIndex(0)->getStyle($F_rom.":".$T_o)->getBorders()->getAllBorders()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);				
             }
@@ -292,38 +294,41 @@
         // выбираем ячейку самую первую
         $objPHPExcel->setActiveSheetIndex(0)->setSelectedCellByColumnAndRow(0,0);
 
-        header("Set-Cookie: fileDownload=true");	
-
         // формат экспорта:
         switch ($isaexport) {
-                        case 'xlsx':    $objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel);						
-                                        header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-                                        header("Content-Disposition: attachment;filename=".str_replace(".xls",".xlsx",$exp_file));
-                                        header("Cache-Control: max-age=0");										
-                                        $objWriter -> save("php://output");	
+                        case 'xlsx':    header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                                        $objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel);					
+                                        
+                                        	
                         break;
                         case 'xlsm':    header("Content-Type: application/vnd.ms-excel.sheet.macroEnabled.12");
-                                        header("Content-Disposition: attachment;filename=".$exp_file);
-                                        header("Cache-Control: max-age=0");
                                         $objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel);
-                                        $objWriter -> save("php://output");	
                         break;
                         case 'csv':
                                         header("Content-type: text/csv");
-                                        header("Content-Disposition: attachment;filename=".str_replace(".xls",".csv",$exp_file));
-                                        header("Cache-Control: max-age=0");
                                         $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'CSV')->setDelimiter(';')
                                                           ->setEnclosure('"')
                                                           ->setLineEnding("\r\n")
                                                           ->setSheetIndex(0);
-                                        $objWriter -> save("php://output");	
                         break;
                         case 'xls':						
                                         header("Content-Type: application/vnd.ms-excel");
-                                        header("Content-Disposition: attachment;filename=".$exp_file."");
-                                        header("Cache-Control: max-age=0");
                                         $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, "Excel5");
-                                        $objWriter -> save("php://output");	
                         break;
+                        case 'pdf':						
+                                        header("Content-Type: application/pdf");                       
+                                        PHPExcel_Settings::setPdfRenderer(PHPExcel_Settings::PDF_RENDERER_MPDF,ENGINE_ROOT."/library/mdpf/");
+                                        $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'PDF');
+                                        $objWriter -> writeAllSheets();	
+                        break;         
+                        case 'print':	
+                                        header("Content-Type: text/html");    
+                                        $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'HTML');                                        	
+                        break;    
         }			
+        
+        header("Content-Disposition: attachment;filename=".$exp_file);
+        header("Cache-Control: max-age=0");        
+        header("Set-Cookie: fileDownload=true");
+        $objWriter -> save("php://output");
 $main_db -> __destruct();

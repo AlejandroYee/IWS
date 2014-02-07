@@ -44,13 +44,13 @@ if (empty($check)) die("Доступ для чтения данных запре
 	
 $query_korrdinates = $main_db -> sql_execute("select tf.owner, tf.object_name, tf.name chart_label, nvl(tf.CHART_show_name, 0) as is_show_name,
 				 decode(nvl(tf.CHART_rotate_name, 0),1,90,0) is_rotate_name, nvl(tf.CHART_X, 1000) CHART_X, nvl(tf.CHART_Y,  350) CHART_Y,
-				 nvl(tf.CHART_DEC_PREC,  0) CHART_DEC_PREC, (Select u.object_type from user_objects u where u.object_name = upper(tf.object_name)) object_type,
+				 (Select u.object_type from user_objects u where u.object_name = upper(tf.object_name)) object_type,
 				 nvl2(tf.form_where, 'AND '||tf.form_where, null) form_where,  t.name, nvl(substr(t.name, 1, instr(t.name, '@') - 1), t.name) l_name,
 				 nvl(substr(t.name, instr(t.name, '@') + 1), t.name) s_name, t.field_name, decode(t.field_type, 'D', 'to_char('||t.field_name||', ''dd.mm.yyyy hh24:mi:ss'') '||t.field_name
 														   ,'I', 'round('||t.field_name||', 0) '||t.field_name
 															   ,t.field_name) f_name,
-				 t.name axis_name, ta.html_txt align_txt, ta.html_txt as axisOnLeft,  /*t.FL_HTML_CODE,*/
-				 tf.xsl_file_in, t.field_type, row_number() over(ORDER BY t.num)-1 as num, ct.name chart_name, ct.id_wb_chart_type as chart_id
+				 t.name axis_name, ta.html_txt align_txt, ta.html_txt as axisOnLeft,
+				 t.field_type, row_number() over(ORDER BY t.num)-1 as num, ct.name chart_name, ct.id_wb_chart_type as chart_id
 				 from ".DB_USER_NAME.".wb_mm_form tf
                                  left join ".DB_USER_NAME.".wb_form_field t on t.id_wb_mm_form = tf.id_wb_mm_form
 				 left join ".DB_USER_NAME.".wb_form_field_align ta on ta.id_wb_form_field_align = t.id_wb_form_field_align
@@ -67,8 +67,7 @@ while ($main_db -> sql_fetch($query_korrdinates)) {
                         . "where 1 = 1 ".$main_db -> sql_result($query_korrdinates, "FORM_WHERE");
                 
                 $dt -> chart_label    = $main_db -> sql_result($query_korrdinates, "CHART_LABEL");
-                $dt -> legend         = boolval($main_db -> sql_result($query_korrdinates, "is_show_name"));                 
-                
+                $dt -> legend         = boolval($main_db -> sql_result($query_korrdinates, "is_show_name"));
                 $m = 0; 
                 $query_data = $main_db -> sql_execute($str_dt);	
                 while ($main_db -> sql_fetch($query_data)) {

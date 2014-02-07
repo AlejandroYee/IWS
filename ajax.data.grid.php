@@ -83,7 +83,7 @@
               'I',
               'round(' || t.field_name || ', 0) ' || t.field_name,
               t.field_name) f_name,
-       ta.html_txt align_txt, tf.xsl_file_in, t.field_type, tf.form_order as form_order
+       ta.html_txt align_txt, t.field_type, tf.form_order as form_order
 	   from ".DB_USER_NAME.".wb_mm_form tf
 	   left join ".DB_USER_NAME.".wb_form_field t on t.id_wb_mm_form = tf.id_wb_mm_form
 	   left join ".DB_USER_NAME.".wb_form_field_align ta on ta.id_wb_form_field_align = t.id_wb_form_field_align

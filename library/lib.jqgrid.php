@@ -198,7 +198,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 
 	// Создаем скриптовую обвязку грида
 	//------------------------------------------------------------------------------------------------------------------------------------------------
-	function greate_grid($type, $dataload, $object_name, $XSL_FILE_OUT, $heigth_of_grid, $form_id,$auto_update) {
+	function greate_grid($type, $dataload, $object_name, $XSL_EXP_FILE, $heigth_of_grid, $form_id,$auto_update) {
 	// Получаем массив данных для обвязки грида
 	$ResArray = $this -> Create_grid_header(); 	
 	// Начинаем создавать сам грид
@@ -742,7 +742,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 	 <?php
 	 // Делаем возможность экспорта
 	 if (isset($ResArray['EXPORT_BUTTON'])) {
-			$this -> Create_export($object_name, $type,  'Экспорт содержимого таблици в файл',  $XSL_FILE_OUT);
+			$this -> Create_export($object_name, $type,  'Экспорт содержимого таблици в файл',  $XSL_EXP_FILE);
 		}	
 	$data = ob_get_contents();
 	ob_end_clean();	
@@ -893,9 +893,9 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
         //------------------------------------------------------------------------------------------------------------------------------------------------
         //  Добавление файла к строке в гриде
 	//------------------------------------------------------------------------------------------------------------------------------------------------	
-	function append_file_to_grid($last_grid_name) {
+	function append_file_to_grid($last_grid_name, $id_mm_fr) {
 		$query_d = $this->db_conn->sql_execute("select t.name, t.field_name  from ".DB_USER_NAME.".wb_mm_form tf left join ".DB_USER_NAME.".wb_form_field t on t.id_wb_mm_form = tf.id_wb_mm_form
-				where tf.id_wb_mm_form = ".$this -> id_mm_fr." and t.is_read_only = 0 and rownum = 1 order by t.num");
+				where tf.id_wb_mm_form = ".$id_mm_fr." and t.is_read_only = 0 and rownum = 1 order by t.num");
 		while ($this-> db_conn-> sql_fetch($query_d)) 	{
 				$file = $this -> return_sql($query_d, "FIELD_NAME");					
 				$s_opts = explode("@",$this -> return_sql($query_d, "NAME"));
@@ -920,11 +920,12 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               onClickButton: function() {
                                                                 var row_id = $('#<?=$last_grid_name?>').jqGrid ('getGridParam', 'selrow');
                                                                 if (row_id 	!= null) {
-                                                                        $('#upload_ajax_<?=$last_grid_name?>').jInputFile({url:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?id_mm_fr=<?=$this -> id_mm_fr?>&oper=edit&id_mm=' + row_id});
+                                                                        $('#upload_ajax_<?=$last_grid_name?>').jInputFile({url:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?id_mm_fr=<?=$id_mm_fr?>&oper=edit&id_mm=' + row_id});
                                                                         $('#import_<?=$last_grid_name?>').dialog('open');																	
                                                                 }
                                                              }                                              
-			});                          
+                                    });             
+                                    
 			$('#import_ajax_<?=$last_grid_name?>').hide();
 			$('#upload_ajax_<?=$last_grid_name?>').jInputFile({
                                                                 filename: '<?=$file?>',
@@ -937,7 +938,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                                                 $('#import_<?=$last_grid_name?>').dialog( 'close');
                                                                                 $('#btn_o_<?=$last_grid_name?>').button('option', 'disabled', false );
                                                                                 crc_input_<?=$last_grid_name?> = null;
-                                                                                $('#ui-<?$this->pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');     
+                                                                                $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');     
                                                                                 $('#<?=$last_grid_name?>').trigger('reloadGrid');
                                                                                 $('#btn_<?=$last_grid_name?>').button('option', 'disabled', true );
                                                                                 $('li[aria-selected="false"] a[href="#<?=$this->pageid?>"]').parent().effect('highlight', {}, 3000);
@@ -958,7 +959,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								text: 'Загрузить',
 								disabled: true,
 								click: function () {
-                                                                        $('#ui-<?$this->pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+                                                                        $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
 									$('#upload_ajax_<?=$last_grid_name?>').jInputFile('submit');
 									$('#btn_o_<?=$last_grid_name?>').button('option', 'disabled', true );
 									$('#btn_<?=$last_grid_name?>').button('option', 'disabled', true );									
@@ -1001,42 +1002,35 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 	//-----------------------------------------------------------------------------------------------------------------------------------------------	
 	// Функция формирования скриптов и форм для экспорта
 	//-----------------------------------------------------------------------------------------------------------------------------------------------
-	function  Create_export($object_name,$type,$label,$XSL_FILE_OUT) {
+	function  Create_export($object_name,$type,$label,$XSL_EXP_FILE) {
 	// Смотрим от кого экспортировать
 	if ($type == "GRID_FORM_DETAIL")  {
 		$export_grid = $this -> grid_main_name;
 	 } else {
 		$export_grid = $object_name;
-	}
-	// дополнительная проверка на наличие файла экспорта:
-	if ( !is_file("xlt/".$XSL_FILE_OUT)) {
-		if (!is_file("xlt/".$XSL_FILE_OUT."m")){
-			$XSL_FILE_OUT = "";
-		}
-	}
+	}	
+        if (!is_file(ENGINE_ROOT.DIRECTORY_SEPARATOR."xlt".DIRECTORY_SEPARATOR.$XSL_EXP_FILE)) {
+            $disabled="disabled";
+            } else {            
+             $disabled = "";   
+        }    
 	?>
 	<div id="export_<?=$object_name?>" title='Укажите формат экспорта:'>
 							<label for="themefor">Тип экспорта:</label>
 							<select id="select_export_<?=$object_name?>" name="select_export_<?=$object_name?>" >
-	<?php
-	if (!empty($XSL_FILE_OUT)) {
-			echo "<option value='xlsm' selected>Экспорт данных по шаблону с макросами</option>\n";	
-			$ex_sel = "";
-		} else {
-			$ex_sel = "selected";
-		}							
-	?>								
-								<option value='xls' <?=$ex_sel?> >Формат Microsoft Office XP (.xls)</option>
-								<option value='xlsx' >Формат Microsoft Office 2007 (.xlsx)</option>							
-								<option value='csv' >Формат данных с разделителями (.csv)</option>
+								<option value='xlsm' <?=$disabled?>>По шаблону с макросами</option>
+								<option value='xls'>Формат Microsoft Office XP (.xls)</option>
+								<option value='xlsx'>Формат Microsoft Office 2007 (.xlsx)</option>
+                                                                <option value='pdf'>Формат Adobe Acrobat Reader (.pdf)</option>                                                                
+								<option value='csv'>Формат данных с разделителями (.csv)</option>
 							</select><br><br>
 							<input type='checkbox' id='export_filtered_<?=$object_name?>'>
 								<label for='export_filtered_<?=$object_name?>' style='font-size:80%' >Применить фильтр и сортировку</label><br><br>						
 							<div id="export_ajax_<?=$object_name?>" >
 								<img src="<?=ENGINE_HTTP?>/library/ajax-loader-tab.gif" style="padding-bottom: 4px; vertical-align: middle;" > Экспортирую...
 							</div>
-					</div>
-					<script type="text/javascript">		
+        </div>
+            <script type="text/javascript">		
 			$(function() {	
 				// Диалог экспорта общий				
 					$('#export_ajax_<?=$object_name?>').hide();
@@ -1062,11 +1056,13 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								text: 'Экспортировать',
 								click: function () {							
 									$('#export_ajax_<?=$object_name?>').show();
+                                                                        $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
 									$('#btn_e_<?=$object_name?>').button('option', 'disabled', true );
 									$('#btn_o_<?=$object_name?>').button('option', 'disabled', true );
-									$('#btn_f_<?=$object_name?>').button('option', 'disabled', true );										
-										$.fileDownload('<?=ENGINE_HTTP?>/ajax.export.grid.php?isaexport=' + $('#select_export_<?=$object_name?>').val() + '&type=<?=$type?>&pageid=<?=$this ->pageid?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=<?=$this ->id_mm_fr_d?>&id_mm=<?=$this ->id_mm?>&id=' + $('#<?=$export_grid?>').jqGrid('getGridParam', 'selrow') + '&filtred=' + $("#export_filtered_<?=$object_name?>").attr('checked') + export_post_data_<?=$object_name?>,
-										{ 	
+									$('#btn_f_<?=$object_name?>').button('option', 'disabled', true );
+                                                                        var url = '<?=ENGINE_HTTP?>/ajax.export.grid.php?isaexport=' + $('#select_export_<?=$object_name?>').val() + '&type=<?=$type?>&pageid=<?=$this ->pageid?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=<?=$this ->id_mm_fr_d?>&id_mm=<?=$this ->id_mm?>&id=' + $('#<?=$export_grid?>').jqGrid('getGridParam', 'selrow') + '&filtred=' + $("#export_filtered_<?=$object_name?>").attr('checked') + export_post_data_<?=$object_name?>;
+									                                                                      
+                                                                                $.fileDownload(url, { 	
 												encodeHTMLEntities: false,
 												httpMethod:'GET',
 												successCallback: function (responseHtml, url) {
@@ -1077,61 +1073,9 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 														$('#export_<?=$object_name?>').dialog( 'close' );
 														custom_alert("Ошибка выполнения экспорта!" + responseHtml);
 												}
-										});										
+										});
+                                                                          
 								  }
-								},
-								{
-								text: 'Быстрый экспорт',
-								click: function () {
-									$('#export_ajax_<?=$object_name?>').show();
-									$('#btn_e_<?=$object_name?>').button('option', 'disabled', true );
-									$('#btn_o_<?=$object_name?>').button('option', 'disabled', true );	
-									$('#btn_f_<?=$object_name?>').button('option', 'disabled', true );	
-									
-									var slp_str = "", 
-										out_doc = "Номер строки;";
-									// Получаем столбци в гриде			
-									$.each($("#<?=$object_name?>").parent().parent().parent().children("div.ui-jqgrid-hdiv").find("div table tr:visible"), function() {	
-										$.each($(this).children("th:visible"), function() {
-											slp_str = slp_str + ';' + $(this).text();
-										});
-										out_doc = out_doc + slp_str.replace(/[\n\r]/g,"").replace(/^;+/, "");
-										slp_str = "";
-									});
-									// Получаем данные
-									$.each($("#<?=$object_name?> tr[role='row']"), function() {	
-										$.each($(this).children("td:visible"), function() {
-											slp_str = slp_str + ';' + $(this).text();
-										});
-											out_doc = out_doc + slp_str.replace(/[\n\r]/g,"").replace(/^;+/, "") + '\r\n';
-											slp_str = "";
-									});
-									
-									function utf8_decode (aa) {
-										var bb = '', c = 0;
-										for (var i = 0; i < aa.length; i++) {
-											c = aa.charCodeAt(i);
-											if (c > 127) {
-												if (c > 1024) {
-													if (c == 1025) {
-														c = 1016;
-													} else if (c == 1105) {
-														c = 1032;
-													}
-													bb += String.fromCharCode(c - 848);
-												}
-											} else {
-												bb += aa.charAt(i);
-											}
-										}
-										return bb;
-									} 
-									
-									$('#export_<?=$object_name?>').append('<a id="file_content<?=$export_grid?>" href="data:text/plain;base64,' + btoa(unescape(utf8_decode(out_doc))) + '" download="content.csv">TableContent</a>');
-									$('#file_content<?=$export_grid?>')[0].click();
-									$('#file_content<?=$export_grid?>').remove();
-									$('#export_<?=$object_name?>').dialog( 'close' );
-								}
 								},
 								{
 								text: 'Отмена',
@@ -1145,6 +1089,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 							$('#btn_e_<?=$object_name?>').button('option', 'disabled', false );
 							$('#btn_o_<?=$object_name?>').button('option', 'disabled', false );
 							$('#btn_f_<?=$object_name?>').button('option', 'disabled', false );	
+                                                        $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');  
 							$( this ).dialog( 'close' );
 						},
 						open: function() {
@@ -1166,7 +1111,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								var checkedValues = $.map($(this).multiselect('getChecked'), function( input ){
 									return input.value;
 								});
-								if (checkedValues == 'old' ) {									
+								if (checkedValues == 'xlsm' ) {									
 										$("#export_filtered_<?=$object_name?>").button( 'disable' );
 								} else {										
 										$("#export_filtered_<?=$object_name?>").button( 'enable' );
@@ -1174,9 +1119,47 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 				})
 				.triggerHandler('multiselectclick'); 
 				$('#<?=$object_name?>')
+                                // Добавляем кнопку печати
+                                .jqGrid('navSeparatorAdd','#Pager_<?=$object_name?>')
+				.jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
+                                                title: 'Распечатать содержимое таблици',
+                                                caption:'',
+                                                buttonicon: 'ui-icon-print',
+                                                onClickButton : function (){
+                                                 var self = $('#Pager_<?=$object_name?>_left').find('.ui-icon-print');
+                                                 self.contextmenu({
+                                                    show:false,
+                                                    delegate: self,
+                                                    menu: [
+                                                        {title: "Распечатать всю таблицу", cmd: "undefined", uiIcon: "ui-icon-print"},
+                                                        {title: "Распечатать фильтрованные данные", cmd: "true", uiIcon: "ui-icon-print"}
+                                                        ],
+                                                        select: function(event, ui) {  
+                                                        $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');    
+                                                            $.ajax({
+                                                                   url: '<?=ENGINE_HTTP?>/ajax.export.grid.php?isaexport=print&type=<?=$type?>&pageid=<?=$this ->pageid?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=<?=$this ->id_mm_fr_d?>&id_mm=<?=$this ->id_mm?>&id=' + $('#<?=$export_grid?>').jqGrid('getGridParam', 'selrow') +'&filtred=' + ui.cmd + export_post_data_<?=$object_name?> ,							  
+                                                                   type: 'POST',
+                                                                   success: function(data) {				
+                                                                        $(data).printThis({
+                                                                            pageTitle: '<?=$label?>'
+                                                                        });
+                                                                        $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');  
+                                                                   },
+                                                                   error: function() {
+                                                                      $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');   
+                                                                   }
+                                                             }); 
+                                                        },
+                                                        position: function(event, ui){
+                                                        return {my: "left bottom", at: "left bottom", of: self};
+                                                    }
+                                                  });
+                                                  self.contextmenu("open", self);
+                                                }                                          
+				})
+                                .jqGrid('navSeparatorAdd','#Pager_<?=$object_name?>')
 				// Добавляем кнопку экспорта
-				.jqGrid('navSeparatorAdd','#Pager_<?=$object_name?>')
-						.jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
+				.jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
 											caption: 'Экспорт...',
 											title: '<?=$label?>',
 											buttonicon: 'ui-icon-disk',

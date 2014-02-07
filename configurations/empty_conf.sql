@@ -764,7 +764,7 @@ select t.id_wb_mm_form id_wb_mm_form_view,
        t.xsl_file_in,
        t.html_img,
        nvl(t.auto_update,0) auto_update,
-       t.xsl_file_out,
+       t.xsl_file_in,
        t.create_user,
        t.create_date,
        t.last_user,
@@ -2218,11 +2218,11 @@ begin
   end if;
 
   if INSERTING then
-    insert into wb_mm_form(id_wb_mm_form, id_wb_main_menu,num,name,id_wb_form_type,action_sql,object_name,xsl_file_in,html_img,
-                             xsl_file_out,form_where,id_wb_chart_type,is_read_only,chart_show_name,chart_rotate_name,
+    insert into wb_mm_form(id_wb_mm_form, id_wb_main_menu,num,name,id_wb_form_type,action_sql,object_name,html_img,
+                             xsl_file_in,form_where,id_wb_chart_type,is_read_only,chart_show_name,chart_rotate_name,
                              chart_x,chart_y,chart_dec_prec,height_rate,owner,edit_button,auto_update,form_order)
-      values (null,n_id,:new.num,:new.name,:new.id_wb_form_type,:new.action_sql,:new.object_name,:new.xsl_file_in,:new.html_img,
-              :new.xsl_file_out,:new.form_where,:new.id_wb_chart_type,:new.is_read_only,:new.chart_show_name,:new.chart_rotate_name,
+      values (null,n_id,:new.num,:new.name,:new.id_wb_form_type,:new.action_sql,:new.object_name,:new.html_img,
+              :new.xsl_file_in,:new.form_where,:new.id_wb_chart_type,:new.is_read_only,:new.chart_show_name,:new.chart_rotate_name,
               :new.chart_x,:new.chart_y,:new.chart_dec_prec,:new.height_rate,:new.owner,:new.edit_button,:new.auto_update, upper(:new.form_order))
               returning id_wb_mm_form into l_id;
 		          dbms_session.set_context('CLIENTCONTEXT', 'rowid', l_id);
@@ -2235,9 +2235,8 @@ begin
       mf.id_wb_form_type   = :new.id_wb_form_type,
       mf.action_sql        = :new.action_sql,
       mf.object_name       = :new.object_name,
-      mf.xsl_file_in       = :new.xsl_file_in,
       mf.html_img          = :new.html_img,
-      mf.xsl_file_out      = :new.xsl_file_out,
+      mf.xsl_file_in       = :new.xsl_file_in,
       mf.form_where        = :new.form_where,
       mf.id_wb_chart_type  = :new.id_wb_chart_type,
       mf.is_read_only      = :new.is_read_only,
@@ -2684,8 +2683,6 @@ values (-152, -2, 44, 'Графики (Ширина)', 'CHART_X', null, null, 3,
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
 values (-151, -2, 45, 'Графики (Высота)', 'CHART_Y', null, null, 3, 'I', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
-values (-150, -2, 46, 'Графики (Округление)', 'CHART_DEC_PREC', null, null, 3, 'I', 0, null, 90, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
 values (-75, -10, 1, 'ID (not display)', 'ID_WB_MM_FORM_VIEW', null, null, 3, 'I', 1, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
 values (-139, -4, 24, 'Только для чтения', 'IS_READ_ONLY', null, null, 2, 'B', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
@@ -2733,8 +2730,6 @@ insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_nam
 values (-81, -12, 44, 'Графики (Ширина)', 'CHART_X', null, null, 3, 'I', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
 values (-80, -12, 45, 'Графики (Высота)', 'CHART_Y', null, null, 3, 'I', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
-values (-79, -12, 46, 'Графики (Округление)', 'CHART_DEC_PREC', null, null, 3, 'I', 0, null, 90, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
 values (-78, -12, 91, 'Создатель', 'CREATE_USER', null, null, 1, 'S', 1, 0, 150, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
@@ -2799,8 +2794,6 @@ insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_nam
 values (-60, -10, 44, 'Графики (Ширина)', 'CHART_X', null, null, 3, 'I', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
 values (-59, -10, 45, 'Графики (Высота)', 'CHART_Y', null, null, 3, 'I', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
-values (-58, -10, 46, 'Графики (Округление)', 'CHART_DEC_PREC', null, null, 3, 'I', 0, null, 90, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
 values (-71, -10, 12, 'Высота формы (%)', 'HEIGHT_RATE', null, null, 3, 'I', 0, null, 90, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
