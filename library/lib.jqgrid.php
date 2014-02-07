@@ -919,7 +919,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               buttonicon: 'ui-icon-arrowthickstop-1-s',
                                               onClickButton: function() {
                                                                 var row_id = $('#<?=$last_grid_name?>').jqGrid ('getGridParam', 'selrow');
-                                                                if (row_id 	!= null) {
+                                                                if (row_id !== null) {
                                                                         $('#upload_ajax_<?=$last_grid_name?>').jInputFile({url:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?id_mm_fr=<?=$id_mm_fr?>&oper=edit&id_mm=' + row_id});
                                                                         $('#import_<?=$last_grid_name?>').dialog('open');																	
                                                                 }
@@ -991,7 +991,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						}			
 			});			
 		});
-             </script>;
+             </script>
         <?php
 	$data = ob_get_contents ();
 	ob_end_clean();
@@ -1013,7 +1013,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
             $disabled="disabled";
             } else {            
              $disabled = "";   
-        }    
+        }  
 	?>
 	<div id="export_<?=$object_name?>" title='Укажите формат экспорта:'>
 							<label for="themefor">Тип экспорта:</label>
@@ -1038,7 +1038,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 							icons: { primary: 'ui-icon-search' }
 							}).click(function() {
 								var btn = $("#export_filtered_<?=$object_name?>");
-								if (btn.attr("checked") != "checked") {
+								if (btn.attr("checked") !== "checked") {
 									btn.attr("checked","checked");
 								} else {
 									btn.removeAttr("checked");

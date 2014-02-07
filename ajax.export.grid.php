@@ -279,7 +279,7 @@
         }
         
         if(!$objPHPExcel->hasMacros()) {
-            for ($i = 0; $i < $cell_exp; $i++) {
+            for ($i = $cell_exp_first; $i < $cell_exp; $i++) {
                     $objPHPExcel->setActiveSheetIndex(0)->setSelectedCellByColumnAndRow($i,$row_exp_zag); //выбираем откуда  
                     $F_rom = $objPHPExcel->setActiveSheetIndex(0)->getActiveCell();
                     $objPHPExcel->setActiveSheetIndex(0)->setSelectedCellByColumnAndRow($i,$row_exp); //выбираем куда                    

@@ -52,7 +52,7 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.calculator.min.js?s=<?=SESSION_ID?>" ></script>				
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.flot.min.js?s=<?=SESSION_ID?>" ></script>	
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.printThis.js?s=<?=SESSION_ID?>" ></script> 
-        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.ui-contextmenu.js?s=<?=SESSION_ID?>" ></script>         
+        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.ui-contextmenu.js?s=<?=SESSION_ID?>" ></script> 
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/ace.js?s=<?=SESSION_ID?>" ></script>	
         
 <?

@@ -26,7 +26,7 @@ var $id_mm_fr, $pageid, $main_db;
 								$url = ENGINE_HTTP . "/ajax.data.chart.php?id=".$this -> id_mm_fr;
 			}
 						
-			return "<div id='".$chartId."' name='".$chartId."' schart_name='".$chart_name."' label='".$chart_label."' url = '".$url."' class='chart_data_".$this -> pageid."' style=\"height: ".$chart_Y."px; width: ".$chart_X."px;\"></div>";
+			return "<div id='".$chartId."' name='".$chartId."' schart_name='".$chart_name."' label='".$chart_label."' url = '".$url."' class='chart_data_".$this -> pageid." chart' style=\"height: ".$chart_Y."px; width: ".$chart_X."px;\"></div>";
 	}
 	
 	// Конструктор
