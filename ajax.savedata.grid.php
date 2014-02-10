@@ -12,14 +12,15 @@ BasicFunctions::requre_script_file("auth.".AUTH.".php");
 // Проверка на пользователя
 $user_auth = new AUTH();	
 if (!$user_auth -> is_user()) {
+		BasicFunctions::to_log("ERR: User maybe not loggen, from no: ".filter_input(INPUT_GET, 'id_mm_fr',FILTER_SANITIZE_NUMBER_INT)."!");
 		BasicFunctions::clear_cache();
 		die("Доступ запрещен");
 	}
         
 $main_db 	= new db();
 
-$type                   = filter_input(INPUT_GET, 'type',FILTER_SANITIZE_STRING);
-$id_mm                  = filter_input(INPUT_GET, 'id_mm',FILTER_SANITIZE_STRING);
+$type               = filter_input(INPUT_GET, 'type',FILTER_SANITIZE_STRING);
+$id_mm              = filter_input(INPUT_GET, 'id_mm',FILTER_SANITIZE_STRING);
 $id_mm_fr   		= filter_input(INPUT_GET, 'id_mm_fr',FILTER_SANITIZE_NUMBER_INT); 
 $id_mm_fr_d 		= filter_input(INPUT_GET, 'id_mm_fr_d',FILTER_SANITIZE_NUMBER_INT);
 $type_of_past 		= filter_input(INPUT_POST, 'oper',FILTER_SANITIZE_STRING); 

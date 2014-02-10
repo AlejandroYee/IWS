@@ -26,6 +26,7 @@ $showaxis       = true;
 
 $user_auth = new AUTH();	
 if (!$user_auth -> is_user()) {
+				BasicFunctions::to_log("ERR: User maybe not loggen, from no: ".$id."!");
                 BasicFunctions::clear_cache();
                 die("Доступ запрещен");
 }
@@ -39,7 +40,10 @@ while ($main_db -> sql_fetch($query_check)) {
         $check	= explode(",",strtoupper(trim( $main_db -> sql_result($query_check, "EDIT_BUTTON") )));
 }
 
-if (empty($check)) die("Доступ для чтения данных запрещен");
+if (empty($check)) {
+		BasicFunctions::to_log("ERR: User not allowed to read from: ".$id_mm_fr."!");
+		die("Доступ для чтения данных запрещен");
+}
 	
 	
 $query_korrdinates = $main_db -> sql_execute("select tf.owner, tf.object_name, tf.name chart_label, nvl(tf.CHART_show_name, 0) as is_show_name,

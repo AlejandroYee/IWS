@@ -18,6 +18,7 @@
   	// Начальные переменные
 	$user_auth = new AUTH();	
 	if (!$user_auth -> is_user()) {
+			BasicFunctions::to_log("ERR: User maybe not loggen, from no: ".filter_input(INPUT_GET, 'id_mm_fr',FILTER_SANITIZE_NUMBER_INT)."!");
 			BasicFunctions::clear_cache();
 			die("Доступ запрещен");
 	}	
@@ -62,7 +63,10 @@
 		$check	= explode(",",strtoupper(trim( $main_db -> sql_result($query_check, "EDIT_BUTTON"))));
         }
 	// если пользователю недоступна форма, то выходим сразу
-	if (empty($check)) die("Доступ для чтения данных запрещен");
+		if (empty($check)) {
+			BasicFunctions::to_log("ERR: User not allowed to read from: ".$id_mm_fr."!");
+			die("Доступ для чтения данных запрещен");
+	}
 
 	// Теперь просто смотрим все поля				
     $query = $main_db -> sql_execute("select tf.owner,

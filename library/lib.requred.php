@@ -34,7 +34,8 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		
 		// Запрос авторизации:
 		$user_auth = new AUTH();
-		if (!$user_auth -> is_user()) {			
+		if (!$user_auth -> is_user()) {
+                        BasicFunctions::to_log("LIB: Session time expired!");
 			die(BasicFunctions::Create_logon_window());
 		}
 		 // Соединение с ДБ
@@ -76,12 +77,13 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 	function Create_Table_Space($id, $pid, $pagetab) {			
 		$IsInputform 		= 0; // флаг наличия входящих данных	
 		$is_wizard_form  	= 0; // Флаг формы визарда
-		$count_detail_forms = 0;
+		$count_detail_forms     = 0;
+                $form_name_user         = "";
 		$this-> id_mm = $id;
 		$this-> pid_mm  = $pid;		
 		$this-> pageid = $pagetab;
 				
-			$query = $this->db_conn->sql_execute("Select count(*) over() c_count, mf.form_where, mf.object_name, mf.height_rate as  height_rate,mf.auto_update, mf.id_wb_mm_form id,mf.action_sql,
+			$query = $this->db_conn->sql_execute("Select count(*) over() c_count,  mm.name as form_name_usrv, mf.form_where, mf.object_name, mf.height_rate as  height_rate,mf.auto_update, mf.id_wb_mm_form id,mf.action_sql,
 					nvl(mf.name, mm.name) name, ft.name type, mf.xsl_file_in, max(case when ft.name like '%_DETAIL' then mf.id_wb_mm_form else null end) over(order by mm.id_wb_main_menu) id_d
 					from ".DB_USER_NAME.".wb_main_menu mm inner join ".DB_USER_NAME.".wb_mm_form mf  on mf.id_wb_main_menu = mm.id_wb_main_menu left join ".DB_USER_NAME.".wb_form_type ft on ft.id_wb_form_type = mf.id_wb_form_type
 					where mm.id_wb_main_menu = ".$id." and exists (Select 1 from ".DB_USER_NAME.".wb_mm_role mr inner join ".DB_USER_NAME.".wb_role_user ru on ru.id_wb_role = mr.id_wb_role and ru.id_wb_user = ".DB_USER_NAME.".wb.get_wb_user_id
@@ -91,7 +93,8 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 			
 				// Заполняем переменные для работы								
 				$this-> id_mm_fr = $this -> return_sql($query, "ID");
-				$this-> id_mm_fr_d  = $this -> return_sql($query, "ID_D");				
+				$this-> id_mm_fr_d  = $this -> return_sql($query, "ID_D");
+                                $form_name_user = $this -> return_sql($query, "form_name_usrv");
 				$object_name = strtolower($this -> return_sql($query, "TYPE")."_".abs($this -> return_sql($query, "ID"))."_".$this ->pageid);	
                                 
 				// Начинаем создавать формы				
@@ -237,16 +240,21 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					$last_grid_type = $this -> return_sql($query, "TYPE");					
 				}			
             }
-			// Здесь мы создаем финальную обвязку:
-			if (isset($chart)) $this -> data_res .= BasicFunctions::regex_javascript($chart -> set_script());
-			if ($count_detail_forms > 1)  $this -> data_res .= BasicFunctions::regex_javascript($grid -> create_detail_tab_script());
-			
-			// Флаг что входные данные загружены
-			if ($IsInputform == 0 ) $this -> data_res .= "<script type=\"text/javascript\"> var data_".$this -> pageid."_loaded = 1;  </script>";
-									
-								
-			// Если у пользователя отсутствуют привелегии:
-			if (empty($this->id_mm_fr)) $this -> data_res = "<h3>У вас недостаточно привелегий!<br>Перезагрузите страницу полностью!</h3>";	
+                // Здесь мы создаем финальную обвязку:
+                if (isset($chart)) $this -> data_res .= BasicFunctions::regex_javascript($chart -> set_script());
+                if ($count_detail_forms > 1)  $this -> data_res .= BasicFunctions::regex_javascript($grid -> create_detail_tab_script());
+
+                // Флаг что входные данные загружены
+                if ($IsInputform == 0 ) $this -> data_res .= "<script type=\"text/javascript\"> var data_".$this -> pageid."_loaded = 1;  </script>";
+
+
+                // Если у пользователя отсутствуют привелегии:
+                if (empty($this->id_mm_fr)) {
+                    $this -> data_res = "<h3>У вас недостаточно привелегий!<br>Перезагрузите страницу полностью!</h3>";
+                    BasicFunctions::to_log("LIB: Load page: '".$form_name_user."' erroor! No privilegies set.");
+                } else {
+                    BasicFunctions::to_log("LIB: Load page: '".$form_name_user."' done!");
+                }
 		// Закрываем сейсии
 		if (isset($chart)) $chart -> __destruct();
 		if (isset($grid))  $grid -> __destruct();

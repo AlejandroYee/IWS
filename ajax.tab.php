@@ -35,8 +35,10 @@ while ($main_db -> sql_fetch($query_check)) {
         $check	= explode(",",strtoupper(trim( $main_db -> sql_result($query_check, "EDIT_BUTTON") )));
 }
 
-if (empty($check) and empty($action)) die("Доступ сюда запрещен");  
-
+if (empty($check) and empty($action)) {
+	BasicFunctions::to_log("ERR: User maybe not loggen, from no: ".$id."!");
+	die("Доступ сюда запрещен");  
+}
 // Формирование шапки и меню навигации $Navigation_res
 //--------------------------------------------------------------------------------------------------------------------------------------------
 $query = $main_db->sql_execute("Select level lev, t.id_wb_main_menu, nvl(t.id_parent, 0) id_parent, t.name from ".DB_USER_NAME.".wb_main_menu t start with t.id_wb_main_menu = ".$id." connect by prior t.id_parent = t.id_wb_main_menu order by lev desc");
