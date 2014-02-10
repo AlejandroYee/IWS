@@ -13,7 +13,9 @@
         BasicFunctions::requre_script_file("auth.".AUTH.".php");
         BasicFunctions::requre_script_file("PHPExcel.php");
         
-	header("Set-Cookie: fileDownload=false");
+        error_reporting(E_ERROR); // инача изза стороних библиотек мы будет неверный хидер отдавать
+	
+        header("Set-Cookie: fileDownload=false");
         
 	$user_auth = new AUTH();	
 	if (!$user_auth -> is_user()) {
