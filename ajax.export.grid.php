@@ -13,7 +13,7 @@
         BasicFunctions::requre_script_file("auth.".AUTH.".php");
         BasicFunctions::requre_script_file("PHPExcel.php");
         
-        error_reporting(E_ERROR); // инача изза стороних библиотек мы будет неверный хидер отдавать
+        error_reporting(E_ALL); // инача изза стороних библиотек мы будет неверный хидер отдавать
 	
         header("Set-Cookie: fileDownload=false");
         
@@ -326,7 +326,7 @@
                                         PHPExcel_Settings::setPdfRenderer(PHPExcel_Settings::PDF_RENDERER_MPDF,ENGINE_ROOT."/library/mdpf/");
                                         $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'PDF');
                                         $objWriter -> writeAllSheets();	
-                        break;         
+                        break; 
                         case 'print':	
                                         header("Content-Type: text/html");    
                                         $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'HTML');                                        	
