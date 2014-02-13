@@ -95,7 +95,7 @@ class BasicFunctions {
             public static function to_log($log,$sub_debug = false) {                
             if (!stripos($log,"mdpf")) {                               
                 BasicFunctions::requre_script_file("auth.".AUTH.".php");
-                $log = iconv(HTML_ENCODING,LOCAL_ENCODING."//IGNORE",str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log));
+                $log = iconv(HTML_ENCODING,LOCAL_ENCODING."//TRANSLIT",str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log));
                 if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (auth::get_user() != "")) {
                                 if (!isset($_SESSION[strtoupper("log_".SESSION_ID)])) {
                                         $_SESSION[strtoupper("log_".SESSION_ID)] = null;
