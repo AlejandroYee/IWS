@@ -95,7 +95,10 @@ class BasicFunctions {
             public static function to_log($log,$sub_debug = false) {                
             if (!stripos($log,"mdpf")) {                               
                 BasicFunctions::requre_script_file("auth.".AUTH.".php");
-                $log = iconv(HTML_ENCODING,LOCAL_ENCODING."//IGNORE",str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log));
+                $log = str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log); 
+                if( iconv(HTML_ENCODING,LOCAL_ENCODING."//IGNORE",$log) !="") {
+                    $log =  iconv(HTML_ENCODING,LOCAL_ENCODING."//IGNORE",$log);
+                } 
                 if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (auth::get_user() != "")) {
                                 if (!isset($_SESSION[strtoupper("log_".SESSION_ID)])) {
                                         $_SESSION[strtoupper("log_".SESSION_ID)] = null;
@@ -367,9 +370,14 @@ class BasicFunctions {
             //--------------------------------------------------------------------------------------------------------------------------------------------
             public static Function trim_fieldname($field_name, $id = false) {
                     if ($id == false) {
-                                    $name = substr($field_name, 0, strrpos($field_name, "_"));			
+                                    $name = substr($field_name, 0, strrpos($field_name, "_"));
+                                    //доп чистка спец символов:
+                                    //$name = substr($field_name, 0, strrpos($field_name, "-"));
+                                    
                             } else {
                                     $name = str_replace("_".$id,"",$field_name);
+                                     //доп чистка спец символов:
+                                    $name = substr($field_name, 0, strrpos($field_name, "-"));
                     }
                     return $name;
             }

@@ -201,7 +201,8 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 	
 	// Возвращаем значение нужного столбца, в случае чего перекодируем
 	public function sql_result($sql,$name,$encoding = true) {
-		$res 	= oci_result($sql,  strtoupper($name));
+                $name = str_ireplace("&QUOT;", "", strtoupper($name));
+		$res 	= oci_result($sql,  $name);
 		$val	= "";	
 		
 		// Если результат CLOB или BLOB

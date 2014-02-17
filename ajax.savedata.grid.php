@@ -19,8 +19,8 @@ if (!$user_auth -> is_user()) {
         
 $main_db 	= new db();
 
-$type               = filter_input(INPUT_GET, 'type',FILTER_SANITIZE_STRING);
-$id_mm              = filter_input(INPUT_GET, 'id_mm',FILTER_SANITIZE_STRING);
+$type                   = filter_input(INPUT_GET, 'type',FILTER_SANITIZE_STRING);
+$id_mm                  = filter_input(INPUT_GET, 'id_mm',FILTER_SANITIZE_STRING);
 $id_mm_fr   		= filter_input(INPUT_GET, 'id_mm_fr',FILTER_SANITIZE_NUMBER_INT); 
 $id_mm_fr_d 		= filter_input(INPUT_GET, 'id_mm_fr_d',FILTER_SANITIZE_NUMBER_INT);
 $type_of_past 		= filter_input(INPUT_POST, 'oper',FILTER_SANITIZE_STRING); 
@@ -72,6 +72,14 @@ switch ($type_of_past) {
         }
         break;	
 }
+// Отчищаем подзапрос от лишниих указателей на страницу:
+$input_post = array();
+foreach (filter_input_array(INPUT_POST) as $key => $value) {
+    if (filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING) != null ) {
+        $input_post[substr($key, 0, strrpos($key, "-"))] = filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING);  
+    }    
+} 
+
 
 $query = $main_db -> sql_execute("select tf.owner, tf.object_name, t.name, t.field_name || '_' || abs(t.id_wb_form_field) field_name_id, t.field_name, decode(trim(t.field_type), 'D', 'to_char('||t.field_name||', ''dd.mm.yyyy hh24:mi:ss'') '||t.field_name,t.field_name) f_name,
 								    ta.html_txt align_txt, tf.xsl_file_in, trim(t.field_type) field_type, tf.action_sql, tf.action_bat from ".DB_USER_NAME.".wb_mm_form tf
@@ -80,11 +88,11 @@ $query = $main_db -> sql_execute("select tf.owner, tf.object_name, t.name, t.fie
 									
 // Формируем поля для запроса
 while ($main_db -> sql_fetch($query)) {
-   	if (($main_db -> sql_result($query, "FIELD_NAME") <> "R_NUM") and ( filter_input(INPUT_POST, $main_db -> sql_result($query, "FIELD_NAME_ID"),FILTER_UNSAFE_RAW) != null or
+   	if (($main_db -> sql_result($query, "FIELD_NAME") <> "R_NUM") and ( isset($input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")]) or
                 isset($_FILES[$main_db -> sql_result($query, "FIELD_NAME")]))) {
             
 		// Вдруг у нас значения в виде массива:
-		$field_name_id = filter_input(INPUT_POST, $main_db -> sql_result($query, "FIELD_NAME_ID"),FILTER_SANITIZE_STRING,FILTER_NULL_ON_FAILURE);  
+		$field_name_id = $input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")];  
                 if (trim($field_name_id) != "") {
                    if (is_array($field_name_id)) {
 			$value = implode(",",$field_name_id);
@@ -209,7 +217,8 @@ if (($type == 'GRID_FORM_DETAIL') or ($type == "TREE_GRID_FORM_DETAIL")) {
 // Проверяем на массим входящюю переменную строки:
 if (!is_numeric ($id_mm)) {
 	// Если у нас не число, то возможно переданы числа или текст через зяпятую. проверяем и формируем:
-	$tmp=explode(",",$id_mm);	
+	$tmp=explode(",",$id_mm);
+        $id_mm1 = "";
 	// пробегаемся по массиву и смотрим  на типы числе или
 	foreach($tmp as $val) if (!is_numeric ($val)) {
 		$id_mm1 .= "'".$val."',";			
@@ -241,6 +250,7 @@ switch ($type_of_past) {
 	
 }    
 
+$str_sql = str_ireplace("&#39;", "'", $str_sql); // Транслируем кавычки
 // Выполняем запрос
 $return_id = $main_db -> sql_execute($str_sql); 
 
@@ -260,8 +270,9 @@ if (!empty($file_data_path) and !empty($file_data_field)) {
 // Файл загружен, если есть скрипт в загрузке то запускаем его:
 if (!empty($file_data_action)) {
 	$main_db_2 = new db(true);	
-		BasicFunctions::end_session();
-		$return_id = $main_db_2 -> sql_execute(str_replace(":ID_".$table_name,"'$id_mm'",$file_data_action));	
+	BasicFunctions::end_session();
+        $to_exec = str_ireplace("&#39;", "'", str_replace(":ID_".$table_name,"'$id_mm'",$file_data_action));        
+	$return_id = $main_db_2 -> sql_execute($to_exec);	
 	$main_db_2 -> __destruct();	
 }
 

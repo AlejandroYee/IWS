@@ -28,7 +28,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		$inv_view_table = $this -> db_conn  -> get_settings_val('SETTINGS_VIEW_INVISIBL_ID_TABLE');
 
 		// Запрос в базу сразу с возвратом необходимых тегов и скриптов, тамже считаем длину текстовых полей
-		$query = $this -> db_conn -> sql_execute("select tf.object_name, tf.name form_name, decode(nvl(t.is_requred, 0), 0, 'false', 'true') is_requred, tf.owner, t.name, tf.edit_button, nvl(t.width, 100) l_name, t.id_wb_form_field field_id, t.field_name || '_' || abs(t.id_wb_form_field) field_name, 'align: ''' || nvl(ta.html_txt, 'left') || ''', ' align_txt,
+		$query = $this -> db_conn -> sql_execute("select tf.object_name, tf.name form_name, decode(nvl(t.is_requred, 0), 0, 'false', 'true') is_requred, tf.owner, t.name, tf.edit_button, nvl(t.width, 100) l_name, t.id_wb_form_field field_id, t.field_name || '_' || abs(t.id_wb_form_field) || '".str_ireplace("tabs_", "-", $this -> pageid)."' field_name, 'align: ''' || nvl(ta.html_txt, 'left') || ''', ' align_txt,
 																case
 																	when upper(trim(t.field_type)) = 'P'  then  'edittype:''password'' '
 																	when upper(trim(t.field_type)) = 'SB' then  decode(trunc((nvl(t.count_element, 0) + 2) / 2), 1, 'stype:''select'', formatter:''select'', edittype: ''select'' ','stype:''select'', formatter:''select'', edittype: ''select'' multiple ')

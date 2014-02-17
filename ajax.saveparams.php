@@ -129,6 +129,9 @@ $query = $main_db->sql_execute("select t.action_sql,t.action_bat from ".DB_USER_
 			$str_block = str_ireplace(":rowid",$rowid1,$str_block);
 		}
 		$sql_block = new db(true);
+                
+                $str_block = str_ireplace("&#39;", "'", $str_block); // Транслируем кавычки
+                
 		BasicFunctions::end_session();
 		$sql_block -> sql_execute($str_block); 	
 		$sql_block -> __destruct();
