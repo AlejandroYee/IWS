@@ -142,9 +142,12 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 		if (strtolower(DB_USER_NAME) == "wb") {		 // костыль если пользователь WB!
 			$sql =  str_ireplace(array("wb.wb.","WB.WB."),"wb.", $sql);
 		}
-	
-		BasicFunctions::to_log("SQL: <".$this->link."> ".trim($sql).";");
-		
+                
+                if (empty($sql)) {                    
+                    BasicFunctions::to_log("ERR: Empty sql query!");
+                } else {                
+                    BasicFunctions::to_log("SQL: <".$this->link."> ".trim($sql).";");
+                }
 		$rowid = "";
 		
 		// Парсим запрос
