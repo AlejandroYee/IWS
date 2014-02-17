@@ -250,7 +250,6 @@ switch ($type_of_past) {
 	
 }    
 
-$str_sql = str_ireplace("&#39;", "'", $str_sql); // Транслируем кавычки
 // Выполняем запрос
 $return_id = $main_db -> sql_execute($str_sql); 
 

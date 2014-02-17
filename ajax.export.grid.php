@@ -129,7 +129,7 @@
                                 from ".DB_USER_NAME.".wb_form_cells t where t.id_wb_mm_form = ".$id_mm_fr." and t.type_cells = 'H' order by t.num");
             while ($main_db -> sql_fetch($exp_query)) {				
                                             // получаем значение
-                                            $exp_query_custom = $main_db -> sql_execute("Select 1 X,".$main_db -> sql_result($exp_query, "FIELD_TXT")." PARAM from dual");
+                                            $exp_query_custom = $main_db -> sql_execute("Select 1 X,". str_ireplace("&#39;", "'", $main_db -> sql_result($exp_query, "FIELD_TXT"))." PARAM from dual");
                                             $main_db -> sql_result($exp_query, "NAME");
                                             
                                             while ($main_db -> sql_fetch($exp_query_custom)) {	

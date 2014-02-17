@@ -73,6 +73,7 @@ if (filter_input(INPUT_GET, 'finish',FILTER_VALIDATE_BOOLEAN)) {
 	$sql_block = new db(true);
 	$action_sql = iconv(HTML_ENCODING,LOCAL_ENCODING, $action_sql);
 	BasicFunctions::end_session();  // Закрываем сейсию для паралельного исполнения
+        $action_sql = str_ireplace("&#39;", "'", $action_sql); // Транслируем кавычки
 	$sql_block -> sql_execute($action_sql);	
 	$sql_block -> __destruct();
 	
