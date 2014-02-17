@@ -22,9 +22,9 @@ class AUTH {
 		
 		// Возможно нам передали логин пароль
 		if (($user != false) and ($pass != false)) {
-			if (!empty($pass)) {			
+			if (!empty($pass)) {	
 				// пытаемся приверить пользователя по ldap
-				if ($this->check_ldap_user($pass, $pwd)) {
+				if ($this->check_ldap_user($user, $pass)) {
 					if ($this -> save_user($user,$pass)) {
 						$ret_val = true;
 					}
