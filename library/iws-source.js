@@ -925,6 +925,9 @@ $(function() {
 						
 						obj.removeAttr('style'); // Исправление неверной длины чекбокса							
 				break;
+                                case 'IP': // Ip box field
+					obj.width(115).ipmask();					
+				break;
 				
 				case 'D': // DATE
 					if (obj.parent().children('.ui-datepicker-trigger').length < 1) { 

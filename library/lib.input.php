@@ -113,13 +113,23 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	function link_element($field_text,$name) {
 		return "<p><a href='".$field_text."'>".$this->FullTrim($name)."</a></p>";						
 	}
-	
+        
+	// IP
+	function ip_element($field_name,$name,$requred) {
+		$output = "";
+		$field_name_short = strtolower($field_name."_".$this->pageid);
+						$output .= "<p><label for=\"".$field_name_short."\">".$this->FullTrim($name)."</label>
+						<input type='text'  is_requred='".$requred."' class='FormElement ui-widget-content ui-corner-all' i_type='IP'  id='".$field_name_short."' name='".$field_name."' /></p>";
+						
+								
+	}
+		
 	// Checkbox
 	function checkbox_element($field_name,$name,$requred) {
 		$output = "";
 		$field_name_short = strtolower($field_name."_".$this->pageid);
 						$output .= "<p><label for=\"".$field_name_short."\">".$this->FullTrim($name)."</label>
-						<input type='checkbox'  is_requred='".$requred."' class='FormElement ui-widget-content ui-corner-all' i_type='B' is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' /></p>";
+						<input type='checkbox'  is_requred='".$requred."' class='FormElement ui-widget-content ui-corner-all' i_type='B' id='".$field_name_short."' name='".$field_name."' /></p>";
 						
 					
 	return $output;
@@ -198,6 +208,12 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 			// new
 			case "B":	
 				$output .= $this -> checkbox_element($this -> return_sql($query_tmp, "FIELD_NAME"),
+										$this -> return_sql($query_tmp, "NAME"),
+										$this -> return_sql($query_tmp, "IS_REQURED")
+										);				
+			break;
+                    	case "IP":	
+				$output .= $this -> ip_element($this -> return_sql($query_tmp, "FIELD_NAME"),
 										$this -> return_sql($query_tmp, "NAME"),
 										$this -> return_sql($query_tmp, "IS_REQURED")
 										);				

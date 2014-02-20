@@ -484,6 +484,7 @@ class BasicFunctions {
                             <a href="http://jqgrid.com" target="_blank">JQGrid</a>,
                             <a href="http://jquery.com/" target="_blank">JQuery</a>,
                             <a href="http://jqueryui.com/" target="_blank">JQuery UI</a>,
+                            <a href="https://github.com/mavDev/jquery.ipmask" target="_blank">IpMask</a>,
                             <a href="http://trentrichardson.com/examples/timepicker/" target="_blank">JQuery TimePicker</a>,
                             <a href="https://github.com/johnculviner/jquery.fileDownload" target="_blank">JQuery fileDownload</a>,
                             <a href="http://ace.ajax.org/" target="_blank">ACE Cloud9 Editor</a>,

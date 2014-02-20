@@ -168,6 +168,12 @@ foreach(filter_input_array(INPUT_POST,FILTER_SANITIZE_STRING) as $k => $v) {
 										$main_db -> sql_result($query, "IS_REQURED")
 										);				
 			break;
+                        case "IP":	
+				$output .= $this -> ip_element(trtolower($main_db -> sql_result($query, "FIELD_NAME")),
+										$main_db -> sql_result($query, "NAME"),
+										$main_db -> sql_result($query, "IS_REQURED")
+										);				
+			break;
 			case "C":	
 				$output .= $this -> number_element($content_value,
 										strtolower($main_db -> sql_result($query, "FIELD_NAME")),

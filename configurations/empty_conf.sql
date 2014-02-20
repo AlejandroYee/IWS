@@ -2353,47 +2353,15 @@ values (1, 'enable', 'Разрешено', 'LOADER', sysdate, 'LOADER', sysdate)
 prompt 2 records loaded
 prompt Loading WB_CHART_TYPE...
 insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (1, 'Column2D', 'Single Series Column 2D Chart', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
+values (1, 'Pie_3D', 'Круговая 3D Диаграмма', 'FlotCharts', 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (2, 'Column3D', 'Single Series Column 3D Chart', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
+values (2, 'MS_Line_Fuled', 'Линии с заливкой', 'FlotCharts', 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (3, 'Line', 'Single Series Line Chart', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
+values (3, 'StackedColumn3D', 'Stacked Column 3D Chart', 'FlotCharts', 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (4, 'Pie3D', 'Single Series Pie 3D Chart', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
+values (4, 'MS_Line', 'Линии без заливки', 'FlotCharts', 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (5, 'Pie2D', 'Single Series Pie 2D Chart', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (6, 'Bar2D', 'Single Series Bar 2D Chart', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (7, 'Area2D', 'Single Series Area 2D Chart', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (8, 'Doughnut2D', 'Single Series Doughnut 2D Chart', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (9, 'MSColumn3D', 'Multi-Series Column 3D Chart', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (10, 'MSColumn2D', 'Multi-Series Column 2D Chart', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (11, 'MSArea2D', 'Multi-Series Column 2D Chart', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (12, 'MSLine', 'Multi-Series Line Chart', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (13, 'MSBar2D', 'Multi-Series Bar Chart', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (14, 'StackedColumn2D', 'Stacked Column 2D Chart', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (15, 'StackedColumn3D', 'Stacked Column 3D Chart', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (16, 'StackedBar2D', 'Stacked Bar 2D Chart', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (17, 'StackedArea2D', 'Stacked Area 2D Chart', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (18, 'MSColumn3DLineDY', 'Combination Dual Y Chart (Column 3D + Line)', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (19, 'MSColumn2DLineDY', 'Combination Dual Y Chart (Column 2D + Line)', 'FusionCharts', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
-values (20, 'MultiAxisLine', 'MultiAxisLine', 'PowerCharts', 'LOADER', sysdate, 'LOADER', sysdate);
-prompt 20 records loaded
-prompt Loading WB_FIELD_TYPE...
+values (5, 'MultiLine_Fuled', 'Линии с несколькими шкалами', 'FlotCharts', 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
 values (2, 'B', 'Переключатель', 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
@@ -2422,7 +2390,8 @@ insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date,
 values (14, 'S', 'Строковое значение', 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
 values (15, 'SB', 'Выпадающий список', 'LOADER', sysdate, 'LOADER', sysdate);
-prompt 14 records loaded
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
+values (16, 'IP', 'Айпи адрес, маска', 'LOADER', sysdate, 'LOADER', sysdate);
 prompt Loading WB_FORM_TYPE...
 insert into WB_FORM_TYPE (id_wb_form_type, num, name, create_user, create_date, last_user, last_date, human_name)
 values (-1, 13, 'WIZARD_FORM', 'LOADER', sysdate, 'LOADER', sysdate, 'Формальный признак указывающий на то что данные вводятся с помощью мастера');

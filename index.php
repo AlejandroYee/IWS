@@ -47,6 +47,7 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.fileUpload.js?s=<?=SESSION_ID?>" ></script>						
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.jqGrid.locale-ru.js?s=<?=SESSION_ID?>" ></script>	
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.multiselect.js?s=<?=SESSION_ID?>" ></script>	
+        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.ipmask.js?s=<?=SESSION_ID?>" ></script>	
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.fileDownload.js?s=<?=SESSION_ID?>" ></script>	
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.ui.menubar.js?s=<?=SESSION_ID?>" ></script>
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.calculator.min.js?s=<?=SESSION_ID?>" ></script>				

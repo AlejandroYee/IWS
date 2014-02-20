@@ -85,6 +85,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						case "M":  $edit_options .= ", i_type:'M', h:'".$this -> return_sql($query, "COUNT_ELEMENT")."'";break;				
 						// CHEKBOX
 						case "B":  $edit_options .= ", i_type:'B', value:'1:0'";break;
+                                                // IP
+						case "IP": $edit_options .= ", i_type:'IP'";break;
 						// INTEGER
 						case "I":  $edit_options .= ", i_type:'I'";break;
 						// NUMBER
