@@ -420,7 +420,7 @@ prompt
 create sequence GEN_WB_FIELD_TYPE
 minvalue 1
 maxvalue 999999999999
-start with 16
+start with 19
 increment by 1
 cache 20;
 
