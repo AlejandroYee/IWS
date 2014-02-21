@@ -122,6 +122,7 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
 						.ui-jqgrid .loading{background:transparent;border:0 transparent;color:inherit;height:99%;left:-5px;opacity:1;padding:10px;top:-5px;width:98%;z-index:89}
 						.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label{text-align:left}
 						.ui-search-toolbar{border-color:transparent}
+                                                .ui-icon-triangle-1-s {background-position: -65px -16px;} /* fix fo left sprite*/
 						.ui-jqgrid tr.jqgrow,.ui-state-active{cursor:default}	
 						li, li li, li li li {list-style-type: none; } 
 <?php 
