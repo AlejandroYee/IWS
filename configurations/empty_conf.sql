@@ -334,7 +334,7 @@ create table WB_USER
   last_user   VARCHAR2(50) not null,
   last_date   DATE not null,
   e_mail      VARCHAR2(255),
-  phone       VARCHAR2(12),
+  phone       VARCHAR2(20),
   param_view  VARCHAR2(2000),
   password    VARCHAR2(2000)
 )
@@ -766,7 +766,6 @@ select t.id_wb_mm_form id_wb_mm_form_view,
        t.xsl_file_in,
        t.html_img,
        nvl(t.auto_update,0) auto_update,
-       t.xsl_file_in,
        t.create_user,
        t.create_date,
        t.last_user,
@@ -2400,6 +2399,8 @@ insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date,
 values (17, 'E', 'Электронный адрес', 'LOADER', sysdate, 'LOADER',sysdate, null, 'N');
 insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
 values (18, 'U03', 'Телефон с кодом города', 'LOADER', sysdate, 'LOADER', sysdate, '+0 (000) 000-00-00', 'N');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (19, 'S', 'Текстовая строка', 'LOADER', sysdate, 'LOADER', sysdate, '+0 (000) 000-00-00', 'N');
 prompt Loading WB_FORM_TYPE...
 insert into WB_FORM_TYPE (id_wb_form_type, num, name, create_user, create_date, last_user, last_date, human_name)
 values (-1, 13, 'WIZARD_FORM', 'LOADER', sysdate, 'LOADER', sysdate, 'Формальный признак указывающий на то что данные вводятся с помощью мастера');
@@ -2734,7 +2735,7 @@ values (-47, -3, 94, 'Дата редактирования', 'LAST_DATE', null,
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
 values (-117, -7, 4, 'e-mail', 'E_MAIL', null, null, 1, 'S', 0, null, 300, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
-values (-116, -7, 5, 'Телефон', 'PHONE', null, null, 1, 'S', 0, null, 85, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
+values (-116, -7, 5, 'Телефон', 'PHONE', null, null, 1, 'U03', 0, null, 150, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
 values (-74, -10, 5, '№ п.п.', 'NUM', null, null, 3, 'I', 0, 0, 30, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
@@ -2886,7 +2887,7 @@ prompt Loading WB_PARAM_TYPE...
 prompt Table is empty
 prompt Loading WB_USER...
 insert into WB_USER (id_wb_user, wb_name, name, create_user, create_date, last_user, last_date, e_mail, phone, param_view, password)
-values (1, 'ADMIN', 'Администратор', 'Администратор', sysdate, 'LOADER', sysdate, 'admin@domen.com', '+79999999999', '', '');
+values (1, 'ADMIN', 'Администратор', 'LOADER', sysdate, 'LOADER', sysdate, 'admin@domen.com', '+7 (999) 999-99-99', '', '');
 prompt 1 records loaded
 prompt Loading WB_PARAM_VALUE...
 prompt Table is empty
