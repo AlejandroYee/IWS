@@ -114,8 +114,8 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 		return "<p><a href='".$field_text."'>".$this->FullTrim($name)."</a></p>";						
 	}
         
-	// IP
-	function ip_element($field_name,$name,$requred) {
+	// maska
+	function mask_element($field_name,$name,$requred) {
 		$output = "";
 		$field_name_short = strtolower($field_name."_".$this->pageid);
 						$output .= "<p><label for=\"".$field_name_short."\">".$this->FullTrim($name)."</label>
@@ -148,7 +148,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 		while ($this-> db_conn-> sql_fetch($query_tmp)) $gridname = strtolower($this -> return_sql($query_tmp, "NAME")."_".$this -> return_sql($query_tmp, "ID")."_".$this ->pageid);
 
 		$query_tmp = $this->db_conn->sql_execute("select substr(t.name, 1, decode(instr(t.name, '@')-1, -1, length(t.name), instr(t.name, '@')-1)) name,
-                       substr(t.name, decode(instr(t.name, '@')+1, 1, null, instr(t.name, '@')+1)) help_name, t.field_txt, t.field_name, decode(nvl(t.is_requred,0), 0,'false', 'true') is_requred, t.field_type,
+                       substr(t.name, decode(instr(t.name, '@')+1, 1, null, instr(t.name, '@')+1)) help_name, t.field_txt, t.field_name, decode(nvl(t.is_requred,0), 0,'false', 'true') is_requred, upper(t.field_type) as field_type,
                        nvl(t.count_element, 1) count_element, nvl(t.width, decode(t.field_type, 'D', 46, 300)) width from ".DB_USER_NAME.".wb_form_field t
 					   where t.id_wb_mm_form = ".$this->id_mm_fr." order by t.num");	
 					   
@@ -211,13 +211,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 										$this -> return_sql($query_tmp, "NAME"),
 										$this -> return_sql($query_tmp, "IS_REQURED")
 										);				
-			break;
-                    	case "IP":	
-				$output .= $this -> ip_element($this -> return_sql($query_tmp, "FIELD_NAME"),
-										$this -> return_sql($query_tmp, "NAME"),
-										$this -> return_sql($query_tmp, "IS_REQURED")
-										);				
-			break;
+			break;                    
 			case "C":	
 				$output .= $this -> number_element($this -> return_sql($query_tmp, "FIELD_TXT"),
 										$this -> return_sql($query_tmp, "FIELD_NAME"),
@@ -265,7 +259,14 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 										);				
 			break;	
 			default:
-					$output .= "<p>".$this -> return_sql($query_tmp, "FIELD_TXT")."</p>";
+                            if (substr($this -> return_sql($query_tmp, "FIELD_TYPE"),0,1) == "U") {	
+                                        $output .= $this -> mask_element($this -> return_sql($query_tmp, "FIELD_NAME"),
+										$this -> return_sql($query_tmp, "NAME"),
+										$this -> return_sql($query_tmp, "IS_REQURED")
+										);					
+                            } else {
+                                $output .= "<p>".$this -> return_sql($query_tmp, "FIELD_TXT")."</p>";
+                            }                            
 			break;
 		}
 	}

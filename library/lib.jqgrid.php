@@ -44,14 +44,16 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 																	when upper(trim(t.field_type)) = 'A'  then  'formatter: ''link'', formatoptions:{target: ''_blank''}'
 																	else 'formatoptions: { defaultValue: '''' }'
 																end field_type, t.count_element,
-														t.field_type field_type_sum, t.field_txt,
+														upper(t.field_type) as field_type_sum,
+                                                                                                                       fft.mask as element_mask,
+                                                                                                                       fft.case as element_case,
+                                                                                                                t.field_txt,
 														decode(t.is_read_only, 1, 'true', 'false') is_read_only,
 														decode(tf.is_read_only, 1, 'true', 'false') as read_only_form
 												from ".DB_USER_NAME.".wb_mm_form tf
-												left join ".DB_USER_NAME.".wb_form_field t
-												on t.id_wb_mm_form = tf.id_wb_mm_form
-												left join ".DB_USER_NAME.".wb_form_field_align ta
-												on ta.id_wb_form_field_align = t.id_wb_form_field_align
+												left join ".DB_USER_NAME.".wb_form_field t on t.id_wb_mm_form = tf.id_wb_mm_form
+                                                                                                left join ".DB_USER_NAME.".wb_field_type fft on fft.id =  t.field_type
+												left join ".DB_USER_NAME.".wb_form_field_align ta on ta.id_wb_form_field_align = t.id_wb_form_field_align
 											  where tf.id_wb_mm_form = ".$this -> id_mm_fr." order by t.num");		
 											  
 				while ($this-> db_conn-> sql_fetch($query)) {
@@ -84,9 +86,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						// MULTILINE
 						case "M":  $edit_options .= ", i_type:'M', h:'".$this -> return_sql($query, "COUNT_ELEMENT")."'";break;				
 						// CHEKBOX
-						case "B":  $edit_options .= ", i_type:'B', value:'1:0'";break;
-                                                // IP
-						case "IP": $edit_options .= ", i_type:'IP'";break;
+						case "B":  $edit_options .= ", i_type:'B', value:'1:0'";break;                                                
 						// INTEGER
 						case "I":  $edit_options .= ", i_type:'I'";break;
 						// NUMBER
@@ -98,6 +98,10 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						// PASSWORD
 						case "P":  $edit_options .= ", i_type:'P'";break;					
 					}
+                                        // отдельный масковый элемент
+                                        if (substr($this -> return_sql($query, "FIELD_TYPE_SUM"),0,1) == "U") {
+                                            $edit_options .= ", i_type:'MAS', mask:'".$this -> return_sql($query, "ELEMENT_MASK")."', case:'".$this -> return_sql($query, "ELEMENT_CASE")."'";
+                                        }
 					$edit_options .= ", w:'".$this -> return_sql($query, "L_NAME")."'";
 					 
 					// Создаем заголовок					

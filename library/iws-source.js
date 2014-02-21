@@ -925,8 +925,21 @@ $(function() {
 						
 						obj.removeAttr('style'); // Исправление неверной длины чекбокса							
 				break;
-                                case 'IP': // Ip box field
-					obj.width(115).ipmask();					
+                                case 'MAS': // МАСКА СПЕЦ ПОЛЕ
+                                        var char_case = obj.attr('case');
+					obj.mask(obj.attr('mask') , {
+                                            onKeyPress: function(str, e, o){ 
+                                              switch (char_case) {
+                                                  case "U":
+                                                     $(o).val(str.toUpperCase()); 
+                                                  break;
+                                                  case "L":
+                                                     $(o).val(str.toLowerCase());
+                                                  break;      
+                                              }  
+                                            }
+                                       });
+                                        
 				break;
 				
 				case 'D': // DATE

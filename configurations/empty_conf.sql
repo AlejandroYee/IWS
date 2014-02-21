@@ -65,10 +65,12 @@ create table WB_FIELD_TYPE
   id_wb_field_type NUMBER not null,
   id               VARCHAR2(3),
   name             VARCHAR2(2000),
+  mask             VARCHAR2(2000),
+  case             VARCHAR2(1) default 'N' not null,
   create_user      VARCHAR2(50) not null,
   create_date      DATE not null,
   last_user        VARCHAR2(50) not null,
-  last_date        DATE not null
+  last_date        DATE not null 
 )
 ;
 
@@ -2362,36 +2364,42 @@ insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, crea
 values (4, 'MS_Line', 'Линии без заливки', 'FlotCharts', 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_CHART_TYPE (id_wb_chart_type, name, description, type_chart, create_user, create_date, last_user, last_date)
 values (5, 'MultiLine_Fuled', 'Линии с несколькими шкалами', 'FlotCharts', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
-values (2, 'B', 'Переключатель', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
-values (3, 'C', 'Валюта (руб.)', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
-values (4, 'D', 'Дата', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
-values (5, 'DT', 'Дата и время', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
-values (6, 'E', 'E-mail', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
-values (7, 'F', 'Файл', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
-values (8, 'FB', 'Файл в таблице', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
-values (9, 'I', 'Целое число', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
-values (10, 'M', 'Многострочный текст', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
-values (11, 'N', 'Дробное число', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
-values (12, 'NL', 'Дробное (более точное)', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
-values (13, 'P', 'Поле пароля', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
-values (14, 'S', 'Строковое значение', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
-values (15, 'SB', 'Выпадающий список', 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date)
-values (16, 'IP', 'Айпи адрес, маска', 'LOADER', sysdate, 'LOADER', sysdate);
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (1, 'A', 'Ссылка (<a> href=)', 'LOADER', sysdate, 'LOADER', sysdate, null, 'N');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (2, 'B', 'Переключатель', 'LOADER', sysdate, 'LOADER', sysdate, null, 'N');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (3, 'C', 'Валюта (руб.)', 'LOADER', sysdate, 'LOADER', sysdate, null, 'N');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (4, 'D', 'Дата', 'LOADER', sysdate, 'LOADER', sysdate null, 'N');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (5, 'DT', 'Дата и время', 'LOADER', sysdate, 'LOADER', sysdate, null, 'N');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (6, 'F', 'Файл', 'LOADER', sysdate, 'LOADER', sysdate, null, 'N');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (7, 'FB', 'Файл в таблице', 'LOADER', sysdate, 'LOADER', sysdate, null, 'N');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (8, 'I', 'Целое', 'LOADER', sysdate, 'LOADER', sysdate, null, 'N');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (9, 'M', 'Многострочный текст', 'LOADER', sysdate, 'LOADER', sysdate, null, 'N');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (10, 'N', 'Дробное', 'LOADER', sysdate, 'LOADER',sysdate, null, 'N');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (11, 'NL', 'Дробное (более точное)', 'LOADER', sysdate, 'LOADER', sysdate, null, 'N');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (12, 'P', 'Поле пароля', 'LOADER', sysdate, 'LOADER', sysdate, null, 'N');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (13, 'S', 'Строка', 'LOADER', sysdate 'LOADER', sysdate, null, 'N');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (14, 'SB', 'Выпадающий список', 'LOADER', sysdate 'LOADER', sysdate, null, 'N');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (15, 'U01', 'Айпи адрес, маска', 'LOADER', sysdate, 'LOADER', sysdate, '099.099.099.099', 'N');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (16, 'U02', 'MAC адрес, маска', 'LOADER', sysdate, 'LOADER', sysdate, 'AA:AA:AA:AA:AA:AA', 'U');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (17, 'E', 'Электронный адрес', 'LOADER', sysdate, 'LOADER',sysdate, null, 'N');
+insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, mask, case)
+values (18, 'U03', 'Телефон с кодом города', 'LOADER', sysdate, 'LOADER', sysdate, '+0 (000) 000-00-00', 'N');
 prompt Loading WB_FORM_TYPE...
 insert into WB_FORM_TYPE (id_wb_form_type, num, name, create_user, create_date, last_user, last_date, human_name)
 values (-1, 13, 'WIZARD_FORM', 'LOADER', sysdate, 'LOADER', sysdate, 'Формальный признак указывающий на то что данные вводятся с помощью мастера');

@@ -99,7 +99,7 @@ foreach(filter_input_array(INPUT_POST,FILTER_SANITIZE_STRING) as $k => $v) {
 $input = new INPUT($id_mm_fr, $id_mm, $pageid);
 
 // после этого смотрим следующую форму:
-$query = $main_db -> sql_execute("select decode(nvl(t.is_requred,0), 0,'false', 'true') is_requred, t.field_type, substr(t.name, 1, decode(instr(t.name, '@')-1, -1, length(t.name), instr(t.name, '@')-1)) name, substr(t.name, decode(instr(t.name, '@')+1, 1, null, instr(t.name, '@')+1)) help_name, t.field_txt, t.field_name, t.field_type,
+$query = $main_db -> sql_execute("select decode(nvl(t.is_requred,0), 0,'false', 'true') is_requred, t.field_type, substr(t.name, 1, decode(instr(t.name, '@')-1, -1, length(t.name), instr(t.name, '@')-1)) name, substr(t.name, decode(instr(t.name, '@')+1, 1, null, instr(t.name, '@')+1)) help_name, t.field_txt, t.field_name, upper(t.field_type) as field_type,
 nvl(t.count_element, 1) count_element, nvl(t.width, decode(trim(t.field_type), 'D', 46, 300)) width from ".DB_USER_NAME.".wb_form_field t  where t.id_wb_mm_form = ".$id_mm_fr." order by t.num");
 while ($main_db -> sql_fetch($query)) {	
 $content_value = $main_db -> sql_result($query, "FIELD_TXT",false);
@@ -168,12 +168,6 @@ foreach(filter_input_array(INPUT_POST,FILTER_SANITIZE_STRING) as $k => $v) {
 										$main_db -> sql_result($query, "IS_REQURED")
 										);				
 			break;
-                        case "IP":	
-				$output .= $this -> ip_element(trtolower($main_db -> sql_result($query, "FIELD_NAME")),
-										$main_db -> sql_result($query, "NAME"),
-										$main_db -> sql_result($query, "IS_REQURED")
-										);				
-			break;
 			case "C":	
 				$output .= $this -> number_element($content_value,
 										strtolower($main_db -> sql_result($query, "FIELD_NAME")),
@@ -221,7 +215,15 @@ foreach(filter_input_array(INPUT_POST,FILTER_SANITIZE_STRING) as $k => $v) {
 										);				
 			break;	
 			default:
-					echo $content_value;
+                            // Отдельный масковый элемент!
+                            if (substr($main_db -> sql_result($query, "FIELD_TYPE"),0,1) == "U") {	
+				$output .= $this -> mask_element(strtolower($main_db -> sql_result($query, "FIELD_NAME")),
+										$main_db -> sql_result($query, "NAME"),
+										$main_db -> sql_result($query, "IS_REQURED")
+										);				
+                            } else {
+                                        echo $content_value;
+                            }
 			break;
 		}
 }
