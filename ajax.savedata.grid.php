@@ -75,7 +75,7 @@ switch ($type_of_past) {
 // Отчищаем подзапрос от лишниих указателей на страницу:
 $input_post = array();
 foreach (filter_input_array(INPUT_POST) as $key => $value) {
-    if (filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING) != null ) {
+    if (filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING) != null and !empty($key)) {
         $input_post[substr($key, 0, strrpos($key, "-"))] = filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING);  
     }    
 } 
@@ -235,7 +235,7 @@ switch ($type_of_past) {
 	// Добавляем запись
 	case 'add':	
 		// Формируем запрос		
-		$str_sql = "insert into ".$owner.".".$table_name." (".substr($str_sql_fl, 1).") values (".substr($str_sql_data,1).") returning ID_".$table_name." into :rid";		
+		$str_sql = "insert into ".$owner.".".$table_name." (".trim($str_sql_fl, ", ").") values (".trim($str_sql_data,", ").") returning ID_".$table_name." into :rid";		
 	break;
 			
 	// Удаляем запись
@@ -245,7 +245,7 @@ switch ($type_of_past) {
 			
 	// Изменяем запись
 	case 'edit':
-		$str_sql = "update ".$owner.".".$table_name." set (".substr($str_sql_fl, 1).") = (select ".substr($str_sql_data,1)." from dual) where  ID_".$table_name." in (".$id_mm.")";
+		$str_sql = "update ".$owner.".".$table_name." set (".trim($str_sql_fl, ", ").") = (select ".trim($str_sql_data,", ")." from dual) where  ID_".$table_name." in (".$id_mm.")";
 	break;
 	
 }    

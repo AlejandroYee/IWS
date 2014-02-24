@@ -142,7 +142,7 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 		if (strtolower(DB_USER_NAME) == "wb") {		 // костыль если пользователь WB!
 			$sql =  str_ireplace(array("wb.wb.","WB.WB."),"wb.", $sql);
 		}
-                
+                $sql = trim($sql,";"); //убераем лишние точки с запятой
                 if (empty($sql)) {                    
                     BasicFunctions::to_log("ERR: Empty sql query!");
                 } else {                

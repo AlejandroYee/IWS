@@ -96,9 +96,9 @@ class BasicFunctions {
             if (!stripos($log,"mdpf")) {                               
                 BasicFunctions::requre_script_file("auth.".AUTH.".php");
                 $log = str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log); 
-                if( iconv(HTML_ENCODING,LOCAL_ENCODING."//IGNORE",$log) !="") {
-                    $log =  iconv(HTML_ENCODING,LOCAL_ENCODING."//IGNORE",$log);
-                } 
+                if(strpos($log,"Load page:") != false) {
+                    $log =  iconv(HTML_ENCODING,LOCAL_ENCODING,$log);
+                }
                 if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (auth::get_user() != "")) {
                                 if (!isset($_SESSION[strtoupper("log_".SESSION_ID)])) {
                                         $_SESSION[strtoupper("log_".SESSION_ID)] = null;
@@ -402,15 +402,17 @@ class BasicFunctions {
             // Загрузка переменной из кеша если она там есть:
             //--------------------------------------------------------------------------------------------------------------------------------------------
             public static function load_from_cache($name, $is_array = true) {	
+                
                             if (isset($_SESSION[strtoupper($name)])  and !isset($_SESSION["ENABLED_CACHE"])) {				
                                             // Распаковываем без проверки чексум, баг firefox'a
                                             BasicFunctions::requre_script_file("lib.json.php");
                                             BasicFunctions::requre_script_file("lib.gz.php");
                                             $json = new json(); 
-                                            $to_menu = $json ->  jsondecode(gz::gzdecode_zip(substr(base64_decode($_SESSION[strtoupper($name)]),10,-8)), $is_array);		 			
+                                            $to_menu = $json -> jsondecode(gz::gzdecode_zip(base64_decode($_SESSION[strtoupper($name)])), $is_array);		 			
                                             // Проверяем есть ли данные, если есть то перемещаем их в массив
                                             if (!empty($to_menu)) {
-                                                    BasicFunctions::to_log("LIB: ".strtoupper($name)." loaded from cache");
+                                                    $ddd = debug_backtrace();
+                                                    BasicFunctions::to_log("LIB: module ".strtoupper($ddd[1]["class"])." found ".strtoupper($name)." in cache");
                                                     return $to_menu;
                                             }
                                     } else {
@@ -505,10 +507,11 @@ class BasicFunctions {
             // Создание select списка для jqgrid
             //--------------------------------------------------------------------------------------------------------------------------------------------
             public static function get_select_data($db, $sql, $rowid) {
-                
+            // Чистим запрос, если там есть закодированные кавычки:
+            $sql = str_ireplace("&#39;","'",$sql);
+            
             // Проверяем кодировку
             $sql = iconv(HTML_ENCODING,LOCAL_ENCODING."//TRANSLIT", str_ireplace(":rowid",$rowid,$sql));
-
             // Выполняем запрос на получение данных:
             $query = $db -> sql_execute($sql);	
             $level 		= 0;

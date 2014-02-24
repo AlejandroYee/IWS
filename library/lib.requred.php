@@ -83,7 +83,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		$this-> pid_mm  = $pid;		
 		$this-> pageid = $pagetab;
 				
-			$query = $this->db_conn->sql_execute("Select count(*) over() c_count,  mm.name as form_name_usrv, mf.form_where, mf.object_name, mf.height_rate as  height_rate,mf.auto_update, mf.id_wb_mm_form id,mf.action_sql,
+			$query = $this->db_conn->sql_execute("Select count(*) over() c_count,  mm.name as form_name_usrv, mf.form_where, mf.object_name, decode(count(*) over(),1,100,mf.height_rate) as height_rate,mf.auto_update, mf.id_wb_mm_form id,mf.action_sql,
 					nvl(mf.name, mm.name) name, ft.name type, mf.xsl_file_in, max(case when ft.name like '%_DETAIL' then mf.id_wb_mm_form else null end) over(order by mm.id_wb_main_menu) id_d
 					from ".DB_USER_NAME.".wb_main_menu mm inner join ".DB_USER_NAME.".wb_mm_form mf  on mf.id_wb_main_menu = mm.id_wb_main_menu left join ".DB_USER_NAME.".wb_form_type ft on ft.id_wb_form_type = mf.id_wb_form_type
 					where mm.id_wb_main_menu = ".$id." and exists (Select 1 from ".DB_USER_NAME.".wb_mm_role mr inner join ".DB_USER_NAME.".wb_role_user ru on ru.id_wb_role = mr.id_wb_role and ru.id_wb_user = ".DB_USER_NAME.".wb.get_wb_user_id
@@ -183,8 +183,9 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					case "GRID_FORM_DETAIL": 
 						require_once(ENGINE_ROOT."/library/lib.jqgrid.php");						
 						// Если детальный грид первый или один то перед ним ставим ресизер
-						if ($count_detail_forms == 0) $this -> data_res .= "<script type=\"text/javascript\"> $(function() { $('#gbox_".$last_grid_name."').parent().addClass('has_resize_control'); set_resizers();}); </script>";	
-						
+						if (($count_detail_forms == 0) and (isset($last_grid_name))) {
+                                                        $this -> data_res .= "<script type=\"text/javascript\"> $(function() { $('#gbox_".$last_grid_name."').parent().addClass('has_resize_control'); set_resizers();}); </script>";	
+                                                }
 						// Создаем детальный грид
 						$grid = new JQGRID($this -> id_mm_fr, $this ->id_mm_fr_d, $this -> id_mm, $this -> pageid, $this -> grid_main_name);
 						$this -> data_res .= BasicFunctions::regex_javascript( $grid -> greate_grid($this -> return_sql($query, "TYPE"),
