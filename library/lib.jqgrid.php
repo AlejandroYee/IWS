@@ -45,8 +45,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 																	else 'formatoptions: { defaultValue: '''' }'
 																end field_type, t.count_element,
 														upper(t.field_type) as field_type_sum,
-                                                                                                                       fft.mask as element_mask,
-                                                                                                                       fft.case as element_case,
+                                                                                                                       fft.char_mask as element_mask,
+                                                                                                                       fft.char_case as element_case,
                                                                                                                 t.field_txt,
 														decode(t.is_read_only, 1, 'true', 'false') is_read_only,
 														decode(tf.is_read_only, 1, 'true', 'false') as read_only_form
