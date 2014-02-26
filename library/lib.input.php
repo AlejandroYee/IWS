@@ -433,8 +433,8 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 		}
 	}	
 	
-	$output .= "<script type=\"text/javascript\">" . BasicFunctions::regex_javascript(
-	"$(function() {
+	$output .=  "<script type=\"text/javascript\">
+	$(function() {
 	var form_list_".$this->pageid." = [".trim($inputs_form,',')."];
 	var form_list_now_".$this->pageid.";
             
@@ -475,9 +475,9 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
                         var qstring = $('#wizard_parameters_".$this -> pageid."').serialize();
                         $('#wizard_form_".$this -> pageid."_content').empty();
 			$('#ajaxload_".$this -> pageid."').show();
-			");
+			";
 			if(!isset($gridname) and !isset($chartname)) {
-				$output .= BasicFunctions::regex_javascript(
+				$output .=
                                         "$('#".$this->pageid." .tab_main_content .CaptionTD').remove();											
 						$('#".$this->pageid." .tab_main_content').append('<div class=\"ui-widget CaptionTD\" style=\"height: 80%;width: 99%;vertical-align: middle;\"></div>');
 						var load_".$this->pageid."_time = 0;                                                 
@@ -490,32 +490,32 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 						load_".$this->pageid."_intval = setInterval(loader_function, 1000);
 						loader_function();
                                                 $('#wizard_form_".$this->pageid."').dialog('close');
-				");
+				";
 			}
-			$output .= BasicFunctions::regex_javascript("			
+			$output .= "			
 			$.ajax({
 					url:'".ENGINE_HTTP."/ajax.data.wizard.php?id_mm_fr=' + form_list_now_".$this->pageid."  + '&finish=true&pageid=".$this -> pageid."&id_mm=".$this -> id_mm."',
 					type: 'POST',
 					data: qstring,
 					success: function(data, status) {
                                         $('#ui-".$this->pageid." span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
-					");
+					";
 					if(isset($gridname)) {
-						$output .= BasicFunctions::regex_javascript("
+						$output .= "
                                                         $('#ui-".$this->pageid." span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
                                                         $('#".$gridname."').jqGrid('setGridParam',{datatype:'json'});
-                                                        $('#".$gridname."').trigger('reloadGrid');");
+                                                        $('#".$gridname."').trigger('reloadGrid');";
 					} else if(!isset($gridname) and !isset($chartname)) {
-						$output .= BasicFunctions::regex_javascript("
+						$output .= "
 								clearInterval(load_".$this->pageid."_intval);
 								load_".$this->pageid."_time = 0;
                                                                 $('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>Данные успешно обработаны,<br>Длительность обработки ' + minutes_".$this->pageid." +' минут(а), ' + seconds_".$this->pageid." + ' секунд.</h2>');								
                                                                 $('li[aria-selected=\"false\"] a[href=\"#".$this->pageid."\"]').parent().effect('pulsate', {}, 2000);
 								$('#show_parameters-".$this->pageid."').button('option','disabled',false);
 												
-						");
+						";
 					}
-					$output .= BasicFunctions::regex_javascript("
+					$output .= "
 						$.each( $('#".$this->pageid." .tab_main_content .chart_data_".$this -> pageid."') , function() {																
 							plot_graph($(this));  
 						});
@@ -604,8 +604,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 			setTimeout(function() {
 				$('#wizard_form_".$this->pageid."').dialog('open');
 			}, 500);
-	});").
-	"</script>	
+	});</script>	
 	<button id=\"show_parameters-".$this->pageid."\"  style=\"float: right;margin:0 5px 0 0;\">Задать параметры</button>";
 	return $output;		
 	}	
