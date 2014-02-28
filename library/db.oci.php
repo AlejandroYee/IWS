@@ -186,7 +186,7 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 		
 		// Если был ретурнинг то отдаем вместо ресурса вернувшиеся значение
 		if (!empty($rowid)) {
-					BasicFunctions::to_log("SQL: <".$this->link."> returning id ".$rowid." is a reached!");
+					BasicFunctions::to_log("SQL: <".$this->link."> returning id ".$rowid." is a reached;");
 					return $rowid;
 			} else {		
 					// Возвращаем ресурс для извлечения данных

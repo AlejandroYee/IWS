@@ -92,13 +92,15 @@ while ($main_db -> sql_fetch($query)) {
                 isset($_FILES[$main_db -> sql_result($query, "FIELD_NAME")]))) {
             
 		// Вдруг у нас значения в виде массива:
-		$field_name_id = $input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")];  
-                if (trim($field_name_id) != "") {
-                   if (is_array($field_name_id)) {
-			$value = implode(",",$field_name_id);
-                    } else {
-                        $value = $field_name_id;
-                    }	
+                if (isset($input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")])) {	
+                    $field_name_id = $input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")];  
+                        if (trim($field_name_id) != "") {
+                           if (is_array($field_name_id)) {
+                                $value = implode(",",$field_name_id);
+                            } else {
+                                $value = $field_name_id;
+                            }	
+                        }
                 }
 		$value =  iconv(HTML_ENCODING,LOCAL_ENCODING,$value); // кодировочку меняем
 		// Если родительский дерева и мы обновляем запись, то:

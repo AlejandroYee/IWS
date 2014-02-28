@@ -243,8 +243,7 @@ class BasicFunctions {
                                            buttons: {
                                                    'Закрыть': function() 
                                                    {
-                                                           $( this ).dialog( 'close' );
-                                                           $('#loading2').fadeOut(300);
+                                                           $( this ).dialog( 'close' );                                                           
                                                    }
                                            },							
                                            open: function() {								
@@ -272,6 +271,7 @@ class BasicFunctions {
                                                                     success: function(data) {
                                                                           if (data != 'true') {                                                                              
                                                                               custom_alert('Неверное имя пользователя или пароль!');
+                                                                              $('#loading2').fadeOut(300);
                                                                            } else {   
                                                                                 $('#logon').fadeOut(400);
                                                                                 setTimeout(function() {                                                                                
@@ -412,7 +412,7 @@ class BasicFunctions {
                                             // Проверяем есть ли данные, если есть то перемещаем их в массив
                                             if (!empty($to_menu)) {
                                                     $ddd = debug_backtrace();
-                                                    BasicFunctions::to_log("LIB: module ".strtoupper($ddd[1]["class"])." found ".strtoupper($name)." in cache");
+                                                    BasicFunctions::to_log("LIB: Module ".strtoupper($ddd[1]["class"])." found ".strtoupper($name)." in cache");
                                                     return $to_menu;
                                             }
                                     } else {

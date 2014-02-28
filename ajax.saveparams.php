@@ -111,6 +111,7 @@ $query = $main_db->sql_execute("select t.action_sql,t.action_bat from ".DB_USER_
 				}
 		// Для кастомных кнопок проверка на заданный ровайди
 		if (!empty($rowid)) {
+                    $rowid1 = "";
 			if (!is_numeric($rowid)) {
 				// Если у нас не число, то возможно переданы числа или текст через зяпятую. проверяем и формируем:
 				$tmp=explode(",",$rowid);
