@@ -65,6 +65,7 @@ class AUTH {
 		$key = $this->encrypt(base64_encode($pass),session_id());
 		$_SESSION["us_name"] = $user;
 		$_SESSION["us_pr"]   = $key;
+                return true;
 	}
 	
 	private function encrypt($str, $key)

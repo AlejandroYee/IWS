@@ -27,6 +27,9 @@ define("DB_ENCODING","CL8MSWIN1251");
 ## AUTH FROM DB INTERFACE
 #define("AUTH","oci.db");
 
+## AUTH FORM WB_USER TABLE INTERFACE
+#define("AUTH","user");
+
 ## TESTING LOCAL AUTCH INTERFACE
 define("AUTH","local");
 define("AUTH_USER_NAME","user name");
