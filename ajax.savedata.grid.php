@@ -89,7 +89,7 @@ $query = $main_db -> sql_execute("select tf.owner, tf.object_name, t.name, t.fie
 // Формируем поля для запроса
 while ($main_db -> sql_fetch($query)) {
    	if (($main_db -> sql_result($query, "FIELD_NAME") <> "R_NUM") and ( isset($input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")]) or
-                isset($_FILES[$main_db -> sql_result($query, "FIELD_NAME")]))) {
+                isset($_FILES[$main_db -> sql_result($query, "FIELD_NAME")])) or ($main_db -> sql_result($query, "FIELD_NAME") == "ID_PARENT")) {
             
 		// Вдруг у нас значения в виде массива:
                 if (isset($input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")])) {	
@@ -103,12 +103,13 @@ while ($main_db -> sql_fetch($query)) {
                         }
                 }
 		$value =  iconv(HTML_ENCODING,LOCAL_ENCODING,$value); // кодировочку меняем
-		// Если родительский дерева и мы обновляем запись, то:
-		if ((($type == "TREE_GRID_FORM_MASTER") or ($type == "TREE_GRID_FORM") or ($type == "TREE_GRID_FORM_DETAIL")) and ($main_db -> sql_result($query, "FIELD_NAME") == "ID_PARENT")) {			
+                
+		// Если родительский дерева и мы обновляем запись, то:                
+		if ((($type == "TREE_GRID_FORM_MASTER") or ($type == "TREE_GRID_FORM") or ($type == "TREE_GRID_FORM_DETAIL")) and ($main_db -> sql_result($query, "FIELD_NAME") == "ID_PARENT")) {                    
 			// только если добавляем запись:
 			if ($type_of_past == 'add') {
 				// Взможно это корневой уровень
-				if (empty($id_mm)) {
+				if (empty($id_mm_fr_d)) {
 						$str_sql_data .= ", null";
 					} else {
 						if (is_numeric($id_mm_fr_d)) {
@@ -221,7 +222,7 @@ if (!is_numeric ($id_mm)) {
 	// Если у нас не число, то возможно переданы числа или текст через зяпятую. проверяем и формируем:
 	$tmp=explode(",",$id_mm);
         $id_mm1 = "";
-	// пробегаемся по массиву и смотрим  на типы числе или
+	// пробегаемся по массиву и смотрим  на типы число или массив
 	foreach($tmp as $val) if (!is_numeric ($val)) {
 		$id_mm1 .= "'".$val."',";			
 	} else {
