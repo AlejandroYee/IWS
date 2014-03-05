@@ -15,7 +15,7 @@ define("ENGINE_ROOT",  filter_input(INPUT_SERVER, 'DOCUMENT_ROOT',FILTER_SANITIZ
 define("SESSION_ID",md5(time().rand(time()/100,getrandmax())));
 define("HTTP_USER_AGENT",filter_input(INPUT_SERVER, 'HTTP_USER_AGENT',FILTER_SANITIZE_STRING));
 define("SESSION_LIFE_TIME", 10800);
-define("VERSION_ENGINE","v2.0.4 Final Release");
+define("VERSION_ENGINE","v2.1.0");
 
 // Переопределение времени выполнения
 ini_set('max_execution_time', 2100);
@@ -560,15 +560,14 @@ class BasicFunctions {
 
             // Сформировали, выводим:
             if (isset($sd_options_content)) foreach ($sd_options_content as $key) {
-                    $rezult .= $key['ID'].":".$key['NAME'].";";
+                    $rezult .= trim($key['ID']).":".trim($key['NAME']).";";
             }
 
             // Вдруг у нас незакрытые группы
             while( $countgroup != 0) {
                     $rezult .=  "GROUP_END:;";
                     $countgroup--;
-            }
-
+            }            
             // убираем последнюю точку с зяпятой
             return rtrim(trim($rezult), ";");	
             }

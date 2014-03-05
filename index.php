@@ -54,13 +54,16 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.flot.min.js?s=<?=SESSION_ID?>" ></script>	
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.printThis.js?s=<?=SESSION_ID?>" ></script> 
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.ui-contextmenu.js?s=<?=SESSION_ID?>" ></script> 
+        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.globalize.min.js?s=<?=SESSION_ID?>" ></script>
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/ace.js?s=<?=SESSION_ID?>" ></script>	
         
 <?
     if (trim(strtolower(filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL))) == 'bianca.test') { // Для дебага Онли
-          ?>                    	        <script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws-source.js?s=<?=SESSION_ID?>" ></script> <?
+          ?>                    	        <script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.source.js?s=<?=SESSION_ID?>" ></script>
+                                                <script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.jqgrid.extend.js?s=<?=SESSION_ID?>" ></script>	 <?
     } else {
-          ?>                    	        <script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.js?s=<?=SESSION_ID?>" ></script> <?
+          ?>                    	        <script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.min.js?s=<?=SESSION_ID?>" ></script> 
+                                                <script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.jqgrid.extend.min.js?s=<?=SESSION_ID?>" ></script>	<?
     }                             
 ?>				
                                 <link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/library/normalize.css?s=<?=SESSION_ID?>" />  				
@@ -124,7 +127,7 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
 						.ui-search-toolbar{border-color:transparent}
                                                 .ui-icon-triangle-1-s {background-position: -65px -16px;} /* fix fo left sprite*/
 						.ui-jqgrid tr.jqgrow,.ui-state-active{cursor:default}	
-						li, li li, li li li {list-style-type: none; } 
+						li, li li, li li li {list-style-type: none;}                                                
 <?php 
 if (($main_db->get_param_view("render_type") > 2) and (!strrpos(HTTP_USER_AGENT, 'MSIE') == "")) $main_db -> set_param_view("render_type",2); // Проверка на эксплорер
 switch ($main_db->get_param_view("render_type")) {
@@ -170,7 +173,6 @@ break;
 	?>
 		</select><br><br>
 		<input type="hidden" name="width_enable" value="off" ><input type="checkbox" name="width_enable" id="width_enable" <?=$main_db->get_param_view("width_enable") ?>><label for="width_enable" style="font-size:80%" >Автоширина данных</label><br>
-		<input type="hidden" name="multiselect" value="off" ><input type="checkbox" name="multiselect" id="multiselect" <?=$main_db->get_param_view("multiselect") ?>><label for="multiselect" style="font-size:80%" >Множественный выбор</label><br>
 		<input type="hidden" name="editabled" value="off" ><input type="checkbox" name="editabled" id="editabled" <?=$main_db->get_param_view("editabled") ?>><label for="editabled" style="font-size:80%" >Отображать нередактируемые поля</label><br>
 		<input type="hidden" name="hide_menu" value="off" ><input type="checkbox" name="hide_menu" id="hide_menu" <?=$main_db->get_param_view("hide_menu") ?>><label for="hide_menu" style="font-size:80%" >Меню в панели вкладок</label><br><br>
 		<label for="spinner">Количество месяцев в окне выбора дат: </label><input id="num_mounth" size="2" name="num_mounth" value = "<?=$main_db->get_param_view("num_mounth")?>" /><br><br>

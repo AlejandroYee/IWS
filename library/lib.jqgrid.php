@@ -48,6 +48,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                                                                                        fft.char_mask as element_mask,
                                                                                                                        fft.char_case as element_case,
                                                                                                                 t.field_txt,
+                                                                                                                t.element_alt,
 														decode(t.is_read_only, 1, 'true', 'false') is_read_only,
 														decode(tf.is_read_only, 1, 'true', 'false') as read_only_form
 												from ".DB_USER_NAME.".wb_mm_form tf
@@ -69,40 +70,40 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						// SELECT
 						case "SB":									
 							if (strrpos($this -> return_sql($query, "FIELD_TYPE"),"multiple") === false) {
-									$multi_str = " multiple:false, h:1, ";
+									$multi_str = " ";
 								} else {
 									$filed_type = str_replace("multiple","",$filed_type);
-									$multi_str = " multiple:true, h:3, ";
+									$multi_str = " multiple:true, size:3, ";
 							}							
 							$main_dbs = new db();
 								$sd_options_content = BasicFunctions::get_select_data($main_dbs, $this -> return_sql($query, "FIELD_TXT"), 'null');	
 							$main_dbs -> __destruct();						
-							$edit_options .= ", i_type:'SB', input_type:'select', ".$multi_str." value: '".$sd_options_content."'";
+							$edit_options .= ", row_type:'SB', input_type:'select', ".$multi_str." value: '".$sd_options_content."'";
 							$sd_options = "searchoptions: {value: ':;".$sd_options_content."'}, ";
 						break;
-						case "DT": $edit_options .= ", i_type:'DT'";break;
+						case "DT": $edit_options .= ", row_type:'DT'";break;
 						// ONLY DATE
-						case "D":  $edit_options .= ", i_type:'D'";break;						
+						case "D":  $edit_options .= ", row_type:'D'";break;						
 						// MULTILINE
-						case "M":  $edit_options .= ", i_type:'M', h:'".$this -> return_sql($query, "COUNT_ELEMENT")."'";break;				
+						case "M":  $edit_options .= ", row_type:'M', h:'".$this -> return_sql($query, "COUNT_ELEMENT")."'";break;				
 						// CHEKBOX
-						case "B":  $edit_options .= ", i_type:'B', value:'1:0'";break;                                                
+						case "B":  $edit_options .= ", row_type:'B', value:'1:0'";break;                                                
 						// INTEGER
-						case "I":  $edit_options .= ", i_type:'I'";break;
+						case "I":  $edit_options .= ", row_type:'I'";break;
 						// NUMBER
-						case "N":  $edit_options .= ", i_type:'N'";break;
+						case "N":  $edit_options .= ", row_type:'N'";break;
 						// NUMBER LONG
-						case "NL": $edit_options .= ", i_type:'NL'";break;
+						case "NL": $edit_options .= ", row_type:'NL'";break;
 						// CURRENCIS
-						case "C":  $edit_options .= ", i_type:'C'";break;
+						case "C":  $edit_options .= ", row_type:'C'";break;
 						// PASSWORD
-						case "P":  $edit_options .= ", i_type:'P'";break;					
+						case "P":  $edit_options .= ", row_type:'P'";break;					
 					}
                                         // отдельный масковый элемент
                                         if (substr($this -> return_sql($query, "FIELD_TYPE_SUM"),0,1) == "U") {
-                                            $edit_options .= ", i_type:'MAS', mask:'".$this -> return_sql($query, "ELEMENT_MASK")."', case:'".$this -> return_sql($query, "ELEMENT_CASE")."'";
+                                            $edit_options .= ", row_type:'MAS', mask:'".$this -> return_sql($query, "ELEMENT_MASK")."', case:'".$this -> return_sql($query, "ELEMENT_CASE")."'";
                                         }
-					$edit_options .= ", w:'".$this -> return_sql($query, "L_NAME")."'";
+					$edit_options .= ", title:'".$this -> return_sql($query, "element_alt")."', w:'".$this -> return_sql($query, "L_NAME")."'";
 					 
 					// Создаем заголовок					
 					$ResArray['colNames'] .= ",
@@ -236,7 +237,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                 sortable: true,
                                 caption: '<?=$ResArray['Title']?>',
                                 ignoreCase: true,
-                                viewrecords: true,	
+                                viewrecords: true,
+                                multiselect:true,
                                 scrollOffset: 17,
                                 hidegrid: false,
                                 width: 500,
@@ -307,6 +309,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                 },
                                 gridComplete: function() {	// на случай невыбранной ноды после обновления в дереве				
                                         var grid_type = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + $(this).attr('id') + "']").attr('form_type');
+                                        $(this).jqGrid('hideCol', 'cb');
                                         if (grid_type == "TREE_GRID_FORM_MASTER" || grid_type == "TREE_GRID_FORM" || grid_type == "TREE_GRID_FORM_DETAIL") {								
                                                 $('#<?=$object_name?>').jqGrid('setGridParam',{editurl:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?type=<?=$type?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=&id_mm=', page:1});							
                                         };											
@@ -316,6 +319,38 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                         clearInterval(grid_load_<?=$object_name?>_intval);
                                         grid_load_<?=$object_name?>_time = 0;						
                                         $("#load_<?=$object_name?>").html(" ");                                        
+                                },
+                                beforeSelectRow: function (rowid, e) {
+                                            var grid = $(this);
+                                            if (!e.ctrlKey && !e.shiftKey) {
+                                                grid.jqGrid('resetSelection');
+                                            }
+                                            else if (e.shiftKey) {
+                                                var initialRowSelect = grid.jqGrid('getGridParam', 'selrow');
+                                                grid.jqGrid('resetSelection');
+
+                                                var CurrentSelectIndex = grid.jqGrid('getInd', rowid);
+                                                var InitialSelectIndex = grid.jqGrid('getInd', initialRowSelect);
+                                                var startID = "";
+                                                var endID = "";
+                                                if (CurrentSelectIndex > InitialSelectIndex) {
+                                                    startID = initialRowSelect;
+                                                    endID = rowid;
+                                                }
+                                                else {
+                                                    startID = rowid;
+                                                    endID = initialRowSelect;
+                                                }
+
+                                                var shouldSelectRow = false;
+                                                $.each(grid.getDataIDs(), function(_, id){
+                                                    if ((shouldSelectRow = id == startID || shouldSelectRow)){
+                                                      grid.jqGrid('setSelection', id, false);
+                                                    }
+                                                    return id != endID;                        
+                                                });
+                                            }
+                                            return true;
                                 },
                                 beforeRequest: function() {
                                                 var postdata = $(this).getGridParam('postData');
@@ -361,15 +396,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                 loadError: function(xhr,status, err){ 
                                                                 custom_alert(xhr.responseText);
                                         }
-                                <?php
-                                // Множественный выбор
-                                if (($this->db_conn->get_param_view("multiselect") == "checked") and ($type != "TREE_GRID_FORM_DETAIL") and (stripos($type,"_MASTER") === false)) {		
-                                        ?> 
-                                                     ,
-                                                     multiselect:true
-                                        <?php
-                                }		
-                                
+                                <?php                               
                                 // Эсли это просто дерево:
                                 if (($type == "TREE_GRID_FORM") or ($type == "TREE_GRID_FORM_MASTER") or ($type == "TREE_GRID_FORM_DETAIL")) 	{
                                         ?>	
@@ -443,17 +470,15 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                                             } else {
                                                                         var recreate = true;
                                                                         $('#<?=$object_name?>').removeAttr('new_colmodel');
-                                                                }
+                                                                }                                                                
                                                       $('#<?=$object_name?>').jqGrid('editGridRow','new',{
-                                                                                        viewPagerButtons:false,
-                                                                                        closeOnEscape:true,
                                                                                         addedrow:'last',
                                                                                         recreateForm: recreate,
-                                                                                        reloadAfterSubmit:false,
-                                                                                        closeAfterAdd:true,																
+                                                                                        editCaption: "Добавить новую запись",
+                                                                                        reloadAfterSubmit:false,															
                                                                                                 afterSubmit: function(response, postdata) {
                                                                                                     $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
-                                                                                                        if (response.responseText.length > 0) {																				
+                                                                                                        if (response.responseText.length > 0) {	
                                                                                                                 if (response.responseText.length > 20) {
                                                                                                                         custom_alert(response.responseText);																			
                                                                                                                 } else {																				
@@ -481,20 +506,12 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               title: 'Скопировать выбранную запись в новую запись (Кнопка C)',
                                               buttonicon: 'ui-icon-transferthick-e-w',
                                               onClickButton: function() {
-                                                                        if ($('#<?=$object_name?>').attr('new_colmodel') === "false" || typeof($('#<?=$object_name?>').attr('new_colmodel')) === "undefined" ) {                                                                                                                               
-                                                                                var recreate = false;														
-                                                                                    } else {
-                                                                                var recreate = true;
-                                                                                $('#<?=$object_name?>').removeAttr('new_colmodel');
-                                                                        }
-									row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
+                                                                        $('#<?=$object_name?>').removeAttr('new_colmodel');
+									row_id = $('#<?=$object_name?>').jqGrid('getGridParam', 'selrow');
+                                                                        
                                                     $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{
-                                                                                viewPagerButtons:false,
-                                                                                closeOnEscape:true,
-                                                                                recreateForm:recreate,
-                                                                                reloadAfterSubmit:true,																	
-                                                                                editCaption: "Скопировать запись",
-                                                                                closeAfterEdit:true,																		
+                                                                                recreateForm:true,																
+                                                                                editCaption: "Скопировать запись",																
                                                                         afterSubmit: function(response, postdata)  {
                                                                                 $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
                                                                                         if (response.responseText.length > 0) {																				
@@ -507,17 +524,17 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                                                                 return [true,"Ok"];
                                                                                         }
                                                                               },
-                                                                                serializeEditData: function (data) {
-                                                                                        data.oper = 'add'; 
+                                                                         serializeEditData: function (data) {
+                                                                                        data.oper = 'add';
                                                                                         return data;
                                                                                 },
-                                                                                beforeSubmit : function(postdata, formid) {
+                                                                         beforeSubmit : function(postdata, formid) {                                                                            
                                                                                         if (check_form(formid)) {
-                                                                                                $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
-                                                                                                return [true,'']; 
+                                                                                            $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+                                                                                            return [true,'']; 
                                                                                         } 
-                                                                                }
-                                                });                                                     
+                                                                         }
+                                                });                                                    
                                                }
 											   
 							})
@@ -543,14 +560,14 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                                                 reloadAfterSubmit:false,
                                                                                 closeAfterEdit:true,																		
                                                                         afterSubmit: function(response, postdata)  {
-                                                                            $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
-                                                                                        if (response.responseText.length > 0) {
+                                                                            $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');                                                                             
+                                                                                        if (response.responseText.length > 20) {
                                                                                                 custom_alert(response.responseText);																			
                                                                                         } else {
-                                                                                                return [true,"Ok"];
+                                                                                                return [true,"Ok",response.responseText];
                                                                                         }       
                                                                                 },
-                                                                                beforeSubmit : function(postdata, formid) {
+                                                                        beforeSubmit : function(postdata, formid) {
                                                                                         if (check_form(formid)) {
                                                                                                 $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
                                                                                                 return [true,'']; 
@@ -723,24 +740,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                    if (typeof(tree_leaf) !== 'undefined' || tree_leaf  === "false") {
                        $('#'+ids).find('.treeclick').click();  
                    }
-		break;  
-                 case 40: // down
-		 if (eventObject.ctrlKey === false) {
-                     toppos = $('#<?=$object_name?>').find('#' + $('#<?=$object_name?>').jqGrid('getGridParam', 'selrow')).position().top;
-                     toppos = toppos - $('#<?=$object_name?>').parent().parent().height()/2;
-                     $('#<?=$object_name?>').parent().parent().scrollTop(toppos); 
-                     $('#<?=$object_name?>').find('.ui-state-hover').removeClass('ui-state-hover');
-                     
-                 }
-		break;  
-                case 38: // down
-		 if (eventObject.ctrlKey === false) {
-                     toppos = $('#<?=$object_name?>').find('#' + $('#<?=$object_name?>').jqGrid('getGridParam', 'selrow')).position().top;
-                     toppos = toppos - $('#<?=$object_name?>').parent().parent().height()/2;
-                     $('#<?=$object_name?>').parent().parent().scrollTop(toppos); 
-                     $('#<?=$object_name?>').find('.ui-state-hover').removeClass('ui-state-hover');
-                 }
-		break;  
+		break; 
         };
           });      
 	});
@@ -823,7 +823,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 											onClickButton : function () {												
 													row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selarrrow');
 																	if ($.isArray(row_id) && row_id != "") {																	
-																			$('#<?=$button_name?>').attr('grid_row',row_id);
+																			$('#<?=$button_name?>').attr('grid_row',row_id);                                                                                                                                                       
 																			$('#<?=$button_name?>').dialog( 'open' );															
 																	} else {
 																			row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');																			
@@ -846,8 +846,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								click: function () {							
 									$('#ajax_<?=$button_name?>').show();
                                                                         $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
-									$('.ui-dialog-buttonpane').hide();
-											$.ajax({
+									$('.ui-dialog-buttonpane').hide();									 
+                                                                                    $.ajax({
 											  url: '<?=ENGINE_HTTP?>/ajax.saveparams.php?id_mm_fr=<?=$id?>&rowid=' + $('#<?=$button_name?>').attr('grid_row'),
 											  processData: false,
 											  datatype:'json',
@@ -881,10 +881,11 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 							$( this ).dialog( 'close' );
 						},
 						open: function() {
+                                                                var self = $(this).parent();
 								$('#ajax_<?=$button_name?>').hide();
-								$('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}});
-								$('.ui-dialog-buttonpane').find('button:contains("Выполнить")').button({icons: { primary: 'ui-icon-check'}});
-								$(this).parent().parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
+								self.children('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}});
+								self.children('.ui-dialog-buttonpane').find('button:contains("Выполнить")').button({icons: { primary: 'ui-icon-check'}});
+								self.parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
 								redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
 						}						
 			});
@@ -990,9 +991,10 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 							$( this ).dialog( 'close' );
 						},
 						open: function() {
-								$(this).parent().children('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_o_<?=$last_grid_name?>');
-								$(this).parent().children('.ui-dialog-buttonpane').find('button:contains("Загрузить")').button({icons: { primary: 'ui-icon-arrowthickstop-1-s'}}).prop('id','btn_<?=$last_grid_name?>');
-								$(this).parent().parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
+                                                                var self = $(this).parent();
+								self.children('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_o_<?=$last_grid_name?>');
+								self.children('.ui-dialog-buttonpane').find('button:contains("Загрузить")').button({icons: { primary: 'ui-icon-arrowthickstop-1-s'}}).prop('id','btn_<?=$last_grid_name?>');
+								self.children.parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
 								redraw_document();
 						}			
 			});			
@@ -1099,13 +1101,10 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 							$( this ).dialog( 'close' );
 						},
 						open: function() {
-								$('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_o_<?=$object_name?>');
-								$('.ui-dialog-buttonpane').find('button:contains("Экспортировать")').button({icons: { primary: 'ui-icon-disk'}}).prop('id','btn_e_<?=$object_name?>');
-								$('.ui-dialog-buttonpane').find('button:contains("Быстрый экспорт")').button({icons: { primary: 'ui-icon-arrowthickstop-1-s'},text:false}).prop('id','btn_f_<?=$object_name?>').attr('title','Быстрый экспорт в csv только текущей страницы со всем содержимым');
-								if ($.browser.msie) {									
-									$('#btn_f_<?=$object_name?>').button('option', 'disabled', true );	
-								}
-								$(this).parent().parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
+                                                                var self = $(this).parent();
+								self.children('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_o_<?=$object_name?>');
+								self.children('.ui-dialog-buttonpane').find('button:contains("Экспортировать")').button({icons: { primary: 'ui-icon-disk'}}).prop('id','btn_e_<?=$object_name?>');
+								self.children.parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
 								redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
 						}
 					});	

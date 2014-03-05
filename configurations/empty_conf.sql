@@ -7,11 +7,7 @@ grant create session, create table, create procedure,
       create sequence, create view, create trigger,
       create synonym, create materialized view,
       query rewrite, create any directory, create type,
-      dba, aq_administrator_role to USER_NAME;
-	  
-	  
-После импорта обязательно обновить:
-update wb_mm_form t set t.owner = 'USER_NAME'
+      dba, aq_administrator_role to USER_NAME;	  
 */
 
 
@@ -131,7 +127,6 @@ create table WB_MM_FORM
   action_sql        VARCHAR2(2000),
   object_name       VARCHAR2(255),
   xsl_file_in       VARCHAR2(255),
-  html_img          VARCHAR2(255),
   xsl_file_out      VARCHAR2(255),
   create_user       VARCHAR2(50) not null,
   create_date       DATE not null,
@@ -233,7 +228,7 @@ create table WB_FORM_FIELD
   xls_position_col       NUMBER,
   xls_position_row       NUMBER,
   is_requred             NUMBER default 0,
-  fl_html_code           NUMBER default 0,
+  element_alt            VARCHAR2(2000) default null,
   create_user            VARCHAR2(50) not null,
   create_date            DATE not null,
   last_user              VARCHAR2(50) not null,
@@ -626,7 +621,7 @@ prompt
 prompt Creating view WB_FORM_FIELD_
 prompt ============================
 prompt
-create or replace force view wb_form_field_ as
+create or replace view wb_form_field_ as
 select t.id_wb_mm_form,
        t.num,
        t.name,
@@ -634,7 +629,7 @@ select t.id_wb_mm_form,
        t.id_wb_form_field_align,
        t.xls_position_col,
        t.xls_position_row,
-       t.fl_html_code,
+       t.element_alt,
        t.field_type
   from wb_form_field t;
 
@@ -658,7 +653,7 @@ select t.id_wb_form_field id_wb_form_field_view,
        t.xls_position_col,
        t.xls_position_row,
        t.is_requred,
-       t.fl_html_code,
+       t.element_alt,
        t.create_user,
        t.create_date,
        t.last_user,
@@ -764,7 +759,6 @@ select t.id_wb_mm_form id_wb_mm_form_view,
        t.action_sql,
        t.object_name,
        t.xsl_file_in,
-       t.html_img,
        nvl(t.auto_update,0) auto_update,
        t.create_user,
        t.create_date,
@@ -2045,29 +2039,27 @@ prompt
 prompt Creating trigger T_B_IU_WB_USER
 prompt ===============================
 prompt
-CREATE OR REPLACE TRIGGER "T_B_IU_WB_USER"
-BEFORE INSERT OR UPDATE
-ON WB_USER
-FOR EACH ROW
-BEGIN
-  if INSERTING then
-    if :new.ID_WB_USER is null then
-      Select GEN_WB_USER.nextval
-        into :new.ID_WB_USER
-        from dual;
-    end if;
-    :new.CREATE_USER := nvl(wb.get_wb_user, USER);
-    :new.CREATE_DATE := sysdate;
-    :new.LAST_USER   := nvl(wb.get_wb_user, USER);
-    :new.LAST_DATE   := sysdate;
-    :new.wb_name     := upper(:new.wb_name);
-  end if;
-  if UPDATING then
-    :new.LAST_USER   := nvl(wb.get_wb_user, USER);
-    :new.LAST_DATE   := sysdate;
-    :new.wb_name     := upper(:new.wb_name);
-  end if;
-END;
+create or replace trigger "T_B_IU_WB_USER"
+   before insert or update or delete on wb_user
+   for each row
+begin
+   if inserting then
+      if :new.id_wb_user is null then
+         select gen_wb_user.nextval into :new.id_wb_user from dual;
+      end if;
+      :new.create_user := nvl(wb.get_wb_user, user);
+      :new.create_date := sysdate;
+      :new.last_user := nvl(wb.get_wb_user, user);
+      :new.last_date := sysdate;
+      :new.wb_name := upper(:new.wb_name);
+   elsif updating then
+      :new.last_user := nvl(wb.get_wb_user, user);
+      :new.last_date := sysdate;
+      :new.wb_name := upper(:new.wb_name);
+   else
+      delete from wb_role_user u where u.id_wb_user = :old.id_wb_user;
+   end if;
+end;
 /
 
 prompt
@@ -2137,9 +2129,9 @@ DECLARE
 BEGIN
   if INSERTING then
     insert into wb_form_field(id_wb_form_field,id_wb_mm_form,num,name,field_name,field_txt,id_wb_form_field_align,field_type,
-                             is_read_only,count_element,width,xls_position_col,xls_position_row,is_requred,fl_html_code)
+                             is_read_only,count_element,width,xls_position_col,xls_position_row,is_requred,element_alt)
       values (null,:new.id_wb_mm_form_view,:new.num,:new.name,:new.field_name,:new.field_txt,:new.id_wb_form_field_align,:new.field_type,
-              :new.is_read_only,:new.count_element,:new.width,:new.xls_position_col,:new.xls_position_row,:new.is_requred,:new.fl_html_code)
+              :new.is_read_only,:new.count_element,:new.width,:new.xls_position_col,:new.xls_position_row,:new.is_requred,:new.element_alt)
                              RETURNING id_wb_form_field INTO l_id;
 
   dbms_session.set_context('CLIENTCONTEXT', 'rowid',l_id );
@@ -2159,7 +2151,7 @@ BEGIN
       ff.xls_position_col       = :new.xls_position_col,
       ff.xls_position_row       = :new.xls_position_row,
       ff.is_requred             = :new.is_requred,
-      ff.fl_html_code           = :new.fl_html_code
+      ff.element_alt           = :new.element_alt
       where ff.id_wb_form_field = l_id;
   else
     delete
@@ -2219,10 +2211,10 @@ begin
   end if;
 
   if INSERTING then
-    insert into wb_mm_form(id_wb_mm_form, id_wb_main_menu,num,name,id_wb_form_type,action_sql,object_name,html_img,
+    insert into wb_mm_form(id_wb_mm_form, id_wb_main_menu,num,name,id_wb_form_type,action_sql,object_name,
                              xsl_file_in,form_where,id_wb_chart_type,is_read_only,chart_show_name,chart_rotate_name,
                              chart_x,chart_y,chart_dec_prec,height_rate,owner,edit_button,auto_update,form_order)
-      values (null,n_id,:new.num,:new.name,:new.id_wb_form_type,:new.action_sql,:new.object_name,:new.html_img,
+      values (null,n_id,:new.num,:new.name,:new.id_wb_form_type,:new.action_sql,:new.object_name,
               :new.xsl_file_in,:new.form_where,:new.id_wb_chart_type,:new.is_read_only,:new.chart_show_name,:new.chart_rotate_name,
               :new.chart_x,:new.chart_y,:new.chart_dec_prec,:new.height_rate,:new.owner,:new.edit_button,:new.auto_update, upper(:new.form_order))
               returning id_wb_mm_form into l_id;
@@ -2236,7 +2228,6 @@ begin
       mf.id_wb_form_type   = :new.id_wb_form_type,
       mf.action_sql        = :new.action_sql,
       mf.object_name       = :new.object_name,
-      mf.html_img          = :new.html_img,
       mf.xsl_file_in       = :new.xsl_file_in,
       mf.form_where        = :new.form_where,
       mf.id_wb_chart_type  = :new.id_wb_chart_type,
@@ -2450,32 +2441,32 @@ insert into WB_MAIN_MENU (id_wb_main_menu, id_parent, num, name, create_user, cr
 values (-10, -1, 6, 'Описание параметров', 'LOADER', sysdate, 'LOADER', sysdate, 1);
 prompt 10 records loaded
 prompt Loading WB_MM_FORM...
-insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in, html_img, xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
-values (-1, -3, 1, 'Главное меню', -11, null, 'WB_MAIN_MENU_VIEW_TREE_USV', null, null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, 0, 0, 0, 100, '', null, 'A,E,D', 0);
-insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in, html_img, xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
-values (-2, -4, 1, 'Формы', -8, null, 'WB_MM_FORM_VIEW', null, null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, null, null, null, 70, '', null, 'A,E,D', 0);
-insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in, html_img, xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
-values (-4, -4, 2, 'Столбцы', -9, null, 'WB_FORM_FIELD_VIEW', null, null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, null, null, null, 30, '', null, 'A,E,D', 0);
-insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in, html_img, xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
-values (-5, -5, 1, 'Типы выравниваний полей', -6, null, 'WB_FORM_FIELD_ALIGN', null, null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, 0, 0, 0, 0, '', null, 'A,E,D', 0);
-insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in, html_img, xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
-values (-6, -6, 2, 'Ячейки', -9, null, 'WB_FORM_CELLS_VIEW', null, null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, null, null, null, 70, '', null, 'A,E,D', 0);
-insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in, html_img, xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
-values (-7, -8, 1, 'Пользователи', -8, null, 'WB_USER', null, null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, null, null, null, null, null, 50, '', null, 'A,E,D', 0);
-insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in, html_img, xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
-values (-8, -9, 1, 'Роли', -8, null, 'WB_ROLE', null, null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, 0, 0, 0, 30, '', null, 'A,E,D', 0);
-insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in, html_img, xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
-values (-9, -8, 2, 'Права доступа', -9, null, 'WB_ROLE_USER', null, null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, 0, 0, 0, 50, '', null, 'A,E,D', 0);
-insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in, html_img, xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
-values (-11, -9, 2, 'Главное меню', -9, null, 'WB_MM_ROLE', null, null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, 0, 0, 0, 70, '', null, 'A,E,D', 0);
-insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in, html_img, xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
-values (-3, -7, 1, 'Глобальные переменные', -11, null, 'WB_SETTINGS_VIEW_TREE', null, null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, null, null, null, null, '', null, 'A,E,D', 0);
-insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in, html_img, xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
-values (-10, -5, 2, 'Формы', -9, null, 'WB_MM_FORM_VIEW', null, null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, null, null, null, null, null, 50, '', null, 'A,E,D', 0);
-insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in, html_img, xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
-values (-12, -6, 1, 'Формы', -8, null, 'WB_MM_FORM_VIEW', null, null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, null, null, null, 30, '', null, 'A,E,D', 0);
-insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in, html_img, xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
-values (-13, -10, 1, 'Описание сохраняемых параметров', -8, null, 'WB_PARAM_TYPE', null, null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, null, null, null, 100, '', null, 'A,E,D', 0);
+insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in,  xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
+values (-1, -3, 1, 'Главное меню', -11, null, 'WB_MAIN_MENU_VIEW_TREE_USV', null, null,  'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, 0, 0, 0, 100, '', null, 'A,E,D', 0);
+insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in,  xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
+values (-2, -4, 1, 'Формы', -8, null, 'WB_MM_FORM_VIEW', null, null,  'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, null, null, null, 70, '', null, 'A,E,D', 0);
+insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in,  xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
+values (-4, -4, 2, 'Столбцы', -9, null, 'WB_FORM_FIELD_VIEW', null, null,  'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, null, null, null, 30, '', null, 'A,E,D', 0);
+insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in,  xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
+values (-5, -5, 1, 'Типы выравниваний полей', -6, null, 'WB_FORM_FIELD_ALIGN', null, null,  'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, 0, 0, 0, 0, '', null, 'A,E,D', 0);
+insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in,  xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
+values (-6, -6, 2, 'Ячейки', -9, null, 'WB_FORM_CELLS_VIEW', null, null,  'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, null, null, null, 70, '', null, 'A,E,D', 0);
+insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in,  xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
+values (-7, -8, 1, 'Пользователи', -8, null, 'WB_USER', null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, null, null, null, null, null, 50, '', null, 'A,E,D', 0);
+insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in,  xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
+values (-8, -9, 1, 'Роли', -8, null, 'WB_ROLE', null, null,  'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, 0, 0, 0, 30, '', null, 'A,E,D', 0);
+insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in,  xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
+values (-9, -8, 2, 'Права доступа', -9, null, 'WB_ROLE_USER', null, null,  'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, 0, 0, 0, 50, '', null, 'A,E,D', 0);
+insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in,  xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
+values (-11, -9, 2, 'Главное меню', -9, null, 'WB_MM_ROLE', null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, 0, 0, 0, 70, '', null, 'A,E,D', 0);
+insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in,  xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
+values (-3, -7, 1, 'Глобальные переменные', -11, null, 'WB_SETTINGS_VIEW_TREE', null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, null, null, null, null, '', null, 'A,E,D', 0);
+insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in,  xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
+values (-10, -5, 2, 'Формы', -9, null, 'WB_MM_FORM_VIEW', null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, null, null, null, null, null, 50, '', null, 'A,E,D', 0);
+insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in,  xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
+values (-12, -6, 1, 'Формы', -8, null, 'WB_MM_FORM_VIEW', null, null, 'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, null, null, null, 30, '', null, 'A,E,D', 0);
+insert into WB_MM_FORM (id_wb_mm_form, id_wb_main_menu, num, name, id_wb_form_type, action_sql, object_name, xsl_file_in,  xsl_file_out, create_user, create_date, last_user, last_date, form_where, id_wb_chart_type, is_read_only, chart_show_name, chart_rotate_name, chart_x, chart_y, chart_dec_prec, height_rate, owner, action_bat, edit_button, auto_update)
+values (-13, -10, 1, 'Описание сохраняемых параметров', -8, null, 'WB_PARAM_TYPE', null, null,  'LOADER', sysdate, 'LOADER', sysdate, null, null, 0, 0, 0, null, null, null, 100, '', null, 'A,E,D', 0);
 prompt 13 records loaded
 prompt Loading WB_FORM_CELLS...
 prompt Table is empty
@@ -2490,375 +2481,380 @@ insert into WB_FORM_FIELD_ALIGN (id_wb_form_field_align, name, html_txt, create_
 values (4, 'По ширине ', 'justify', 'LOADER', sysdate, 'LOADER', sysdate);
 prompt 4 records loaded
 prompt Loading WB_FORM_FIELD...
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-137, -4, 32, 'XLS Верт.позиция', 'XLS_POSITION_ROW', null, null, 3, 'I', 0, null, 90, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-136, -4, 33, 'Обязательное поле', 'IS_REQURED', null, null, 2, 'B', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-143, -4, 15, 'Тип поля', 'FIELD_TYPE', null, 'Select upper(trim(id)) id, name from wb_field_type', 1, 'SB', 0, 0, 150, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-135, -5, 1, 'ID (not display)', 'ID_WB_FORM_FIELD_ALIGN', null, null, 3, 'I', 1, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-134, -5, 2, 'Наименование', 'NAME', null, null, 1, 'S', 0, 0, 420, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-133, -5, 3, 'Комментарий', 'HTML_TXT', null, null, 1, 'S', 0, null, 110, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-132, -5, 91, 'Создатель', 'CREATE_USER', null, null, 1, 'S', 1, 0, 150, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-131, -5, 94, 'Датаредактирования', 'LAST_DATE', null, null, 1, 'D', 1, 0, 120, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-130, -6, 1, 'ID (not display)', 'ID_WB_FORM_CELLS_VIEW', null, null, 3, 'I', 1, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-129, -6, 3, '№ п.п.', 'NUM', null, null, 3, 'I', 0, 0, 30, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-128, -6, 10, 'Текст', 'NAME', null, null, 1, 'S', 0, 0, 150, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-127, -6, 11, 'SQL', 'FIELD_TXT', null, null, 1, 'M', 0, 3, 400, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-123, -6, 31, 'XLS Гор.позиция', 'XLS_POSITION_COL', null, null, 3, 'I', 0, null, 90, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-122, -6, 32, 'XLS Верт.позиция', 'XLS_POSITION_ROW', null, null, 3, 'I', 0, null, 90, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-121, -6, 33, 'XLS Тип', 'XLS_TYPE', null, null, 1, 'S', 0, null, 40, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-125, -6, 17, 'Тип поля', 'FIELD_TYPE', null, 'Select upper(trim(id)) id, name from wb_field_type', 1, 'SB', 0, 0, 80, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-126, -6, 12, 'Алиас поля', 'FIELD_NAME', null, null, 1, 'S', 0, 0, 100, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-124, -6, 21, 'Тип ячейки', 'TYPE_CELLS', null, 'Select id, name  from (Select ''H''  id,  ''H - Шапка отчета''  name from dual union all        Select ''F''  id,  ''F - Подвал отчета'' name from dual)  order by id', 1, 'SB', 0, null, 100, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-119, -7, 1, 'ID (not display)', 'ID_WB_USER', null, null, 3, 'I', 1, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-118, -7, 3, 'Имя пользователя', 'NAME', null, null, 1, 'S', 0, 0, 300, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-115, -7, 91, 'Создатель', 'CREATE_USER', null, null, 1, 'S', 1, 0, 150, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-114, -7, 92, 'Дата создания', 'CREATE_DATE', null, null, 1, 'D', 1, 0, 120, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-113, -7, 94, 'Датаредактирования', 'LAST_DATE', null, null, 1, 'D', 1, 0, 120, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-112, -8, 1, 'ID (not display)', 'ID_WB_ROLE', null, null, 3, 'I', 1, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-111, -8, 2, 'Наименование', 'WB_NAME', null, null, 1, 'S', 0, 0, 310, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-110, -8, 3, 'Комментарий', 'NAME', null, null, 1, 'S', 0, null, 630, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-109, -8, 91, 'Создатель', 'CREATE_USER', null, null, 1, 'S', 1, 0, 150, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-108, -8, 92, 'Дата создания', 'CREATE_DATE', null, null, 1, 'D', 1, 0, 120, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-107, -8, 93, 'Последнийредактор', 'LAST_USER', null, null, 1, 'S', 1, 0, 150, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-106, -9, 1, 'ID (not display)', 'ID_WB_ROLE_USER', null, null, 3, 'I', 1, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-105, -9, 2, 'Наименование роли', 'ID_WB_ROLE', null, 'Select * from (' || chr(10) || '  select t.id_wb_role id,' || chr(10) || '         t.name name ' || chr(10) || '  from wb_role t ' || chr(10) || 'union all' || chr(10) || '  Select null id, ' || chr(10) || '         null name ' || chr(10) || '  from dual) t ' || chr(10) || 'order by t.name nulls first', 1, 'SB', 0, 0, 290, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-104, -9, 91, 'Создатель', 'CREATE_USER', null, null, 1, 'S', 1, 0, 150, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-103, -11, 1, 'ID (not display)', 'ID_WB_MM_ROLE', null, null, 3, 'I', 1, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-102, -11, 2, 'Главное меню', 'ID_WB_MAIN_MENU', null, 'Select mm.id_wb_main_menu_view_tree id, mm.tree_name name,mm.lev lev from wb_main_menu_view_tree mm', 1, 'SB', 0, 0, 300, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-101, -11, 4, 'Тип доступа', 'ID_WB_ACCESS_TYPE', null, 'Select * from (' || chr(10) || 'select t.id_wb_access_type id,' || chr(10) || '       t.name name' || chr(10) || '       from wb_access_type t) t' || chr(10) || 'order by t.name desc', 1, 'SB', 0, null, 110, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-100, -11, 91, 'Создатель', 'CREATE_USER', null, null, 1, 'S', 1, 0, 150, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-99, -11, 92, 'Дата создания', 'CREATE_DATE', null, null, 1, 'D', 1, 0, 120, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-98, -11, 93, 'Последнийредактор', 'LAST_USER', null, null, 1, 'S', 1, 0, 150, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-120, -6, 91, 'Создатель', 'CREATE_USER', null, null, 1, 'S', 1, 0, 150, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-4, -3, 0, '# п/п (not display)', 'R_NUM', null, null, 3, 'I', 1, null, 80, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-3, -3, 50, 'ID_PARENT', 'ID_PARENT', null, null, 3, 'N', 0, null, 200, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-2, -3, 93, 'Последний редактор', 'LAST_USER', null, null, 1, 'S', 1, null, 150, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-45, -12, 34, 'Скрипт пост загрузки', 'ACTION_BAT', null, null, 1, 'S', 0, null, 300, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-46, -10, 34, 'Скрипт пост загрузки', 'ACTION_BAT', null, null, 1, 'S', 0, null, 300, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-44, -2, 34, 'Скрипт пост загрузки', 'ACTION_BAT', null, null, 1, 'S', 0, null, 300, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-1, -3, 92, 'Дата создания', 'CREATE_DATE', null, null, 1, 'D', 1, null, 120, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-37, -1, 94, 'Дата редактирования', 'LAST_DATE', null, null, 1, 'D', 1, null, 120, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-36, -2, 0, '# п/п (not display)', 'R_NUM', null, null, 3, 'I', 1, null, 80, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-35, -2, 91, 'Создатель', 'CREATE_USER', null, null, 1, 'S', 1, null, 150, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-34, -2, 92, 'Дата создания', 'CREATE_DATE', null, null, 1, 'D', 1, null, 120, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-33, -2, 94, 'Дата редактирования', 'LAST_DATE', null, null, 1, 'D', 1, null, 120, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-32, -4, 0, '# п/п (not display)', 'R_NUM', null, null, 3, 'I', 1, null, 80, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-31, -4, 91, 'Создатель', 'CREATE_USER', null, null, 1, 'S', 1, null, 150, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-30, -4, 92, 'Дата создания', 'CREATE_DATE', null, null, 1, 'D', 1, null, 120, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-29, -4, 93, 'Последний редактор', 'LAST_USER', null, null, 1, 'S', 1, null, 150, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-28, -4, 94, 'Дата редактирования', 'LAST_DATE', null, null, 1, 'D', 1, null, 120, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-27, -5, 0, '# п/п (not display)', 'R_NUM', null, null, 3, 'I', 1, null, 80, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-26, -5, 92, 'Дата создания', 'CREATE_DATE', null, null, 1, 'D', 1, null, 120, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-25, -5, 93, 'Последний редактор', 'LAST_USER', null, null, 1, 'S', 1, null, 150, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-24, -6, 0, '# п/п (not display)', 'R_NUM', null, null, 3, 'I', 1, null, 80, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-23, -6, 92, 'Дата создания', 'CREATE_DATE', null, null, 1, 'D', 1, null, 120, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-22, -6, 93, 'Последний редактор', 'LAST_USER', null, null, 1, 'S', 1, null, 150, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-21, -6, 94, 'Дата редактирования', 'LAST_DATE', null, null, 1, 'D', 1, null, 120, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-20, -7, 0, '# п/п (not display)', 'R_NUM', null, null, 3, 'I', 1, null, 80, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-19, -7, 2, 'Login', 'WB_NAME', null, null, 1, 'S', 0, 0, 300, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-18, -7, 93, 'Последний редактор', 'LAST_USER', null, null, 1, 'S', 1, null, 150, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-17, -8, 0, '# п/п (not display)', 'R_NUM', null, null, 3, 'I', 1, null, 80, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-16, -8, 94, 'Дата редактирования', 'LAST_DATE', null, null, 1, 'D', 1, null, 120, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-15, -9, 0, '# п/п (not display)', 'R_NUM', null, null, 3, 'I', 1, null, 80, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-14, -9, 92, 'Дата создания', 'CREATE_DATE', null, null, 1, 'D', 1, null, 120, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-13, -9, 93, 'Последний редактор', 'LAST_USER', null, null, 1, 'S', 1, null, 150, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-12, -9, 94, 'Дата редактирования', 'LAST_DATE', null, null, 1, 'D', 1, null, 120, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-11, -11, 0, '# п/п (not display)', 'R_NUM', null, null, 3, 'I', 1, null, 80, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-10, -11, 94, 'Дата редактирования', 'LAST_DATE', null, null, 1, 'D', 1, null, 120, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-9, -12, 0, '# п/п (not display)', 'R_NUM', null, null, 3, 'I', 1, null, 80, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-8, -12, 93, 'Последний редактор', 'LAST_USER', null, null, 1, 'S', 1, null, 150, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-7, -10, 0, '# п/п (not display)', 'R_NUM', null, null, 3, 'I', 1, null, 80, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-6, -10, 92, 'Дата создания', 'CREATE_DATE', null, null, 1, 'D', 1, null, 120, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-5, -10, 94, 'Дата редактирования', 'LAST_DATE', null, null, 1, 'D', 1, null, 120, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-40, -1, 0, '# п/п (not display)', 'R_NUM', null, null, 3, 'I', 1, null, 80, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-39, -1, 6, 'Наименование', 'NAME', null, null, 1, 'S', 0, 0, 450, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-38, -1, 91, 'Создатель', 'CREATE_USER', null, null, 1, 'S', 1, null, 150, null, null, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-43, -1, 5, '№ п.п.', 'NUM', null, null, 3, 'I', 0, 0, 30, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-152, -2, 44, 'Графики (Ширина)', 'CHART_X', null, null, 3, 'I', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-151, -2, 45, 'Графики (Высота)', 'CHART_Y', null, null, 3, 'I', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-75, -10, 1, 'ID (not display)', 'ID_WB_MM_FORM_VIEW', null, null, 3, 'I', 1, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-139, -4, 24, 'Только для чтения', 'IS_READ_ONLY', null, null, 2, 'B', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-140, -4, 23, 'Кол-во элементов', 'COUNT_ELEMENT', null, null, 3, 'I', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-141, -4, 22, 'Ширина', 'WIDTH', null, null, 3, 'I', 0, null, 60, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-97, -12, 2, 'ID (not display)', 'ID_WB_MM_FORM_VIEW', null, null, 3, 'I', 1, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-96, -12, 3, 'Главное меню', 'ID_WB_MAIN_MENU_VIEW_TREE_USV', null, 'select t.id_wb_main_menu_view_tree_usv id, t.tree_name name, t.lev lev from wb_main_menu_view_tree_usv t', 1, 'SB', 0, 0, 400, 0, 0, 1, null, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-95, -12, 5, '№ п.п.', 'NUM', null, null, 3, 'I', 0, 0, 30, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-94, -12, 7, 'Наименование', 'NAME', null, null, 1, 'S', 0, 0, 310, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-93, -12, 11, 'Тип формы', 'ID_WB_FORM_TYPE', null, 'select t.id_wb_form_type id, t.human_name || '' (''|| t.name || '')'' name' || chr(10) || '          from wb_form_type t' || chr(10) || ' order by t.name nulls first', 1, 'SB', 0, 0, 400, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-92, -12, 12, 'Высота формы (%)', 'HEIGHT_RATE', null, null, 3, 'I', 0, null, 90, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-42, -2, 14, 'Автообновление формы (сек.)', 'AUTO_UPDATE', null, null, 1, 'I', 0, null, 50, null, null, 0, null, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-41, -10, 14, 'Автообновление формы (сек.)', 'AUTO_UPDATE', null, null, 1, 'I', 0, null, 50, null, null, 0, null, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-91, -12, 13, 'Только для чтения', 'IS_READ_ONLY', null, null, 2, 'B', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
-values (-90, -12, 21, 'SQL блок:<br><font size="-3">обязательно необходимо<br>указание схемы обьекта</font>', 'ACTION_SQL', null, null, 1, 'M', 0, 10, 300, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
+values (-90, -12, 21, 'SQL блок:', 'ACTION_SQL', null, null, 1, 'M', 0, 10, 300, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-89, -12, 22, 'Схема БД', 'OWNER', null, 'select username as id, username as name ' || chr(10) || 'from sys.all_users', 1, 'SB', 0, 0, 280, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-88, -12, 23, 'Объект БД', 'OBJECT_NAME', null, null, 1, 'S', 0, null, 150, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-87, -12, 24, 'Условие в запросе', 'FORM_WHERE', null, null, 1, 'M', 0, 3, 250, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-86, -12, 31, 'Имя шаблона xls', 'XSL_FILE_IN', null, null, 1, 'S', 0, null, 220, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-85, -12, 33, 'Кнопки A,E,D', 'EDIT_BUTTON', null, 'Select ''A'' id, ''Добавление строки'' name from dual union all Select ''E'' id, ''Изменение строки'' name from dual union all Select ''С'' id, ''Копирование строки'' name from dual union all Select ''D'' id, ''Удаление строки'' name from dual union all Select ''EXP'' id, ''Экспорт документа'' name from dual' || chr(10) || '', 1, 'SB', 0, 3, 220, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-84, -12, 41, 'Тип графика', 'ID_WB_CHART_TYPE', null, 'select *  from (select t.id_wb_chart_type id,t.description || '' ('' || t.type_chart || ''->'' || t.name|| '')''  name from wb.wb_chart_type t union all select null id, null name from dual) t order by t.name nulls first', 1, 'SB', 0, null, 160, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-83, -12, 42, 'Графики (Показать подписи)', 'CHART_SHOW_NAME', null, null, 2, 'B', 0, null, 130, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-82, -12, 43, 'Графики (Повернуть подписи)', 'CHART_ROTATE_NAME', null, null, 2, 'B', 0, null, 350, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-81, -12, 44, 'Графики (Ширина)', 'CHART_X', null, null, 3, 'I', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-80, -12, 45, 'Графики (Высота)', 'CHART_Y', null, null, 3, 'I', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-78, -12, 91, 'Создатель', 'CREATE_USER', null, null, 1, 'S', 1, 0, 150, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-77, -12, 92, 'Дата создания', 'CREATE_DATE', null, null, 1, 'D', 1, 0, 120, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-76, -12, 94, 'Дата редактирования', 'LAST_DATE', null, null, 1, 'D', 1, 0, 120, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-55, -3, 1, 'ID (not display)', 'ID_WB_SETTINGS_VIEW_TREE', null, null, 3, 'I', 1, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-54, -3, 3, 'LEV', 'LEV', null, null, 3, 'I', 0, null, 90, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-53, -3, 4, 'Наименование', 'NAME', null, null, 1, 'S', 0, 0, 550, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-52, -3, 5, '№ п.п.', 'NUM', null, null, 3, 'I', 0, 0, 30, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-51, -3, 6, 'Уникальный ключ', 'SHORT_NAME', null, null, 1, 'S', 0, 0, 400, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-50, -3, 7, 'Зачение параметра', 'VALUE', null, null, 1, 'M', 0, 4, 400, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-49, -3, 8, 'Используется', 'USED', null, null, 2, 'B', 0, null, 90, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-48, -3, 91, 'Создатель', 'CREATE_USER', null, null, 1, 'S', 1, null, 150, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-47, -3, 94, 'Дата редактирования', 'LAST_DATE', null, null, 1, 'D', 1, null, 120, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-117, -7, 4, 'e-mail', 'E_MAIL', null, null, 1, 'S', 0, null, 300, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-116, -7, 5, 'Телефон', 'PHONE', null, null, 1, 'U03', 0, null, 150, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-74, -10, 5, '№ п.п.', 'NUM', null, null, 3, 'I', 0, 0, 30, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-73, -10, 7, 'Наименование', 'NAME', null, null, 1, 'S', 0, 0, 310, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-72, -10, 8, 'Тип формы', 'ID_WB_FORM_TYPE', null, 'select t.id_wb_form_type id, t.human_name || '' (''|| t.name || '')'' name' || chr(10) || '          from wb_form_type t' || chr(10) || ' order by t.name nulls first', 1, 'SB', 0, 0, 350, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
-values (-69, -10, 21, 'SQL блок:<br><font size="-3">обязательно необходимо<br>указание схемы обьекта</font>', 'ACTION_SQL', null, null, 1, 'M', 0, 10, 300, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
+values (-69, -10, 21, 'SQL блок:', 'ACTION_SQL', null, null, 1, 'M', 0, 10, 300, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-67, -10, 23, 'Объект БД', 'OBJECT_NAME', null, null, 1, 'S', 0, null, 150, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-65, -10, 31, 'Имя шаблона xls', 'XSL_FILE_IN', null, null, 1, 'S', 0, null, 220, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-64, -10, 33, 'Кнопки A,E,D', 'EDIT_BUTTON', null, 'Select ''A'' id, ''Добавление строки'' name from dual union all Select ''E'' id, ''Изменение строки'' name from dual union all Select ''С'' id, ''Копирование строки'' name from dual union all Select ''D'' id, ''Удаление строки'' name from dual union all Select ''EXP'' id, ''Экспорт документа'' name from dual' || chr(10) || '', 1, 'SB', 0, 3, 350, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-57, -10, 91, 'Создатель', 'CREATE_USER', null, null, 1, 'S', 1, null, 150, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-56, -10, 93, 'Последний редактор', 'LAST_USER', null, null, 1, 'S', 1, null, 150, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-172, -1, 3, 'LEV', 'LEV', null, null, 3, 'I', 1, null, 90, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-68, -10, 22, 'Схема БД', 'OWNER', null, 'select username as id, username as name ' || chr(10) || 'from sys.all_users', 1, 'SB', 0, 0, 280, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-66, -10, 24, 'Условие в запросе', 'FORM_WHERE', null, null, 1, 'M', 0, 3, 250, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-63, -10, 41, 'Тип графика', 'ID_WB_CHART_TYPE', null, 'select *  from (select t.id_wb_chart_type id,t.description || '' ('' || t.type_chart || ''->'' || t.name|| '')''  name from wb.wb_chart_type t union all select null id, null name from dual) t order by t.name nulls first', 1, 'SB', 0, null, 250, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-70, -10, 13, 'Только для чтения', 'IS_READ_ONLY', null, null, 2, 'B', 0, 0, 80, 0, 0, 0, null, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-62, -10, 42, 'Графики (Показать подписи)', 'CHART_SHOW_NAME', null, null, 2, 'B', 0, null, 130, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-61, -10, 43, 'Графики (Повернуть подписи)', 'CHART_ROTATE_NAME', null, null, 2, 'B', 0, null, 350, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-60, -10, 44, 'Графики (Ширина)', 'CHART_X', null, null, 3, 'I', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-59, -10, 45, 'Графики (Высота)', 'CHART_Y', null, null, 3, 'I', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-71, -10, 12, 'Высота формы (%)', 'HEIGHT_RATE', null, null, 3, 'I', 0, null, 90, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-164, -2, 11, 'Тип формы', 'ID_WB_FORM_TYPE', null, 'select t.id_wb_form_type id, t.human_name || '' (''|| t.name || '')'' name' || chr(10) || '          from wb_form_type t' || chr(10) || ' order by t.name nulls first', 1, 'SB', 0, 0, 400, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-163, -2, 12, 'Высота формы (%)', 'HEIGHT_RATE', null, null, 3, 'I', 0, null, 90, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-162, -2, 13, 'Только для чтения', 'IS_READ_ONLY', null, null, 2, 'B', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
-values (-161, -2, 21, 'SQL блок:<br><font size="-3">обязательно необходимо<br>указание схемы обьекта</font>', 'ACTION_SQL', null, null, 1, 'M', 0, 10, 400, null, null, null, null, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
+values (-161, -2, 21, 'SQL блок:', 'ACTION_SQL', null, null, 1, 'M', 0, 10, 400, null, null, null, null, 'LOADER', sysdate, 'LOADER', sysdate);
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-160, -2, 22, 'Схема БД', 'OWNER', null, 'select username as id, username as name ' || chr(10) || 'from sys.all_users', 1, 'SB', 0, 0, 280, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-159, -2, 23, 'Объект БД', 'OBJECT_NAME', null, null, 1, 'S', 0, null, 200, null, null, null, null, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-158, -2, 24, 'Условие в запросе', 'FORM_WHERE', null, null, 1, 'M', 0, 3, 250, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-157, -2, 31, 'Имя шаблона xls', 'XSL_FILE_IN', null, null, 1, 'S', 0, null, 220, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-156, -2, 33, 'Кнопки A,E,D', 'EDIT_BUTTON', null, 'Select ''A'' id, ''Добавление строки'' name from dual union all Select ''E'' id, ''Изменение строки'' name from dual union all Select ''С'' id, ''Копирование строки'' name from dual union all Select ''D'' id, ''Удаление строки'' name from dual union all Select ''EXP'' id, ''Экспорт документа'' name from dual' || chr(10) || '', 1, 'SB', 0, 3, 400, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-155, -2, 41, 'Тип графика', 'ID_WB_CHART_TYPE', null, 'Select * from (select t.id_wb_chart_type id, t.name name from wb_chart_type t union all Select null id, null name from dual) t order by t.name nulls first', 1, 'SB', 0, null, 250, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-154, -2, 42, 'Графики (Показать подписи)', 'CHART_SHOW_NAME', null, null, 2, 'B', 0, null, 130, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-153, -2, 43, 'Графики (Повернуть подписи)', 'CHART_ROTATE_NAME', null, null, 2, 'B', 0, null, 350, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-167, -2, 2, 'Главное меню', 'ID_WB_MAIN_MENU_VIEW_TREE_USV', null, 'Select t.id_wb_main_menu_view_tree_usv id,' || chr(10) || 't.tree_name_ name   ' || chr(10) || ', t.lev lev from wb_main_menu_view_tree_usv t', 1, 'SB', 0, 0, 400, 0, 0, 1, null, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-174, -1, 1, 'ID (not display)', 'ID_WB_MAIN_MENU_VIEW_TREE_USV', null, null, 1, 'I', 1, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-173, -1, 2, 'ID_PARENT', 'ID_PARENT', null, null, 1, 'I', 0, null, 180, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-171, -1, 10, 'Используется', 'USED', null, null, 2, 'B', 0, null, 90, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-170, -1, 92, 'Дата создания', 'CREATE_DATE', null, null, 1, 'D', 1, null, 120, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-169, -1, 93, 'Последний редактор', 'LAST_USER', null, null, 1, 'S', 1, null, 150, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-168, -2, 1, 'ID (not display)', 'ID_WB_MM_FORM_VIEW', null, null, 3, 'I', 1, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-166, -2, 5, '№ п.п.', 'NUM', null, null, 3, 'I', 0, 0, 30, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-165, -2, 7, 'Наименование', 'NAME', null, null, 1, 'S', 0, 0, 310, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-149, -2, 93, 'Последнийредактор', 'LAST_USER', null, null, 1, 'S', 1, 0, 150, 0, 0, 0, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-148, -4, 1, 'ID (not display)', 'ID_WB_FORM_FIELD_VIEW', null, null, 3, 'I', 1, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-142, -4, 21, 'Выравнивание', 'ID_WB_FORM_FIELD_ALIGN', null, 'select t.id_wb_form_field_align as id, t.name as name' || chr(10) || '  from wb_form_field_align t' || chr(10) || ' order by t.id_wb_form_field_align', 1, 'SB', 0, 0, 100, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-147, -4, 10, '№ п.п.', 'NUM', null, null, 3, 'I', 0, 0, 30, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-146, -4, 11, 'Наименование', 'NAME', null, null, 1, 'S', 0, 0, 240, 0, 0, 1, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-144, -4, 14, 'Текст поля', 'FIELD_TXT', null, null, 1, 'M', 0, null, 300, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-145, -4, 12, 'Поле в БД либо Переменная', 'FIELD_NAME', null, null, 1, 'S', 0, 0, 220, 0, 0, 1, null, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-138, -4, 31, 'XLS Гор.позиция', 'XLS_POSITION_COL', null, null, 3, 'I', 0, null, 90, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-175, -13, 100, 'ID (not display)', 'ID_WB_PARAM_TYPE', null, null, 3, 'I', 0, null, 90, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-176, -13, 94, 'Дата редактирования', 'LAST_DATE', null, null, 3, 'D', 0, null, 120, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-177, -13, 93, 'Последний редактор', 'LAST_USER', null, null, 3, 'S', 0, null, 150, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-178, -13, 92, 'Дата создания', 'CREATE_DATE', null, null, 3, 'D', 0, null, 120, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-179, -13, 91, 'Создатель', 'CREATE_USER', null, null, 3, 'S', 0, null, 150, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-180, -13, 70, 'Используется', 'USED', null, null, 3, 'B', 0, null, 50, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-181, -13, 60, 'Тип значения получаемого', 'GET_TYPE', null, 'Select id, name from wb_field_type', 3, 'SB', 0, null, 200, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-182, -13, 50, 'Тип значения сохраняемого', 'SAVE_TYPE', null, 'Select id, name from wb_field_type', 3, 'SB', 0, null, 200, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-183, -13, 40, 'Описание', 'DESCRIPTION', null, null, 3, 'S', 0, null, 300, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-184, -13, 30, 'Имя переменной', 'NAME', null, null, 3, 'S', 0, null, 300, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-185, -13, 20, '№ п.п.', 'NUM', null, null, 3, 'I', 0, null, 60, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-186, -13, 0, '# п/п (not display)', 'R_NUM', null, null, 3, 'I', 0, null, 80, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, fl_html_code, create_user, create_date, last_user, last_date)
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-187, -2, 25, 'Условие сортировки', 'FORM_ORDER', null, null, 1, 'S', 0, null, 250, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
-prompt 186 records loaded
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
+values (-188, -7, 6, 'Пароль', 'PASWORD', null, null, 1, 'P', 0, null, 150, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
+values (-189, -4, 13, 'Подсказка к полю', 'ELEMENT_ALT', null, null, 1, 'S', 0, null, 250, null, null, null, 0, 'DB_UPDATE', sysdate, 'DB_UPDATE', sysdate);
+
+prompt 189 records loaded
 prompt Loading WB_ROLE...
 insert into WB_ROLE (id_wb_role, wb_name, name, create_user, create_date, last_user, last_date)
 values (1, 'ADMIN', 'Администраторы', 'LOADER', sysdate, 'LOADER', sysdate);
@@ -2933,6 +2929,53 @@ values (17, null, 2, 'Изображение конфигурации', 'ROOT_CO
 insert into WB_SETTINGS (id_wb_settings, id_parent, num, name, short_name, value, used, create_user, create_date, last_user, last_date)
 values (18, null, 3, 'Иконка конфигурации', 'ROOT_CONFIG_FAVICON', 'sport_icon.png', 1, 'LOADER', sysdate, 'LOADER', sysdate);
 prompt 15 records loaded
+update wb_form_field t set t.element_alt =    
+   case t.field_name
+         when 'PASSWORD' then               'Пароль пользователь при использовании модуля аунтификации auth.user'
+         when 'XLS_POSITION_ROW' then       'Положение по вертикали вставляемого поля в файл при экспорте либо печати документа'
+         when 'HEIGHT_RATE' then            'Высота формы на странице, в случае если форма одна то можно незаполнять либо указать 100%, если форм несколько, то необходимо заполнить в процентном соотношении от остальных форм'
+         when 'EDIT_BUTTON' then            'Кнопки которые будут отражены под таблицей, по необходимости вы можете контролировать что можно делать с выделенной строкой'
+         when 'XSL_FILE_IN' then            'Имя выходного файла при экспорте документа, либо шаблон на основе которого сформируется файл для экспорта. поддерживается формат xlsm с макросами'
+         when 'CHART_SHOW_NAME' then        'Показывать или нет названия графика и его заголовок'
+         when 'CHART_Y' then                'Высота графика в пикселях'
+         when 'CREATE_DATE' then            'Дата создания записи в БД'
+         when 'TYPE_CHART' then             'Тип графика, в зависимости от типа можно добавлять разные элементы на графике'
+         when 'XLS_POSITION_COL' then       'Положение по горизонтали вставляемого поля в файл при экспорте либо печати документа'
+         when 'FIELD_TYPE' then             'Тип столбца данных, в случае если это список то необходимо заполнить поле SQL Блок/Текст поля для того чтобы получить данны для списка. Принимаемые значения: id, name'
+         when 'USED' then                   'Флаг определяющий можно ли использовать данную форму пользователям или нет, если нет то данная форма не будет видна и доступ к ней блокируется'
+         when 'WB_NAME' then                'Логин пользователя для доступа к системе'
+         when 'DESCRIPTION' then            'Описание типа графиков, что может сделать и как'
+         when 'CHART_X' then                'Длина графика в пикселях'
+         when 'WIDTH' then                  'Длина элемента в пикселях, на основе длины строится диалоговые окна изменения и просмотра'
+         when 'CREATE_USER' then            'Пользователь создавший запись в БД'
+         when 'LAST_USER' then              'Пользователь последний изменивший запись в БД'
+         when 'ARRAY_NAME' then             'Наименование массива либо переменной для биндинга и дальнейшего использования, заполняется без первого символа ":". В последующих столбцах ее можно использовать для динамического получения списка либо обновления какого либо поля'
+         when 'IS_REQURED' then             'Данное поля обязательно или нет для заполнения при редактировании записи'
+         when 'TYPE_CELLS' then             'Позиция ячейки в файле экспорта'
+         when 'PARAM_VIEW' then             'Служебное поле с параметрами пользователя'
+         when 'FORM_WHERE' then             'Поле для выполения каких либо действий в системе, например выполнение команды после загрузки файла'
+         when 'COUNT_ELEMENT' then          'Высота элемента, применима только к типу поля "Многострочный текст" и "Выпадающий список"'
+         when 'IS_READ_ONLY' then           'Данный столбец или элемент недоступен для изменения либо удаления'
+         when 'ACTION_SQL' then             'Блок выполняемый в зафисимости от типа формы, может содержать забиндиные переменные. Внутри обязательно нужно указывать схемы вызываемых обьектов если не указана схема в нижнем поле'
+         when 'NUM' then                    'Порядковый номер отображения и использования элемента на странице либо в таблице, важно чтобы номера не пересекались!'
+         when 'LAST_DATE' then              'Дата последнего изменения записи в БД'
+         when 'PHONE' then                  'Телефон пользователя'
+         when 'E_MAIL' then                 'Электронная почта пользователя'
+         when 'NAME' then                   'Отображаемое имя элемента'
+		 when 'AUTO_UPDATE' then            'Автоматическое обновление формы через определенный промежуток времени'	
+		 when 'ID_WB_MAIN_MENU_VIEW_TREE' then            'Главное меню к которому привязывается форма или элемент'		
+		 when 'ID_WB_FORM_TYPE' then        'Тип формы, на одной странице их может быть несколько, важно соблюдать порядок форм иначе будут ошибки отображения и логики'		
+		 when 'ID_WB_CHART_TYPE' then       'Тип графика, используется только когда тип формы выбран как "График"'	
+         when 'FIELD_TXT' then              'SQL Блок который позволяет заполнить данными элемент в случает "Выпадающего списка" можно использовать переменную :rowid для того чтобы подставить либо текущий выделенный rowid элемента  либо rowid ведущей формы если данный элемент принадлежит ведомой форме. Также позволяет использовать значение из выше стоящего поля, биндить можно по названию поля в БД'
+         when 'OWNER' then                  'Схема в БД в которой находится элемент и в которой будут выполены все sql блоки касаемо данного элемента'
+         when 'OBJECT_NAME' then            'Обьект в БД с привязкой к схеме для которого создается форма.'
+         when 'CHART_ROTATE_NAME' then      'Если указато то шкалы в графике будут повернуты на 90 градусов вокруг своей оси'
+         when 'SHORT_NAME' then             'Короткое имя переменной кторое будет использоваться в дальнейшем в БД'
+         when 'FIELD_NAME' then             'Поле в обьекте БД которое будет привязано к данному элементу, также оно будет доступно как переменная для дальшейших полей для значений на основе значений данного обьекта'
+         else
+             null
+      end        where t.id_wb_form_field < 0;
+update wb_mm_form t set t.owner = user;
 prompt Enabling foreign key constraints for WB_MAIN_MENU...
 alter table WB_MAIN_MENU enable constraint FK_WB_MM_PARENT;
 prompt Enabling foreign key constraints for WB_MM_FORM...

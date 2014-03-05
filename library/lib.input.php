@@ -26,7 +26,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 				while ($this-> db_conn-> sql_fetch($query_d))  {					
 					$output .= "
 					<p><label for='".$field_name_short."' >".$this->FullTrim($name)."</label>
-						<input type='text' class='date_".$this->pageid." FormElement ui-widget-content ui-corner-all' i_type='D' is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d, "DEF_DATE")."' />
+						<input type='text' class='date_".$this->pageid." FormElement ui-widget-content ui-corner-all' row_type='D' is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d, "DEF_DATE")."' />
 					</p>
 					";
 				}
@@ -42,7 +42,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 						while ($this-> db_conn-> sql_fetch($query_d))  {					
 							$output .= "
 							<p><label for='".$field_name_short."' >".$this->FullTrim($name)."</label>
-								<input type='text' class='date_time_".$this->pageid." FormElement ui-widget-content ui-corner-all' i_type='DT' is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d, "DEF_DATE")."' />
+								<input type='text' class='date_time_".$this->pageid." FormElement ui-widget-content ui-corner-all' row_type='DT' is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d, "DEF_DATE")."' />
 							</p>
 							";
 						}
@@ -69,7 +69,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	function textarea_element($field_name,$name,$count_element, $requred) {
 		$field_name_short = strtolower($field_name."_".$this->pageid);
 		return "<p style='text-align :left;'><label for='".$field_name_short."' >".$this->FullTrim($name)."</label>
-					  <textarea id='".$field_name_short."' h='".$count_element."' is_requred='".$requred."' i_type='M' name='".$field_name."' role='textbox' multiline='true' class='FormElement ui-widget-content ui-corner-all'></textarea>
+					  <textarea id='".$field_name_short."' h='".$count_element."' is_requred='".$requred."' row_type='M' name='".$field_name."' role='textbox' multiline='true' class='FormElement ui-widget-content ui-corner-all'></textarea>
 					</p>";
 	}
 	function select_element($field_text,$field_name,$name,$width,$count_element, $requred) {
@@ -77,12 +77,12 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 		if ($count_element <= 1) {						
 						$output .= "<p>
 								<label for='".$field_name."' >".$this->FullTrim($name)."</label>
-								<select id=\"".$field_name."-".$this->pageid."\"  i_type='SB' is_requred='".$requred."' name=\"".$field_name."\" h='1' w='".$width."' >";
+								<select id=\"".$field_name."-".$this->pageid."\"  row_type='SB' is_requred='".$requred."' name=\"".$field_name."\"  w='".$width."' >";
 					} else {
 						
 						$output .= "<p>
 								<label for='".$field_name."' >".$this->FullTrim($name)."</label>
-								<select id=\"".$field_name."-".$this->pageid."\" multiple='multiple' i_type='SB' name=\"".$field_name."[]\" h='".$count_element."' w='".$width."'>";
+								<select id=\"".$field_name."-".$this->pageid."\" multiple='multiple' row_type='SB' name=\"".$field_name."[]\" h='".$count_element."' w='".$width."'>";
 					}
 					
 						$query_d = $this -> db_conn->sql_execute($field_text);
@@ -104,7 +104,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
                                                         $value = $this -> return_sql($query_d, "DEF_NUM");
                                                 }        
 						$output .= "<p><label for=\"".$field_name_short."\">".$this->FullTrim($name)."</label>
-						<input type='text'  class='FormElement ui-widget-content ui-corner-all' i_type='".$num_culture."' w='".$width."' is_requred='".$requred."' id='".$field_name_short."' value='".$value."' name='".$field_name."' /></p>";
+						<input type='text'  class='FormElement ui-widget-content ui-corner-all' row_type='".$num_culture."' w='".$width."' is_requred='".$requred."' id='".$field_name_short."' value='".$value."' name='".$field_name."' /></p>";
 						
 					
 	return $output;
@@ -119,7 +119,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 		$output = "";
 		$field_name_short = strtolower($field_name."_".$this->pageid);
 						$output .= "<p><label for=\"".$field_name_short."\">".$this->FullTrim($name)."</label>
-						<input type='text'  is_requred='".$requred."' class='FormElement ui-widget-content ui-corner-all' i_type='IP'  id='".$field_name_short."' name='".$field_name."' /></p>";
+						<input type='text'  is_requred='".$requred."' class='FormElement ui-widget-content ui-corner-all' row_type='IP'  id='".$field_name_short."' name='".$field_name."' /></p>";
 						
 								
 	}
@@ -129,7 +129,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 		$output = "";
 		$field_name_short = strtolower($field_name."_".$this->pageid);
 						$output .= "<p><label for=\"".$field_name_short."\">".$this->FullTrim($name)."</label>
-						<input type='checkbox'  is_requred='".$requred."' class='FormElement ui-widget-content ui-corner-all' i_type='B' id='".$field_name_short."' name='".$field_name."' /></p>";
+						<input type='checkbox'  is_requred='".$requred."' class='FormElement ui-widget-content ui-corner-all' row_type='B' id='".$field_name_short."' name='".$field_name."' /></p>";
 						
 					
 	return $output;
@@ -152,7 +152,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
                        nvl(t.count_element, 1) count_element, nvl(t.width, decode(t.field_type, 'D', 46, 300)) width from ".DB_USER_NAME.".wb_form_field t
 					   where t.id_wb_mm_form = ".$this->id_mm_fr." order by t.num");	
 					   
-	$output = "<div id='param-".$this->pageid."' title='Укажите параметры:'>
+	$output = "<div id='param-".$this->pageid."' title='Укажите параметры:' class='ui-jqdialog-content'>
 	<form id='form_parameters_".$this->pageid."' >";  
 	
     while ($this-> db_conn-> sql_fetch($query_tmp)) {
@@ -279,7 +279,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
         $output .= BasicFunctions::regex_javascript("
 				$(function() { 			
 					// Преобразовываемся:
-					create_from_table_elemnts($('#form_parameters_".$this->pageid."'));			
+					create_from_table_elements($('#form_parameters_".$this->pageid."'));			
 					
 					$('#param-".$this->pageid."').dialog({
 						autoOpen: false,
@@ -419,7 +419,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	$query_tmp = $this->db_conn->sql_execute("select  t.*, ft.name as form_type from ".DB_USER_NAME.".wb_mm_form t left join ".DB_USER_NAME.".wb_form_type ft on ft.id_wb_form_type = t.id_wb_form_type where t.id_wb_main_menu = ".$this -> id_mm." and  (ft.name like 'INPUT_%' or ft.name = 'WIZARD_FORM') order by t.num");
 	while ($this-> db_conn-> sql_fetch($query_tmp)) {
 		if ($this -> return_sql($query_tmp, "FORM_TYPE") == "WIZARD_FORM") {
-			$output .= "<div id='wizard_form_".$this -> pageid."' title='".$this -> return_sql($query_tmp, "NAME")."'>
+			$output .= "<div id='wizard_form_".$this -> pageid."' title='".$this -> return_sql($query_tmp, "NAME")."' class='ui-jqdialog-content' >
 							<form id = 'wizard_parameters_".$this -> pageid."' name = 'wizard_parameters_".$this -> pageid."' >
 								<div id='ajaxload_".$this -> pageid."' ><img src='/library/ajax-loader.gif' style='padding-bottom: 4px; vertical-align: middle;' > Загружаю...</div>	
 								<div id='wizard_form_".$this -> pageid."_content'>
@@ -538,7 +538,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 				$.post('".ENGINE_HTTP."/ajax.data.wizard.php?id_mm_fr=' + counter  + '&pageid=".$this -> pageid."&id_mm=".$this -> id_mm."',qstring, function(data) {
 					$('#ajaxload_".$this -> pageid."').hide();
 					self.append(data);
-					create_from_table_elemnts(self);
+					create_from_table_elements(self);
                                         $('#button_back_".$this -> pageid."').button('option','disabled', false );
                                         $('#button_next_".$this -> pageid."').button('option','disabled', false );  
                                         $('#ui-".$this->pageid." span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');
