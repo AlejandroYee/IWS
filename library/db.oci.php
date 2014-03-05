@@ -43,7 +43,7 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 						}
 				}
 				// ОК, регистрируемся в системе
-				if (DB_USER_NAME != "wb") { // костыль если используется пользователь WB!
+				if (strtolower(DB_USER_NAME) != "wb") { // костыль если используется пользователь WB, из-за того что у нас пакет WB!
 					OCI_Execute(OCI_Parse($this->link,"begin ".DB_USER_NAME.".wb.save_wb_user(upper('".auth::get_user()."')); end;"));
 				} else {
 					OCI_Execute(OCI_Parse($this->link,"begin wb.save_wb_user(upper('".auth::get_user()."')); end;"));
