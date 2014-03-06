@@ -53,6 +53,31 @@ if (!$user_auth -> is_user()) {
 	BasicFunctions::clear_cache();
 	die("Доступ запрещен");
 }
+  
+if ($act == "check_version") {
+    BasicFunctions::to_log("LIB: Checking for new version....");	
+    $fv =  file_get_contents(UPDATE_SITE . "/version.json");
+    if ($fv) {
+        echo $fv;
+    } else {
+        BasicFunctions::to_log("LIB: Check version filed! no internet access or proxy file.");
+    }
+    exit;    
+}
+
+if ($act == "get_history") {
+    BasicFunctions::to_log("LIB: New version is avalable, getting changelog...");
+    $fv = file(UPDATE_SITE . "/history.txt");
+    if ($fv) {        
+         for ($i = 1; $i < count($fv); $i++) {
+                if (trim($fv[$i]) == "//--------------------------------------------------------------------------------------------------------//") {
+                 die();   
+                }  
+             echo $fv[$i]."<br>";
+         }
+    }  
+    exit;    
+}
 
 // Сделано для смены темы
 if (!empty($theme)) {
@@ -79,6 +104,107 @@ if ($act ==  "clear_log_file") {
 }
 
 $main_db = new db();
+
+if ($act == "update_to_lastest_version") {
+ function delTree($dir) { 
+   $files = array_diff(scandir($dir), array('.','..')); 
+    foreach ($files as $file) { 
+      (is_dir($dir.DIRECTORY_SEPARATOR.$file)) ? delTree($dir.DIRECTORY_SEPARATOR.$file) : unlink($dir.DIRECTORY_SEPARATOR.$file); 
+    } 
+    return rmdir($dir); 
+} 
+function recurse_copy($src,$dst) { 
+    if (!is_dir($src)) {
+        exit; 
+    }
+    $dir = opendir($src); 
+    if (!is_dir($dst)) {
+        mkdir($dst); 
+    }
+    while(false !== ( $file = readdir($dir)) ) { 
+        if (( $file != '.' ) && ( $file != '..' )) { 
+            if ( is_dir($src . DIRECTORY_SEPARATOR . $file) ) { 
+                recurse_copy($src . DIRECTORY_SEPARATOR . $file,$dst . DIRECTORY_SEPARATOR . $file); 
+            } 
+            else { 
+                copy($src . DIRECTORY_SEPARATOR . $file,$dst . DIRECTORY_SEPARATOR . $file); 
+            } 
+        } 
+    } 
+    closedir($dir); 
+}
+ // проверяем привелегии
+ $query = $main_db -> sql_execute("select decode(count(t.id_wb_main_menu), 0, 'false', 'true') as is_administator  from wb_main_menu t where used = 1 and (wb.get_access_main_menu(t.id_wb_main_menu) = 'enable' or t.name is null) and t.id_parent is null   and t.num = 999");
+    while ($main_db -> sql_fetch($query)) {             
+       $is_administator =  $main_db -> sql_result($query, "is_administator");
+    }
+    
+  if (isset($is_administator) and (defined("UPDATE_SITE"))) {  
+        // пытаемся обновить систему сами:
+        $fv =  file_get_contents(UPDATE_SITE . "/version.json");
+        if ($fv) {
+            BasicFunctions::requre_script_file("lib.json.php");
+            $json = new json(); 
+            $dt = $json -> jsondecode($fv,true);
+            if(VERSION_ENGINE != trim($dt["version"])) {
+                if (is_dir(ENGINE_ROOT. DIRECTORY_SEPARATOR . ".git")) {
+                 // Обновляемся через гит
+                 exec("git info 2>&1",$output,$comm);
+                 if($comm != 0) {
+                     echo "Ошибка работы GIT:<br>";
+                     echo implode("<br>\n",$output);
+                 }    
+                } else {
+                // Обновляемся до релиза:  
+                 $fv_z =  file_get_contents($dt["link"]);
+                 if ($fv_z) {
+                     $tmp_file = tempnam(sys_get_temp_dir(), rand(5, 15)."_iws_update.zip"); //скачать
+                     if(file_put_contents($tmp_file,$fv_z)) { // сохранить
+                          exec("unzip -o ".$tmp_file." -d ".ENGINE_ROOT." 2>&1",$output,$comm);       // распаковать                    
+                                if($comm == 0) {
+                                    $dir_input_name = "IWS-" .$dt["version"];// директория с новым релизом
+                                    // Применяем файл базы данных
+                                    $db_file = $dir_input_name .DIRECTORY_SEPARATOR. "db_update_".VERSION_ENGINE."_to_".trim($dt["version"]).".sql";
+                                    if (is_file($db_file)) {
+                                        $main_db -> sql_execute(file_get_contents($db_file));                                        
+                                    }   
+                                    // отчищаем папки и файлы:
+                                    delTree("configurations");
+                                    delTree("jscript");
+                                    delTree("library");
+                                    delTree("themes");
+                                    $files = array_diff(scandir(ENGINE_ROOT . DIRECTORY_SEPARATOR), array('.','..')); 
+                                    foreach ($files as $file) {                                       
+                                        if (!is_dir($file) and (!strstr($file, "config."))) {
+                                            unlink($file);
+                                        }
+                                    }
+                                    // Перемещаем все файлы из директории в корень:
+                                    recurse_copy($dir_input_name,ENGINE_ROOT);
+                                    delTree($dir_input_name);                                    
+                                 } else {
+                                    echo "Ошибка работы UNZIP:<br>";
+                                    echo implode("<br>\n",$output);
+                                }   
+                     } else {
+                       echo "Неудалось записать временный файл.";   
+                     }    
+                 } else {
+                     echo "Неудалось скачать файл Обновления системы, ошибка сервера, либо сервер недоступен.";  
+                 }    
+                }
+            }  else {                
+                echo "Обновление не требуется, у вас система самой последней версии.";  
+            }    
+          } else {
+         echo "Неудалось скачать файл обновления, возможно нет доступа в интернет на сервере, и/или прокси сервер ненастроен.";   
+        } 
+      // Проверяем обновления БД
+    } else {
+    echo "У вас недостаточно привилегий для обновления.";  
+  }    
+  exit;  
+}
 
 // Дополнительная проверка на пользователя и права доступа:
 $query_check = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_mm_form = ".$id_mm_fr." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable'");

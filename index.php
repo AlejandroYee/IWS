@@ -122,8 +122,8 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
 						.ui-jqgrid .ui-jqgrid-htable th div{height:26px;overflow:hidden;position:relative;white-space:normal!important}
 						.ui-multiselect-single .ui-multiselect-checkboxes label{padding:2px!important}
 						.ui-multiselect-checkboxes span{clear:both;font-size:.9em;padding-left:4px}
-						.ui-jqgrid .loading{background:transparent;border:0 transparent;color:inherit;height:99%;left:-5px;opacity:1;padding:10px;top:-5px;width:98%;z-index:89}
-						.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label{text-align:left}
+                                                .ui-multiselect-checkboxes li.ui-multiselect-optgroup-label{text-align:left}
+						.ui-jqgrid .loading{background:transparent;border:0 transparent;color:inherit;height:99%;left:-5px;opacity:1;padding:10px;top:-5px;width:98%;z-index:89}						
 						.ui-search-toolbar{border-color:transparent}
                                                 .ui-icon-triangle-1-s {background-position: -65px -16px;} /* fix fo left sprite*/
 						.ui-jqgrid tr.jqgrow,.ui-state-active{cursor:default}	
@@ -193,6 +193,7 @@ break;
 	</form>
 	</div>
 	<?=BasicFunctions::about($main_db)?>
+        <?=BasicFunctions::check_version($main_db)?>
 	<table cellpadding="0" cellspacing="0" style="border:0px;padding:0px;margin:0px;width:100%"><tr>
 	<td class="ui-widget ui-widget-header main_menu">
 		<div id="Menubar" style="border:0px;">			

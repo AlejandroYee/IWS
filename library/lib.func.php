@@ -15,7 +15,7 @@ define("ENGINE_ROOT",  filter_input(INPUT_SERVER, 'DOCUMENT_ROOT',FILTER_SANITIZ
 define("SESSION_ID",md5(time().rand(time()/100,getrandmax())));
 define("HTTP_USER_AGENT",filter_input(INPUT_SERVER, 'HTTP_USER_AGENT',FILTER_SANITIZE_STRING));
 define("SESSION_LIFE_TIME", 10800);
-define("VERSION_ENGINE","v2.1.0");
+define("VERSION_ENGINE","2.1.0");
 
 // Переопределение времени выполнения
 ini_set('max_execution_time', 2100);
@@ -28,8 +28,8 @@ session_start();
 Error_Reporting(E_ALL);
 
 require_once(ENGINE_ROOT."/config.".filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL).".php");
-set_error_handler('my_error_handler');
-set_exception_handler('my_exception_handler');
+//set_error_handler('my_error_handler');
+//set_exception_handler('my_exception_handler');
 register_shutdown_function('end_timer');
 
 //--------------------------------------------------------------------------------------------------------------------------------------------
@@ -228,7 +228,7 @@ class BasicFunctions {
                         <h6>Случайная тема оформления, называется: "<?=$theme_first['theme_name'][$theme_number]?>"</h6>
                 </div>
                 <div id="login_theme" style="position:absolute;text-align:center;width:200px;height:20px;top:315px;left:100px">
-                        <h6 id="about">IWS: <?=VERSION_ENGINE?>@<?=date("Y")?></h6>
+                        <h6 id="about">IWS: v<?=VERSION_ENGINE?>@<?=date("Y")?></h6>
                 </div>
             </div>   
             <script type="text/javascript" >
@@ -465,7 +465,7 @@ class BasicFunctions {
                     ?>
                     </div>
                     <p><b style="font-size:220%;">IWS</b><br><b>Intellectual web system</b><br>
-                    <b>Версия системы:</b> <?=VERSION_ENGINE?> <?=date("Y")?><br>
+                    <b>Версия системы:</b> v<?=VERSION_ENGINE?> <?=date("Y")?><br>
                     <b>Конфигурация:</b><br><?=$db -> get_settings_val('ROOT_CONFIG_NAME')?>, версия: <?=$db -> get_settings_val('ROOT_CONFIG_VERSION')?> <br>
                     </p>
                     <p><b>Авторы:</b> Лысиков А.В., Мындра П.А.</p>
@@ -501,6 +501,80 @@ class BasicFunctions {
                             </div>
                     </div>
             <?php
+            }
+            //--------------------------------------------------------------------------------------------------------------------------------------------
+            // Проверка версий
+            //--------------------------------------------------------------------------------------------------------------------------------------------
+            public static Function check_version($db) {               
+                $query = $db -> sql_execute("select decode(count(t.id_wb_main_menu), 0, 'false', 'true') as is_administator  from wb_main_menu t where used = 1 and (wb.get_access_main_menu(t.id_wb_main_menu) = 'enable' or t.name is null) and t.id_parent is null   and t.num = 999");
+                while ($db -> sql_fetch($query)) {             
+                   $is_administator =  $db -> sql_result($query, "is_administator");
+                }
+                if (isset($is_administator) and (defined("UPDATE_SITE"))) {
+               ?>
+               <script type="text/javascript" >
+                            $.ajax({
+                               url: '<?=ENGINE_HTTP?>/ajax.saveparams.php?act=check_version',							  
+                               type: 'GET',
+                               success: function(data){	
+                                   data = '{"version": "2.1.5","date": "07.03.2014","link":"https://github.com/andrey-boomer/IWS/archive/v2.0.3.zip"}';
+                                     if (data != "") {
+                                       var dt = jQuery.parseJSON(data);                                            
+                                        if ((dt.version) && $.trim(dt.version) !== $.trim('<?=$db -> get_settings_val('ROOT_DB_VERSION')?>') ) {                                        			
+                                            $.ajax({
+                                                   url: '<?=ENGINE_HTTP?>/ajax.saveparams.php?act=get_history',							  
+                                                   type: 'GET',
+                                                   success: function(dat)  {	
+                                                   $('#tabs').children('.ui-tabs-nav').append("<div class='alert_button ui-state-highlight ui-corner-all' onclick='$(\"#update_dlg\").dialog(\"open\");' style='float:right;width:145px;margin:3px;padding:3px;cursor:pointer;' title='Доступна новая версия: v" + 
+                                                               dt.version + " от " + dt.date + "'><span class='ui-icon ui-icon-alert' style='float:left'></span>Обновление IWS</div>");
+                                                   
+                                                   var msg = '<p><b>Новая версия:</b> v'+dt.version+'<br><b>Дата выпуска:</b> '+dt.date+'</p><b>Что нового:</b><br>'+ dat +
+                                                           '<br>Обновиться можно вручную через git,<br>либо скачать новую версию нажав на ссылку ниже:<br>' +
+                                                           '<a href="'+dt.link+'">'+dt.link+'</a>' +
+                                                           '<br><br><br>А также в зависимости от настроек системы и сервера<br>можно обновиться автоматически ' +
+                                                           'для этого нажмите кнопку "обновить"';
+                                                   
+                                                   $('<div />').attr({'id':'update_dlg','style':'text-align:left;'}).html(msg).dialog({
+                                                        autoOpen: false,
+                                                        modal: false,
+                                                        minWidth: 350,
+                                                        width: 830,
+                                                        title: 'Доступно обновление системы IWS',
+                                                        closeOnEscape: true,
+                                                        buttons: [
+                                                            {text: "Обновить систему",
+                                                                click: function() {
+                                                                    $('#btn_u').button('option', 'disabled', true );
+                                                                    $.ajax({
+                                                                        url: '<?=ENGINE_HTTP?>/ajax.saveparams.php?act=update_to_lastest_version',							  
+                                                                        type: 'GET',
+                                                                        success: function(data){
+                                                                            if (data != "") {
+                                                                                custom_alert(data);
+                                                                                $('#btn_u').button('option', 'disabled', false );
+                                                                            } else {    
+                                                                                window.location.replace('<?=ENGINE_HTTP?>');
+                                                                            }
+                                                                        }
+                                                                    });
+                                                               }
+                                                            }
+                                                        ],
+                                                        open: function() {
+                                                            var self = $(this).parent();
+                                                            self.children('.ui-dialog-buttonpane').find('button:contains("Обновить систему")').button({icons: { primary: 'ui-icon-refresh'}}).prop('id','btn_u');
+                                                        }
+                                                   });
+
+                                                  }	  
+                                            });    
+                                       }
+                                      } 
+                               }	  
+                             });
+               </script>
+               <?php
+               }
             }
             
             //--------------------------------------------------------------------------------------------------------------------------------------------	
