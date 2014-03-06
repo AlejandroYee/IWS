@@ -1,13 +1,15 @@
 /*
-create tablespace USER_NAME DATAFILE 'c:\oracle\oradata\XE\USER_NAME.DBF' SIZE 10M AUTOEXTEND ON NEXT 5M;
+Пустая конфигурация предназначена для чистой установки, для нее не требуется производить обновление с помощью каких либо скриптов
 
 create user USER_NAME  identified by "password"  default tablespace USER_NAME;
-
 grant create session, create table, create procedure,
       create sequence, create view, create trigger,
       create synonym, create materialized view,
       query rewrite, create any directory, create type,
-      dba, aq_administrator_role to USER_NAME;	  
+      dba, aq_administrator_role to USER_NAME;	
+grant all on UTL_TCP to USER_NAME; 
+grant all on UTL_HTTP to USER_NAME; 
+grant all on UTL_FILE to USER_NAME;	  
 */
 
 
@@ -2361,7 +2363,7 @@ values (2, 'B', 'Переключатель', 'LOADER', sysdate, 'LOADER', sysda
 insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, char_mask, char_case)
 values (3, 'C', 'Валюта (руб.)', 'LOADER', sysdate, 'LOADER', sysdate, null, 'N');
 insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, char_mask, char_case)
-values (4, 'D', 'Дата', 'LOADER', sysdate, 'LOADER', sysdate null, 'N');
+values (4, 'D', 'Дата', 'LOADER', sysdate, 'LOADER', sysdate, null, 'N');
 insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, char_mask, char_case)
 values (5, 'DT', 'Дата и время', 'LOADER', sysdate, 'LOADER', sysdate, null, 'N');
 insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, char_mask, char_case)
@@ -2379,9 +2381,9 @@ values (11, 'NL', 'Дробное (более точное)', 'LOADER', sysdate,
 insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, char_mask, char_case)
 values (12, 'P', 'Поле пароля', 'LOADER', sysdate, 'LOADER', sysdate, null, 'N');
 insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, char_mask, char_case)
-values (13, 'S', 'Строка', 'LOADER', sysdate 'LOADER', sysdate, null, 'N');
+values (13, 'S', 'Текстовая строка', 'LOADER', sysdate, 'LOADER', sysdate, null, 'N');
 insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, char_mask, char_case)
-values (14, 'SB', 'Выпадающий список', 'LOADER', sysdate 'LOADER', sysdate, null, 'N');
+values (14, 'SB', 'Выпадающий список', 'LOADER', sysdate, 'LOADER', sysdate, null, 'N');
 insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, char_mask, char_case)
 values (15, 'U01', 'Айпи адрес, маска', 'LOADER', sysdate, 'LOADER', sysdate, '099.099.099.099', 'N');
 insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, char_mask, char_case)
@@ -2390,8 +2392,6 @@ insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date,
 values (17, 'E', 'Электронный адрес', 'LOADER', sysdate, 'LOADER',sysdate, null, 'N');
 insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, char_mask, char_case)
 values (18, 'U03', 'Телефон с кодом города', 'LOADER', sysdate, 'LOADER', sysdate, '+0 (000) 000-00-00', 'N');
-insert into WB_FIELD_TYPE (id_wb_field_type, id, name, create_user, create_date, last_user, last_date, char_mask, char_case)
-values (19, 'S', 'Текстовая строка', 'LOADER', sysdate, 'LOADER', sysdate, '+0 (000) 000-00-00', 'N');
 prompt Loading WB_FORM_TYPE...
 insert into WB_FORM_TYPE (id_wb_form_type, num, name, create_user, create_date, last_user, last_date, human_name)
 values (-1, 13, 'WIZARD_FORM', 'LOADER', sysdate, 'LOADER', sysdate, 'Формальный признак указывающий на то что данные вводятся с помощью мастера');
@@ -2850,10 +2850,9 @@ values (-186, -13, 0, '# п/п (not display)', 'R_NUM', null, null, 3, 'I', 0, n
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-187, -2, 25, 'Условие сортировки', 'FORM_ORDER', null, null, 1, 'S', 0, null, 250, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
-values (-188, -7, 6, 'Пароль', 'PASWORD', null, null, 1, 'P', 0, null, 150, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
+values (-188, -7, 6, 'Пароль', 'PASSWORD', null, null, 1, 'P', 0, null, 150, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-189, -4, 13, 'Подсказка к полю', 'ELEMENT_ALT', null, null, 1, 'S', 0, null, 250, null, null, null, 0, 'DB_UPDATE', sysdate, 'DB_UPDATE', sysdate);
-
 prompt 189 records loaded
 prompt Loading WB_ROLE...
 insert into WB_ROLE (id_wb_role, wb_name, name, create_user, create_date, last_user, last_date)
@@ -2928,6 +2927,8 @@ insert into WB_SETTINGS (id_wb_settings, id_parent, num, name, short_name, value
 values (17, null, 2, 'Изображение конфигурации', 'ROOT_CONFIG_LOGO', 'sport_logo.png', 1, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_SETTINGS (id_wb_settings, id_parent, num, name, short_name, value, used, create_user, create_date, last_user, last_date)
 values (18, null, 3, 'Иконка конфигурации', 'ROOT_CONFIG_FAVICON', 'sport_icon.png', 1, 'LOADER', sysdate, 'LOADER', sysdate);
+insert into WB_SETTINGS (id_wb_settings, id_parent, num, name, short_name, value, used, create_user, create_date, last_user, last_date)
+values (-1, null, 3, 'Версия БД', 'ROOT_DB_VERSION', '2.1.0', 1, 'LOADER', sysdate, 'LOADER', sysdate);
 prompt 15 records loaded
 update wb_form_field t set t.element_alt =    
    case t.field_name

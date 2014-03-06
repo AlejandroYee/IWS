@@ -1,14 +1,18 @@
-alter table WB_FORM_FIELD disable all triggers;
+/*
+Файл обновления БД с версии 2.0.4 до версии 2.1.0
+*/
+ALTER TRIGGER T_B_U_WB_FORM_FIELD_ERR DISABLE;
 update WB_FORM_FIELD t set t.fl_html_code = null;
 alter table WB_FORM_FIELD rename column fl_html_code to ELEMENT_ALT;
 alter table WB_FORM_FIELD modify element_alt varchar2(2000) default null;
-alter table WB_FORM_FIELD enable all triggers;
 alter table WB_MM_FORM drop column html_img;
 delete from wb_form_field t where t.id_wb_form_field < 0 and t.field_name = 'HTML_IMG';
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
-values (-188, -7, 6, 'Пароль', 'PASWORD', null, null, 1, 'P', 0, null, 150, null, null, null, 0, 'DB_UPDATE', sysdate, 'DB_UPDATE', sysdate);
+values (-188, -7, 6, 'Пароль', 'PASSWORD', null, null, 1, 'P', 0, null, 150, null, null, null, 0, 'DB_UPDATE', sysdate, 'DB_UPDATE', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-189, -4, 13, 'Подсказка к полю', 'ELEMENT_ALT', null, null, 1, 'S', 0, null, 250, null, null, null, 0, 'DB_UPDATE', sysdate, 'DB_UPDATE', sysdate);
+insert into WB_SETTINGS (id_wb_settings, id_parent, num, name, short_name, value, used, create_user, create_date, last_user, last_date)
+values (-1, null, 3, 'Версия БД', 'ROOT_DB_VERSION', '2.1.0', 1, 'DB_UPDATE', sysdate, 'DB_UPDATE', sysdate);
 update wb_form_field t set t.element_alt =    
    case t.field_name
          when 'PASSWORD' then               'Пароль пользователь при использовании модуля аунтификации auth.user'
@@ -238,4 +242,5 @@ begin
    end if;
 end;
 /
-
+ALTER TRIGGER T_B_U_WB_FORM_FIELD_ERR ENABLE;
+commit;
