@@ -297,7 +297,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 			// каждый шаг это меню. если парент 0 то тогда это новый подпункт меню
 			while ($this-> db_conn ->sql_fetch($query)) {
 				// Хук для перевода меню в меню пользователя:
-				if (intval($this -> return_sql($query, "NUM")) == 999 ) {
+				if (intval($this -> return_sql($query, "NUM")) == 999 ) {                                                
 						$this -> main_menu[$last_num + 4]['ID'] = $last_num + 4;
 						$this -> main_menu[$last_num + 4]['PARENT'] = $last_num + 1;
 						$this -> main_menu[$this -> return_sql($query, "ID_WB_MAIN_MENU")]['PARENT'] = $last_num + 1;

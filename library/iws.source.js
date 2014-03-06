@@ -145,10 +145,8 @@ $(function() {
 	$( "#tabs" ).tabs({
 			collapsible: false,
 			heightStyle: "fill",
-			activate: function( event, ui ) {
-				if (ui.newPanel.attr('need_redraw') === 'true') {
-                                    redraw_document(ui.newPanel);
-                                }
+			activate: function( event, ui ) {				
+                                    redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
 			}
 	});
 	
@@ -917,11 +915,11 @@ $(function() {
 				}).multiselectfilter().addClass(spl_tabid);
 			    break;
 			    case 'M': // MULTILINE - ACE
-                                setTimeout(function() {                            
+                               setTimeout(function() {                            
                                     obj.before($('<div />').attr({'id':'editor_' + obj.attr('name')}));
                                          $('#editor_' + obj.attr('name')).ace_editor({
                                             width: obj.attr('w'),
-                                            heigth: (obj.attr('h')*12 > 50)?obj.attr('h')*12:50,
+                                            heigth: (obj.attr('rows')*12 > 50)?obj.attr('rows')*12:50,
                                             mode: 'ace/mode/pgsql',
                                             classes: 'FormElement ui-widget-content ui-corner-all',
                                             resizable: true,
@@ -934,8 +932,8 @@ $(function() {
                                                     }
                                             }
                                     }).addClass(spl_tabid).css({'margin-left':'0px;'});
-                                   }, 50); 
-                                obj.hide();                                
+                                    obj.hide(); 
+                                   }, 50);                                                                
                             break;
 			}
 			
@@ -1072,7 +1070,7 @@ $(function() {
 
 					
 	// Обработка мультиселекта и кнопки настроек
-	$("#themeselector").multiselect({multiple: false, header: false, selectedList: 1});
+	$("#themeselector").multiselect({multiple: false, header: true, selectedList: 1});
 	$("#width_enable").button({icons: { primary: "ui-icon-arrow-2-e-w" }}).click(function() {var btn = $("#width_enable");if (btn.attr("checked") != "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});
 	$("#editabled").button({icons: { primary: "ui-icon-lightbulb" }}).click(function() {var btn = $("#editabled");if (btn.attr("checked") != "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
 	$("#hide_menu").button({icons: { primary: "ui-icon-carat-2-e-w" }}).click(function() {var btn = $("#hide_menu");if (btn.attr("checked") != "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		

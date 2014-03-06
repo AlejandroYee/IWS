@@ -31,7 +31,6 @@ editGridRow : function(rowid, p){
             var form_html = $("<form />").attr({
                 'name':'FormPost',
                 'id':'editmod' + form_id,
-                'class':'FormGrid',
                 'onsubmit':'return false;',
                 'style':'text-align: left;'
             });
@@ -137,7 +136,7 @@ editGridRow : function(rowid, p){
                  'class':'FormElement ui-jqdialog-content'
              }).append(form_html).dialog({
 		autoOpen: false,
-		modal: p.modal,
+		modal: false,
 		minWidth: 450,
                 width: s_width,
                 appendTo: $(".ui-tabs-panel[aria-expanded='true']").children(".tab_main_content"),
@@ -215,14 +214,15 @@ editGridRow : function(rowid, p){
 			}
                     }
                 ],
-		close:function() {
-			$( this ).dialog( "close" );
+		close:function() {			
+                        $( this ).parent().parent().children('.ui-widget-overlay').remove();
+                        $( this ).dialog( "close" );
 		},
 		open: function() {
                                 var self = $(this).parent();
 				self.children('.ui-dialog-buttonpane').find('button:contains("'+bCancel+'")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_c_'+form_id);
-				self.children('.ui-dialog-buttonpane').find('button:contains("'+bSubmit+'")').button({icons: { primary: 'ui-icon-disk'}}).prop('id','btn_s_'+form_id);;
-				self.parent().css('z-index', 110).parent().children('.ui-widget-overlay').css('z-index', 105);
+				self.children('.ui-dialog-buttonpane').find('button:contains("'+bSubmit+'")').button({icons: { primary: 'ui-icon-disk'}}).prop('id','btn_s_'+form_id);
+                                $($('<div />').attr({'class':'ui-widget-overlay ui-front dialog_jqgrid_overlay ui-corner-all','style':'position:absolute;z-index:99'})).prependTo(self.parent());
                                 redraw_document();
 		}
 	});
@@ -393,7 +393,7 @@ viewGridRow : function(rowid, p){
                  'class':'FormElement ui-jqdialog-content'
              }).append(form_table).dialog({
 		autoOpen: true,
-		modal: true,
+		modal: false,
 		minWidth: 350,
                 appendTo: $(".ui-tabs-panel[aria-expanded='true']").children(".tab_main_content"),
                 title: $.jgrid.view.caption,
@@ -408,13 +408,14 @@ viewGridRow : function(rowid, p){
                     }
                 ],
 		close:function() {
+                        $( this ).parent().parent().children('.ui-widget-overlay').remove();
 			$( this ).dialog( "close" );
                         $( this ).dialog('destroy').remove();
 		},
 		open: function() {
                                 var self = $(this).parent();
 				self.children('.ui-dialog-buttonpane').find('button:contains("'+$.jgrid.view.bClose+'")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_c_'+form_id);
-				self.parent().css('z-index', 110).parent().children('.ui-widget-overlay').css('z-index', 105);
+				$($('<div />').attr({'class':'ui-widget-overlay ui-front dialog_jqgrid_overlay ui-corner-all','style':'position:absolute;z-index:99'})).prependTo(self.parent());
                                 redraw_document();
 		}
 	});
@@ -432,7 +433,7 @@ delGridRow : function(rowids,p) {
                  'class':'FormElement ui-jqdialog-content'
              }).append($.jgrid.del.msg).dialog({
 		autoOpen: true,
-		modal: true,
+		modal: false,
 		minWidth: 350,
                 appendTo: $(".ui-tabs-panel[aria-expanded='true']").children(".tab_main_content"),
                 title: $.jgrid.del.caption,
@@ -475,6 +476,7 @@ delGridRow : function(rowids,p) {
                     }
                 ],
 		close:function() {
+                        $( this ).parent().parent().children('.ui-widget-overlay').remove();
 			$( this ).dialog( "close" );
                         $( this ).dialog('destroy').remove();
 		},
@@ -482,7 +484,7 @@ delGridRow : function(rowids,p) {
                                 var self = $(this).parent();
 				self.children('.ui-dialog-buttonpane').find('button:contains("'+$.jgrid.del.bCancel+'")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_c_'+form_id);
                                 self.children('.ui-dialog-buttonpane').find('button:contains("'+$.jgrid.del.bSubmit+'")').button({icons: { primary: 'ui-icon-trash'}}).prop('id','btn_d_'+form_id);
-				self.parent().css('z-index', 110).parent().children('.ui-widget-overlay').css('z-index', 105);
+				$($('<div />').attr({'class':'ui-widget-overlay ui-front dialog_jqgrid_overlay ui-corner-all','style':'position:absolute;z-index:99'})).prependTo(self.parent());
                                 redraw_document();
 		}
 	});
@@ -530,7 +532,7 @@ columnChooser : function(opts) {
         
         dlg.append(selector).dialog({
 		autoOpen: true,
-		modal: true,
+		modal: false,
                 appendTo: $(".ui-tabs-panel[aria-expanded='true']").children(".tab_main_content"),
                 title: $.jgrid.col.caption,
                 width:opts.width,
@@ -558,6 +560,7 @@ columnChooser : function(opts) {
                     }
                 ],
 		close:function() {
+                        $( this ).parent().parent().children('.ui-widget-overlay').remove();
 			$( this ).dialog( "close" );
                         $( this ).dialog('destroy').remove();
                         redraw_document();
@@ -566,7 +569,7 @@ columnChooser : function(opts) {
                                 var self = $(this).parent();
 				self.children('.ui-dialog-buttonpane').find('button:contains("'+$.jgrid.col.bCancel+'")').button({icons: { primary: 'ui-icon-close'}});
                                 self.children('.ui-dialog-buttonpane').find('button:contains("'+$.jgrid.col.bSubmit+'")').button({icons: { primary: 'ui-icon-disk'}});
-				self.parent().css('z-index', 110).parent().children('.ui-widget-overlay').css('z-index', 105);
+				$($('<div />').attr({'class':'ui-widget-overlay ui-front dialog_jqgrid_overlay ui-corner-all','style':'position:absolute;z-index:99'})).prependTo(self.parent());
                                 redraw_document();
 		}
 	});        

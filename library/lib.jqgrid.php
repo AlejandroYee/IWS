@@ -85,7 +85,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						// ONLY DATE
 						case "D":  $edit_options .= ", row_type:'D'";break;						
 						// MULTILINE
-						case "M":  $edit_options .= ", row_type:'M', h:'".$this -> return_sql($query, "COUNT_ELEMENT")."'";break;				
+						case "M":  $edit_options .= ", row_type:'M', rows:'".$this -> return_sql($query, "COUNT_ELEMENT")."'";break;				
 						// CHEKBOX
 						case "B":  $edit_options .= ", row_type:'B', value:'1:0'";break;                                                
 						// INTEGER
