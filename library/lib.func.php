@@ -516,11 +516,10 @@ class BasicFunctions {
                             $.ajax({
                                url: '<?=ENGINE_HTTP?>/ajax.saveparams.php?act=check_version',							  
                                type: 'GET',
-                               success: function(data){	
-                                   data = '{"version": "2.1.5","date": "07.03.2014","link":"https://github.com/andrey-boomer/IWS/archive/v2.0.3.zip"}';
+                               success: function(data){	                                  
                                      if (data != "") {
                                        var dt = jQuery.parseJSON(data);                                            
-                                        if ((dt.version) && $.trim(dt.version) !== $.trim('<?=$db -> get_settings_val('ROOT_DB_VERSION')?>') ) {                                        			
+                                        if ((dt.version) && $.trim(dt.version) !== $.trim('<?=VERSION_ENGINE?>') ) {                                        			
                                             $.ajax({
                                                    url: '<?=ENGINE_HTTP?>/ajax.saveparams.php?act=get_history',							  
                                                    type: 'GET',
