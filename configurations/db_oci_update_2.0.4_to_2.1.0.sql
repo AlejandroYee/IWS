@@ -7,6 +7,7 @@ alter table WB_FORM_FIELD rename column fl_html_code to ELEMENT_ALT;
 alter table WB_FORM_FIELD modify element_alt varchar2(2000) default null;
 alter table WB_MM_FORM drop column html_img;
 delete from wb_form_field t where t.id_wb_form_field < 0 and t.field_name = 'HTML_IMG';
+delete from wb_form_field t where t.id_wb_form_field < 0 and t.field_name = 'FL_HTML_CODE';
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-188, -7, 6, 'Пароль', 'PASSWORD', null, null, 1, 'P', 0, null, 150, null, null, null, 0, 'DB_UPDATE', sysdate, 'DB_UPDATE', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
