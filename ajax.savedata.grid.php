@@ -151,7 +151,7 @@ while ($main_db -> sql_fetch($query)) {
 						}
 				break;
 				case 'B':
-					if (intval($value) <> 1) {
+					if (strtolower(trim($value)) <> "on") {
 							$str_sql_data .= ", 0";
 						} else {
 							$str_sql_data .= ", 1";
