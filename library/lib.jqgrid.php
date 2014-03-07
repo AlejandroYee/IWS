@@ -47,6 +47,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 														upper(t.field_type) as field_type_sum,
                                                                                                                        fft.char_mask as element_mask,
                                                                                                                        fft.char_case as element_case,
+                                                                                                                       t.field_name as field_name_empty,
                                                                                                                 t.field_txt,
                                                                                                                 t.element_alt,
 														decode(t.is_read_only, 1, 'true', 'false') is_read_only,
@@ -104,7 +105,10 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                             $edit_options .= ", row_type:'MAS', mask:'".$this -> return_sql($query, "ELEMENT_MASK")."', case:'".$this -> return_sql($query, "ELEMENT_CASE")."'";
                                         }
 					$edit_options .= ", title:'".$this -> return_sql($query, "element_alt")."', w:'".$this -> return_sql($query, "L_NAME")."'";
-					 
+					// Смотрим поле индекса для таблици:
+                                        if (strtoupper($this -> return_sql($query, "field_name_empty")) == strtoupper("ID_" . $this -> return_sql($query, "OBJECT_NAME"))) { 
+                                         $edit_options .= ", index_field:'true'";
+                                        }    
 					// Создаем заголовок					
 					$ResArray['colNames'] .= ",
 						'".trim(str_ireplace(array("(not display)","#")," ",$this -> return_sql($query, "NAME")))."'";
@@ -212,7 +216,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 	ob_start();
 	ob_implicit_flush();
 	?>	<div class="grid_resizer <?=$this->pageid?>" for="<?=$object_name?>" form_id="<?=$form_id?>" auto_update="<?=$auto_update?>" form_type="<?=$type?>" percent="<?=$heigth_of_grid?>">
-		<table id="<?=$object_name?>"></table>
+		<table id="<?=$object_name?>" ></table>
 			<div id="Pager_<?=$object_name?>"></div>
 		</div>
 		<script type="text/javascript">		
