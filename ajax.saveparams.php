@@ -247,6 +247,7 @@ $query = $main_db->sql_execute("select t.action_sql,t.action_bat from ".DB_USER_
 						$str_block = str_ireplace(":".$main_db->sql_result($query_tmp, "FIELD_NAME"),"'".$arr_value[$main_db->sql_result($query_tmp, "FIELD_NAME")]."'",$str_block);	
 					}
 				}
+                                
 		// Для кастомных кнопок проверка на заданный ровайди
 		if (!empty($rowid)) {
                     $rowid1 = "";
@@ -257,14 +258,16 @@ $query = $main_db->sql_execute("select t.action_sql,t.action_bat from ".DB_USER_
 				
 				// пробегаемся по массиву и смотрим  на типы числе или
 				foreach($tmp as $key => $val) if (!is_numeric ($val)) {
-					$rowid.= "'".$val."',";			
+					$rowid .= "'".$val."',";			
 				} else {
 					$rowid .= $val.",";			
 				}
 				
 				// Чистим от последней запятой, и выполняем
 				$rowid1 = trim($rowid,",");
-			}		
+			} else {
+                                $rowid1 = trim($rowid);
+                        }    
 			$str_block = str_ireplace(":rowid",$rowid1,$str_block);
 		}
 		$sql_block = new db(true);
