@@ -133,6 +133,19 @@ function recurse_copy($src,$dst) {
     } 
     closedir($dir); 
 }
+function update_db($folder) {     
+    $ver_db = $main_db -> get_settings_val('ROOT_DB_VERSION');
+    // Применяем файл базы данных
+                    $db_file = $folder."configurations".DIRECTORY_SEPARATOR."db_".DB."_update_".$ver_db."_to_".trim($dt["version"]).".sql";
+                    if (is_file($db_file)) {
+                        if (VERSION_ENGINE == trim($dt["previos"])) {
+                            $main_db -> sql_execute(file_get_contents($db_file)); 
+                        } else {
+                            echo "Файлы системы обновлены до последней версии, но обновление БД неудалось. Вам необходимо вручную запустить все файлы по порядку из папки 'configurations'".
+                                 " которые начинаются с версии ".$ver_db." до версии ".$dt["version"]. " по всем вопросам обратитесь к update.txt в папке configurations.";
+                        }    
+                    }    
+}
  // проверяем привелегии
  $query = $main_db -> sql_execute("select decode(count(t.id_wb_main_menu), 0, 'false', 'true') as is_administator  from wb_main_menu t where used = 1 and (wb.get_access_main_menu(t.id_wb_main_menu) = 'enable' or t.name is null) and t.id_parent is null   and t.num = 999");
     while ($main_db -> sql_fetch($query)) {             
@@ -149,11 +162,13 @@ function recurse_copy($src,$dst) {
             if(VERSION_ENGINE != trim($dt["version"])) {
                 if (is_dir(ENGINE_ROOT. DIRECTORY_SEPARATOR . ".git")) {
                  // Обновляемся через гит
-                 exec("git info 2>&1",$output,$comm);
+                 exec("git pull 2>&1",$output,$comm);
                  if($comm != 0) {
                      echo "Ошибка работы GIT:<br>";
                      echo implode("<br>\n",$output);
-                 }    
+                 } else {
+                       update_db("");                     
+                 }
                 } else {
                 // Обновляемся до релиза:  
                  $fv_z =  file_get_contents($dt["link"]);
@@ -164,10 +179,7 @@ function recurse_copy($src,$dst) {
                                 if($comm == 0) {
                                     $dir_input_name = "IWS-" .$dt["version"];// директория с новым релизом
                                     // Применяем файл базы данных
-                                    $db_file = $dir_input_name .DIRECTORY_SEPARATOR. "db_update_".VERSION_ENGINE."_to_".trim($dt["version"]).".sql";
-                                    if (is_file($db_file)) {
-                                        $main_db -> sql_execute(file_get_contents($db_file));                                        
-                                    }   
+                                    update_db($dir_input_name.DIRECTORY_SEPARATOR);                                                                
                                     // отчищаем папки и файлы:
                                     delTree("configurations");
                                     delTree("jscript");
@@ -188,7 +200,7 @@ function recurse_copy($src,$dst) {
                                 }   
                      } else {
                        echo "Неудалось записать временный файл.";   
-                     }    
+                     }                     
                  } else {
                      echo "Неудалось скачать файл Обновления системы, ошибка сервера, либо сервер недоступен.";  
                  }    
@@ -269,7 +281,4 @@ if (!empty($action_bat)) {
 	exec($action_bat);
 }
 
-/*$json = new json();
-BasicFunctions::requre_script_file("lib.json.php"); 
-echo jsonencode("done");*/
 $main_db -> __destruct();
