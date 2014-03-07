@@ -187,7 +187,7 @@ function update_db($folder) {
                                     delTree("themes");
                                     $files = array_diff(scandir(ENGINE_ROOT . DIRECTORY_SEPARATOR), array('.','..')); 
                                     foreach ($files as $file) {                                       
-                                        if (!is_dir($file) and (!strstr($file, "config."))) {
+                                        if (!is_dir($file) and (!strstr($file, "config.") and (strstr($file, ".php")))) {
                                             unlink($file);
                                         }
                                     }
