@@ -149,7 +149,15 @@ editGridRow : function(rowid, p){
                              var searilezed = [];
                              $.each($('#editmod' + form_id).find("input, select, textarea"), function() {
                                  var obj = $(this);
-                                 searilezed[obj.attr('name')] = obj.val();
+                                 var grid_obj_name = grid.attr('for_object_db');
+                                 var grid_index_row = '';
+                                 if (obj.attr('name') !== undefined ){                                     
+                                        if (obj.attr('row_type') === 'B') {
+                                           searilezed[obj.attr('name')] = (obj.attr('checked') === 'checked')?'on':'off'; 
+                                        } else {
+                                           searilezed[obj.attr('name')] = obj.val();
+                                        }                                       
+                                 }
                              }); 
                                 searilezed =  $.extend({}, searilezed); //save as object
                                 
@@ -192,11 +200,14 @@ editGridRow : function(rowid, p){
                                                         //save data to grid  
                                                         if (searilezed.oper !== "add") {                                                             
                                                                grid.jqGrid('setRowData',rowid,searilezed);
-                                                           } else {
-                                                               if (tree) { 
-                                                                    grid.jqGrid('addChildNode',ret[3],searilezed.ID_PARENT,searilezed);                                                                    
+                                                           } else {   
+                                                               var row_id_n = [];                                                               
+                                                                   row_id_n[$('#editmod' + form_id).find("input[index_field='true']").attr('id')] = ret[2];
+                                                                   searilezed =  $.extend(searilezed, row_id_n);
+                                                               if (tree) {                                                                    
+                                                                    grid.jqGrid('addChildNode',ret[2],searilezed.ID_PARENT,searilezed);                                                                    
                                                                } else {
-                                                                    grid.jqGrid('addRowData',ret[3],searilezed,p.addedrow); 
+                                                                    grid.jqGrid('addRowData',ret[2],searilezed,p.addedrow); 
                                                                }
                                                         }
                                                         dlg.dialog( "close" );
