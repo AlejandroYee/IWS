@@ -22,12 +22,18 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
 <html class="no-js" lang="en-US">                                                                                                                                            
 <head>
         <meta charset="<?php echo strtolower(HTML_ENCODING); ?>">
-        <title><?=$main_db -> get_settings_val('ROOT_CONFIG_NAME')?></title>
+        <title>IWS - <?=$main_db -> get_settings_val('ROOT_CONFIG_NAME')?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=<?php echo strtolower(HTML_ENCODING); ?>"/>
         <meta http-equiv="Cache-Control" content="no-cache">
         <meta http-equiv="Pragma" content="no-cache" >				
-        <meta http-equiv="expires" content="0">						
+        <meta http-equiv="expires" content="0">		
+        <meta http-equiv="imagetoolbar" content="no" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+        <meta name="author" lang="ru" content="Andrey Lysikov ICQ:454169, skype: andrey.boomer" />
+        <meta name="copyright" lang="ru" content="MIT License" />
+        <meta name="description" content="Интелектуальная веб система. Интерфейс обмена и работы с sql базой данны" />
+        <meta name="document-state" content="Dynamic" />
+        <meta name="robots" content="noindex,follow" />
         <link rel="icon" type="image/x-icon" href="<?=ENGINE_HTTP?>/<?=$main_db -> get_settings_val("ROOT_CONFIG_FAVICON")?>" />
         <link rel="Bookmark" type="image/x-icon" href="<?=ENGINE_HTTP?>/<?=$main_db -> get_settings_val("ROOT_CONFIG_FAVICON")?>" />
         <link rel="shortcut icon" type="image/x-icon" href="<?=ENGINE_HTTP?>/<?=$main_db -> get_settings_val("ROOT_CONFIG_FAVICON")?>" />
