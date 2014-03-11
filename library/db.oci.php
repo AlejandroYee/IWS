@@ -215,7 +215,11 @@ private $arhive_sql,$vields_sql = [];
 	// Возвращаем значение нужного столбца, в случае чего перекодируем
 	public function sql_result($sql,$name,$encoding = true) {
                 $name   = str_ireplace(array("&QUOT;","&quot;"), "", strtoupper(trim($name)));               
-                $res 	= oci_result($sql,  $name);
+                if (is_numeric($name)) {
+                    $res 	= oci_result($sql, intval($name));
+                } else {
+                    $res 	= oci_result($sql,  $name);
+                }    
                 $val	= "";	
 
                 // Если результат CLOB или BLOB
