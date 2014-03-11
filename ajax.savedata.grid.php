@@ -51,7 +51,7 @@ while ($main_db -> sql_fetch($query_check)) {
 }
 // если пользователю недоступна форма или она только для чтения, то выходим сразу
 if (empty($check)) {
-    die("Доступ для изменения запрещен");
+    die("Доступ для изменения запрещен"); 
 }
 
 // Теперь смотрим есть ли определенные права
@@ -74,12 +74,14 @@ switch ($type_of_past) {
 }
 // Отчищаем подзапрос от лишниих указателей на страницу:
 $input_post = array();
-foreach (filter_input_array(INPUT_POST) as $key => $value) {
-    if (filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING) != null and !empty($key)) {
+foreach (filter_input_array(INPUT_POST) as $key => $value) {    
+    if (filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING) != null and !empty($key)) {        
         $input_post[substr($key, 0, strrpos($key, "-"))] = filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING);  
-    }    
+    } 
+    if (is_array($value) and !empty($key)) {
+        $input_post[substr($key, 0, strrpos($key, "-"))] = implode(",",filter_var_array($value,FILTER_SANITIZE_STRING));  
+    }
 } 
-
 
 $query = $main_db -> sql_execute("select tf.owner, tf.object_name, t.name, t.field_name || '_' || abs(t.id_wb_form_field) field_name_id, t.field_name, decode(trim(t.field_type), 'D', 'to_char('||t.field_name||', ''dd.mm.yyyy hh24:mi:ss'') '||t.field_name,t.field_name) f_name,
 								    ta.html_txt align_txt, tf.xsl_file_in, trim(t.field_type) field_type, tf.action_sql, tf.action_bat from ".DB_USER_NAME.".wb_mm_form tf
@@ -90,19 +92,8 @@ $query = $main_db -> sql_execute("select tf.owner, tf.object_name, t.name, t.fie
 while ($main_db -> sql_fetch($query)) {
    	if (($main_db -> sql_result($query, "FIELD_NAME") <> "R_NUM") and ( isset($input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")]) or
                 isset($_FILES[$main_db -> sql_result($query, "FIELD_NAME")])) or ($main_db -> sql_result($query, "FIELD_NAME") == "ID_PARENT")) {
-            
-		// Вдруг у нас значения в виде массива:
-                if (isset($input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")])) {	
-                    $field_name_id = $input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")];  
-                        if (trim($field_name_id) != "") {
-                           if (is_array($field_name_id)) {
-                                $value = implode(",",$field_name_id);
-                            } else {
-                                $value = $field_name_id;
-                            }	
-                        }
-                }
-		$value =  iconv(HTML_ENCODING,LOCAL_ENCODING,$value); // кодировочку меняем
+           
+		$value =  iconv(HTML_ENCODING,LOCAL_ENCODING,$input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")]); // кодировочку меняем
                 
 		// Если родительский дерева и мы обновляем запись, то:                
 		if ((($type == "TREE_GRID_FORM_MASTER") or ($type == "TREE_GRID_FORM") or ($type == "TREE_GRID_FORM_DETAIL")) and ($main_db -> sql_result($query, "FIELD_NAME") == "ID_PARENT")) {                    
