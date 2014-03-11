@@ -774,7 +774,7 @@ $(function() {
                             } else if (obj.attr('row_type') == 'NL') {
                                 obj.spinner( "option", "culture", "ru-RU" )
                                          .spinner( "option", "numberFormat", "n7" )
-                                         .spinner( "option", "step", "0.01" );
+                                         .spinner( "option", "step", "0.0000001" );
                             } else if (obj.attr('row_type') == 'C') {
                                   obj.spinner( "option", "culture", "ru-RU" )
                                          .spinner( "option", "numberFormat", "C" )
