@@ -10,6 +10,7 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------
 class db{
 var $link, $user_pref, $user_real_name,$session_id_local;
+private $arhive_sql,$vields_sql = [];
 
 	function __construct($new_descript = false) {	
 	$ora = $this -> connect_db($new_descript);
@@ -156,7 +157,7 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 		if (strpos(strtolower($sql),"returning") > 0 ) {			
 			oci_bind_by_name($res, ":rid", $rowid, -1, SQLT_INT);			
 		} 
-		
+		$this -> arhive_sql = $sql;
 		// Выполняем
 		if (!OCI_Execute($res)) {
 				// Проверяем еще раз на наличе ретурна, и если есть убираем его и отдаем в обработку заново:
@@ -183,7 +184,11 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 					die("<p align='left' >".iconv(LOCAL_ENCODING,HTML_ENCODING,str_replace(array("\r\n", "\n",),"<br>",str_replace(array("    ","   ","  ")," ",$err_array['message'])))."</p>");
 				}
 		}
-		
+                // заполняем массив столбцов
+                $this -> vields_sql = [];		
+                for ($i = 1; $i <= oci_num_fields($res); $i++) {
+                    $this -> vields_sql[] = strtoupper(oci_field_name($res, $i));
+                }    
 		// Если был ретурнинг то отдаем вместо ресурса вернувшиеся значение
 		if (!empty($rowid)) {
 					BasicFunctions::to_log("SQL: <".$this->link."> returning id ".$rowid." is a reached;");
@@ -197,27 +202,41 @@ var $link, $user_pref, $user_real_name,$session_id_local;
 	// Парсинг строк в таблице
 	public function sql_fetch($sql) { return OCI_Fetch($sql); }
 	
+        // Проверяем есть ли в массиве наше имя столбца
+        public function sql_has_field($sql,$name) {
+            $name   = str_ireplace(array("&QUOT;","&quot;"), "", strtoupper(trim($name)));
+            if (array_search($name,$this -> vields_sql) !== false) {
+                    return true;
+            } else {
+                    return false;
+            }    
+        }
 	
 	// Возвращаем значение нужного столбца, в случае чего перекодируем
 	public function sql_result($sql,$name,$encoding = true) {
-                $name = str_ireplace("&QUOT;", "", strtoupper($name));
-		$res 	= oci_result($sql,  $name);
-		$val	= "";	
-		
-		// Если результат CLOB или BLOB
-		if (is_object($res)) {			
-			while(!$res -> eof()){
-				$val .= $res -> read(1024);
-			}
-		} else {
-			$val = $res;
-		}
-		
-		// Нужна ли перекодировка:
-		if ($encoding)	{
-			$val =  iconv(LOCAL_ENCODING,HTML_ENCODING,$val);
-		}
-		return $val;
+                $name   = str_ireplace(array("&QUOT;","&quot;"), "", strtoupper(trim($name)));
+                if (array_search($name,$this -> vields_sql) !== false) {
+                    $res 	= oci_result($sql,  $name);
+                    $val	= "";	
+
+                    // Если результат CLOB или BLOB
+                    if (is_object($res)) {			
+                            while(!$res -> eof()){
+                                    $val .= $res -> read(1024);
+                            }
+                    } else {
+                            $val = $res;
+                    }
+
+                    // Нужна ли перекодировка:
+                    if ($encoding)	{
+                            $val =  iconv(LOCAL_ENCODING,HTML_ENCODING,$val);
+                    }
+                    return $val;
+                } else {                                         
+                    BasicFunctions::to_log("ERR: getting ".$name." from SQL: ".$this -> arhive_sql,true);
+                    return "";
+                }    
 	}	
 	
 	// Получаем полное имя пользователя

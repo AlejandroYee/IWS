@@ -595,7 +595,7 @@ class BasicFunctions {
 
             while ($db -> sql_fetch($query)) {
                     // поддержка опт группы (optgroup):
-                    if (trim($db -> sql_result($query, "LEV")) !="" ) {	
+                    if ($db ->  sql_has_field($query,"LEV")) {	
                             // Используем группы, сначала заполняем данные в массив		
                             if (($level != $db -> sql_result($query, "LEV")) and ($level != 0)) {
                                     if ($level < $db -> sql_result($query, "LEV")) {	
