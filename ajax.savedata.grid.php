@@ -75,14 +75,17 @@ switch ($type_of_past) {
 // Отчищаем подзапрос от лишниих указателей на страницу:
 $input_post = array();
 foreach (filter_input_array(INPUT_POST) as $key => $value) {    
+    
     if (filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING) != null and !empty($key)) {        
-        $input_post[substr($key, 0, strrpos($key, "-"))] = filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING);  
+        $input_post[substr($key, 0, strrpos($key, "-"))] = filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING); 
     } 
     if (is_array($value) and !empty($key)) {
         $input_post[substr($key, 0, strrpos($key, "-"))] = implode(",",filter_var_array($value,FILTER_SANITIZE_STRING));  
     }
+    if (empty($value) and (array_search(substr($key, 0, strrpos($key, "-")),$input_post) === false)) {
+        $input_post[substr($key, 0, strrpos($key, "-"))] = "null";
+    }
 } 
-
 $query = $main_db -> sql_execute("select tf.owner, tf.object_name, t.name, t.field_name || '_' || abs(t.id_wb_form_field) field_name_id, t.field_name, decode(trim(t.field_type), 'D', 'to_char('||t.field_name||', ''dd.mm.yyyy hh24:mi:ss'') '||t.field_name,t.field_name) f_name,
 								    ta.html_txt align_txt, tf.xsl_file_in, trim(t.field_type) field_type, tf.action_sql, tf.action_bat from ".DB_USER_NAME.".wb_mm_form tf
 									left join ".DB_USER_NAME.".wb_form_field t on t.id_wb_mm_form = tf.id_wb_mm_form left join ".DB_USER_NAME.".wb_form_field_align ta on ta.id_wb_form_field_align = t.id_wb_form_field_align
@@ -92,8 +95,7 @@ $query = $main_db -> sql_execute("select tf.owner, tf.object_name, t.name, t.fie
 while ($main_db -> sql_fetch($query)) {
    	if (($main_db -> sql_result($query, "FIELD_NAME") <> "R_NUM") and ( isset($input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")]) or
                 isset($_FILES[$main_db -> sql_result($query, "FIELD_NAME")])) or ($main_db -> sql_result($query, "FIELD_NAME") == "ID_PARENT")) {
-           
-		$value =  iconv(HTML_ENCODING,LOCAL_ENCODING,$input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")]); // кодировочку меняем
+		$value =  iconv(HTML_ENCODING,LOCAL_ENCODING,$input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")]); // кодировочку меняем                
                 
 		// Если родительский дерева и мы обновляем запись, то:                
 		if ((($type == "TREE_GRID_FORM_MASTER") or ($type == "TREE_GRID_FORM") or ($type == "TREE_GRID_FORM_DETAIL")) and ($main_db -> sql_result($query, "FIELD_NAME") == "ID_PARENT")) {                    
@@ -121,28 +123,25 @@ while ($main_db -> sql_fetch($query)) {
 		// Смотрим на тип переменных						
 		switch (strtoupper(trim($main_db -> sql_result($query, "FIELD_TYPE")))) {
 				case 'D':
-						if (stripos($value,":") > 0) {
-								$str_sql_data .= ", to_date('".$value."', 'dd.mm.yyyy hh24:mi:ss')";										
-						} else {
-								$str_sql_data .= ", to_date('".$value."', 'dd.mm.yyyy')";
-						}
-				break;
-				case 'DT':
-						if (stripos($value,":") > 0) {
-								$str_sql_data .= ", to_date('".$value."', 'dd.mm.yyyy hh24:mi:ss')";										
-						} else {
-								$str_sql_data .= ", to_date('".$value."', 'dd.mm.yyyy')";
-						}
+                                case 'DT':
+                                            if (trim($value) != "null") {
+                                                $value = "'".$value."'";
+                                            }     
+                                            if (stripos($value,":") > 0) {
+                                                $str_sql_data .= ", to_date(".$value.", 'dd.mm.yyyy hh24:mi:ss')";										
+                                            } else {
+                                                $str_sql_data .= ", to_date(".$value.", 'dd.mm.yyyy')";
+                                            }
 				break;
 				case 'I':
-					if (trim($value) <> "") {
+					if (trim($value) != "null") {
 							$str_sql_data .= ",".intval($value);
 						} else {
 							$str_sql_data .= ", null";
 						}
 				break;
 				case 'B':
-					if (strtolower(trim($value)) <> "on") {
+					if (strtolower(trim($value)) != "on") {
 							$str_sql_data .= ", 0";
 						} else {
 							$str_sql_data .= ", 1";
@@ -152,14 +151,14 @@ while ($main_db -> sql_fetch($query)) {
 						$str_sql_data .= ",".floatval(str_replace(",",".",$value));
 				break;
 				case 'P':
-					if (!empty($value)) {
+					if (trim($value) != "null") {
 						$str_sql_data .= ",'".md5($value)."'";
-					}
+					} else {
+                                                $str_sql_data .= ", null";
+                                        }    
 				break;
 				case 'C':
-						$str_sql_data .= ",".floatval(str_replace(",",".",$value));
-				break;
-				case 'NL':
+                                case 'NL':
 						$str_sql_data .= ",".floatval(str_replace(",",".",$value));
 				break;
 				case 'F':						
@@ -188,7 +187,10 @@ while ($main_db -> sql_fetch($query)) {
 						}
 				break;
 				default:
-						$str_sql_data .= ",'".$value."' ";
+                                        if (trim($value) != "null") {
+                                                $value = "'".$value."'";
+                                            }   
+					$str_sql_data .= ",".$value;
 				break;
 		}
 	}	
