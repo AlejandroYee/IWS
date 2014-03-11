@@ -213,11 +213,11 @@ private $arhive_sql,$vields_sql = [];
         }
 	
 	// Возвращаем значение нужного столбца, в случае чего перекодируем
-	public function sql_result($sql,$name,$encoding = true) {
-                $name   = str_ireplace(array("&QUOT;","&quot;"), "", strtoupper(trim($name)));               
+	public function sql_result($sql,$name,$encoding = true) {                            
                 if (is_numeric($name)) {
                     $res 	= oci_result($sql, intval($name));
                 } else {
+                    $name       = str_ireplace(array("&QUOT;","&quot;"), "", strtoupper(trim($name)));   
                     $res 	= oci_result($sql,  $name);
                 }    
                 $val	= "";	
