@@ -214,29 +214,24 @@ private $arhive_sql,$vields_sql = [];
 	
 	// Возвращаем значение нужного столбца, в случае чего перекодируем
 	public function sql_result($sql,$name,$encoding = true) {
-                $name   = str_ireplace(array("&QUOT;","&quot;"), "", strtoupper(trim($name)));
-                if (array_search($name,$this -> vields_sql) !== false) {
-                    $res 	= oci_result($sql,  $name);
-                    $val	= "";	
+                $name   = str_ireplace(array("&QUOT;","&quot;"), "", strtoupper(trim($name)));               
+                $res 	= oci_result($sql,  $name);
+                $val	= "";	
 
-                    // Если результат CLOB или BLOB
-                    if (is_object($res)) {			
-                            while(!$res -> eof()){
-                                    $val .= $res -> read(1024);
-                            }
-                    } else {
-                            $val = $res;
-                    }
+                // Если результат CLOB или BLOB
+                if (is_object($res)) {			
+                        while(!$res -> eof()){
+                                $val .= $res -> read(1024);
+                        }
+                } else {
+                        $val = $res;
+                }
 
-                    // Нужна ли перекодировка:
-                    if ($encoding)	{
-                            $val =  iconv(LOCAL_ENCODING,HTML_ENCODING,$val);
-                    }
-                    return $val;
-                } else {                                         
-                    BasicFunctions::to_log("ERR: getting ".$name." from SQL: ".$this -> arhive_sql,true);
-                    return "";
-                }    
+                // Нужна ли перекодировка:
+                if ($encoding)	{
+                        $val =  iconv(LOCAL_ENCODING,HTML_ENCODING,$val);
+                }
+                return $val;                 
 	}	
 	
 	// Получаем полное имя пользователя
