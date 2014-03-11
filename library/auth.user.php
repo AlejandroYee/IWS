@@ -25,7 +25,13 @@ class AUTH {
 				}				
 			}
 		}	
-		
+		// Если пользователб у нас корявый и выставлено разрешение для гостей то определяем его как гостя
+                if (defined("AUTH_ALLOW_GUEST") and $user != false) {
+                    if ($this -> save_user(AUTH_ALLOW_GUEST,"")) {
+                        BasicFunctions::to_log("LIB: User ". strtoupper($user). " has logined as GUEST: ".AUTH_ALLOW_GUEST);
+                        return true;
+                    }    
+                }    
 		return false;
 	}
         
@@ -33,7 +39,12 @@ class AUTH {
             $db_con = new DB();
             if ($encrupt) {
                $pass = md5($pass);
+            }
+            
+            if (defined("AUTH_ALLOW_GUEST") and $user == AUTH_ALLOW_GUEST ) {
+                return true;
             }    
+            
             $sql = $db_con -> sql_execute("select count(*) as is_user from wb_user w where w.wb_name = upper('".$user."') and w.password = '".$pass."'");
             while ($db_con -> sql_fetch($sql)) {
 		if ($db_con -> sql_result($sql, "is_user") > 0 ) {

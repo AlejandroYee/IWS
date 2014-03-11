@@ -29,6 +29,7 @@ define("DB_ENCODING","CL8MSWIN1251");
 
 ## AUTH FORM WB_USER TABLE INTERFACE
 #define("AUTH","user");
+#define("AUTH_ALLOW_GUEST","GUEST_USER"); //  Укажите имя пользователя гостя в базе, гости будут залогенены под ним
 
 ## TESTING LOCAL AUTCH INTERFACE
 define("AUTH","local");
