@@ -138,6 +138,7 @@ var hidden_menu = false;
 var main_menu_higth;
 var doc_height;
 var doc_width;
+var doc_title = null;
                 
 $(function() {
     
@@ -145,8 +146,13 @@ $(function() {
 	$( "#tabs" ).tabs({
 			collapsible: false,
 			heightStyle: "fill",
-			activate: function( event, ui ) {				
+			activate: function( event, ui ) {                                    
                                     redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
+                                    if (doc_title === null) {
+                                      doc_title = document.title;  
+                                    } 
+                                    document.title = doc_title + ' [ ' + ui.newTab.text() + ' ]';
+                                   
 			}
 	});
 	
@@ -326,14 +332,16 @@ $(function() {
 		$.ajax({
 			  url: tabContentUrl,							  
 			  type: 'GET',
-			  success: function(data){				
+			  success: function(data){
 				if($(data).find("div[window_login='logon']").length == 0) {
 					$('#'+id).empty().css('text-align','left').attr({need_redraw:true});
-                                        $('#'+id).append($(data).fadeIn(300));
-					redraw_document($(".ui-tabs-panel[aria-expanded='true']"));				
+                                        $('#'+id).append($(data).fadeIn(300));                                        
+					redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
 				} else {		 		
 					// Нам вернули страницу авторизации. отчищаем документ
 					$('html').empty().append(data);
+                                        document.title = doc_title;
+                                       
 				}
 			  }	  
 			});
@@ -345,7 +353,10 @@ $(function() {
 		var panelId = $("#ui-" + id_tab).parent().closest( "li" ).remove().attr( "aria-controls" );
 		$( "#tabs" ).tabs( "refresh" );
                 sumtab--;
-		redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
+                redraw_document($(".ui-tabs-panel[aria-expanded='true']"));              
+                if ($(".ui-tabs-nav li[aria-selected='true']").length === 0 ) {                
+                    document.title = doc_title;
+                } 
                 $( "#" + panelId ).remove();                
                 // Нужно подчистить элементы multiselect и диалоги
                 $("." + id_tab).remove();
@@ -849,10 +860,6 @@ $(function() {
                                                 icons: {primary: 'ui-icon-calendar'},
                                                 text: false
                                         }).addClass(spl_tabid);
-                        if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
-                                        obj.datepicker( "option", "disabled", true );
-                                        obj.parent().children('.ui-datepicker-trigger').remove();
-                        }					
 		    break;
 		    case 'DT': // DATE TIME					
                                 var myControl=  {
@@ -901,10 +908,6 @@ $(function() {
                                                 icons: {primary: 'ui-icon-calendar'},
                                                 text: false
                                         }).addClass(spl_tabid);
-                                if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
-                                        obj.datepicker( "option", "disabled", true );
-                                        obj.parent().children('.ui-datepicker-trigger').remove();
-                                }
 			   break;		
 			   case 'SB': // MULTISELECT
 				obj.multiselect({
@@ -914,9 +917,10 @@ $(function() {
                                         selectedList: obj.attr('size')?obj.attr('size'):1
 				}).multiselectfilter().addClass(spl_tabid);
 			    break;
-			    case 'M': // MULTILINE - ACE
-                               setTimeout(function() {                            
-                                    obj.before($('<div />').attr({'id':'editor_' + obj.attr('name')}));
+			    case 'M': // MULTILINE - ACE     
+                                if (obj.attr('show_disabled') !== "true") {
+                                    setTimeout(function() {  
+                                     obj.before($('<div />').attr({'id':'editor_' + obj.attr('name')}));
                                          $('#editor_' + obj.attr('name')).ace_editor({
                                             width: obj.attr('w'),
                                             heigth: (obj.attr('rows')*12 > 50)?obj.attr('rows')*12:50,
@@ -933,16 +937,57 @@ $(function() {
                                             }
                                     }).addClass(spl_tabid).css({'margin-left':'0px;'});
                                     obj.hide(); 
-                                   }, 50);                                                                
+                                   }, 50); 
+                               }
                             break;
 			}
-			
+                    if (typeof(obj.attr('field_has_sql')) !== "undefined") {
+                        $($('<button>Расчитать/вставить/обновить содержимое</button>').button({icons: {primary: 'ui-icon-refresh'}, text: false})
+                                .click(function( event ) {
+                                    var searilezed_elem = [];
+                                        $.each(form_id.find("input, select, textarea"), function() {
+                                            var elem = $(this);
+                                            if (elem.attr('name') !== undefined ){                                     
+                                                   if (elem.attr('row_type') === 'B') {
+                                                      searilezed_elem[elem.attr('name')] = (elem.attr('checked') === 'checked')?1:0; 
+                                                   } else {
+                                                      searilezed_elem[elem.attr('name')] = elem.val();
+                                                   }                                       
+                                            }
+                                        }); 
+                                searilezed_elem =  $.extend({}, searilezed_elem); //save as object
+                                $.ajax({
+                                    url: 'ajax.data.field.php?type=field&value_name=' + obj.attr('name'),
+                                    datatype:'json',
+                                    data: searilezed_elem,
+                                    cache: false,
+                                    type: 'POST',
+                                       success: function(rets) {	
+                                          obj.val(rets);
+                                          update_table_elemnts(form_id);
+                                       }	  
+                                   });	  
+                                })
+                            ).insertAfter(obj.parent().children(':last'));
+                        $(this).width($(this).width() + 20);                    
+                    }   
+                    
                     // Если мы видим поля но не можем изменять
                     if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
-                                    obj.attr({'name':null,'disabled':'disabled'}).addClass('FormElement ui-widget-content ui-corner-all ui-state-disabled');
-                                    if (typeof(obj_clone) !== "undefined") {
-                                            obj_clone.attr({'name':null,'disabled':'disabled'}).addClass('FormElement ui-widget-content ui-corner-all ui-state-disabled');
-                                    }
+                         obj.attr({'name':null,'disabled':'disabled'}).addClass('FormElement ui-widget-content ui-corner-all ui-state-disabled');  
+                         switch (obj.attr('row_type')) {			
+                                case 'I' : // INTEGER, NUMBER, NUMBER LOOOONG,CURRVAL
+                                case 'N' :
+                                case 'NL':
+                                case 'C' : 
+                                    obj.spinner({ disabled: true });
+                                break;   
+                            case 'D': // DATE	
+                            case 'DT':
+                                   obj.datepicker( "option", "disabled", true );
+                                   obj.parent().children('.ui-datepicker-trigger').remove();
+                            break;                            
+                         }
                     }
                      if ($(this).width() > s_width) {
                          s_width = $(this).width();
@@ -1006,8 +1051,10 @@ $(function() {
 		
 				break;
 				
-				case 'M': // MULTILINE - ACE	
-                                    $('#editor_' + obj.attr('name')).ace_editor({value: obj.val()});
+				case 'M': // MULTILINE - ACE
+                                    if (obj.attr('show_disabled') !== "true") {
+                                        $('#editor_' + obj.attr('name')).ace_editor({value: obj.val()});
+                                    }
 				break;
 			} 
 		});	
@@ -1076,7 +1123,7 @@ $(function() {
 	$("#hide_menu").button({icons: { primary: "ui-icon-carat-2-e-w" }}).click(function() {var btn = $("#hide_menu");if (btn.attr("checked") != "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
 	$("#cache_enable").button({icons: { primary: "ui-icon-notice" }}).click(function() {var btn = $("#cache_enable");if (btn.attr("checked") != "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
 	$("#renderer").slider({
-			range: "min",
+	    range: "min",
             value: $("#render_type").val(),
             min: 0,
             max: 3,
@@ -1114,9 +1161,9 @@ $(function() {
 					  }
 					});
 	// Нужно для автозагрузки данных в селект в гриде 	
-	get_select_values_grid = function (gridname, value_name, parent_value_id) {
+	get_select_values_grid = function (gridname, value_name) {
 		$.ajax({
-				url: 'ajax.data.select.php?value_name=' + value_name + '&parent_id=' + parent_value_id,
+				url: 'ajax.data.field.php?type=select&value_name=' + value_name,
 				datatype :'json',
 				cache: false,
 				type: 'GET',

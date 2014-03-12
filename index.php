@@ -169,7 +169,7 @@ break;
 						if (($file_t == ".") or ($file_t == "..")) continue;
 						$iscss = strpos($file_t,".css");
 						if (!empty($iscss)) {
-								if (trim(THEMES_DIR. DIRECTORY_SEPARATOR .$file. DIRECTORY_SEPARATOR .$file_t) == trim($main_db->get_param_view("theme"))) {$selected="selected";} else {$selected="";}
+							if (trim(THEMES_DIR. DIRECTORY_SEPARATOR .$file. DIRECTORY_SEPARATOR .$file_t) === trim($main_db->get_param_view("theme"))) {$selected="selected";} else {$selected="";}
 							echo "<option value=\"".THEMES_DIR. DIRECTORY_SEPARATOR .$file. DIRECTORY_SEPARATOR .$file_t."\" $selected>$file</option>\n\t";
 							break;
 						}
