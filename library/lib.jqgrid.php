@@ -65,7 +65,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					
 					// Параметры поля
 					$filed_type = $this -> return_sql($query, "FIELD_TYPE");
-						
+					$field_txt  = $this -> return_sql($query, "FIELD_TXT");
+                                        
 					// Проверка элементов:
 					switch ($this -> return_sql($query, "FIELD_TYPE_SUM")) {						
 						// SELECT
@@ -77,7 +78,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 									$multi_str = " multiple:true, size:3, ";
 							}							
 							$main_dbs = new db();
-								$sd_options_content = BasicFunctions::get_select_data($main_dbs, $this -> return_sql($query, "FIELD_TXT"), 'null');	
+								$sd_options_content = BasicFunctions::get_select_data($main_dbs,$field_txt, 'null');	
 							$main_dbs -> __destruct();						
 							$edit_options .= ", row_type:'SB', input_type:'select', ".$multi_str." value: '".$sd_options_content."'";
 							$sd_options = "searchoptions: {value: ':;".$sd_options_content."'}, ";
@@ -108,6 +109,10 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					// Смотрим поле индекса для таблици:
                                         if (strtoupper($this -> return_sql($query, "field_name_empty")) == strtoupper("ID_" . $this -> return_sql($query, "OBJECT_NAME"))) { 
                                          $edit_options .= ", index_field:'true'";
+                                        }
+                                        // Смотрим на содержимое поля активное оно или нет
+                                        if (!empty($field_txt)) {
+                                            $edit_options .= ", field_has_sql:'true'";                                            
                                         }    
 					// Создаем заголовок					
 					$ResArray['colNames'] .= ",
@@ -274,7 +279,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                             // Обновляем филд select в случае если он есть и подсовываем ему rowid	
                                                             $.each( $('#' + gridname).jqGrid ('getGridParam', 'colModel') , function() {
                                                                             if (this.edittype == "select") {												
-                                                                                    get_select_values_grid(gridname, this.name, ids);
+                                                                                    get_select_values_grid(gridname, this.name);
                                                                             }
                                                             });
                                                     });
@@ -291,7 +296,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                             $('#' + gridname).jqGrid('setGridParam',{search:false, datatype:'json',loadonce:false,treedatatype:'json'}, true);
                                                             $.each( $('#' + gridname).jqGrid ('getGridParam', 'colModel') , function() {
                                                                             if (this.edittype == "select") {												
-                                                                                    get_select_values_grid(gridname, this.name, ids);
+                                                                                    get_select_values_grid(gridname, this.name);
                                                                             }
                                                             });
                                                             if ($(this).parent().attr('aria-expanded') == "true") {
