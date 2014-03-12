@@ -29,7 +29,7 @@
     options: {
       header: true,
       height: 175,
-	  height_button: 29,
+	  height_button: 19,
       minWidth: 225,
 	  minMenuWidth: null,
       classes: '',
