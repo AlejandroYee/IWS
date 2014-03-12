@@ -680,6 +680,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 											multiple: false,
 											position: {my: 'left bottom', at: 'left top' },
 											minWidth: 70,
+                                                                                        height_button:19,
 											height: 120,
 											header: false,
 											selectedList: 1
