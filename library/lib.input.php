@@ -21,12 +21,17 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 			$output = "";
 			$field_name_short = strtolower($field_name."_".$this->pageid);
 			// проверка на пустой филд
-			if (empty($field_text)) $field_text = "sysdate";
-			$query_d = $this->db_conn->sql_execute("select to_char(".$field_text.", 'dd.mm.yyyy') def_date from dual");
+			if (empty($field_text)) {
+                                $field_text = "select to_char(sysdate, 'dd.mm.yyyy') def_date from dual";
+                                $is_active = "";
+                        } else {
+                                $is_active = "field_has_sql='true'";
+                        }   
+			$query_d = $this->db_conn->sql_execute($field_text);
 				while ($this-> db_conn-> sql_fetch($query_d))  {					
 					$output .= "
 					<p><label for='".$field_name_short."' >".$this->FullTrim($name)."</label>
-						<input type='text' class='date_".$this->pageid." FormElement ui-widget-content ui-corner-all' row_type='D' is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d, "DEF_DATE")."' />
+						<input type='text' class='date_".$this->pageid." FormElement ui-widget-content ui-corner-all' row_type='D' ".$is_active." is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d, 1)."' />
 					</p>
 					";
 				}
@@ -37,12 +42,17 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 			$output = "";
 			$field_name_short = strtolower($field_name."_".$this->pageid);
 			// проверка на пустой филд
-			if (empty($field_text)) $field_text = "sysdate";
-			$query_d = $this->db_conn->sql_execute("select to_char(".$field_text.", 'dd.mm.yyyy') def_date from dual");
+			if (empty($field_text)) {
+                                $field_text = "select to_char(sysdate, 'dd.mm.yyyy') def_date from dual";
+                                $is_active = "";
+                        } else {
+                                $is_active = "field_has_sql='true'";
+                        }   
+			$query_d = $this->db_conn->sql_execute($field_text);
 						while ($this-> db_conn-> sql_fetch($query_d))  {					
 							$output .= "
 							<p><label for='".$field_name_short."' >".$this->FullTrim($name)."</label>
-								<input type='text' class='date_time_".$this->pageid." FormElement ui-widget-content ui-corner-all' row_type='DT' is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d, "DEF_DATE")."' />
+								<input type='text' class='date_time_".$this->pageid." FormElement ui-widget-content ui-corner-all' row_type='DT' ".$is_active." is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d,1)."' />
 							</p>
 							";
 						}
@@ -52,16 +62,18 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	function string_element($field_text,$field_name,$name,$width, $requred) {
 		$field_name_short = strtolower($field_name."_".$this->pageid);
 			if (!empty($field_text) and (strpos($field_text,"input")  == 0)) {			
-				$query_d = $this->db_conn->sql_execute("select (".$field_text.") str_val from dual");	
+				$query_d = $this->db_conn->sql_execute($field_text);	
 				while ($this-> db_conn-> sql_fetch($query_d))  {
-                                        $str_val = $this -> return_sql($query_d, "STR_VAL");
+                                        $str_val = $this -> return_sql($query_d, 1);
                                 }
+                                $is_active = "field_has_sql='true'";
 			} else {
 				$str_val = "";
+                                $is_active = "";
 			}
 				
 		return "<p><label for='".$field_name_short."' >".$this->FullTrim($name)."</label>
-					<input type='text' class='FormElement ui-widget-content ui-corner-all' is_requred='".$requred."' id='".$field_name_short."' size='".round($width/8)."' name='".$field_name."' value='".$str_val."' />
+					<input type='text' class='FormElement ui-widget-content ui-corner-all' is_requred='".$requred."' ".$is_active." id='".$field_name_short."' size='".round($width/8)."' name='".$field_name."' value='".$str_val."' />
 			</p>
 			";
 	}
@@ -77,12 +89,12 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 		if ($count_element <= 1) {						
 						$output .= "<p>
 								<label for='".$field_name."' >".$this->FullTrim($name)."</label>
-								<select id=\"".$field_name."-".$this->pageid."\"  row_type='SB' is_requred='".$requred."' name=\"".$field_name."\"  w='".$width."' >";
+								<select id=\"".$field_name."-".$this->pageid."\"  row_type='SB' field_has_sql='true' is_requred='".$requred."' name=\"".$field_name."\"  w='".$width."' >";
 					} else {
 						
 						$output .= "<p>
 								<label for='".$field_name."' >".$this->FullTrim($name)."</label>
-								<select id=\"".$field_name."-".$this->pageid."\" multiple='multiple' row_type='SB' name=\"".$field_name."[]\" h='".$count_element."' w='".$width."'>";
+								<select id=\"".$field_name."-".$this->pageid."\" multiple='multiple' field_has_sql='true' row_type='SB' name=\"".$field_name."[]\" h='".$count_element."' w='".$width."'>";
 					}
 					
 						$query_d = $this -> db_conn->sql_execute($field_text);
@@ -98,13 +110,18 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 		$output = "";
 		$field_name_short = strtolower($field_name."_".$this->pageid);
 					// проверка на пустой филд
-					if (empty($field_text)) $field_text = "null";
-					$query_d = $this->db_conn->sql_execute("select (".$field_text.") def_num from dual");
-						while ($this-> db_conn-> sql_fetch($query_d)) {
-                                                        $value = $this -> return_sql($query_d, "DEF_NUM");
-                                                }        
+					if (empty($field_text)) {
+                                                $field_text = "select null def_num from dual";
+                                                $is_active = "";
+                                        } else {
+                                                $is_active = "field_has_sql='true'";
+                                        }   
+					$query_d = $this->db_conn->sql_execute($field_text);
+                                        while ($this-> db_conn-> sql_fetch($query_d)) {
+                                                $value = $this -> return_sql($query_d, 1);
+                                        }        
 						$output .= "<p><label for=\"".$field_name_short."\">".$this->FullTrim($name)."</label>
-						<input type='text'  class='FormElement ui-widget-content ui-corner-all' row_type='".$num_culture."' w='".$width."' is_requred='".$requred."' id='".$field_name_short."' value='".$value."' name='".$field_name."' /></p>";
+						<input type='text'  class='FormElement ui-widget-content ui-corner-all' row_type='".$num_culture."' w='".$width."' ".$is_active." is_requred='".$requred."' id='".$field_name_short."' value='".$value."' name='".$field_name."' /></p>";
 						
 					
 	return $output;
