@@ -140,12 +140,11 @@ while ($main_db -> sql_fetch($query)) {
 							$str_sql_data .= ", null";
 						}
 				break;
-				case 'B':
-					if (strtolower(trim($value)) != "on") {
-							$str_sql_data .= ", 0";
-						} else {
-							$str_sql_data .= ", 1";
-						}
+				case 'B': 
+                                        if (trim($value) == "null") {
+                                             $value = 0;
+                                        }
+					$str_sql_data .= ", ".trim($value);				
 				break;
 				case 'N':
 						$str_sql_data .= ",".floatval(str_replace(",",".",$value));
