@@ -153,7 +153,7 @@ editGridRow : function(rowid, p){
                                  var grid_index_row = '';
                                  if (obj.attr('name') !== undefined ){                                     
                                         if (obj.attr('row_type') === 'B') {
-                                           searilezed[obj.attr('name')] = (obj.attr('checked') === 'checked')?'on':'off'; 
+                                           searilezed[obj.attr('name')] = (obj.attr('checked') === 'checked')?1:0; 
                                         } else {
                                            searilezed[obj.attr('name')] = obj.val();
                                         }                                       
@@ -198,9 +198,12 @@ editGridRow : function(rowid, p){
                                                      }     
                                                      if (execut) {
                                                         //save data to grid  
-                                                        if (searilezed.oper !== "add") {                                                             
-                                                               grid.jqGrid('setRowData',rowid,searilezed);
+                                                        if (searilezed.oper !== "add") { 
+                                                            delete searilezed.oper;                                                           
+                                                               grid.jqGrid('setRowData',searilezed.id,searilezed);
                                                            } else {   
+                                                                 delete searilezed.oper;
+                                                                 delete searilezed.id;
                                                                var row_id_n = [];                                                               
                                                                    row_id_n[$('#editmod' + form_id).find("input[index_field='true']").attr('id')] = ret[2];
                                                                    searilezed =  $.extend(searilezed, row_id_n);
