@@ -914,6 +914,7 @@ $(function() {
                                         multiple: obj.attr('multiple')?true:false,
                                         minWidth: (obj.attr('w') < 255)?255:obj.attr('w'),
                                         header: true,
+                                        height_button: 29,
                                         selectedList: obj.attr('size')?obj.attr('size'):1
 				}).multiselectfilter().addClass(spl_tabid);
 			    break;
@@ -964,7 +965,7 @@ $(function() {
                                     type: 'POST',
                                        success: function(rets) {	
                                           obj.val(rets);
-                                          update_table_elemnts(form_id);
+                                          update_table_elemnts(form_id,obj);
                                        }	  
                                    });	  
                                 })
@@ -997,10 +998,15 @@ $(function() {
         }    
         
 	// обновление элементов и контроллов на странице
-	update_table_elemnts = function (form_id) {                
+	update_table_elemnts = function (form_id,cur_elem) {                
           
+          if (typeof(cur_elem) === 'undefined') {
+            var search_in = form_id.find("input, select, textarea");
+           } else {
+            var search_in = cur_elem;
+          }      
                 // разбираем элементы
-		$.each(form_id.find("input, select, textarea"), function() {
+		$.each(search_in, function() {
 			var obj = $(this);			
 			// Убираем алертный класс			
 			obj.removeClass('ui-state-error');
