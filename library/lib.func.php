@@ -265,7 +265,7 @@ class BasicFunctions {
                                         $.ajax({
                                                             url: '".ENGINE_HTTP."/ajax.saveparams.php?act=login',
                                                             datatype:'json',
-                                                            data: { username: $('#username').val(), password:  $('#password').val() },
+                                                            data: { username: $('#username').val(), password:  btoa($('#password').val()) },
                                                             cache: false,
                                                             type: 'POST',
                                                                     success: function(data) {
