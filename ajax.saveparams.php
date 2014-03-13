@@ -34,8 +34,8 @@ BasicFunctions::requre_script_file("auth.".AUTH.".php");
 $user_auth = new AUTH();
 
 // Вход пользователя
-if ($act == "login") {
-	$pwd = filter_input(INPUT_POST, 'password',FILTER_SANITIZE_STRING);
+if ($act == "login") {        
+	$pwd = base64_decode(filter_input(INPUT_POST, 'password',FILTER_SANITIZE_STRING));
 	$usr = filter_input(INPUT_POST, 'username',FILTER_SANITIZE_STRING);
 	$user_auth -> is_user($usr,$pwd);
         if ($user_auth -> is_user()) {

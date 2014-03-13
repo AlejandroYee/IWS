@@ -265,7 +265,7 @@ class BasicFunctions {
                                         $.ajax({
                                                             url: '".ENGINE_HTTP."/ajax.saveparams.php?act=login',
                                                             datatype:'json',
-                                                            data: { username: $('#username').val(), password:  $('#password').val() },
+                                                            data: { username: $('#username').val(), password:  btoa($('#password').val()) },
                                                             cache: false,
                                                             type: 'POST',
                                                                     success: function(data) {
@@ -584,7 +584,8 @@ class BasicFunctions {
             $sql = str_ireplace("&#39;","'",$sql);
             
             // Проверяем кодировку
-            $sql = iconv(HTML_ENCODING,LOCAL_ENCODING."//TRANSLIT", str_ireplace(":rowid",$rowid,$sql));
+            $sql = iconv(HTML_ENCODING,LOCAL_ENCODING."//TRANSLIT", str_ireplace(":rowid",$rowid,$sql));            
+           
             // Выполняем запрос на получение данных:
             $query = $db -> sql_execute($sql);	
             $level 		= 0;
