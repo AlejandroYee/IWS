@@ -1,4 +1,4 @@
-<?
+<?php
 /*
 * Autor Andrey Lysikov (C) 2014
 * Licensed under the MIT license:
