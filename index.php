@@ -177,22 +177,22 @@ break;
 				  }
 			}
 	?>
-		</select><br><br>
-		<input type="hidden" name="width_enable" value="off" ><input type="checkbox" name="width_enable" id="width_enable" <?=$main_db->get_param_view("width_enable") ?>><label for="width_enable" style="font-size:80%" >Автоширина данных</label><br>
-		<input type="hidden" name="editabled" value="off" ><input type="checkbox" name="editabled" id="editabled" <?=$main_db->get_param_view("editabled") ?>><label for="editabled" style="font-size:80%" >Отображать нередактируемые поля</label><br>
-		<input type="hidden" name="hide_menu" value="off" ><input type="checkbox" name="hide_menu" id="hide_menu" <?=$main_db->get_param_view("hide_menu") ?>><label for="hide_menu" style="font-size:80%" >Меню в панели вкладок</label><br><br>
-		<label for="spinner">Количество месяцев в окне выбора дат: </label><input id="num_mounth" size="2" name="num_mounth" value = "<?=$main_db->get_param_view("num_mounth")?>" /><br><br>
-		<label for="spinner2">Количество записей на страницу: </label><input id="num_reck" size="2" name="num_reck" value = "<?=$main_db->get_param_view("num_reck")?>" />		
-		<br><br><div class="ui-widget-header" style = "height: 1px;"></div><br>
-		Парамерты производительности:<br><br>
-		<input type="hidden" name="cache_enable" value="off" ><input type="checkbox" name="cache_enable" id="cache_enable" <?=$main_db->get_param_view("cache_enable") ?>><label for="cache_enable" style="font-size:80%" >Отключить кеширование</label><br><br>
-		<label for="renderer">Качество отображения:</label><br><br>
+                </select>
+		<p><input type="hidden" name="width_enable" value="off" ><input type="checkbox" name="width_enable" id="width_enable" <?=$main_db->get_param_view("width_enable") ?>><label for="width_enable" style="font-size:80%" >Автоширина данных</label></p>
+		<p><input type="hidden" name="editabled" value="off" ><input type="checkbox" name="editabled" id="editabled" <?=$main_db->get_param_view("editabled") ?>><label for="editabled" style="font-size:80%" >Отображать нередактируемые поля</label></p>
+		<p><input type="hidden" name="hide_menu" value="off" ><input type="checkbox" name="hide_menu" id="hide_menu" <?=$main_db->get_param_view("hide_menu") ?>><label for="hide_menu" style="font-size:80%" >Меню в панели вкладок</label><br /></p>
+		<p><label for="spinner">Количество месяцев в окне выбора дат: </label><input id="num_mounth" size="2" name="num_mounth" value = "<?=$main_db->get_param_view("num_mounth")?>" />
+                <p><label for="spinner2">Количество записей на страницу: </label><input id="num_reck" size="2" name="num_reck" value = "<?=$main_db->get_param_view("num_reck")?>" /></p>		
+                <p><div class="ui-widget-header" style = "height: 1px;"></div></p>
+		<p>Парамерты производительности:</p>
+		<p><input type="hidden" name="cache_enable" value="off" ><input type="checkbox" name="cache_enable" id="cache_enable" <?=$main_db->get_param_view("cache_enable") ?>><label for="cache_enable" style="font-size:80%" >Отключить кеширование</label></p>
+		<p><label for="renderer">Качество отображения:</label></p>
 		<input type="hidden" name="render_type" id="render_type" value="<?=$main_db->get_param_view("render_type")?>" />
 		<div style="float:right">
-			<div name="renderer" id="renderer"  style="float:right;top:-5px;width:280px;"></div>
-			<div style="width:200px;display: block;height:30px;">
-					<span style="position:absolute;float:left;display: block;width: 280px;text-align:left;"><br>Минимальное</span>
-					<span style="position:absolute;float:right;display: block;width: 293px;"><br>Максимальное</span>               
+			<div name="renderer" id="renderer"  style="float:right;top:-13px;width:280px;"></div>
+			<div style="width:150px;top:10px;display: block;height:30px;">
+					<span style="position:absolute;float:left;display: block;width: 280px;text-align:left;font-size: 11px;">Минимальное</span>
+					<span style="position:absolute;float:right;display: block;width: 293px;font-size: 11px;">Максимальное</span>               
 			</div>
 		</div>
 		<input type="submit" id="submit_settings" style="display: none;">		
@@ -234,10 +234,10 @@ if (defined("OFFINE_START_DATE") and defined("OFFINE_END_DATE") and (date("d.m.Y
 ?>
 <div id="dialog_offline" title="Запланированные работы:">
 <p>
-<b>Уважаемый пользователь.</b><br><br>
-C <?=date("H:i:s",OFFINE_START_DATE)?> по <?=date("H:i:s",OFFINE_END_DATE)?><br><br>
-Система будет находится в оффлайне для:<br> 
-<b><?=OFFINE_MESSAGE?> </b><br><br>
+<b>Уважаемый пользователь.</b><br /><br />
+C <?=date("H:i:s",OFFINE_START_DATE)?> по <?=date("H:i:s",OFFINE_END_DATE)?><br /><br />
+Система будет находится в оффлайне для:<br /> 
+<b><?=OFFINE_MESSAGE?> </b><br /><br />
 Приносим свои извенения за доставленное неудобство, 
 по возможности завершите работу с системой до указанного времени.
 </p>
