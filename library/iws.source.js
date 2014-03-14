@@ -130,7 +130,7 @@ switch (browser[0])
 			if (browser[1] < 10) { alert_browser_message(browser[0] +' (версия ' + browser[1] +'.' + browser[2] + ')') }; 
 		break;
 };
-			
+        
 var counttab = 1;	
 var sumtab = 0;
 var alert_enabled = 0;
@@ -942,8 +942,8 @@ $(function() {
                                }
                             break;
 			}
-                    if (typeof(obj.attr('field_has_sql')) !== "undefined") {
-                        $($('<button>Расчитать/вставить/обновить содержимое</button>').button({icons: {primary: 'ui-icon-refresh'}, text: false})
+                    if (typeof(obj.attr('field_has_sql')) !== "undefined" && obj.attr('row_type') !== "SB") {
+                        $($('<button>Расчитать/вставить/обновить содержимое</button>').button({icons: {primary: 'ui-icon-refresh'}, text: false}).addClass('have_sql_action')
                                 .click(function( event ) {
                                     var searilezed_elem = [];
                                         $.each(form_id.find("input, select, textarea"), function() {
@@ -957,8 +957,9 @@ $(function() {
                                             }
                                         }); 
                                 searilezed_elem =  $.extend({}, searilezed_elem); //save as object
+                             
                                 $.ajax({
-                                    url: 'ajax.data.field.php?type=field&value_name=' + obj.attr('name'),
+                                    url:  'ajax.data.field.php?type=field&value_name=' + obj.attr('name'),
                                     datatype:'json',
                                     data: searilezed_elem,
                                     cache: false,
@@ -975,7 +976,11 @@ $(function() {
                     
                     // Если мы видим поля но не можем изменять
                     if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
-                         obj.attr({'name':null,'disabled':'disabled'}).addClass('FormElement ui-widget-content ui-corner-all ui-state-disabled');  
+                         obj.attr({'name':null,'disabled':'disabled'}).addClass('FormElement ui-widget-content ui-corner-all ui-state-disabled');
+                         if (typeof(obj.attr('field_has_sql')) !== "undefined") {
+                             //Блокируем самообновление
+                             obj.parent().children('.have_sql_action').button('option', 'disabled', true );
+                         }
                          switch (obj.attr('row_type')) {			
                                 case 'I' : // INTEGER, NUMBER, NUMBER LOOOONG,CURRVAL
                                 case 'N' :
@@ -983,11 +988,14 @@ $(function() {
                                 case 'C' : 
                                     obj.spinner({ disabled: true });
                                 break;   
-                            case 'D': // DATE	
-                            case 'DT':
-                                   obj.datepicker( "option", "disabled", true );
-                                   obj.parent().children('.ui-datepicker-trigger').remove();
-                            break;                            
+                                case 'D': // DATE	
+                                case 'DT':
+                                       obj.datepicker( "option", "disabled", true );
+                                       obj.parent().children('.ui-datepicker-trigger').remove();
+                                break;   
+                                case 'SB':
+                                       obj.multiselect('disable');
+                                break;
                          }
                     }
                      if ($(this).width() > s_width) {
@@ -1167,9 +1175,9 @@ $(function() {
 					  }
 					});
 	// Нужно для автозагрузки данных в селект в гриде 	
-	get_select_values_grid = function (gridname, value_name) {
+	get_select_values_grid = function (gridname, value_name,parent_id) {
 		$.ajax({
-				url: 'ajax.data.field.php?type=select&value_name=' + value_name,
+				url: 'ajax.data.field.php?type=select&value_name=' + value_name+'&parent_id='+parent_id,
 				datatype :'json',
 				cache: false,
 				type: 'GET',
@@ -1178,7 +1186,7 @@ $(function() {
 						$('#' + gridname).attr('new_colmodel',true);
 				}	  
 			});	
-	}	
+	}
 
 $.calculator.regionalOptions['ru'] = {
 	decimalChar: '.',
@@ -1466,7 +1474,7 @@ Globalize.addCultureInfo( "ru-RU", "default", {
         }
     });	
 	
-	$.widget("ui.ace_editor", {  
+$.widget("ui.ace_editor", {  
 	options: {  
 		editor: null,
 		mode: 'ace/mode/pgsql',
