@@ -532,7 +532,24 @@ class BasicFunctions {
                     </div>
                     <a href="<?=ENGINE_HTTP?>/history.txt" target="_blank"><b>История изменений:</b></a><br>
                             <div class="ui-widget-content" style="height:150px;overflow: auto;font-size:70%;padding: .5em 1em; text-align:left;position: relative;">
-                            <?=str_replace("\n","<br>",file_get_contents(ENGINE_ROOT."/history.txt"))?>
+                            <?php
+                            $fv = file(ENGINE_ROOT . "/history.txt");
+                            $j = 0;
+                            $vl = "";
+                            if ($fv) {        
+                                 for ($i = 0; $i < count($fv); $i++) {
+                                     if ($j < 5) { // показывает только 5 последних версий
+                                        if (trim($fv[$i]) == "//--------------------------------------------------------------------------------------------------------//") {
+                                            $j++; 
+                                            $vl .= "<br>";
+                                         } else {
+                                            $vl .= $fv[$i];
+                                        }
+                                     }
+                                 }
+                            }
+                            echo str_replace("\n","<br>",$vl);
+                            ?>
                             </div>
                     </div>
             <?php

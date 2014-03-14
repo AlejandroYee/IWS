@@ -21,9 +21,9 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html class="no-js" lang="en-US">                                                                                                                                            
 <head>
-        <meta charset="<?php echo strtolower(HTML_ENCODING); ?>">
+        <meta charset="<?=strtolower(HTML_ENCODING)?>">
         <title>IWS - <?=$main_db -> get_settings_val('ROOT_CONFIG_NAME')?></title>
-        <meta http-equiv="Content-Type" content="text/html; charset=<?php echo strtolower(HTML_ENCODING); ?>"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=<?=strtolower(HTML_ENCODING)?>"/>
         <meta http-equiv="Cache-Control" content="no-cache">
         <meta http-equiv="Pragma" content="no-cache" >				
         <meta http-equiv="expires" content="0">		
@@ -51,8 +51,7 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-timepicker-ru.js?s=<?=SESSION_ID?>" ></script>
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.jqGrid.min.js?s=<?=SESSION_ID?>" ></script>				
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.fileUpload.js?s=<?=SESSION_ID?>" ></script>						
-        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.jqGrid.locale-ru.js?s=<?=SESSION_ID?>" ></script>	
-        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.multiselect.js?s=<?=SESSION_ID?>" ></script>	
+        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.jqGrid.locale-ru.js?s=<?=SESSION_ID?>" ></script>        	
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.mask.min.js?s=<?=SESSION_ID?>" ></script>	
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.fileDownload.js?s=<?=SESSION_ID?>" ></script>	
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.ui.menubar.js?s=<?=SESSION_ID?>" ></script>
@@ -61,17 +60,16 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.printThis.js?s=<?=SESSION_ID?>" ></script> 
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.ui-contextmenu.js?s=<?=SESSION_ID?>" ></script> 
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.globalize.min.js?s=<?=SESSION_ID?>" ></script>
-        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/ace.js?s=<?=SESSION_ID?>" ></script>	
-        
-<?
-    if (trim(strtolower(filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL))) == 'bianca.test') { // Для дебага Онли
-          ?>                    	        <script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.source.js?s=<?=SESSION_ID?>" ></script>
-                                                <script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.jqgrid.extend.js?s=<?=SESSION_ID?>" ></script>	 <?
-    } else {
-          ?>                    	        <script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.min.js?s=<?=SESSION_ID?>" ></script> 
-                                                <script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.jqgrid.extend.min.js?s=<?=SESSION_ID?>" ></script>	<?
-    }                             
-?>				
+        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/ace.js?s=<?=SESSION_ID?>" ></script>
+<?php
+            if (trim(strtolower(filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL))) == 'bianca.test') {
+                $min = "source";
+            } else {
+                $min = "min";
+            }    
+        ?>        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.multiselect.<?=$min?>.js?s=<?=SESSION_ID?>" ></script>
+        <script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.<?=$min?>.js?s=<?=SESSION_ID?>" ></script>
+        <script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.jqgrid.extend.<?=$min?>.js?s=<?=SESSION_ID?>" ></script>
                                 <link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/library/normalize.css?s=<?=SESSION_ID?>" />  				
 				<?php
 				$db_link = new DB();
@@ -107,8 +105,7 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
 						echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP."/jscript/".$file ."?s=".SESSION_ID."\" /> \n\t\t\t\t";
 					}
 				}
-				?> 				
-				<style type="text/css">
+				?> 			<style type="text/css">
 						#loading{background:#fff url(<?=ENGINE_HTTP?>/library/ajax-loader-tab.gif) no-repeat center center;height:100%;position:absolute;width:100%;z-index:100}
 						html,body{font-size:12px;margin:0;overflow:hidden;padding:0;-webkit-transform: translate3d(0, 0, 0);}
 						a{cursor:pointer}
@@ -170,7 +167,7 @@ break;
 						$iscss = strpos($file_t,".css");
 						if (!empty($iscss)) {
 							if (trim(THEMES_DIR. DIRECTORY_SEPARATOR .$file. DIRECTORY_SEPARATOR .$file_t) === trim($main_db->get_param_view("theme"))) {$selected="selected";} else {$selected="";}
-							echo "<option value=\"".THEMES_DIR. DIRECTORY_SEPARATOR .$file. DIRECTORY_SEPARATOR .$file_t."\" $selected>$file</option>\n\t";
+							echo "			<option value=\"".THEMES_DIR. DIRECTORY_SEPARATOR .$file. DIRECTORY_SEPARATOR .$file_t."\" $selected>$file</option>\n\t";
 							break;
 						}
 					}				  
