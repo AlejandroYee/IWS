@@ -310,8 +310,8 @@ $(function() {
 				$( "#tabs").children(".ui-tabs-nav" ).append(
 								$('<li />')                                                                
                                                                 .append ($('<a />')
-                                                                            .attr({ href: '#' + id, title: tabTitle, id: 'ui-' + id })                                                                            
-                                                                            .text(trim_text(tabTitle,40,3))
+                                                                            .attr({ href: '#' + id, title: tabTitle, id: 'ui-' + id })   
+                                                                            .append('<span style="float:right;left:10px;">'+trim_text(tabTitle,40,3)+'</span>')
                                                                             .append('<span class="ui-icon ui-icon-document" style="float:left;top:5px"></span>')
                                                                          )
                                                                 .append('<span class="ui-icon ui-icon-close" style="float:left"></span>')
