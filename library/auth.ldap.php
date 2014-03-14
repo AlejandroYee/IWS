@@ -12,7 +12,7 @@ class AUTH {
 		if (isset($_SESSION['us_name']) and isset($_SESSION['us_pr']) and $user == false and $pass == false) {			
 			// распаковываем пароль
 			$pwd = base64_decode($this->decrypt($_SESSION['us_pr'],session_id()));
-			if (!empty($pwd)) {			
+			if (!empty($pwd) or defined("AUTH_ALLOW_GUEST")) {			
 				// пытаемся приверить пользователя, даже если он пройдет проверку, то потом отвалится от лдап
 				if ($this->check_ldap_user($_SESSION['us_name'], $pwd)) {
 					$ret_val = true;				
@@ -31,7 +31,13 @@ class AUTH {
 				}				
 			}
 		}	
-		
+		// Если пользователб у нас корявый и выставлено разрешение для гостей то определяем его как гостя
+                if (defined("AUTH_ALLOW_GUEST") and $user != false and !$ret_val) {
+                    if ($this -> save_user(AUTH_ALLOW_GUEST,"")) {
+                        BasicFunctions::to_log("LIB: User ". strtoupper($user). " has logined as GUEST: ".AUTH_ALLOW_GUEST);
+                        $ret_val = true;
+                    }    
+                }
 		return $ret_val;
 	}
 
@@ -48,6 +54,9 @@ class AUTH {
 	}
 	
 	private function check_ldap_user($user,$pass) {
+            if (defined("AUTH_ALLOW_GUEST") and $user == AUTH_ALLOW_GUEST ) {
+                return true;
+            } 
 		$ldap = ldap_connect(AUTH_DOMAIN,AUTH_PORT);
 		if ($ldap) {		
 			ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
