@@ -29,9 +29,9 @@
     options: {
       header: true,
       height: 175,
-	  height_button: 19,
-      minWidth: 225,
-	  minMenuWidth: null,
+      height_button: 19,
+      minWidth: 225, 
+      minMenuWidth: null,
       classes: '',
       checkAllText: 'Check all',
       uncheckAllText: 'Uncheck all',
@@ -59,18 +59,17 @@
       // factory cannot unbind automatically. Use eventNamespace if on
       // jQuery UI 1.9+, and otherwise fallback to a custom string.
       this._namespaceID = this.eventNamespace || ('multiselect' + multiselectID);
-
-      var button = (this.button = $('<button type="button"><span class="ui-icon ui-icon-triangle-1-s"></span></button>'))
-        .addClass('ui-multiselect ui-button ui-widget ui-state-default ui-corner-all')
-        .addClass(o.classes)
-        .attr({ 'title':el.attr('title'), 'aria-haspopup':true, 'tabIndex':el.attr('tabIndex') })
-		.css('min-height', o.height_button + 'px')
-        .insertAfter(el),
-
-        buttonlabel = (this.buttonlabel = $('<span />'))
-          .html(o.noneSelectedText)
-          .appendTo(button),
-
+      var el_div = (this.button_span = $('<span />')).insertAfter(el);
+      var button = (this.button = $('<button />'))
+            .addClass('ui-multiselect ui-button ui-widget ui-state-default ui-corner-all')
+            .addClass(o.classes)
+            .attr({ 'title':el.attr('title'), 'aria-haspopup':true, 'tabIndex':el.attr('tabIndex') })    
+            .appendTo(el_div),  
+        button_arrow = (this.button_arrow = $('<button />'))
+            .addClass('ui-multiselect ui-button ui-widget ui-state-default ui-corner-all')
+            .addClass(o.classes)
+            .attr({ 'title':el.attr('title'), 'aria-haspopup':true, 'tabIndex':el.attr('tabIndex') })    
+            .appendTo(el_div),  
         menu = (this.menu = $('<div />'))
           .addClass('ui-multiselect-menu ui-widget ui-widget-content ui-corner-all')
           .addClass(o.classes)
@@ -98,6 +97,11 @@
           .addClass('ui-multiselect-checkboxes ui-helper-reset')
           .appendTo(menu);
 
+        button.button({label:o.noneSelectedText}).height(o.height_button).css('padding','0px');
+        button_arrow.button({label:o.noneSelectedText,text: false,icons: {primary: "ui-icon-triangle-1-s"}}).height(o.height_button).css('padding','0px');
+        
+        el_div.buttonset();
+        
         // perform event bindings
         this._bindEvents();
 
@@ -109,13 +113,12 @@
           menu.addClass('ui-multiselect-single');
         }
 	if ('resizable' in jQuery.ui) {
- 			    menu.resizable({
- 						resize: function( event, ui ) {						
- 								$(this).children('ul').height(ui.size.height);
- 								o.height = ui.size.height;
- 								
- 						}		
- 			    });
+            menu.resizable({
+                resize: function( event, ui ) {						
+                                $(this).children('ul').height(ui.size.height);
+                                o.height = ui.size.height;
+                }		
+            });
       }
  
         // bump unique ID
@@ -235,9 +238,12 @@
         value = o.noneSelectedText;
       } else {
         if($.isFunction(o.selectedText)) {
-          value = o.selectedText.call(this, numChecked, $inputs.length, $checked.get());
+          value = o.selectedText.call(this, numChecked, $inputs.length, $checked.get());          
         } else if(/\d/.test(o.selectedList) && o.selectedList > 0 && numChecked <= o.selectedList) {
           value = $checked.map(function() { return $(this).next().text(); }).get().join(o.separator);
+          if (value === "") {
+              value = o.noneSelectedText;
+          }
         } else {
           value = o.selectedText.replace('#', numChecked).replace('#', $inputs.length);
         }
@@ -250,14 +256,14 @@
 
     // this exists as a separate method so that the developer 
     // can easily override it.
-    _setButtonValue: function(value) {
-      this.buttonlabel.text(value);
+    _setButtonValue: function(value) {	       
+            this.button.children('.ui-button-text').text(value); 
     },
 
     // binds events
     _bindEvents: function() {
       var self = this;
-      var button = this.button;
+      var button = this.button_arrow;
 
       function clickHandler() {
         self[ self._isOpen ? 'close' : 'open' ]();
@@ -265,8 +271,9 @@
       }
 
       // webkit doesn't like it when you click on the span :(
-      button
-        .find('span')
+      button.find('span')
+        .bind('click.multiselect', clickHandler);
+      this.button.find('span')
         .bind('click.multiselect', clickHandler);
 
       // button events
@@ -451,15 +458,15 @@
       if(/\d/.test(o.minWidth) && width < o.minWidth) {
         width = o.minWidth;
       }
-
-      // set widths
-      this.button.outerWidth(width);
+	  // set widths
+      this.button.outerWidth(width - 35);
+      this.button_span.outerWidth(width + this.button_arrow.outerWidth());
     },
 
     // set menu width
     _setMenuWidth: function() {
       var m = this.menu;
-	  var width = this.button.outerWidth();
+	  var width = this.button_span.outerWidth();
 	  var o = this.options;
 	  
 	  if(/\d/.test(o.minMenuWidth) && width < o.minMenuWidth) {
@@ -546,6 +553,7 @@
 
     _toggleDisabled: function(flag) {
       this.button.attr({ 'disabled':flag, 'aria-disabled':flag })[ flag ? 'addClass' : 'removeClass' ]('ui-state-disabled');
+      this.button_arrow.attr({ 'disabled':flag, 'aria-disabled':flag })[ flag ? 'addClass' : 'removeClass' ]('ui-state-disabled');
 
       var inputs = this.menu.find('input');
       var key = "ech-multiselect-disabled";
@@ -796,7 +804,8 @@
       label: 'Filter:',
       width: null, /* override default width set in css file (px). null will inherit */
       placeholder: 'Enter keywords',
-      autoReset: false
+      autoReset: false,
+      has_clear_button:true
     },
 
     _create: function() {
@@ -808,9 +817,21 @@
 
       // store header; add filter class so the close/check all/uncheck all links can be positioned correctly
       var header = (this.header = instance.menu.find('.ui-multiselect-header').addClass('ui-multiselect-hasfilter'));
-
+      var clear_but;
+      
+      if (opts.has_clear_button) {
+          clear_but = $('<span />').attr({
+                    'class':'ui-icon ui-icon-closethick',
+                    'style':'float:left;top:8px;left:150px;position: absolute; cursor: pointer;'
+                }).on("click", function() {
+                    $(this).parent().find('input').val('').click();                                        
+                });
+        }
       // wrapper elem
-      var wrapper = (this.wrapper = $('<div class="ui-multiselect-filter">' + (opts.label.length ? opts.label : '') + '<input placeholder="'+opts.placeholder+'" type="search"' + (/\d/.test(opts.width) ? 'style="width:'+opts.width+'px"' : '') + ' /></div>').prependTo(this.header));
+      var wrapper = (this.wrapper = $('<div class="ui-multiselect-filter">' + (opts.label.length ? opts.label : '') + '</div>')
+                .append('<input placeholder="'+opts.placeholder+'" type="search"' + (/\d/.test(opts.width) ? 'style="width:'+opts.width+'px"' : '') + ' />')
+                .append(clear_but)
+                .prependTo(this.header));
 
       // reference to the actual inputs
       this.inputs = instance.menu.find('input[type="checkbox"], input[type="radio"]');
