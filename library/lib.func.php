@@ -233,13 +233,8 @@ class BasicFunctions {
             </div>   
             <script type="text/javascript" >
         <?php
-<<<<<<< HEAD
              echo BasicFunctions::regex_javascript("$(function() {  
                  base64_encode = function ( data ) {    
-=======
-             echo BasicFunctions::regex_javascript("$(function() {            
-                  base64_encode = function ( data ) {    
->>>>>>> bb93f805550cead1a7501b19ce7c4f43faad1faa
 
                         data = escape(data);  
 
