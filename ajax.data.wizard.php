@@ -87,13 +87,14 @@ if (filter_input(INPUT_GET, 'finish',FILTER_VALIDATE_BOOLEAN)) {
 }
 
 // формируем массив спрятанных форм с пришедшими данными:
-foreach(filter_input_array(INPUT_POST,FILTER_SANITIZE_STRING) as $k => $v) {
+if (filter_input_array(INPUT_POST,FILTER_SANITIZE_STRING))
+    foreach(filter_input_array(INPUT_POST,FILTER_SANITIZE_STRING) as $k => $v) {
 	if (is_array($v)) {
 		echo "<input type='hidden' name='".strtolower($k)."' value = '".ext_implode(",",$v)."' >\n";
 	} else {
 		echo "<input type='hidden' name='".strtolower($k)."' value = '".$v."' >\n";
 	}
-}
+    }
 
 // Подгружаем класс форм:
 $input = new INPUT($id_mm_fr, $id_mm, $pageid);
@@ -104,7 +105,8 @@ nvl(t.count_element, 1) count_element, nvl(t.width, decode(trim(t.field_type), '
 while ($main_db -> sql_fetch($query)) {	
 $content_value = $main_db -> sql_result($query, "FIELD_TXT",false);
 // Производим подмену если есть такое значение:
-foreach(filter_input_array(INPUT_POST,FILTER_SANITIZE_STRING) as $k => $v) {
+if (filter_input_array(INPUT_POST,FILTER_SANITIZE_STRING))
+    foreach(filter_input_array(INPUT_POST,FILTER_SANITIZE_STRING) as $k => $v) {
 	if (is_array($v)) {
 		$content_value = str_replace(strtolower(trim(":".$k)),"'".ext_implode(",",$v)."'",strtolower($content_value));
 	} else {

@@ -29,7 +29,7 @@
         
         // пробуем прибиндить переменные если они есть в посте, но сначала формируем массив
         $input_post = array();
-        foreach (filter_input_array(INPUT_POST) as $key => $value) {    
+        if (filter_input_array(INPUT_POST)) foreach (filter_input_array(INPUT_POST) as $key => $value) {    
             if (filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING) != null and !empty($key)) {        
                 $input_post[":" . BasicFunctions::trim_fieldname(substr($key, 0, strrpos($key, "-")))] = filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING);  
             } 
