@@ -56,8 +56,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 												left join ".DB_USER_NAME.".wb_form_field t on t.id_wb_mm_form = tf.id_wb_mm_form
                                                                                                 left join ".DB_USER_NAME.".wb_field_type fft on fft.id =  t.field_type
 												left join ".DB_USER_NAME.".wb_form_field_align ta on ta.id_wb_form_field_align = t.id_wb_form_field_align
-											  where tf.id_wb_mm_form = ".$this -> id_mm_fr." order by t.num");		
-											  
+											  where tf.id_wb_mm_form = ".$this -> id_mm_fr." order by t.num");	
+                                							  
 				while ($this-> db_conn-> sql_fetch($query)) {
 					$hidden 	= "";
 					$sd_options     = "";
@@ -66,7 +66,6 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					// Параметры поля
 					$filed_type = $this -> return_sql($query, "FIELD_TYPE");
 					$field_txt  = $this -> return_sql($query, "FIELD_TXT");
-                                        
 					// Проверка элементов:
 					switch ($this -> return_sql($query, "FIELD_TYPE_SUM")) {						
 						// SELECT
@@ -76,9 +75,9 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								} else {
 									$filed_type = str_replace("multiple","",$filed_type);
 									$multi_str = " multiple:true, size:3, ";
-							}							
-							$main_dbs = new db();
-								$sd_options_content = BasicFunctions::get_select_data($main_dbs,$field_txt, 'null');	
+							}		
+                                                        $main_dbs = new db();
+							$sd_options_content = BasicFunctions::get_select_data($main_dbs,$field_txt, 'null');	
 							$main_dbs -> __destruct();						
 							$edit_options .= ", row_type:'SB', input_type:'select', ".$multi_str." value: '".$sd_options_content."'";
 							$sd_options = "searchoptions: {value: ':;".$sd_options_content."'}, ";
@@ -279,7 +278,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                             // Обновляем филд select в случае если он есть и подсовываем ему rowid	
                                                             $.each( $('#' + gridname).jqGrid ('getGridParam', 'colModel') , function() {
                                                                             if (this.edittype == "select") {												
-                                                                                    get_select_values_grid(gridname, this.name);
+                                                                                    get_select_values_grid(gridname, this.name,ids);
                                                                             }
                                                             });
                                                     });
@@ -296,7 +295,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                             $('#' + gridname).jqGrid('setGridParam',{search:false, datatype:'json',loadonce:false,treedatatype:'json'}, true);
                                                             $.each( $('#' + gridname).jqGrid ('getGridParam', 'colModel') , function() {
                                                                             if (this.edittype == "select") {												
-                                                                                    get_select_values_grid(gridname, this.name);
+                                                                                    get_select_values_grid(gridname, this.name,ids);
                                                                             }
                                                             });
                                                             if ($(this).parent().attr('aria-expanded') == "true") {
@@ -680,7 +679,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 											multiple: false,
 											position: {my: 'left bottom', at: 'left top' },
 											minWidth: 70,
-                                                                                        height_button:19,
+                                                                                        height_button:16,
 											height: 120,
 											header: false,
 											selectedList: 1
