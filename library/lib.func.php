@@ -151,23 +151,23 @@ class BasicFunctions {
                                             if (!is_dir(THEMES_DIR)) {
                                                 die ("Неуказана директория тем в конфигурации!");                                                
                                             }	
-                                            if (!is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR."jscript/")) {
+                                            if (!is_dir(ENGINE_ROOT."/jscript/")) {
                                                 die ("Ошибка конфигурации и привелегий сервера!");                                                 
                                             }
 
-                                            $dh  = opendir(THEMES_DIR.DIRECTORY_SEPARATOR);
+                                            $dh  = opendir(THEMES_DIR."/");
                                             while (false !== ($file = readdir($dh))) {
                                             if (($file == ".") or ($file == "..")) { 
                                                     continue;                                                    
                                             }
-                                              if (is_dir(THEMES_DIR. DIRECTORY_SEPARATOR . $file)) {
-                                                    $dh_sub  = opendir(THEMES_DIR. DIRECTORY_SEPARATOR . $file);
+                                              if (is_dir(THEMES_DIR. "/" . $file)) {
+                                                    $dh_sub  = opendir(THEMES_DIR. "/" . $file);
                                                     while (false !== ($file_t = readdir($dh_sub))) {
                                                             if (($file_t == ".") or ($file_t == "..")) {
                                                                     continue;
                                                             }
                                                             if (strpos($file_t,".css") > 0) { 
-                                                                            $theme_first['theme_file'][] = THEMES_DIR. DIRECTORY_SEPARATOR .$file. DIRECTORY_SEPARATOR .$file_t;
+                                                                            $theme_first['theme_file'][] = THEMES_DIR. "/" .$file. "/" .$file_t;
                                                                             $theme_first['theme_name'][] = $file;
                                                                             break;
                                                                     }	
@@ -181,7 +181,7 @@ class BasicFunctions {
                                                     }
                                             }
                                             setcookie("theme_num_last", $theme_number);
-                                            echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"". ENGINE_HTTP . DIRECTORY_SEPARATOR .$theme_first['theme_file'][$theme_number]." \" /> \n";														
+                                            echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"". ENGINE_HTTP . "/" .$theme_first['theme_file'][$theme_number]." \" /> \n";														
             ?>  			<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.1.0.min.js?s=<?=SESSION_ID?>"></script>
                                             <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.10.4.custom.min.js?s=<?=SESSION_ID?>"></script>
                                             <style type="text/css">											

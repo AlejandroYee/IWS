@@ -75,32 +75,32 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
                                 <link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/library/normalize.css?s=<?=SESSION_ID?>" />  				
 				<?php
 				$db_link = new DB();
-				if ((trim($db_link->get_param_view("theme")) != "") and ( is_file(ENGINE_ROOT . DIRECTORY_SEPARATOR . $db_link->get_param_view("theme")) )) {	
-						echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP . DIRECTORY_SEPARATOR . $db_link->get_param_view("theme")."?s=".SESSION_ID." \" /> \n\t\t\t\t";						
+				if ((trim($db_link->get_param_view("theme")) != "") and ( is_file(ENGINE_ROOT . "/" . $db_link->get_param_view("theme")) )) {	
+						echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP . "/" . $db_link->get_param_view("theme")."?s=".SESSION_ID." \" /> \n\t\t\t\t";						
 				} else {
-				$dh  = opendir(ENGINE_ROOT.DIRECTORY_SEPARATOR.THEMES_DIR.DIRECTORY_SEPARATOR);
+				$dh  = opendir(ENGINE_ROOT."/".THEMES_DIR."/");
 				while (false !== ($file = readdir($dh))) {
 				if (($file == ".") or ($file == "..")) continue;				
-				  if (is_dir(THEMES_DIR. DIRECTORY_SEPARATOR . $file)) {				  
-					$dh_sub  = opendir(THEMES_DIR. DIRECTORY_SEPARATOR . $file);
+				  if (is_dir(THEMES_DIR. "/" . $file)) {				  
+					$dh_sub  = opendir(THEMES_DIR. "/" . $file);
 					while (false !== ($file_t = readdir($dh_sub))) {
 						if (($file_t == ".") or ($file_t == "..")) continue;						
 						if (strrpos($file_t,".css") !== false) {
 						    // Попытаемся найти дефолтную темку						
 							if (trim(strtolower($file)) == "smoothness") {
-								$theme_first = THEMES_DIR. DIRECTORY_SEPARATOR .$file. DIRECTORY_SEPARATOR .$file_t;	
+								$theme_first = THEMES_DIR. "/" .$file. "/" .$file_t;	
 							}
-							if (empty($theme_first)) $theme_first = THEMES_DIR. DIRECTORY_SEPARATOR .$file. DIRECTORY_SEPARATOR .$file_t;
+							if (empty($theme_first)) $theme_first = THEMES_DIR. "/" .$file. "/" .$file_t;
 						}	
 						}
 					}
 				  }
 				if (!empty($theme_first)) { 
-					echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP. DIRECTORY_SEPARATOR .$theme_first."?s=".SESSION_ID."\" /> \n\t\t\t\t";					
+					echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP. "/" .$theme_first."?s=".SESSION_ID."\" /> \n\t\t\t\t";					
 				}
 				}
 				unset($dh);				
-				$dh  = opendir(ENGINE_ROOT.DIRECTORY_SEPARATOR."jscript");
+				$dh  = opendir(ENGINE_ROOT."/"."jscript");
 				while (false !== ($file = readdir($dh))) {
 				if (($file == ".") or ($file == "..")) continue;
 					if (strrpos($file,".css") !== false)  {
