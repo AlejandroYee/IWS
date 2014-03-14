@@ -23,6 +23,7 @@ define("DB_ENCODING","CL8MSWIN1251");
 #define("AUTH","ldap");
 #define("AUTH_DOMAIN","domain.ru");
 #define("AUTH_PORT","389");
+#define("AUTH_ALLOW_GUEST","GUEST_USER"); //  Укажите имя пользователя гостя в базе, гости будут залогенены под ним
 
 ## AUTH FROM DB INTERFACE
 #define("AUTH","oci.db");
