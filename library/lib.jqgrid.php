@@ -387,9 +387,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                          crc_input_<?=$object_name?> = null;                                         
                                 },
                                 loadComplete: function (data) {
-                                       if (typeof(data.scalar) !== 'undefined') {
                                             $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');
-                                        }
                                 },
                                 beforeProcessing: function(data, status, xhr) {                                    
                                         if ($("#reload_grid_<?=$this -> pageid?>").attr("checked") == "checked") {
