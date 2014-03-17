@@ -95,8 +95,9 @@ $query = $main_db -> sql_execute("select tf.owner, tf.object_name, t.name, t.fie
 while ($main_db -> sql_fetch($query)) {
    	if (($main_db -> sql_result($query, "FIELD_NAME") <> "R_NUM") and ( isset($input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")]) or
                 isset($_FILES[$main_db -> sql_result($query, "FIELD_NAME")])) or ($main_db -> sql_result($query, "FIELD_NAME") == "ID_PARENT")) {
+            if ($main_db -> sql_result($query, "FIELD_NAME") != "ID_PARENT") {
 		$value =  iconv(HTML_ENCODING,LOCAL_ENCODING,$input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")]); // кодировочку меняем                
-                
+            }    
 		// Если родительский дерева и мы обновляем запись, то:                
 		if ((($type == "TREE_GRID_FORM_MASTER") or ($type == "TREE_GRID_FORM") or ($type == "TREE_GRID_FORM_DETAIL")) and ($main_db -> sql_result($query, "FIELD_NAME") == "ID_PARENT")) {                    
 			// только если добавляем запись:
