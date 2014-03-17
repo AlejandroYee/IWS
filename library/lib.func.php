@@ -5,18 +5,14 @@
 *   http://www.opensource.org/licenses/mit-license.php
 * Part of IWS system
 */
-?>
-
-<? $short_open_tag_enabled = true; ?>
-
-<?php
 if (!defined('PHP_VERSION_ID')) {
     $version = explode('.', PHP_VERSION);
-    define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
-    if (PHP_VERSION_ID < 50400 and !isset($short_open_tag_enabled) or $short_open_tag_enabled != true)
-            die("Для работы системы IWS нужно включить директиву short_open_tag = On"); 
+    define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));   
 }
 
+ if ((PHP_VERSION_ID < 50400) and (ini_get("short_open_tag") != 1))
+            die("Для работы системы IWS нужно включить директиву short_open_tag = On"); 
+  
 if (filter_input(INPUT_SERVER, 'HTTPS',FILTER_VALIDATE_BOOLEAN) > 0) {
     if (!extension_loaded ("openssl")) die("Для работы системы IWS нужен модуль php_openssl который незагружен или отсутсвует, подключите модуль.");  
     define("ENGINE_HTTP",  "https://" .filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL));
