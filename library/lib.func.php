@@ -5,8 +5,20 @@
 *   http://www.opensource.org/licenses/mit-license.php
 * Part of IWS system
 */
+?>
+
+<? $short_open_tag_enabled = true; ?>
+
+<?php
+if (!defined('PHP_VERSION_ID')) {
+    $version = explode('.', PHP_VERSION);
+    define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
+    if (PHP_VERSION_ID < 50400 and !isset($short_open_tag_enabled) or $short_open_tag_enabled != true)
+            die("Для работы системы IWS нужно включить директиву short_open_tag = On"); 
+}
 
 if (filter_input(INPUT_SERVER, 'HTTPS',FILTER_VALIDATE_BOOLEAN) > 0) {
+    if (!extension_loaded ("openssl")) die("Для работы системы IWS нужен модуль php_openssl который незагружен или отсутсвует, подключите модуль.");  
     define("ENGINE_HTTP",  "https://" .filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL));
 } else {    
     define("ENGINE_HTTP",  "http://" .filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL));
@@ -27,9 +39,18 @@ date_default_timezone_set('Europe/Moscow');
 session_start();
 Error_Reporting(E_ALL);
 
-require_once(ENGINE_ROOT."/config.".filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL).".php");
-//set_error_handler('my_error_handler');
-//set_exception_handler('my_exception_handler');
+// Проверяем основные переменнные и модули
+if (is_file(ENGINE_ROOT."/config.".filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL).".php")) {
+    require_once(ENGINE_ROOT."/config.".filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL).".php");
+} else {
+    die("Вы зашли на сайт системы IWS, но по данному адресу ".ENGINE_HTTP." конфигурацая ненастроена, пожалуйста обратитесь к вашему администратору!");
+
+    
+}    
+if (!extension_loaded ("mbstring")) die("Для работы системы IWS нужен модуль php-mbstring который незагружен или отсутсвует, подключите модуль.");  
+
+set_error_handler('my_error_handler');
+set_exception_handler('my_exception_handler');
 register_shutdown_function('end_timer');
 
 //--------------------------------------------------------------------------------------------------------------------------------------------

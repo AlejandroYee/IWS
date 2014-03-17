@@ -5,6 +5,7 @@
 *   http://www.opensource.org/licenses/mit-license.php
 * Part of IWS system
 */
+if (!extension_loaded ("oci8")) die("Для работы системы IWS с БД ORACLE нужен модуль php-oci8 который незагружен или отсутсвует, подключите модуль.");  
 class AUTH {
 	function is_user($user = false,$pass = false) {		
 		// Пробуем узнать если ли у нас переменная сейсии:

@@ -5,6 +5,8 @@
 *   http://www.opensource.org/licenses/mit-license.php
 * Part of IWS system
 */
+
+if (!defined("AUTH_USER_NAME")) die("Для работы системы IWS с аунтификацие LOCAL нужно указать параметры подключения в конфигурационном файле"); 
 class AUTH {
 	function is_user($user = false,$pass = false) {		
 		// Обычная заглушка

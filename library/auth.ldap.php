@@ -5,6 +5,12 @@
 *   http://www.opensource.org/licenses/mit-license.php
 * Part of IWS system
 */
+
+// Проверяем сначала модули:
+if (!extension_loaded ("ldap")) die("Для работы системы IWS с аунтификацие LDAP нужен модуль php-ldap который незагружен или отсутсвует, подключите модуль.");    
+if (!extension_loaded ("mcrypt")) die("Для работы системы IWS с аунтификацие LDAP нужен модуль php-mcrypt который незагружен или отсутсвует, подключите модуль."); 
+if (!defined("AUTH_DOMAIN") or !defined("AUTH_PORT")) die("Для работы системы IWS с аунтификацие LDAP нужно указать параметры подключения в конфигурационном файле"); 
+        
 class AUTH {
 	function is_user($user = false,$pass = false) {	
             $ret_val = false;
