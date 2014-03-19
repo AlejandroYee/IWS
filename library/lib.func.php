@@ -5,44 +5,54 @@
 *   http://www.opensource.org/licenses/mit-license.php
 * Part of IWS system
 */
-if (!defined('PHP_VERSION_ID')) {
-    $version = explode('.', PHP_VERSION);
-    define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));   
-}
 
- if ((PHP_VERSION_ID < 50400) and (ini_get("short_open_tag") != 1))
-            die("Для работы системы IWS нужно включить директиву short_open_tag = On"); 
-  
-if (filter_input(INPUT_SERVER, 'HTTPS',FILTER_VALIDATE_BOOLEAN) > 0) {
-    if (!extension_loaded ("openssl")) die("Для работы системы IWS нужен модуль php_openssl который незагружен или отсутсвует, подключите модуль.");  
-    define("ENGINE_HTTP",  "https://" .filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL));
-} else {    
-    define("ENGINE_HTTP",  "http://" .filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL));
-}
-define("ENGINE_ROOT",  filter_input(INPUT_SERVER, 'DOCUMENT_ROOT',FILTER_SANITIZE_STRING));
-define("SESSION_ID",md5(time().rand(time()/100,getrandmax())));
-define("HTTP_USER_AGENT",filter_input(INPUT_SERVER, 'HTTP_USER_AGENT',FILTER_SANITIZE_STRING));
-define("SESSION_LIFE_TIME", 10800);
-define("VERSION_ENGINE","2.1.1");
-
-// Переопределение времени выполнения
 ini_set('max_execution_time', 2100);
 ini_set('display_errors','Off');
 ini_set('session.gc_probability', 1);
 ini_set("session.use_only_cookies", 1);
 date_default_timezone_set('Europe/Moscow');
-
-session_start();
 Error_Reporting(E_ALL);
 
-// Проверяем основные переменнные и модули
-if (is_file(ENGINE_ROOT."/config.".filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL).".php")) {
-    require_once(ENGINE_ROOT."/config.".filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL).".php");
-} else {
-    die("Вы зашли на сайт системы IWS, но по данному адресу ".ENGINE_HTTP." конфигурацая ненастроена, пожалуйста обратитесь к вашему администратору!");
+if (!defined('PHP_VERSION_ID')) {
+    $version = explode('.', PHP_VERSION);
+    define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));   
+}
 
-    
-}    
+if ((PHP_VERSION_ID < 50400) and (ini_get("short_open_tag") != 1)) {
+            die("Для работы системы IWS нужно включить директиву short_open_tag = On"); 
+}
+
+if (PHP_SAPI === 'cli' || (!isset($_SERVER['DOCUMENT_ROOT']) && !isset($_SERVER['REQUEST_URI']))) {
+        define("ENGINE_HTTP", false);        
+        define("AUTH","local");
+        define("AUTH_USER_NAME","console");
+        error_reporting(E_ALL ^ E_NOTICE);
+        require_once(ENGINE_ROOT."/config.".CONFIG.".php");
+    } else {
+        if (filter_input(INPUT_SERVER, 'HTTPS',FILTER_VALIDATE_BOOLEAN) > 0) {
+            if (!extension_loaded ("openssl")) die("Для работы системы IWS нужен модуль php_openssl который незагружен или отсутсвует, подключите модуль.");  
+            define("ENGINE_HTTP",  "https://" .filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL));
+        } else {    
+            define("ENGINE_HTTP",  "http://" .filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL));
+        }
+        
+        define("ENGINE_ROOT",  filter_input(INPUT_SERVER, 'DOCUMENT_ROOT',FILTER_SANITIZE_STRING));
+        
+        // Проверяем основные переменнные и модули
+        if (is_file(ENGINE_ROOT."/config.".filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL).".php")) {
+            require_once(ENGINE_ROOT."/config.".filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL).".php");
+        } else {
+            die("Вы зашли на сайт системы IWS, но по данному адресу ".ENGINE_HTTP." конфигурацая ненастроена, пожалуйста обратитесь к вашему администратору!");   
+        }    
+}
+
+define("SESSION_ID",md5(time().rand(time()/100,getrandmax())));
+define("HTTP_USER_AGENT",filter_input(INPUT_SERVER, 'HTTP_USER_AGENT',FILTER_SANITIZE_STRING));
+define("SESSION_LIFE_TIME", 10800);
+define("VERSION_ENGINE","2.1.1");
+
+session_start();
+
 if (!extension_loaded ("mbstring")) die("Для работы системы IWS нужен модуль php-mbstring который незагружен или отсутсвует, подключите модуль.");  
 
 set_error_handler('my_error_handler');
@@ -101,7 +111,7 @@ class BasicFunctions {
             //--------------------------------------------------------------------------------------------------------------------------------------------
             public static Function requre_script_file($file_name) {
                 if (!is_file( ENGINE_ROOT ."/library/".$file_name)) {
-                                die("Проблема при загрузке конфигурации и модулей, обратитесь к документации. [".$file_name."]");
+                                die("Проблема при загрузке конфигурации и модулей, обратитесь к документации. [".$file_name."]\n");
                 }
                 require_once (ENGINE_ROOT ."/library/".$file_name);
             }
@@ -123,7 +133,7 @@ class BasicFunctions {
                                 $_SESSION[strtoupper("log_".SESSION_ID)].= "[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).">] ".$log."\r\n";
                         }
                 // для случаев когда неавторизированны
-                if ($sub_debug and (auth::get_user() == "")) {
+                if ($sub_debug and !auth::get_user()) {
                     file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." <".strtoupper($sub_debug).">] ".$log."\r\n", FILE_APPEND | LOCK_EX);                
                 }
             }      
@@ -373,7 +383,33 @@ class BasicFunctions {
                                                      ), '', $str); 
             return $str;
             }
+            //--------------------------------------------------------------------------------------------------------------------------------------------
+            // Функция преобразования переменных пришедших в скрипт в зависимости от того откуда пришли переменные
+            // может брать как и из командной строки так и из get post переменных
+            //--------------------------------------------------------------------------------------------------------------------------------------------
+            public static function getinput_var($argvs = false)  {  
+               if (ENGINE_HTTP and $argvs)  // command line
+               {
+                  $found = array();
+                  foreach (array_merge(filter_input_array("INPUT_POST"),filter_input_array("INPUT_GET")) as $key => $value) {   
+                    $found[$key] = $value;                   
+                  }
+                  return $found;
+               }
+               else  {
+                  $found = array();
+                   foreach ($argvs as $arg) {
+                        $e=explode("=",$arg);
+                        if(count($e) == 2)
+                            $found[str_ireplace("-","",$e[0])] = $e[1];
+                        else    
+                            $found[str_ireplace("-","",$e[0])] = true;
+                   }
+                  return $found;
+               }
 
+               return false;
+            }
             //--------------------------------------------------------------------------------------------------------------------------------------------	
             // Проверка загруженных классов
             //--------------------------------------------------------------------------------------------------------------------------------------------
