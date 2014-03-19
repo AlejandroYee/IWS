@@ -254,8 +254,9 @@ if (!empty($file_data_path) and !empty($file_data_field)) {
 	// Отчищаем клоб и загружаем данные	
 	$main_db_2 = new db(true);	
 	$main_db_2 -> sql_execute("update ".$owner.".".$table_name." set ".$file_data_field." = null where ID_".$table_name." = '$id_mm'");
-	BasicFunctions::to_log("Load binary file to ".$owner.".".$table_name." ... WHERE ID_".$table_name." = ".$id_mm);					
-	$filedata = str_split(base64_encode(gzencode(file_get_contents($file_data_path))), 2048);
+	BasicFunctions::to_log("Load binary file to ".$owner.".".$table_name." ... WHERE ID_".$table_name." = ".$id_mm);
+        BasicFunctions::requre_script_file("lib.gz.php");
+	$filedata = str_split(base64_encode(gz::gzencode_zip(file_get_contents($file_data_path))), 2048);
 		 foreach($filedata as $File_data_str) {
 			$main_db_2 -> sql_execute("update ".$owner.".".$table_name." set ".$file_data_field." = ".$file_data_field." || '".$File_data_str."' WHERE ID_".$table_name." = '$id_mm'");
 		}
