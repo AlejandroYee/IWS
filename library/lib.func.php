@@ -43,15 +43,14 @@ if (PHP_SAPI === 'cli' || (!isset($_SERVER['DOCUMENT_ROOT']) && !isset($_SERVER[
             require_once(ENGINE_ROOT."/config.".filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL).".php");
         } else {
             die("Вы зашли на сайт системы IWS, но по данному адресу ".ENGINE_HTTP." конфигурацая ненастроена, пожалуйста обратитесь к вашему администратору!");   
-        }    
+        }         
+        session_start();
 }
 
 define("SESSION_ID",md5(time().rand(time()/100,getrandmax())));
 define("HTTP_USER_AGENT",filter_input(INPUT_SERVER, 'HTTP_USER_AGENT',FILTER_SANITIZE_STRING));
 define("SESSION_LIFE_TIME", 10800);
 define("VERSION_ENGINE","2.1.1");
-
-session_start();
 
 if (!extension_loaded ("mbstring")) die("Для работы системы IWS нужен модуль php-mbstring который незагружен или отсутсвует, подключите модуль.");  
 
