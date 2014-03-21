@@ -842,7 +842,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 			
 			$('#<?=$button_name?>').dialog({
 					autoOpen: false,
-						modal: true,
+						modal: false,
 						minWidth:400,
 						appendTo: $('#<?=$this->pageid?> .tab_main_content'),
 						closeOnEscape: true,
@@ -883,8 +883,9 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						   }						
 						],
 						close:function() {
-							$('.ui-dialog-buttonpane').show();
+							$('.ui-dialog-buttonpane').show();                                                        
 							$('#ajax_<?=$button_name?>').hide();
+                                                        $( this ).parent().parent().children('.ui-widget-overlay').remove();
 							$( this ).dialog( 'close' );
 						},
 						open: function() {
@@ -892,7 +893,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								$('#ajax_<?=$button_name?>').hide();
 								self.children('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}});
 								self.children('.ui-dialog-buttonpane').find('button:contains("Выполнить")').button({icons: { primary: 'ui-icon-check'}});
-								self.parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
+								$($('<div />').attr({'class':'ui-widget-overlay ui-front dialog_jqgrid_overlay ui-corner-all','style':'position:absolute;z-index:99'})).prependTo(self.parent());
 								redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
 						}						
 			});
@@ -963,7 +964,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 			});
 			$('#import_<?=$last_grid_name?>').dialog({
 						autoOpen: false,
-						modal: true,
+						modal: false,
 						minWidth:400,
 						closeOnEscape: true,
 						appendTo: $('#<?=$this->pageid?> .tab_main_content'),	
@@ -995,13 +996,14 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 							$('#upload_ajax_<?=$last_grid_name?>').jInputFile('clear');
 							$('#btn_<?=$last_grid_name?>').button('option', 'disabled', true );	
 							$('#import_ajax_<?=$last_grid_name?>').hide();
+                                                        $( this ).parent().parent().children('.ui-widget-overlay').remove();
 							$( this ).dialog( 'close' );
 						},
 						open: function() {
                                                                 var self = $(this).parent();
 								self.children('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_o_<?=$last_grid_name?>');
 								self.children('.ui-dialog-buttonpane').find('button:contains("Загрузить")').button({icons: { primary: 'ui-icon-arrowthickstop-1-s'}}).prop('id','btn_<?=$last_grid_name?>');
-								self.children.parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
+								$($('<div />').attr({'class':'ui-widget-overlay ui-front dialog_jqgrid_overlay ui-corner-all','style':'position:absolute;z-index:99'})).prependTo(self.parent());
 								redraw_document();
 						}			
 			});			
@@ -1061,7 +1063,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 							});					
 					$('#export_<?=$object_name?>').dialog({
 						autoOpen: false,
-						modal: true,
+						modal: false,
 						minWidth:450,
 						closeOnEscape: true,
 						resizable:false,
@@ -1104,14 +1106,15 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 							$('#btn_e_<?=$object_name?>').button('option', 'disabled', false );
 							$('#btn_o_<?=$object_name?>').button('option', 'disabled', false );
 							$('#btn_f_<?=$object_name?>').button('option', 'disabled', false );	
-                                                        $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');  
+                                                        $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
+                                                        $( this ).parent().parent().children('.ui-widget-overlay').remove();
 							$( this ).dialog( 'close' );
 						},
 						open: function() {
                                                                 var self = $(this).parent();
 								self.children('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_o_<?=$object_name?>');
 								self.children('.ui-dialog-buttonpane').find('button:contains("Экспортировать")').button({icons: { primary: 'ui-icon-disk'}}).prop('id','btn_e_<?=$object_name?>');
-								self.children.parent().children('.ui-widget-overlay').addClass('dialog_jqgrid_overlay ui-corner-all');
+								$($('<div />').attr({'class':'ui-widget-overlay ui-front dialog_jqgrid_overlay ui-corner-all','style':'position:absolute;z-index:99'})).prependTo(self.parent());
 								redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
 						}
 					});	
