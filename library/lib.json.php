@@ -233,22 +233,4 @@ class json {
                         return '[' . implode(',', $result) . ']';
                     }
                 } 
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 }
