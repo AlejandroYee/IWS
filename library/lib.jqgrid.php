@@ -62,6 +62,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					$hidden 	= "";
 					$sd_options     = "";
 					$edit_options 	= "";
+                                        $field_txt      = "";
 					
 					// Параметры поля
 					$filed_type = $this -> return_sql($query, "FIELD_TYPE");
@@ -110,7 +111,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                          $edit_options .= ", index_field:'true'";
                                         }
                                         // Смотрим на содержимое поля активное оно или нет
-                                        if (!empty($field_txt)) {
+                                        if (!empty(trim($field_txt))) {
                                             $edit_options .= ", field_has_sql:'true'";                                            
                                         }    
 					// Создаем заголовок					

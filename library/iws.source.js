@@ -963,7 +963,7 @@ $(function() {
                                     datatype:'json',
                                     data: searilezed_elem,
                                     cache: false,
-                                    type: 'POST',
+                                    type: 'GET',
                                        success: function(rets) {	
                                           obj.val(rets);
                                           update_table_elemnts(form_id,obj);
