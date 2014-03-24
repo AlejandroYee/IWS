@@ -66,7 +66,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					
 					// Параметры поля
 					$filed_type = $this -> return_sql($query, "FIELD_TYPE");
-					$field_txt  = $this -> return_sql($query, "FIELD_TXT");
+					$field_txt  = trim($this -> return_sql($query, "FIELD_TXT"));
 					// Проверка элементов:
 					switch ($this -> return_sql($query, "FIELD_TYPE_SUM")) {						
 						// SELECT
@@ -111,7 +111,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                          $edit_options .= ", index_field:'true'";
                                         }
                                         // Смотрим на содержимое поля активное оно или нет
-                                        if (!empty(trim($field_txt))) {
+                                        if (!empty($field_txt)) {
                                             $edit_options .= ", field_has_sql:'true'";                                            
                                         }    
 					// Создаем заголовок					
