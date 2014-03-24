@@ -1046,8 +1046,8 @@ $(function() {
 				break;
 				case 'SB': // MULTISELECT
 						if (!obj.attr('multiple')) {
-						var txt = obj.find('option:selected').text();
-							obj.parent().find('.ui-multiselect span:last').text(txt);
+                                                        var txt = obj.find('option:selected').text();
+							obj.parent().find('.ui-button-text-only span').text(txt);
 							obj.multiselect("widget").find("input:checked").removeAttr('checked').removeAttr('aria-selected').parent().removeClass('ui-state-active ui-state-hover');							
 							$.each(obj.multiselect("widget").find("span:contains('" + txt + "')"), function() {
 								if (txt != "" && $(this).text() == txt) {
