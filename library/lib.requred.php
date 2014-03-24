@@ -44,7 +44,11 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		// Для использования кеширования, нужно сразу загрузить меню
 		if (empty($this -> main_menu)) {
                         $this -> set_tree_main_menu_from_db();
-                }        
+                } 
+                if (empty($this -> db_conn -> user_real_name)) {
+                    BasicFunctions::to_log("LIB: User not registered in wb_users!");
+                    die(BasicFunctions::Create_logon_window());
+                }
 	}
 	
 	 // Метод завершения
