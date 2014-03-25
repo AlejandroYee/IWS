@@ -74,7 +74,7 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
 				<?php
 				$db_link = new DB();
 				if ((trim($db_link->get_param_view("theme")) != "") and ( is_file(ENGINE_ROOT . "/" . $db_link->get_param_view("theme")) )) {	
-						echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP . "/" . $db_link->get_param_view("theme")."?s=".SESSION_ID." \" /> \n\t\t\t\t";						
+						echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP . "/" . str_ireplace("\\", "/", $db_link->get_param_view("theme"))."?s=".SESSION_ID." \" /> \n\t\t\t\t";						
 				} else {
 				$dh  = opendir(ENGINE_ROOT."/".THEMES_DIR."/");
 				while (false !== ($file = readdir($dh))) {
