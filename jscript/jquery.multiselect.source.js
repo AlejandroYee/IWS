@@ -260,13 +260,15 @@
     _setButtonValue: function(value) {
         var o = this.options;
         var width = this.button.outerWidth();
+        var stoped = true;
         if (value.length * 10 > width) {
             var final_string = '';
             var spl_text = value.split(' ');
                     for (var i = 0; i < spl_text.length; i++) {
                             final_string = final_string + ' ' + spl_text[i];
-                            if (i === 2) {
+                            if (final_string.length * 20 > width && stoped) {
                                     value = final_string + '...';
+                                    stoped = false;
                             }
                     }
         } else {
