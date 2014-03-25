@@ -112,7 +112,7 @@ editGridRow : function(rowid, p){
                     });        
                     
                     table_elements.append($('<td />').attr({'class':'CaptionTD','style':'width:150px;'}).append(col_names[i])); 
-                    table_elements.append($('<td />').attr({'class':'DataTD','style':'white-space:nowrap;'}).append(elem));                    
+                    table_elements.append($('<td />').attr({'class':'DataTD'}).append(elem));                    
                     form_table.append(table_elements);
                 }
              });  

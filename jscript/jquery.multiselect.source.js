@@ -63,7 +63,7 @@
       var button = (this.button = $('<button />'))
             .addClass('ui-multiselect ui-button ui-widget ui-state-default ui-corner-all')
             .addClass(o.classes)
-            .attr({ 'title':el.attr('title'), 'aria-haspopup':true, 'tabIndex':el.attr('tabIndex') })    
+            .attr({ 'title':el.attr('title'), 'aria-haspopup':true, 'tabIndex':el.attr('tabIndex')})    
             .appendTo(el_div),  
         button_arrow = (this.button_arrow = $('<button />'))
             .addClass('ui-multiselect ui-button ui-widget ui-state-default ui-corner-all')
@@ -112,7 +112,8 @@
         if(!o.multiple) {
           menu.addClass('ui-multiselect-single');
         }
-	if ('resizable' in jQuery.ui) {
+
+	if ('resizable' in jQuery.ui && !$.browser.msie) {
             menu.resizable({
                 resize: function( event, ui ) {						
                                 $(this).children('ul').height(ui.size.height);
@@ -256,14 +257,28 @@
 
     // this exists as a separate method so that the developer 
     // can easily override it.
-    _setButtonValue: function(value) {	       
-            this.button.children('.ui-button-text').text(value); 
+    _setButtonValue: function(value) {
+        var o = this.options;
+        var width = this.button.outerWidth();
+        if (value.length * 10 > width) {
+            var final_string = '';
+            var spl_text = value.split(' ');
+                    for (var i = 0; i < spl_text.length; i++) {
+                            final_string = final_string + ' ' + spl_text[i];
+                            if (i === 2) {
+                                    value = final_string + '...';
+                            }
+                    }
+        } else {
+        }
+        this.button.children('.ui-button-text').text(value); 
     },
 
     // binds events
     _bindEvents: function() {
       var self = this;
       var button = this.button_arrow;
+      var button2 = this.button;
 
       function clickHandler() {
         self[ self._isOpen ? 'close' : 'open' ]();
@@ -278,6 +293,38 @@
 
       // button events
       button.bind({
+        click: clickHandler,
+        keydown: function(e) {
+          switch(e.which) {
+            case 27: // esc
+              case 38: // up
+              case 37: // left
+              self.close();
+            break;
+            case 39: // right
+              case 40: // down
+              self.open();
+            break;
+          }
+        },
+        mouseenter: function() {
+          if(!button.hasClass('ui-state-disabled')) {
+            $(this).addClass('ui-state-hover');
+          }
+        },
+        mouseleave: function() {
+          $(this).removeClass('ui-state-hover');
+        },
+        focus: function() {
+          if(!button.hasClass('ui-state-disabled')) {
+            $(this).addClass('ui-state-focus');
+          }
+        },
+        blur: function() {
+          $(this).removeClass('ui-state-focus');
+        }
+      });
+      button2.bind({
         click: clickHandler,
         keydown: function(e) {
           switch(e.which) {

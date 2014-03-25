@@ -7,130 +7,31 @@
 jQuery.uiBackCompat = false;
 jQuery.jgrid.no_legacy_api = true;
 
-function browserDetectNav(chrAfterPoint)
-{
-var UA=window.navigator.userAgent,
-	OperaB = /Opera[ \/]+\w+\.\w+/i,
-	OperaV = /Version[ \/]+\w+\.\w+/i,	
-	FirefoxB = /Firefox\/\w+\.\w+/i,
-	ChromeB = /Chrome\/\w+\.\w+/i,
-	SafariB = /Version\/\w+\.\w+/i,
-	IEB = /MSIE *\d+\.\w+/i,
-	SafariV = /Safari\/\w+\.\w+/i,
-	browser = new Array(),
-	browserSplit = /[ \/\.]/i,
-	OperaV = UA.match(OperaV),
-	Firefox = UA.match(FirefoxB),
-	Chrome = UA.match(ChromeB),
-	Safari = UA.match(SafariB),
-	SafariV = UA.match(SafariV),
-	IE = UA.match(IEB),
-	Opera = UA.match(OperaB);
-		if ((!Opera=="")&(!OperaV=="")) browser[0]=OperaV[0].replace(/Version/, "Opera")
-				else 
-		if (!Opera=="")	browser[0]=Opera[0]
-				else
-		if (!IE=="") browser[0] = IE[0]
-				else 
-		if (!Firefox=="") browser[0]=Firefox[0]
-				else
-		if (!Chrome=="") browser[0] = Chrome[0]
-				else
-		if ((!Safari=="")&&(!SafariV=="")) browser[0] = Safari[0].replace("Version", "Safari")
-                                else
-                if (!!window.MSStream) browser[0] = "Internet Explorer IE11";
-            
-	var outputData;
-	
-	if (browser[0] != null) outputData = browser[0].split(browserSplit);
-	if (((chrAfterPoint == null)|(chrAfterPoint == 0))&(outputData != null)) 
-		{
-			chrAfterPoint=outputData[2].length;
-			outputData[2] = outputData[2].substring(0, chrAfterPoint);
-			return(outputData);
-		}
-			else
-				if (chrAfterPoint != null) 
-				{
-					outputData[2] = outputData[2].substr(0, chrAfterPoint);
-					return(outputData);					
-				}
-					else	return(false);
-}
-
-function browserDetectJS() {
-var
-	browser = new Array();
-	
-	if (window.opera) {
-		browser[0] = "Opera";
-		browser[1] = window.opera.version();
-	}
-		else 
-		if (window.chrome) {
-			browser[0] = "Chrome";
-		}
-			else
-			if (window.sidebar) {
-				browser[0] = "Firefox";
-			}
-				else
-					if ((!window.external)&&(browser[0]!=="Opera")) {
-						browser[0] = "Safari";
-					}
-						else
-						if (window.ActiveXObject) {
-							browser[0] = "MSIE";
-							if (window.navigator.userProfile) browser[1] = "6"
-								else 
-									if (window.Storage) browser[1] = "8"
-										else 
-											if ((!window.Storage)&&(!window.navigator.userProfile)) browser[1] = "7"
-												else browser[1] = "Unknown";
-						}
-	
-	if (!browser) return(false)
-		else return(browser);
-}
 function alert_browser_message (br) {
-alert("К сожалению, ваша версия браузера:\r\n" + br + "\r\nбольше не поддерживается и система будет работать нестабильно, обновитесь, либо обратитесь к администратору!");
-throw new Exception_no_browser("error"); // инициируем ошибку для остановки выполнения скриптов
+    alert("К сожалению, ваша версия браузера:\r\n" + br + "\r\nбольше не поддерживается и система будет работать нестабильно, обновитесь, либо обратитесь к администратору!");
+    throw new Exception_no_browser("error"); // инициируем ошибку для остановки выполнения скриптов
 }
 
-var browserNav = browserDetectNav(1),
-	browserJS = browserDetectJS(), browser;
-	if (browserNav[0] == browserJS[0]) browser = browserNav
-		else
-			if (browserNav[0] != browserJS[0]) browser = browserJS
-				else
-			browser = false;
-			
-// Прописываем корректно определенные версии браузеров, и сверяемся с версиями
-jQuery.browser = {};
-switch (browser[0])
+switch (jQuery.browser.name)
 {
 		case 'Chrome':
-			jQuery.browser.webkit = true;
-			if (browser[1] < 23) { alert_browser_message(browser[0] +' (версия ' + browser[1] +'.' + browser[2] + ')') }; 
+			if (jQuery.browser.majorVersion < 27) { alert_browser_message(jQuery.browser.name +' (версия ' + jQuery.browser.fullVersion + ')'); }; 
 		break;
 		case 'Safari':
-			jQuery.browser.safari = true;
-			if (browser[1] < 5) { alert_browser_message(browser[0] +' (версия ' + browser[1] +'.' + browser[2] + ')') }; 
+			if (jQuery.browser.majorVersion < 5) { alert_browser_message(jQuery.browser.name +' (версия ' + jQuery.browser.fullVersion + ')'); }; 
 		break;
-		case 'MSIE':
-			jQuery.browser.msie = true;
-			if (browser[1] < 9) { alert_browser_message(browser[0] +' (версия ' + browser[1] +'.' + browser[2] + ')') }; 
+		case 'Microsoft Internet Explorer':
+			if (jQuery.browser.majorVersion < 9) { alert_browser_message(jQuery.browser.name +' (версия ' + jQuery.browser.fullVersion + ')'); }; 
 		break;
 		case 'Opera':
-			jQuery.browser.opera = true;
-			if (browser[1] < 13 ) { alert_browser_message(browser[0] +' (версия ' + browser[1] +'.' + browser[2] + ')') }; 
+			if (jQuery.browser.majorVersion < 13 ) { alert_browser_message(jQuery.browser.name +' (версия ' + jQuery.browser.fullVersion + ')'); }; 
 		break;
 		case 'Firefox':
-			jQuery.browser.mozilla = true;
-			if (browser[1] < 10) { alert_browser_message(browser[0] +' (версия ' + browser[1] +'.' + browser[2] + ')') }; 
+			if (jQuery.browser.majorVersion < 26) { alert_browser_message(jQuery.browser.name +' (версия ' + jQuery.browser.fullVersion + ')'); }; 
 		break;
-};
-        
+};  
+
+
 var counttab = 1;	
 var sumtab = 0;
 var alert_enabled = 0;
@@ -170,8 +71,8 @@ $(function() {
 	{
             
                 title_msg = 'Внимание:';		
-                if (output_msg.search('ORA-') != -1) title_msg = 'SQL Ошибка конфигурации:';
-                if (output_msg.search('запрещен') != -1) title_msg = 'Аунтефикация:';
+                if (output_msg.search('ORA-') !== -1) title_msg = 'SQL Ошибка конфигурации:';
+                if (output_msg.search('запрещен') !== -1) title_msg = 'Аунтефикация:';
 		if (!output_msg) output_msg = '';
 
 		$("<div />").html(output_msg).dialog({
@@ -190,7 +91,7 @@ $(function() {
 					$(this).parent().css('z-index', 9999).parent().children('.ui-widget-overlay').css('z-index', 105);					
 			}
 		});
-	}
+	};
 					
 	// Основное меню для загрузки
 	$("#Menubar").menubar({
@@ -215,7 +116,7 @@ $(function() {
 					}
 				}
 		}
-	}
+	};
 	
         // Отрисовка,перерисовка графиков
         plot_graph = function (self_obj) { 
@@ -243,7 +144,7 @@ $(function() {
 			}
                     };  
                     $.extend(options, obj.options);
-                   if (self_obj.children().length == 0) {
+                   if (self_obj.children().length === 0) {
                             $.plot(chart_render, obj.data,options); 
                             chart_render.bind( "plothover", function( e, pos, item ) {
                                  var isTooltip = chart_render.is( ":ui-tooltip" );
@@ -297,10 +198,10 @@ $(function() {
 	// Функция добавления вкладок и содержимого через аякс
 	SetTab = function (tabTitle,tabContentUrl,same_tab) {
 		// Если предан флаг, то просто перезагружаем вкладу
-		if (same_tab != 'false') {
+		if (same_tab !== 'false') {
 				var id = same_tab;								
 				$('#'+id).empty();						
-				if (tabTitle != '') {
+				if (tabTitle !== '') {
 					$('#ui-'+id).text(trim_text(tabTitle,40,3));
 					$('#ui-'+id).prop("title",tabTitle);
 				}								
@@ -323,7 +224,7 @@ $(function() {
 		
 		$( "#tabs" ).tabs("refresh");
 		
-		if (same_tab == 'false') {
+		if (same_tab === 'false') {
 			$("#tabs").tabs("option", "active",$('#tabs').children('.ui-tabs-nav li').length - 1);
 		}						
 		// ставим тригер на загрузку содержимого вкладки во фрейм
@@ -333,7 +234,7 @@ $(function() {
 			  url: tabContentUrl,							  
 			  type: 'GET',
 			  success: function(data){
-				if($(data).find("div[window_login='logon']").length == 0) {
+				if($(data).find("div[window_login='logon']").length === 0) {
 					$('#'+id).empty().css('text-align','left').attr({need_redraw:true});
                                         $('#'+id).append($(data).fadeIn(300));                                        
 					redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
@@ -346,7 +247,7 @@ $(function() {
 			  }	  
 			});
 		counttab++;							
-	}					
+	};					
 
 	// Закрываем вкладку
 	CloseTab = function (id_tab) {            
@@ -360,7 +261,7 @@ $(function() {
                 $( "#" + panelId ).remove();                
                 // Нужно подчистить элементы multiselect и диалоги
                 $("." + id_tab).remove();
-	}
+	};
 
 	// Кнопка справки если есть:
 	$(".help_button").button({icons: {primary: 'ui-icon-help'},text: false})
@@ -449,14 +350,14 @@ $(function() {
                              doc_width_grid = doc_width - 27;
                              add_to_koeff = 20;
                         } else {
-                             percent = percent - (33/(doc_height/100))
+                             percent = percent - (33/(doc_height/100));
                              doc_height_grid = (doc_height - main_menu_higth - 93)/100 * percent - 23;
                              doc_width_grid  = doc_width - 48;
                              add_to_koeff = 0;
                        }
 			// Коэфициент для грида если открыт фильтр:
-                       if (ft != "TREE_GRID_FORM_DETAIL" && ft != "TREE_GRID_FORM") { 
-                            if (self.children('.ui-jqgrid').find('.ui-search-toolbar').css("display") != 'none' && ft != "TREE_GRID_FORM_MASTER" ) {
+                       if (ft !== "TREE_GRID_FORM_DETAIL" && ft !== "TREE_GRID_FORM") { 
+                            if (self.children('.ui-jqgrid').find('.ui-search-toolbar').css("display") !== 'none' && ft !== "TREE_GRID_FORM_MASTER" ) {
                                             var coeffd_filtr = 82 + add_to_koeff;
                                     } else {
                                             var coeffd_filtr = 55 + add_to_koeff;
@@ -530,7 +431,7 @@ $(function() {
 		if (sumtab > 7) {
                                 alert_enabled = 1;
 				$.each($('.navigation_header'), function() {											
-					if ($(this).children('.alert_button').length != 1) {
+					if ($(this).children('.alert_button').length !== 1) {
 						$(this).append("<div class='alert_button ui-state-error ui-corner-all' style='float:right;width:100px;margin: 6px 15px 5px 5px;' title='Открыто более 7 вкладок одновременно," +
 							"это может сильно замедлить работу системы. По возможности закройте одну или несколько вкладок.'><span class='ui-icon ui-icon-alert' style='float:left'></span>ВНИМАНИЕ!</div>");
 					}
@@ -541,7 +442,7 @@ $(function() {
                                     $('.navigation_header .alert_button').remove();
                                 }
 		}
-        }
+        };
 	
 	replace_select_opt_group = function (object) {
 		if (typeof(object) === 'undefined') object = $('body');
@@ -563,7 +464,7 @@ $(function() {
 			}
 		});	
 		
-	}
+	};
 	
 	// Автоширина столбцов в гриде (применяемся только к указаннуму)
 	auto_width_grid = function (grid) {
@@ -577,7 +478,7 @@ $(function() {
 		var count_element = 0;
 		
 		$.each(grid_header, function() {
-			if ($(this).attr('id') == grid + "_rn") {
+			if ($(this).attr('id') === grid + "_rn") {
 				has_r_num = $(this).width(); // Убираем r_num из расчета
 			}
 			grid_width_old = grid_width_old + $(this).width();
@@ -592,19 +493,19 @@ $(function() {
 			$.each(grid_header, function() {
 				var w_tmp = $(this).width();
 				// Применяем к заголовку
-				if ($(this).attr('id') != grid + "_rn") {	
+				if ($(this).attr('id') !== grid + "_rn") {	
 					$(this).width(w_tmp * coeff);
 				}
 			});
 			$.each(grid_hcontent, function() {
 				var w_tmp = $(this).width();
 				// Применяем к заголовку
-				if ($(this).width() != has_r_num) {	
+				if ($(this).width() !== has_r_num) {	
 					$(this).width(w_tmp * coeff);
 				}
 			});
 		}					
-	}
+	};
 
 	// Прикрепляем ресизеры
 	set_resizers = function() {
@@ -642,7 +543,7 @@ $(function() {
 						$('<div />').addClass('ui-widget-header ui-state-hover ui-corner-all').height(2).width(150));
 			}
 		});			
-	}
+	};
 
 	//Детальные вкладки
 	set_detail_tab= function() {						
@@ -650,13 +551,13 @@ $(function() {
 					collapsible: true,
 					heightStyle: "fill",
 					activate: function( event, ui ) {
-						if ($('#' + ui.newTab.attr('aria-controls')).children('.grid_resizer_tabs').attr('need_update') == 'true') {
+						if ($('#' + ui.newTab.attr('aria-controls')).children('.grid_resizer_tabs').attr('need_update') === 'true') {
 							$('#' + $('#' + ui.newTab.attr('aria-controls')).children('.grid_resizer_tabs').attr('for')).jqGrid().trigger('reloadGrid', true);
 							$('#' + ui.newTab.attr('aria-controls')).children('.grid_resizer_tabs').attr('need_update','false');
 						}
 					}
 			});
-	}
+	};
 
 	// Нужно для корретного закрытия вкладки, чтобы ничего в коде от нее не осталось
 	$(document).on("click", "#tabs span.ui-icon-close", function() {
@@ -778,15 +679,15 @@ $(function() {
                     case 'NL':
                     case 'C' :                                
                             obj.spinner();
-                            if (obj.attr('row_type') == 'N') {
+                            if (obj.attr('row_type') === 'N') {
                                 obj.spinner( "option", "culture", "ru-RU" )
                                          .spinner( "option", "numberFormat", "n2" )
                                          .spinner( "option", "step", "0.01" );
-                            } else if (obj.attr('row_type') == 'NL') {
+                            } else if (obj.attr('row_type') === 'NL') {
                                 obj.spinner( "option", "culture", "ru-RU" )
                                          .spinner( "option", "numberFormat", "n7" )
                                          .spinner( "option", "step", "0.0000001" );
-                            } else if (obj.attr('row_type') == 'C') {
+                            } else if (obj.attr('row_type') === 'C') {
                                   obj.spinner( "option", "culture", "ru-RU" )
                                          .spinner( "option", "numberFormat", "C" )
                                          .spinner( "option", "step", "0.01" );
@@ -803,7 +704,7 @@ $(function() {
                                                             obj.calculator('show');
                                             })
                             ).insertAfter(obj.parent());
-                            if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
+                            if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') !== 'false') {
                                     obj.spinner( "option", "disabled" );
                                     obj.parent().parent().children('.ui-button').remove();	
                             }
@@ -816,7 +717,7 @@ $(function() {
                              obj.before('<label for="' + obj.attr('id') + '">Включено или выключено</label>')
                             .button({icons: { primary: 'ui-icon-check' }, text: false}).addClass(spl_tabid)
                             .click(function() {
-                                    if (obj.attr('checked') != 'checked') {
+                                    if (obj.attr('checked') !== 'checked') {
                                                     obj.attr('checked','checked').button({icons: { primary: 'ui-icon-check' }});
                                             } else {
                                                     obj.removeAttr('checked').button({icons: { primary: 'ui-icon-bullet' }});
@@ -884,7 +785,7 @@ $(function() {
                                                 return obj;
                                         },
                                         options: function(tp_inst, obj, unit, opts, val){
-                                                if(typeof(opts) == 'string' && val !== undefined)
+                                                if(typeof(opts) === 'string' && val !== undefined)
                                                                 return obj.find('.ui-timepicker-input').spinner(opts, val);
                                                 return obj.find('.ui-timepicker-input').spinner(opts);
                                         },
@@ -963,19 +864,20 @@ $(function() {
                                     datatype:'json',
                                     data: searilezed_elem,
                                     cache: false,
-                                    type: 'GET',
+                                    type: 'POST',
                                        success: function(rets) {	
                                           obj.val(rets);
                                           update_table_elemnts(form_id,obj);
                                        }	  
                                    });	  
+                                   return false;
                                 })
                             ).insertAfter(obj.parent().children(':last'));
                         $(this).width($(this).width() + 20);                    
                     }   
                     
                     // Если мы видим поля но не можем изменять
-                    if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
+                    if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') !== 'false') {
                          obj.attr({'name':null,'disabled':'disabled'}).addClass('FormElement ui-widget-content ui-corner-all ui-state-disabled');
                          if (typeof(obj.attr('field_has_sql')) !== "undefined") {
                              //Блокируем самообновление
@@ -1003,7 +905,7 @@ $(function() {
                     }
               });  
               return s_width;
-        }    
+        };    
         
 	// обновление элементов и контроллов на странице
 	update_table_elemnts = function (form_id,cur_elem) {                
@@ -1050,12 +952,12 @@ $(function() {
 							obj.parent().find('.ui-button-text-only span').text(txt);
 							obj.multiselect("widget").find("input:checked").removeAttr('checked').removeAttr('aria-selected').parent().removeClass('ui-state-active ui-state-hover');							
 							$.each(obj.multiselect("widget").find("span:contains('" + txt + "')"), function() {
-								if (txt != "" && $(this).text() == txt) {
+								if (txt !== "" && $(this).text() === txt) {
 								$(this).parent().addClass('ui-corner-all ui-state-active ui-state-hover')
 									.children('input').attr('checked','checked').attr('aria-selected',true);
 								}
 							});
-							if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') != 'false') {
+							if (typeof(obj.attr('show_disabled')) !== "undefined" && obj.attr('show_disabled') !== 'false') {
 								obj.multiselect('disable');
 								obj.multiselect("refresh");	
 							}
@@ -1072,7 +974,7 @@ $(function() {
 				break;
 			} 
 		});	
-	}
+	};
 	
 	// Диалог настроке и обработчики
 	$("#param").dialog({
@@ -1132,10 +1034,10 @@ $(function() {
 					
 	// Обработка мультиселекта и кнопки настроек
 	$("#themeselector").multiselect({multiple: false, header: true, selectedList: 1});
-	$("#width_enable").button({icons: { primary: "ui-icon-arrow-2-e-w" }}).click(function() {var btn = $("#width_enable");if (btn.attr("checked") != "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});
-	$("#editabled").button({icons: { primary: "ui-icon-lightbulb" }}).click(function() {var btn = $("#editabled");if (btn.attr("checked") != "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
-	$("#hide_menu").button({icons: { primary: "ui-icon-carat-2-e-w" }}).click(function() {var btn = $("#hide_menu");if (btn.attr("checked") != "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
-	$("#cache_enable").button({icons: { primary: "ui-icon-notice" }}).click(function() {var btn = $("#cache_enable");if (btn.attr("checked") != "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
+	$("#width_enable").button({icons: { primary: "ui-icon-arrow-2-e-w" }}).click(function() {var btn = $("#width_enable");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});
+	$("#editabled").button({icons: { primary: "ui-icon-lightbulb" }}).click(function() {var btn = $("#editabled");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
+	$("#hide_menu").button({icons: { primary: "ui-icon-carat-2-e-w" }}).click(function() {var btn = $("#hide_menu");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
+	$("#cache_enable").button({icons: { primary: "ui-icon-notice" }}).click(function() {var btn = $("#cache_enable");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
 	$("#renderer").slider({
 	    range: "min",
             value: $("#render_type").val(),
@@ -1186,7 +1088,7 @@ $(function() {
 						$('#' + gridname).attr('new_colmodel',true);
 				}	  
 			});	
-	}
+	};
 
 $.calculator.regionalOptions['ru'] = {
 	decimalChar: '.',
@@ -1281,7 +1183,7 @@ Globalize.addCultureInfo( "ru-RU", "default", {
 
     var rotateLeft = function(lValue, iShiftBits) {
         return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
-    }
+    };
  
     var addUnsigned = function(lX, lY) {
         var lX4, lY4, lX8, lY8, lResult;
@@ -1297,23 +1199,23 @@ Globalize.addCultureInfo( "ru-RU", "default", {
         } else {
             return (lResult ^ lX8 ^ lY8);
         }
-    }
+    };
  
     var F = function(x, y, z) {
         return (x & y) | ((~ x) & z);
-    }
+    };
  
     var G = function(x, y, z) {
         return (x & z) | (y & (~ z));
-    }
+    };
  
     var H = function(x, y, z) {
         return (x ^ y ^ z);
-    }
+    };
  
     var I = function(x, y, z) {
         return (y ^ (x | (~ z)));
-    }
+    };
  
     var FF = function(a, b, c, d, x, s, ac) {
         a = addUnsigned(a, addUnsigned(addUnsigned(F(b, c, d), x), ac));
