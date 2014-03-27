@@ -943,8 +943,11 @@ $(function() {
                                         }					
 				break;
 				case 'D': // DATE
-                                case 'DT': // DATE TIME
-						obj.datepicker( "setDate", obj.val() );	
+                                case 'DT': // DATE TIME    
+                                    strs = obj.val();
+                                    if (strs.length  > 1) {
+                                        obj.datepicker("setDate", obj.val());	
+                                    }
 				break;
 				case 'SB': // MULTISELECT
 						if (!obj.attr('multiple')) {
