@@ -1,8 +1,6 @@
 Options All -Indexes
-deny from all
 
-<Files *>
+<Files "*.source.js">
     Order allow,deny
     Deny from all
-    Satisfy All
 </Files>
