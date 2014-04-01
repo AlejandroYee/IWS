@@ -126,8 +126,12 @@ while ($main_db -> sql_fetch($query)) {
 				case 'D':
                                 case 'DT':
                                             if (trim($value) != "null") {
-                                                $value = "'".$value."'";
-                                            }     
+                                                if (strlen($value) < 3) {
+                                                    $value = "null";
+                                                } else {
+                                                     $value = "'".trim($value)."'";
+                                                }
+                                            } 
                                             if (stripos($value,":") > 0) {
                                                 $str_sql_data .= ", to_date(".$value.", 'dd.mm.yyyy hh24:mi:ss')";										
                                             } else {
