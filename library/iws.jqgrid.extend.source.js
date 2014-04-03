@@ -57,8 +57,11 @@ editGridRow : function(rowid, p){
                     });
                     
                     if(!colmodel[i].editable) {
-                        colmodel[i].hidden = true;
+                        colmodel[i].hidden_tmp = true;
                     }    
+                    if(colmodel[i].hidden) {
+                        colmodel[i].hidden_tmp = true;
+                    }   
                     if(!colmodel[i].edittype) {
                             colmodel[i].edittype = "text";
                     }
@@ -110,7 +113,7 @@ editGridRow : function(rowid, p){
                         'id':'tr_' + colmodel[i].index,
                         'class':'FormData',
                         'title': colmodel[i].editoptions.title,
-                        'style': colmodel[i].hidden ? "display:none" : ""              
+                        'style': colmodel[i].hidden_tmp ? "display:none" : ""              
                     });        
                     
                     table_elements.append($('<td />').attr({'class':'CaptionTD','style':'width:150px;'}).append(col_names[i])); 
