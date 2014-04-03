@@ -53,6 +53,8 @@ $(function() {
                                       doc_title = document.title;  
                                     } 
                                     document.title = doc_title + ' [ ' + ui.newTab.text() + ' ]';
+                                   // console.log(ui.newTab);
+                                   // посмотреть в будущем чтобы не обрезалось
                                    
 			}
 	});
@@ -234,6 +236,11 @@ $(function() {
 			  url: tabContentUrl,							  
 			  type: 'GET',
 			  success: function(data){
+                                // нужно задестроить гриды если они есть:
+                                $.each( $('#'+id).find('.ui-jqgrid'), function() {
+                                    $('#'+$(this).attr('id')).jqGrid('GridDestroy');
+                                });
+                              
 				if($(data).find("div[window_login='logon']").length === 0) {
 					$('#'+id).empty().css('text-align','left').attr({need_redraw:true});
                                         $('#'+id).append($(data).fadeIn(300));                                        
@@ -320,7 +327,7 @@ $(function() {
                     id_tab.attr({need_redraw:false}).children(".navigation_header").height(30);
                 }
 		//  Основные оверлеи
-		$(".dialog_jqgrid_overlay,.ui-widget-overlay").height(doc_height - main_menu_higth - 85).width(doc_width - 24).offset({ top: main_menu_higth + 30 + 50, left: 12 });
+		$(".dialog_jqgrid_overlay,.ui-widget-overlay").height(doc_height - main_menu_higth - 88).width(doc_width - 24).offset({ top: main_menu_higth + 30 + 50, left: 12 });
                  
 		// Прячем полосу прокрутки
                 id_tab.css('overflow','hidden');
@@ -951,8 +958,8 @@ $(function() {
 				break;
 				case 'SB': // MULTISELECT
 						if (!obj.attr('multiple')) {
-                                                        var txt = obj.find('option:selected').text();
-							obj.parent().find('.ui-button-text-only span').text(txt);
+                                                        var txt = obj.find('option:selected').text();                                                       
+                                                        obj.multiselect("setButtonValue",txt);
 							obj.multiselect("widget").find("input:checked").removeAttr('checked').removeAttr('aria-selected').parent().removeClass('ui-state-active ui-state-hover');							
 							$.each(obj.multiselect("widget").find("span:contains('" + txt + "')"), function() {
 								if (txt !== "" && $(this).text() === txt) {
@@ -1094,7 +1101,7 @@ $(function() {
 	};
 
 $.calculator.regionalOptions['ru'] = {
-	decimalChar: '.',
+	decimalChar: ',',
 	buttonText: '...', buttonStatus: 'Открыть калькулятор',
 	closeText: 'Закрыть', closeStatus: 'Закрыть калькулятор',
 	useText: 'OK', useStatus: 'Использовать текущее значение в поле',
@@ -1137,18 +1144,18 @@ Globalize.addCultureInfo( "ru-RU", "default", {
 	language: "ru",
 	numberFormat: {
 		",": "",
-		".": ".",
+		".": ",",
 		negativeInfinity: "-бесконечность",
 		positiveInfinity: "бесконечность",
 		percent: {
 			pattern: ["-n%","n%"],
 			",": "",
-			".": "."
+			".": ","
 		},
 		currency: {
 			pattern: ["-n$","n$"],
 			",": "",
-			".": ".",
+			".": ",",
 			symbol: "р."
 		}
 	},
