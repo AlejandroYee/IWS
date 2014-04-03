@@ -88,7 +88,9 @@ editGridRow : function(rowid, p){
                                 if (colmodel[i].editoptions.multiple) {
                                     val = row_data[colmodel[i].index].split(',');
                                     } else {
-                                    val = row_data[colmodel[i].index].split('~|');
+                                        if (typeof(row_data[colmodel[i].index]) !== "undefined") {
+                                            val = row_data[colmodel[i].index].split('~|');
+                                        }
                                }
                                $.each(val, function(keys, values) {
                                     if ($.trim(values) === $.trim(el[0])) {
@@ -199,7 +201,9 @@ editGridRow : function(rowid, p){
                                                      if (execut) {
                                                         //save data to grid  
                                                         if (searilezed.oper !== "add") { 
-                                                            delete searilezed.oper;                                                           
+                                                            delete searilezed.oper;     
+                                                            //console.log(searilezed);
+                                                            // посмотреть почему некорректно валюта ставится
                                                                grid.jqGrid('setRowData',searilezed.id,searilezed);
                                                            } else {   
                                                                  delete searilezed.oper;
