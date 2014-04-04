@@ -207,9 +207,7 @@ if (filter_input_array(INPUT_POST,FILTER_SANITIZE_STRING))
 										);				
 			break;			
 			case "A":	
-				$output .= $this -> link_element($content_value,
-										$main_db -> sql_result($query, "NAME")
-										);				
+				$output .= $this -> link_element($content_value, $main_db -> sql_result($query, "NAME") );				
 			break;
 			case "E":	
 				$output .= $this -> link_element("mailto:".$content_value,
