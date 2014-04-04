@@ -29,14 +29,16 @@
         
         // пробуем прибиндить переменные если они есть в посте, но сначала формируем массив
         $input_post = array();
-        if (filter_input_array(INPUT_POST)) foreach (filter_input_array(INPUT_POST) as $key => $value) {    
-            if (filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING) != null and !empty($key)) {        
-                $input_post[":" . BasicFunctions::trim_fieldname(substr($key, 0, strrpos($key, "-")))] = filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING);  
+        if (filter_input_array(INPUT_POST)) {
+            foreach (filter_input_array(INPUT_POST) as $key => $value) {    
+                if (filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING) != null and !empty($key)) {        
+                    $input_post[":" . BasicFunctions::trim_fieldname(substr($key, 0, strrpos($key, "-")))] = filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING);  
+                } 
+                if (is_array($value) and !empty($key)) {
+                    $input_post[":" . BasicFunctions::trim_fieldname(substr($key, 0, strrpos($key, "-")))] = implode(",",filter_var_array($value,FILTER_SANITIZE_STRING));  
+                }
             } 
-            if (is_array($value) and !empty($key)) {
-                $input_post[":" . BasicFunctions::trim_fieldname(substr($key, 0, strrpos($key, "-")))] = implode(",",filter_var_array($value,FILTER_SANITIZE_STRING));  
-            }
-        }         
+        }
         
         // заменяем значения:
         if (!empty($input_post)) {
@@ -55,6 +57,7 @@
           break;
           case 'field':  
             //выполняем и возвращаем значение (должно быть только одно!)
+            $query_field = str_ireplace("&#39;", "'", $query_field);  
             $query_sub = $main_db -> sql_execute($query_field);	
             while ($main_db -> sql_fetch($query_sub)) {
 		echo $main_db -> sql_result($query_sub, 1);
