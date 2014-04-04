@@ -337,4 +337,10 @@
         header("Cache-Control: max-age=0");        
         header("Set-Cookie: fileDownload=true");
         $objWriter -> save("php://output");
+        // подчищаем за собой
+        $objPHPExcel->disconnectWorksheets();
+        unset($objWriter, $objPHPExcel);
+        if (isset($temp_file) and is_file($temp_file)) {
+            unlink($temp_file);            
+        }
 $main_db -> __destruct();
