@@ -275,7 +275,9 @@
         }
         this.button.children('.ui-button-text').text(value); 
     },
-
+    setButtonValue: function(value) {
+       this._setButtonValue(value);
+    },
     // binds events
     _bindEvents: function() {
       var self = this;
