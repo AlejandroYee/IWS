@@ -2918,7 +2918,7 @@ values (17, null, 2, 'Изображение конфигурации', 'ROOT_CO
 insert into WB_SETTINGS (id_wb_settings, id_parent, num, name, short_name, value, used, create_user, create_date, last_user, last_date)
 values (18, null, 3, 'Иконка конфигурации', 'ROOT_CONFIG_FAVICON', 'sport_icon.png', 1, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_SETTINGS (id_wb_settings, id_parent, num, name, short_name, value, used, create_user, create_date, last_user, last_date)
-values (-1, null, 3, 'Версия БД', 'ROOT_DB_VERSION', '2.1.1', 1, 'LOADER', sysdate, 'LOADER', sysdate);
+values (-1, null, 3, 'Версия БД', 'ROOT_DB_VERSION', '2.1.2', 1, 'LOADER', sysdate, 'LOADER', sysdate);
 prompt 15 records loaded
 update wb_form_field t set t.element_alt =    
    case t.field_name
