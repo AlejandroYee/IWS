@@ -182,17 +182,19 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 					$ResArray['TREE_EMPTY_DATA'] .= ",\"\"";
 				}
 				
-				
 				// Кнопки редактирования
 				foreach($form_buttons as $value) {
 					switch (trim($value)) { 
 						case 'A':
+                                                case 'А':
 							$ResArray['ADD_BUTTON'] = true;
 						break;
 						case 'E':
+                                                case 'Е':
 							$ResArray['EDIT_BUTTON'] = true;
 						break;
                                             	case 'C':
+                                                case 'С':    
 							$ResArray['COPY_BUTTON'] = true;
 						break;
 						case 'D':
@@ -438,17 +440,17 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                   buttonicon: 'ui-icon-refresh',
                                   onClickButton: function(){
                                     crc_input_<?=$object_name?> = null; // Принудительно отчищаем crc
-                                                                                    $('#<?=$object_name?>').trigger('reloadGrid');
-                                                                                    // Если есть детальные гриды то отчищаем их, но при этом смотрим текущий грид на предмет детальности
-                                                                                    // если именно в нем нажали кнопку обновить то отчищать ничего не нужно
-                                                                                    grid_type = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer_tabs[for='" + $(this).attr('id') + "'],#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + $(this).attr('id') + "']").attr('form_type');
-                                                                                    if (grid_type !== "GRID_FORM_DETAIL" && grid_type !== "TREE_GRID_FORM_DETAIL") {	
-                                                                                            $.each( $("#<?=$this -> pageid?> .tab_main_content .grid_resizer_tabs[form_type$='_DETAIL'],#<?=$this -> pageid?> .tab_main_content .grid_resizer[form_type$='_DETAIL']"), function() {													
-                                                                                                    $('#' + $(this).attr('for')).jqGrid('clearGridData');
-                                                                                                    $('#' + $(this).attr('for')).jqGrid('setGridParam',{search:false, datatype:'local',loadonce:false,treedatatype:'local'}, true);
-                                                                                                    $(this).attr('need_update','true');
-                                                                                            });
-                                                                                    }
+                                            $('#<?=$object_name?>').trigger('reloadGrid');
+                                            // Если есть детальные гриды то отчищаем их, но при этом смотрим текущий грид на предмет детальности
+                                            // если именно в нем нажали кнопку обновить то отчищать ничего не нужно
+                                            grid_type = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer_tabs[for='" + $(this).attr('id') + "'],#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + $(this).attr('id') + "']").attr('form_type');
+                                            if (grid_type !== "GRID_FORM_DETAIL" && grid_type !== "TREE_GRID_FORM_DETAIL") {	
+                                                    $.each( $("#<?=$this -> pageid?> .tab_main_content .grid_resizer_tabs[form_type$='_DETAIL'],#<?=$this -> pageid?> .tab_main_content .grid_resizer[form_type$='_DETAIL']"), function() {													
+                                                            $('#' + $(this).attr('for')).jqGrid('clearGridData');
+                                                            $('#' + $(this).attr('for')).jqGrid('setGridParam',{search:false, datatype:'local',loadonce:false,treedatatype:'local'}, true);
+                                                            $(this).attr('need_update','true');
+                                                    });
+                                            }
                                   }											
                                             })	
                             .jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
