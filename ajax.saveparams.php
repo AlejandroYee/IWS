@@ -60,7 +60,7 @@ if ($act == "check_version") {
     if ($fv) {
         echo $fv;
     } else {
-        BasicFunctions::to_log("LIB: Check version filed! no internet access or proxy file.");
+        BasicFunctions::to_log("LIB: Check version filed! no internet access or proxy not responding.");
     }
     exit;    
 }
