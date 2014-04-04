@@ -27,7 +27,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
                         } else {
                                 $is_active = "field_has_sql='true'";
                         }   
-			$query_d = $this->db_conn->sql_execute($field_text);
+			$query_d = $this->db_conn->sql_execute(str_ireplace("&#39;", "'", $field_text));
 				while ($this-> db_conn-> sql_fetch($query_d))  {					
 					$output .= "
 					<p><label for='".$field_name_short."' >".$this->FullTrim($name)."</label>
@@ -48,7 +48,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
                         } else {
                                 $is_active = "field_has_sql='true'";
                         }   
-			$query_d = $this->db_conn->sql_execute($field_text);
+			$query_d = $this->db_conn->sql_execute(str_ireplace("&#39;", "'", $field_text));
 						while ($this-> db_conn-> sql_fetch($query_d))  {					
 							$output .= "
 							<p><label for='".$field_name_short."' >".$this->FullTrim($name)."</label>
@@ -62,7 +62,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	function string_element($field_text,$field_name,$name,$width, $requred) {
 		$field_name_short = strtolower($field_name."_".$this->pageid);
 			if (!empty($field_text) and (strpos($field_text,"input")  == 0)) {			
-				$query_d = $this->db_conn->sql_execute($field_text);	
+				$query_d = $this->db_conn->sql_execute(str_ireplace("&#39;", "'", $field_text));	
 				while ($this-> db_conn-> sql_fetch($query_d))  {
                                         $str_val = $this -> return_sql($query_d, 1);
                                 }
@@ -97,7 +97,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 								<select id=\"".$field_name."-".$this->pageid."\" multiple='multiple' field_has_sql='true' row_type='SB' name=\"".$field_name."[]\" h='".$count_element."' w='".$width."'>";
 					}
 					
-						$query_d = $this -> db_conn->sql_execute($field_text);
+						$query_d = $this -> db_conn->sql_execute(str_ireplace("&#39;", "'", $field_text));
 						while ($this-> db_conn-> sql_fetch($query_d)) { 
 								$output .= "<option ".$this -> return_sql($query_d, "FL_SELECTED")." value=".$this -> return_sql($query_d, "ID").">".$this -> return_sql($query_d, "NAME");
                                                 }
@@ -116,7 +116,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
                                         } else {
                                                 $is_active = "field_has_sql='true'";
                                         }   
-					$query_d = $this->db_conn->sql_execute($field_text);
+					$query_d = $this->db_conn->sql_execute(str_ireplace("&#39;", "'", $field_text));
                                         while ($this-> db_conn-> sql_fetch($query_d)) {
                                                 $value = $this -> return_sql($query_d, 1);
                                         }        
@@ -162,8 +162,9 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	$show_form=0;
 		// Получаем имя родительского грида
 		$query_tmp = $this->db_conn->sql_execute("select ft.name, t.id_wb_mm_form id from ".DB_USER_NAME.".wb_mm_form t left join ".DB_USER_NAME.".wb_form_type ft on ft.id_wb_form_type = t.id_wb_form_type where t.id_wb_main_menu = ".$this -> id_mm." and ft.name like 'GRID%' and rownum = 1 order by t.num");
-		while ($this-> db_conn-> sql_fetch($query_tmp)) $gridname = strtolower($this -> return_sql($query_tmp, "NAME")."_".$this -> return_sql($query_tmp, "ID")."_".$this ->pageid);
-
+		while ($this-> db_conn-> sql_fetch($query_tmp)) {
+                        $gridname = strtolower($this -> return_sql($query_tmp, "NAME")."_".$this -> return_sql($query_tmp, "ID")."_".$this ->pageid);
+                }
 		$query_tmp = $this->db_conn->sql_execute("select substr(t.name, 1, decode(instr(t.name, '@')-1, -1, length(t.name), instr(t.name, '@')-1)) name,
                        substr(t.name, decode(instr(t.name, '@')+1, 1, null, instr(t.name, '@')+1)) help_name, t.field_txt, t.field_name, decode(nvl(t.is_requred,0), 0,'false', 'true') is_requred, upper(t.field_type) as field_type,
                        nvl(t.count_element, 1) count_element, nvl(t.width, decode(t.field_type, 'D', 46, 300)) width from ".DB_USER_NAME.".wb_form_field t
@@ -332,6 +333,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 									}	
 									load_".$this->pageid."_intval = setInterval(loader_function, 1000);
 									loader_function();
+                                                                        self_dialog.dialog('close');
 									$.get('ajax.saveparams.php?&id_mm_fr=".$this->id_mm_fr."&' + qString, function(data) {										
 										clearInterval(load_".$this->pageid."_intval);										
 										$('#".$this->pageid." .tab_main_content .CaptionTD').html('<h2>Данные успешно обработаны,<br>Длительность обработки ' + minutes_".$this->pageid." +' минут(а), ' + seconds_".$this->pageid." + ' секунд.</h2>');
@@ -342,7 +344,6 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 												custom_alert(data);
 										}
                                                                                 $('#ui-".$this->pageid." span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');
-                                                                                self_dialog.dialog('close');
                                                                                 
 									});
 									");
@@ -415,7 +416,9 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
                     });");
 	$output .= "</script>	
 	<button id=\"show_parameters-".$this->pageid."\"  style=\"float: right;margin:0 5px 0 0;\">Задать параметры</button>";	
-	if (empty($show_form)) $output = ""; // Если форма пустая, то просто обнуляем содержимое вывода
+	if (empty($show_form)) {
+                $output = ""; // Если форма пустая, то просто обнуляем содержимое вывода
+        }
 	return $output;	
 	}
 	
