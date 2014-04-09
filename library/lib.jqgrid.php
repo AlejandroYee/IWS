@@ -459,8 +459,12 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                   title: 'Просмотреть выделенную запись (Кнопка V, ENTER)',
                                   buttonicon: 'ui-icon-document',
                                   onClickButton: function(){
-                                                    row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');                                                               
-                                                           $('#<?=$object_name?>').jqGrid('viewGridRow',row_id,{viewPagerButtons:true, recreateForm:false, closeOnEscape:true});
+                                                    row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');  
+                                                    if (row_id !== null) {
+                                                             $('#<?=$object_name?>').jqGrid('viewGridRow',row_id,{viewPagerButtons:true, recreateForm:false, closeOnEscape:true});
+                                                    } else {
+                                                            custom_alert("Невыбрана запись для просмотра.");
+                                                    }
                                                  }											
                                             })					
                             .jqGrid('navSeparatorAdd','#Pager_<?=$object_name?>')
@@ -479,31 +483,31 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                                             } else {
                                                                         var recreate = true;
                                                                         $('#<?=$object_name?>').removeAttr('new_colmodel');
-                                                                }                                                                
-                                                      $('#<?=$object_name?>').jqGrid('editGridRow','new',{
-                                                                                        addedrow:'last',
-                                                                                        recreateForm: recreate,
-                                                                                        editCaption: "Добавить новую запись",
-                                                                                        reloadAfterSubmit:false,															
-                                                                                                afterSubmit: function(response, postdata) {
-                                                                                                    $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
-                                                                                                        if (response.responseText.length > 0) {	
-                                                                                                                if (response.responseText.length > 20) {
-                                                                                                                        custom_alert(response.responseText);																			
-                                                                                                                } else {																				
-                                                                                                                        return [true,"Ok",response.responseText];																				
-                                                                                                                }
-                                                                                                        } else {
-                                                                                                                return [true,"Ok"];
-                                                                                                        }
-                                                                                                  },
-                                                                                                beforeSubmit : function(postdata, formid) {																					
-                                                                                                        if (check_form(formid)) {
-                                                                                                                $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
-                                                                                                                return [true,'']; 
-                                                                                                        } 
-                                                                                                }
-                                                                                });
+                                                                }     
+                                                            $('#<?=$object_name?>').jqGrid('editGridRow','new',{
+                                                                                              addedrow:'last',
+                                                                                              recreateForm: recreate,
+                                                                                              editCaption: "Добавить новую запись",
+                                                                                              reloadAfterSubmit:false,															
+                                                                                                      afterSubmit: function(response, postdata) {
+                                                                                                          $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
+                                                                                                              if (response.responseText.length > 0) {	
+                                                                                                                      if (response.responseText.length > 20) {
+                                                                                                                              custom_alert(response.responseText);																			
+                                                                                                                      } else {																				
+                                                                                                                              return [true,"Ok",response.responseText];																				
+                                                                                                                      }
+                                                                                                              } else {
+                                                                                                                      return [true,"Ok"];
+                                                                                                              }
+                                                                                                        },
+                                                                                                      beforeSubmit : function(postdata, formid) {																					
+                                                                                                              if (check_form(formid)) {
+                                                                                                                      $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+                                                                                                                      return [true,'']; 
+                                                                                                              } 
+                                                                                                      }
+                                                                                      });                                                        
                                                }
 											   
 							})
@@ -517,33 +521,36 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               onClickButton: function() {
                                                                         $('#<?=$object_name?>').removeAttr('new_colmodel');
 									row_id = $('#<?=$object_name?>').jqGrid('getGridParam', 'selrow');
-                                                                        
-                                                    $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{
-                                                                                recreateForm:true,																
-                                                                                editCaption: "Скопировать запись",																
-                                                                        afterSubmit: function(response, postdata)  {
-                                                                                $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
-                                                                                        if (response.responseText.length > 0) {																				
-                                                                                                if (response.responseText.length > 20) {
-                                                                                                        custom_alert(response.responseText);																			
-                                                                                                } else {																				
-                                                                                                        return [true,"Ok",response.responseText];																				
+                                                    if (row_id !== null) {                    
+                                                            $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{
+                                                                                        recreateForm:true,																
+                                                                                        editCaption: "Скопировать запись",																
+                                                                                afterSubmit: function(response, postdata)  {
+                                                                                        $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
+                                                                                                if (response.responseText.length > 0) {																				
+                                                                                                        if (response.responseText.length > 20) {
+                                                                                                                custom_alert(response.responseText);																			
+                                                                                                        } else {																				
+                                                                                                                return [true,"Ok",response.responseText];																				
+                                                                                                        }
+                                                                                                } else {
+                                                                                                        return [true,"Ok"];
                                                                                                 }
-                                                                                        } else {
-                                                                                                return [true,"Ok"];
-                                                                                        }
-                                                                              },
-                                                                         serializeEditData: function (data) {
-                                                                                        data.oper = 'add';
-                                                                                        return data;
-                                                                                },
-                                                                         beforeSubmit : function(postdata, formid) {                                                                            
-                                                                                        if (check_form(formid)) {
-                                                                                            $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
-                                                                                            return [true,'']; 
-                                                                                        } 
-                                                                         }
-                                                });                                                    
+                                                                                      },
+                                                                                 serializeEditData: function (data) {
+                                                                                                data.oper = 'add';
+                                                                                                return data;
+                                                                                        },
+                                                                                 beforeSubmit : function(postdata, formid) {                                                                            
+                                                                                                if (check_form(formid)) {
+                                                                                                    $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+                                                                                                    return [true,'']; 
+                                                                                                } 
+                                                                                 }
+                                                        });  
+                                                }else {
+                                                            custom_alert("Невыбрана запись для копирования.");
+                                                    }
                                                }
 											   
 							})
@@ -562,27 +569,31 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                                                 $('#<?=$object_name?>').removeAttr('new_colmodel');
                                                                         }
 									row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
-                                                                $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{
-                                                                                viewPagerButtons:false,
-                                                                                closeOnEscape: true,
-                                                                                recreateForm: recreate,
-                                                                                reloadAfterSubmit:false,
-                                                                                closeAfterEdit:true,																		
-                                                                        afterSubmit: function(response, postdata)  {
-                                                                            $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');                                                                             
-                                                                                        if (response.responseText.length > 20) {
-                                                                                                custom_alert(response.responseText);																			
-                                                                                        } else {
-                                                                                                return [true,"Ok",response.responseText];
-                                                                                        }       
-                                                                                },
-                                                                        beforeSubmit : function(postdata, formid) {
-                                                                                        if (check_form(formid)) {
-                                                                                                $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
-                                                                                                return [true,'']; 
-                                                                                        } 
-                                                                                }
-                                                                        });
+                                                                        if (row_id !== null) {
+                                                                                $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{
+                                                                                                viewPagerButtons:false,
+                                                                                                closeOnEscape: true,
+                                                                                                recreateForm: recreate,
+                                                                                                reloadAfterSubmit:false,
+                                                                                                closeAfterEdit:true,																		
+                                                                                        afterSubmit: function(response, postdata)  {
+                                                                                            $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');                                                                             
+                                                                                                        if (response.responseText.length > 20) {
+                                                                                                                custom_alert(response.responseText);																			
+                                                                                                        } else {
+                                                                                                                return [true,"Ok",response.responseText];
+                                                                                                        }       
+                                                                                                },
+                                                                                        beforeSubmit : function(postdata, formid) {
+                                                                                                        if (check_form(formid)) {
+                                                                                                                $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+                                                                                                                return [true,'']; 
+                                                                                                        } 
+                                                                                                }
+                                                                                        });
+                                                                        } else {
+                                                                            custom_alert("Невыбрана запись для изменения.");
+                                                                    }
                                                              }                                              
 							})
 		<?php		}
@@ -594,6 +605,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               buttonicon: 'ui-icon-close',
                                               onClickButton: function(){
                                                                 row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selarrrow');
+                                                                
                                                                 if ($.isArray(row_id) && row_id != "") {																	
                                                                                  $('#<?=$object_name?>').jqGrid('delGridRow',row_id,{closeAfterDel: true,closeOnEscape:true, recreateForm:false,reloadAfterSubmit:false,															
                                                                                         afterSubmit: function(response, postdata)  {
@@ -611,20 +623,24 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                                                 });																	
                                                                 } else {
                                                                                 row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
-                                                                                  $('#<?=$object_name?>').jqGrid('delGridRow',row_id,{closeAfterDel: true,closeOnEscape:true, recreateForm:true,reloadAfterSubmit:false,																
-                                                                                        afterSubmit: function(response, postdata)  {
-                                                                                            $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
-                                                                                                if (response.responseText.length > 0) {
-                                                                                                        custom_alert(response.responseText);
-                                                                                                } else {
-                                                                                                        return [true,''];
-                                                                                                }                                                                                               
-                                                                                        },
-                                                                                        beforeSubmit : function(postdata, formid) {                                                                                                
-                                                                                                        $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
-                                                                                                        return [true,'']; 
-                                                                                        }
-                                                                                });
+                                                                                if (row_id !== null) {
+                                                                                            $('#<?=$object_name?>').jqGrid('delGridRow',row_id,{closeAfterDel: true,closeOnEscape:true, recreateForm:true,reloadAfterSubmit:false,																
+                                                                                                  afterSubmit: function(response, postdata)  {
+                                                                                                      $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
+                                                                                                          if (response.responseText.length > 0) {
+                                                                                                                  custom_alert(response.responseText);
+                                                                                                          } else {
+                                                                                                                  return [true,''];
+                                                                                                          }                                                                                               
+                                                                                                  },
+                                                                                                  beforeSubmit : function(postdata, formid) {                                                                                                
+                                                                                                                  $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-document').addClass('ui-icon-transferthick-e-w');
+                                                                                                                  return [true,'']; 
+                                                                                                  }
+                                                                                          });
+                                                                                } else {
+                                                                                        custom_alert("Невыбрана запись для удаления.");
+                                                                                }
                                                                 }	
                                                              }                                              
 							})
