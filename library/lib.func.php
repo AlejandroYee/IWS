@@ -19,7 +19,7 @@ if (!defined('PHP_VERSION_ID')) {
 }
 
 if ((PHP_VERSION_ID < 50400) and (ini_get("short_open_tag") != 1)) {
-            die("Для работы системы IWS нужно включить директиву short_open_tag = On"); 
+            die("Для работы системы IWS нужно включить директиву short_open_tag = On. Либо обновить PHP до версии 5.4"); 
 }
 
 if (PHP_SAPI === 'cli' || (!isset($_SERVER['DOCUMENT_ROOT']) && !isset($_SERVER['REQUEST_URI']))) {
@@ -78,7 +78,9 @@ if (!function_exists('boolval')) {
                 return (bool) $val;
         }
 }
-
+if (function_exists('session_register_shutdown')) {
+    session_register_shutdown();    
+}
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Класс подсчета времени выполнения
 //--------------------------------------------------------------------------------------------------------------------------------------------
@@ -99,8 +101,14 @@ function end_timer()
    }  
    
    if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and ( auth::get_user() != "")) {
-    file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,$_SESSION[strtoupper("log_".SESSION_ID)], FILE_APPEND | LOCK_EX);
-    unset($_SESSION[strtoupper("log_".SESSION_ID)]);
+    file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,$_SESSION[strtoupper("log_".SESSION_ID)], FILE_APPEND | LOCK_EX);    
+    $_SESSION[strtoupper("log_".SESSION_ID)] = null; 
+    // Проверяем на предыдущие закрытые сейсии чтобы не плодить файлы, и делаем унсет им:
+    foreach ($_SESSION as $key => $value) { 
+          if ($value  == "NULL") {
+              unset($_SESSION[$key]);
+          }      
+    }
    }
 }
 
