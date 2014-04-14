@@ -22,7 +22,7 @@
 	$main_db = new db();
 	
         // Изменяем запрос в случае если есть имя переменной и айди формы:
-        if (($form_id !== false or $form_id !== null) and !empty($value_name)) {            
+        if (($form_id !== false or $form_id !== null) and !empty($value_name) and !empty($form_id)) {            
             $query = $main_db -> sql_execute("select fw.field_txt from ".DB_USER_NAME.".wb_form_field fw where lower(fw.field_name) = lower('".$value_name."') and abs(fw.id_wb_mm_form) = ".$form_id);
         } else {
             $query = $main_db -> sql_execute("select fw.field_txt from ".DB_USER_NAME.".wb_form_field fw where lower(fw.field_name) = lower('".BasicFunctions::trim_fieldname($value_name)."') and abs(fw.id_wb_form_field) = '".$value_id."'");		
