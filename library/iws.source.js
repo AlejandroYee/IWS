@@ -867,7 +867,7 @@ $(function() {
                                 searilezed_elem =  $.extend({}, searilezed_elem); //save as object
                              
                                 $.ajax({
-                                    url:  'ajax.data.field.php?type=field&value_name=' + obj.attr('name'),
+                                    url:  'ajax.data.field.php?type=field&value_name=' + obj.attr('name') + "&form_id=" + obj.attr('form_id'),
                                     datatype:'json',
                                     data: searilezed_elem,
                                     cache: false,

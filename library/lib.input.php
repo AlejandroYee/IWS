@@ -12,7 +12,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	// Обрезка пробелов в строке, включая html пробел
 	//--------------------------------------------------------------------------------------------------------------------------------------------
 	Function FullTrim($txt) {
-					return trim(str_replace("&nbsp;","",$txt));
+		return trim(str_ireplace(array("&nbsp;","<br>"),"",$txt));
 	}
 	
 	// Описываем элементы данных
@@ -31,7 +31,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 				while ($this-> db_conn-> sql_fetch($query_d))  {					
 					$output .= "
 					<p><label for='".$field_name_short."' >".$this->FullTrim($name)."</label>
-						<input type='text' class='date_".$this->pageid." FormElement ui-widget-content ui-corner-all' row_type='D' ".$is_active." is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d, 1)."' />
+						<input type='text' class='date_".$this->pageid." FormElement ui-widget-content ui-corner-all' form_id='".$this->id_mm_fr."' row_type='D' ".$is_active." is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d, 1)."' />
 					</p>
 					";
 				}
@@ -52,7 +52,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 						while ($this-> db_conn-> sql_fetch($query_d))  {					
 							$output .= "
 							<p><label for='".$field_name_short."' >".$this->FullTrim($name)."</label>
-								<input type='text' class='date_time_".$this->pageid." FormElement ui-widget-content ui-corner-all' row_type='DT' ".$is_active." is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d,1)."' />
+								<input type='text' class='date_time_".$this->pageid." FormElement ui-widget-content ui-corner-all' form_id='".$this->id_mm_fr."' row_type='DT' ".$is_active." is_requred='".$requred."' id='".$field_name_short."' name='".$field_name."' value='".$this -> return_sql($query_d,1)."' />
 							</p>
 							";
 						}
@@ -73,7 +73,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 			}
 				
 		return "<p><label for='".$field_name_short."' >".$this->FullTrim($name)."</label>
-					<input type='text' class='FormElement ui-widget-content ui-corner-all' is_requred='".$requred."' ".$is_active." id='".$field_name_short."' size='".round($width/8)."' name='".$field_name."' value='".$str_val."' />
+					<input type='text' class='FormElement ui-widget-content ui-corner-all' is_requred='".$requred."' ".$is_active." id='".$field_name_short."' form_id='".$this->id_mm_fr."' size='".round($width/8)."' name='".$field_name."' value='".$str_val."' />
 			</p>
 			";
 	}
@@ -81,7 +81,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 	function textarea_element($field_name,$name,$count_element, $requred) {
 		$field_name_short = strtolower($field_name."_".$this->pageid);
 		return "<p style='text-align :left;'><label for='".$field_name_short."' >".$this->FullTrim($name)."</label>
-					  <textarea id='".$field_name_short."' h='".$count_element."' is_requred='".$requred."' row_type='M' name='".$field_name."' role='textbox' multiline='true' class='FormElement ui-widget-content ui-corner-all'></textarea>
+					  <textarea id='".$field_name_short."' h='".$count_element."' is_requred='".$requred."' row_type='M' name='".$field_name."' role='textbox' form_id='".$this->id_mm_fr."' multiline='true' class='FormElement ui-widget-content ui-corner-all'></textarea>
 					</p>";
 	}
 	function select_element($field_text,$field_name,$name,$width,$count_element, $requred) {
@@ -89,12 +89,12 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 		if ($count_element <= 1) {						
 						$output .= "<p>
 								<label for='".$field_name."' >".$this->FullTrim($name)."</label>
-								<select id=\"".$field_name."-".$this->pageid."\"  row_type='SB' field_has_sql='true' is_requred='".$requred."' name=\"".$field_name."\"  w='".$width."' >";
+								<select id=\"".$field_name."-".$this->pageid."\"  row_type='SB' field_has_sql='true' is_requred='".$requred."' form_id='".$this->id_mm_fr."' name=\"".$field_name."\"  w='".$width."' >";
 					} else {
 						
 						$output .= "<p>
 								<label for='".$field_name."' >".$this->FullTrim($name)."</label>
-								<select id=\"".$field_name."-".$this->pageid."\" multiple='multiple' field_has_sql='true' row_type='SB' name=\"".$field_name."[]\" h='".$count_element."' w='".$width."'>";
+								<select id=\"".$field_name."-".$this->pageid."\" multiple='multiple' field_has_sql='true' row_type='SB' form_id='".$this->id_mm_fr."' name=\"".$field_name."[]\" h='".$count_element."' w='".$width."'>";
 					}
 					
 						$query_d = $this -> db_conn->sql_execute(str_ireplace("&#39;", "'", $field_text));
@@ -121,7 +121,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
                                                 $value = $this -> return_sql($query_d, 1);
                                         }        
 						$output .= "<p><label for=\"".$field_name_short."\">".$this->FullTrim($name)."</label>
-						<input type='text'  class='FormElement ui-widget-content ui-corner-all' row_type='".$num_culture."' w='".$width."' ".$is_active." is_requred='".$requred."' id='".$field_name_short."' value='".$value."' name='".$field_name."' /></p>";
+						<input type='text'  class='FormElement ui-widget-content ui-corner-all' row_type='".$num_culture."' form_id='".$this->id_mm_fr."' w='".$width."' ".$is_active." is_requred='".$requred."' id='".$field_name_short."' value='".$value."' name='".$field_name."' /></p>";
 						
 					
 	return $output;
@@ -136,7 +136,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 		$output = "";
 		$field_name_short = strtolower($field_name."_".$this->pageid);
 						$output .= "<p><label for=\"".$field_name_short."\">".$this->FullTrim($name)."</label>
-						<input type='text'  is_requred='".$requred."' class='FormElement ui-widget-content ui-corner-all' row_type='IP'  id='".$field_name_short."' name='".$field_name."' /></p>";
+						<input type='text'  is_requred='".$requred."' class='FormElement ui-widget-content ui-corner-all' form_id='".$this->id_mm_fr."' row_type='IP'  id='".$field_name_short."' name='".$field_name."' /></p>";
 						
 								
 	}
@@ -146,7 +146,7 @@ var $db_conn, $id_mm_fr, $id_mm, $pageid;
 		$output = "";
 		$field_name_short = strtolower($field_name."_".$this->pageid);
 						$output .= "<p><label for=\"".$field_name_short."\">".$this->FullTrim($name)."</label>
-						<input type='checkbox'  is_requred='".$requred."' class='FormElement ui-widget-content ui-corner-all' row_type='B' id='".$field_name_short."' name='".$field_name."' /></p>";
+						<input type='checkbox'  is_requred='".$requred."' class='FormElement ui-widget-content ui-corner-all' form_id='".$this->id_mm_fr."' row_type='B' id='".$field_name_short."' name='".$field_name."' /></p>";
 						
 					
 	return $output;

@@ -16,12 +16,17 @@
         $type           = filter_input(INPUT_GET, 'type',FILTER_SANITIZE_STRING);
 	$value_name     = filter_input(INPUT_GET, 'value_name',FILTER_SANITIZE_STRING);
         $value_id       = substr(substr($value_name, strrpos($value_name, "_") + 1), 0, strrpos(substr($value_name, strrpos($value_name, "_") + 1), "-"));
+        $form_id        = filter_input(INPUT_GET, 'form_id',FILTER_SANITIZE_NUMBER_INT);
 	$query_field    = "";
         
 	$main_db = new db();
 	
-	$query = $main_db -> sql_execute("select fw.field_txt from ".DB_USER_NAME.".wb_form_field fw where lower(fw.field_name) = lower('".BasicFunctions::trim_fieldname($value_name)."') and abs(fw.id_wb_form_field) = '".$value_id."'");		
-        
+        // Изменяем запрос в случае если есть имя переменной и айди формы:
+        if (($form_id !== false or $form_id !== null) and !empty($value_name)) {            
+            $query = $main_db -> sql_execute("select fw.field_txt from ".DB_USER_NAME.".wb_form_field fw where lower(fw.field_name) = lower('".$value_name."') and abs(fw.id_wb_mm_form) = ".$form_id);
+        } else {
+            $query = $main_db -> sql_execute("select fw.field_txt from ".DB_USER_NAME.".wb_form_field fw where lower(fw.field_name) = lower('".BasicFunctions::trim_fieldname($value_name)."') and abs(fw.id_wb_form_field) = '".$value_id."'");		
+        }
         BasicFunctions::end_session(); 
 	while ($main_db -> sql_fetch($query)) {
 		$query_field = $main_db -> sql_result($query, "FIELD_TXT");
