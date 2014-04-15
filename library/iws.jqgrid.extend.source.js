@@ -5,7 +5,11 @@
 * Part of IWS system
 * 
 * from jqgrid we need only modules:
-* grid.base, grid.custom (not all), grid.form (only nav grid), grid.fmatter
+* grid.base,
+* grid.custom (setGridState,GridUnload,GridDestroy,clearBeforeUnload,sortGrid,setColProp,getColProp),
+* grid.formedit (navSeparatorAdd,navButtonAdd,navGrid),
+* grid.fmatter,
+* grid.treegrid
 */
                 
 $.jgrid.extend({
