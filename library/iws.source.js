@@ -864,8 +864,7 @@ $(function() {
                                                    }                                       
                                             }
                                         }); 
-                                searilezed_elem =  $.extend({}, searilezed_elem); //save as object
-                             
+                                searilezed_elem =  $.extend({}, searilezed_elem); //save as object                             
                                 $.ajax({
                                     url:  'ajax.data.field.php?type=field&value_name=' + obj.attr('name') + "&form_id=" + obj.attr('form_id'),
                                     datatype:'json',
@@ -879,7 +878,7 @@ $(function() {
                                    });	  
                                    return false;
                                 })
-                            ).insertAfter(obj.parent().children(':last'));
+                            ).insertAfter(form_id.find('#tr_'+ obj.attr('id')+ ' .DataTD' ).children(':last'));
                         $(this).width($(this).width() + 20);                    
                     }   
                     
