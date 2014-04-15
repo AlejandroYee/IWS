@@ -50,7 +50,7 @@ if (PHP_SAPI === 'cli' || (!isset($_SERVER['DOCUMENT_ROOT']) && !isset($_SERVER[
 define("SESSION_ID",md5(time().rand(time()/100,getrandmax())));
 define("HTTP_USER_AGENT",filter_input(INPUT_SERVER, 'HTTP_USER_AGENT',FILTER_SANITIZE_STRING));
 define("SESSION_LIFE_TIME", 10800);
-define("VERSION_ENGINE","2.1.2");
+define("VERSION_ENGINE","2.1.3");
 
 if (!extension_loaded ("mbstring")) die("Для работы системы IWS нужен модуль php-mbstring который незагружен или отсутсвует, подключите модуль.");  
 
