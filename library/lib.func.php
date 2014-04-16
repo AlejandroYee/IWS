@@ -137,7 +137,11 @@ class BasicFunctions {
                                 if (!isset($_SESSION[strtoupper("log_".SESSION_ID)])) {
                                         $_SESSION[strtoupper("log_".SESSION_ID)] = null;
                                 }
-                                $_SESSION[strtoupper("log_".SESSION_ID)].= "[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).">] ".$log."\r\n";
+                                $ip = BasicFunctions::get_ip();
+                                if (!empty($ip)) {
+                                    $ip = "/".$ip;
+                                }
+                                $_SESSION[strtoupper("log_".SESSION_ID)].= "[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).$ip.">] ".$log."\r\n";
                         }
                 // для случаев когда неавторизированны
                 if ($sub_debug and !auth::get_user()) {
@@ -447,16 +451,16 @@ class BasicFunctions {
             // Текущий ИП
             //--------------------------------------------------------------------------------------------------------------------------------------------
             public static function get_ip() {
-                         $ip1=preg_replace("/^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})/", "\\1.\\2.\\3.\\4", getenv('HTTP_X_FORWARDED_FOR'));
+                     $ip1=preg_replace("/^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})/", "\\1.\\2.\\3.\\4", getenv('HTTP_X_FORWARDED_FOR'));
                      $ip2=preg_replace("/^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})/", "\\1.\\2.\\3.\\4", getenv('REMOTE_ADDR'));
                      if (!empty($ip1) & !empty($ip2)) 
-                                                    $ip=$ip1.':'.$ip2;
+                                                    $ip=$ip1.'@'.$ip2;
                      if (!empty($ip1) & empty($ip2)) 
                                                     $ip=$ip1;
                      if (empty($ip1) & !empty($ip2)) 
                                                     $ip=$ip2;
                      if (empty($ip1) & empty($ip2)) 
-                                                    $ip='неизвестно';
+                                                    $ip='';
                      return $ip;
             }
 
