@@ -510,7 +510,6 @@ class BasicFunctions {
                                             $to_menu = $json -> jsondecode(gz::gzdecode_zip(base64_decode($_SESSION[strtoupper($name)])), $is_array);		 			
                                             // Проверяем есть ли данные, если есть то перемещаем их в массив
                                             if (!empty($to_menu)) {
-                                                    $ddd = debug_backtrace();
                                                     BasicFunctions::to_log("LIB: Module ".strtoupper($ddd[1]["class"])." found ".strtoupper($name)." in cache");
                                                     return $to_menu;
                                             }
