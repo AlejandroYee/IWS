@@ -507,7 +507,8 @@ class BasicFunctions {
                                             BasicFunctions::requre_script_file("lib.json.php");
                                             BasicFunctions::requre_script_file("lib.gz.php");
                                             $json = new json(); 
-                                            $to_menu = $json -> jsondecode(gz::gzdecode_zip(base64_decode($_SESSION[strtoupper($name)])), $is_array);		 			
+                                            $to_menu = $json -> jsondecode(gz::gzdecode_zip(base64_decode($_SESSION[strtoupper($name)])), $is_array);
+                                            $ddd = debug_backtrace();
                                             // Проверяем есть ли данные, если есть то перемещаем их в массив
                                             if (!empty($to_menu)) {
                                                     BasicFunctions::to_log("LIB: Module ".strtoupper($ddd[1]["class"])." found ".strtoupper($name)." in cache");
