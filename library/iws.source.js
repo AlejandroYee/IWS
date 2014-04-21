@@ -201,7 +201,8 @@ $(function() {
 	SetTab = function (tabTitle,tabContentUrl,same_tab) {
 		// Если предан флаг, то просто перезагружаем вкладу
 		if (same_tab !== 'false') {
-				var id = same_tab;								
+				var id = same_tab;
+                                $("." + id).remove();
 				$('#'+id).empty();						
 				if (tabTitle !== '') {
 					$('#ui-'+id).text(trim_text(tabTitle,40,3));
@@ -684,7 +685,8 @@ $(function() {
                     case 'I' : // INTEGER, NUMBER, NUMBER LOOOONG,CURRVAL
                     case 'N' :
                     case 'NL':
-                    case 'C' :                                
+                    case 'C' :         
+                            sp_value =  obj.val();
                             obj.spinner();
                             if (obj.attr('row_type') === 'N') {
                                 obj.spinner( "option", "culture", "ru-RU" )
@@ -696,7 +698,7 @@ $(function() {
                                          .spinner( "option", "step", "0.0000001" );
                             } else if (obj.attr('row_type') === 'C') {
                                   obj.spinner( "option", "culture", "ru-RU" )
-                                         .spinner( "option", "numberFormat", "C" )
+                                         .spinner( "option", "numberFormat", "n2" )
                                          .spinner( "option", "step", "0.01" );
                             }                                  
                             obj.removeClass('ui-widget-content ui-corner-all')
@@ -715,6 +717,7 @@ $(function() {
                                     obj.spinner( "option", "disabled" );
                                     obj.parent().parent().children('.ui-button').remove();	
                             }
+                            obj.spinner( 'value', sp_value );
 					
 		    break;
 		    case 'P': // PASSWORD
@@ -1100,7 +1103,7 @@ $(function() {
 	};
 
 $.calculator.regionalOptions['ru'] = {
-	decimalChar: ',',
+	decimalChar: '.',
 	buttonText: '...', buttonStatus: 'Открыть калькулятор',
 	closeText: 'Закрыть', closeStatus: 'Закрыть калькулятор',
 	useText: 'OK', useStatus: 'Использовать текущее значение в поле',
@@ -1143,19 +1146,19 @@ Globalize.addCultureInfo( "ru-RU", "default", {
 	language: "ru",
 	numberFormat: {
 		",": "",
-		".": ",",
+		".": ".",
 		negativeInfinity: "-бесконечность",
 		positiveInfinity: "бесконечность",
 		percent: {
 			pattern: ["-n%","n%"],
 			",": "",
-			".": ","
+			".": "."
 		},
 		currency: {
 			pattern: ["-n$","n$"],
 			",": "",
-			".": ",",
-			symbol: "р."
+			".": ".",
+			symbol: "p."
 		}
 	},
 	calendars: {

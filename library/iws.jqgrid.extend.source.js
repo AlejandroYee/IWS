@@ -209,16 +209,14 @@ editGridRow : function(rowid, p){
                                                      if (execut) {
                                                         //save data to grid  
                                                         if (searilezed.oper !== "add") { 
-                                                            delete searilezed.oper;     
-                                                            //console.log(searilezed);
-                                                            // посмотреть почему некорректно валюта ставится
+                                                               delete searilezed.oper;   
                                                                grid.jqGrid('setRowData',searilezed.id,searilezed);
                                                            } else {   
                                                                  delete searilezed.oper;
                                                                  delete searilezed.id;
                                                                var row_id_n = [];                                                               
                                                                    row_id_n[$('#editmod' + form_id).find("input[index_field='true']").attr('id')] = ret[2];
-                                                                   searilezed =  $.extend(searilezed, row_id_n);
+                                                                   searilezed =  $.extend(searilezed, row_id_n);                                                                   
                                                                if (tree) {                                                                    
                                                                     grid.jqGrid('addChildNode',ret[2],searilezed.ID_PARENT,searilezed);                                                                    
                                                                } else {

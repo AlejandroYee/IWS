@@ -33,10 +33,10 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 																	when upper(trim(t.field_type)) = 'P'  then  'edittype:''password'' '
 																	when upper(trim(t.field_type)) = 'SB' then  decode(trunc((nvl(t.count_element, 0) + 2) / 2), 1, 'stype:''select'', formatter:''select'', edittype: ''select'' ','stype:''select'', formatter:''select'', edittype: ''select'' multiple ')
 																	when upper(trim(t.field_type)) = 'M'  then  'edittype:  ''textarea'''
-																	when upper(trim(t.field_type)) = 'I'  then  'formatter: ''number'', formatoptions:{decimalPlaces: 0, defaultValue:'''',thousandsSeparator:''''} '
-																	when upper(trim(t.field_type)) = 'N'  then  'formatter: ''number'', formatoptions:{decimalPlaces: 2, thousandsSeparator:'''',defaultValue:''''}'
+																	when upper(trim(t.field_type)) = 'I'  then  'formatter: ''number'', formatoptions:{decimalPlaces: 0, decimalSeparator:''.'', defaultValue:'''',thousandsSeparator:''''} '
+																	when upper(trim(t.field_type)) = 'N'  then  'formatter: ''number'', formatoptions:{decimalPlaces: 2, decimalSeparator:''.'',thousandsSeparator:'''',defaultValue:''''}'
 																	when upper(trim(t.field_type)) = 'NL' then  'formatter: ''number'', formatoptions:{decimalPlaces: 7}, defaultValue:'''''
-																	when upper(trim(t.field_type)) = 'C'  then  'formatter: ''currency'', formatoptions:{prefix: '''', suffix:''p.'',defaultValue:''''}'
+																	when upper(trim(t.field_type)) = 'C'  then  'formatter: ''currency'', formatoptions:{prefix: '''', decimalPlaces: 2, decimalSeparator:''.'', suffix:'''',defaultValue:''''}'
 																	when upper(trim(t.field_type)) = 'D'  then  'formatter: ''date'', formatoptions:{srcformat:''d.m.Y'',newformat:''d.m.Y''} '
 																	when upper(trim(t.field_type)) = 'DT' then  'formatter: ''date'', formatoptions:{srcformat:''d.m.Y H:i:s'',newformat:''d.m.Y H:i:s''}'
 																	when upper(trim(t.field_type)) = 'E'  then  'formatter: ''email'' '
