@@ -741,8 +741,8 @@
       // unbind events
       $doc.unbind(this._namespaceID);
       $(this.element[0].form).unbind(this._namespaceID);
-
-      this.button.remove();
+	  this.button_arrow.unbind().remove();	
+      this.button.unbind().remove();
       this.menu.remove();
       this.element.show();
 
