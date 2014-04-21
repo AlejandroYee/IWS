@@ -242,7 +242,7 @@ class BasicFunctions {
             ?>
             </h3>
             <p>Необходима авторизация, представьтесь:</p>	
-            <form method="POST" id="settings_from" style="position:absolute;text-align:center;width:200px;height:190px;top:100px;left:100px" >
+            <form method="POST" id="settings_from" style="position:absolute;text-align:center;width:200px;height:190px;top:100px;left:100px" onsubmit="return false;">
                             <div id="login_edit">
                                     <label for="username_or_email" tabindex="-1" class="ui-widget" style="font-size:1.2em"><b>Ваш логин:</b></label><br>
                                     <input aria-required="true"  autofocus="autofocus" id="username" name="username" class="ui-widget ui-widget-content ui-corner-all" style="height: 24px;"  type="text" /><br><br>
@@ -250,7 +250,7 @@ class BasicFunctions {
                             </div>
                                     <input aria-required="true" id="password" class="ui-widget ui-widget-content ui-corner-all" name="password" style="height: 24px;" type="password" /><br><br>
                                     <input type="submit" id="submit_settings" style="display: none;">
-                                    <button>Войти</button>	
+                                    <button id="logon_btn" >Войти</button>	
             </form>
             <?php } else {?>
                 <p><br><br><br>
@@ -324,10 +324,9 @@ class BasicFunctions {
                                    });
                    };
 
-                $( 'button')
+                $('#logon_btn')
                   .button()
-                  .click(function( event ) {
-                  
+                  .click(function( event ) {                  
                             var usr = $('#username').val();
                             var pass = $('#password').val();
                             $('#loading2').fadeIn(300);
@@ -368,7 +367,7 @@ class BasicFunctions {
                 
             $('#password').keyup(function(eventObject){
                     if (eventObject.keyCode === 13) {                        
-                            $('button').click();
+                            $('#logon_btn').click();
                       }
              });
              
