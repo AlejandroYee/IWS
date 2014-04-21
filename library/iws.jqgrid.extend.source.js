@@ -9,6 +9,7 @@
 * grid.custom (setGridState,GridUnload,GridDestroy,clearBeforeUnload,sortGrid,setColProp,getColProp),
 * grid.formedit (navSeparatorAdd,navButtonAdd,navGrid),
 * grid.fmatter,
+* grid.jqueryui,
 * grid.treegrid
 */
                 
