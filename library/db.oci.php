@@ -21,7 +21,7 @@ private $arhive_sql,$vields_sql = [];
 	
 		if (!$ora) {		
 			$err_array = oci_error();				
-			BasicFunctions::to_log("ERR: ".$err_array['message']);
+			BasicFunctions::to_log("ERR: ".$err_array['message'],true);
 			die("<p align='left' >".iconv(LOCAL_ENCODING,HTML_ENCODING,str_replace(array("\r\n", "\n",),"<br>",str_replace(array("    ","   ","  ")," ",$err_array['message'])))."</p>");
 		
 		} else {
