@@ -130,22 +130,26 @@ class BasicFunctions {
             if (!stripos($log,"mdpf")) {                               
                 BasicFunctions::requre_script_file("auth.".AUTH.".php");
                 $log = str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log); 
+                $ip = BasicFunctions::get_ip();
+                if (!empty($ip)) {
+                    $ip = "/".$ip;
+                }
                 if(strpos($log,"Load page:") != false) {
                     $log =  iconv(HTML_ENCODING,LOCAL_ENCODING,$log);
                 }
                 if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (auth::get_user() != "")) {
                                 if (!isset($_SESSION[strtoupper("log_".SESSION_ID)])) {
                                         $_SESSION[strtoupper("log_".SESSION_ID)] = null;
-                                }
-                                $ip = BasicFunctions::get_ip();
-                                if (!empty($ip)) {
-                                    $ip = "/".$ip;
-                                }
+                                }                                
                                 $_SESSION[strtoupper("log_".SESSION_ID)].= "[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).$ip.">] ".$log."\r\n";
                         }
                 // для случаев когда неавторизированны
-                if ($sub_debug and !auth::get_user()) {
-                    file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." <".strtoupper($sub_debug).">] ".$log."\r\n", FILE_APPEND | LOCK_EX);                
+                if ($sub_debug != false and $sub_debug != true and !auth::get_user()) {
+                    file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." <".strtoupper($sub_debug).$ip.">] ".$log."\r\n", FILE_APPEND | LOCK_EX);                
+                }
+                // для случаев когда неавторизированны без пользователя
+                if ($sub_debug == true) {
+                    file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." ] ".$log."\r\n", FILE_APPEND | LOCK_EX);                
                 }
             }      
             }
@@ -333,14 +337,14 @@ class BasicFunctions {
                             setTimeout(function(){ 
                             if (usr.replace(/\s/g,'') === '') custom_alert('Необходимо указать имя пользователя!');		
                             if (pass.replace(/\s/g,'') === '') custom_alert('Необходимо указать пароль!');		
-                            if (usr.replace(/\s/g,'') !== '' && pass.replace(/\s/g,'') !== '') {                                                                        	                                
+                            if (usr.replace(/\s/g,'') !== '' && pass.replace(/\s/g,'') !== '') {   
                                         $.ajax({
                                                             url: '".ENGINE_HTTP."/ajax.saveparams.php?act=login',
                                                             datatype:'json',
                                                             data: { username: $('#username').val(), password:  base64_encode($('#password').val()) },
                                                             cache: false,
                                                             type: 'POST',
-                                                                    success: function(data) {
+                                                                    success: function(data) {                                                                    
                                                                           if (data != 'true') {                                                                              
                                                                               custom_alert('Неверное имя пользователя или пароль!');
                                                                               $('#loading2').fadeOut(300);
