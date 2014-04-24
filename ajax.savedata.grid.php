@@ -122,7 +122,7 @@ while ($main_db -> sql_fetch($query)) {
 		} else {
 			$str_sql_fl .= ",".$main_db -> sql_result($query, "FIELD_NAME");			
 		}
-                    
+        $data_action = $main_db -> sql_result($query, "ACTION_SQL");            
 		// Смотрим на тип переменных						
 		switch (strtoupper(trim($main_db -> sql_result($query, "FIELD_TYPE")))) {
 				case 'D':
@@ -174,7 +174,6 @@ while ($main_db -> sql_fetch($query)) {
 							}
 							$file_data_field = $main_db -> sql_result($query, "XSL_FILE_IN");
 							$str_sql_data .= ", '".iconv(HTML_ENCODING,LOCAL_ENCODING,$_FILES[$main_db -> sql_result($query, "FIELD_NAME")]['name'])."'";
-							$file_data_action = $main_db -> sql_result($query, "ACTION_SQL");
 							$action_bat = $main_db -> sql_result($query, "ACTION_BAT");
 							$type_of_past = $oper;
 						} else {
@@ -186,16 +185,15 @@ while ($main_db -> sql_fetch($query)) {
 							$str_sql_data .= ", '".iconv(HTML_ENCODING,LOCAL_ENCODING,$_FILES[$main_db -> sql_result($query, "FIELD_NAME")]['name'])."'";							
 							$file_data_path = $_FILES[$main_db -> sql_result($query, "FIELD_NAME")]['tmp_name'];
 							$file_data_field = $main_db -> sql_result($query, "FIELD_NAME")."_CONTENT";
-							$file_data_action = $main_db -> sql_result($query, "ACTION_SQL");
 							$type_of_past = $oper;
 						} else {
 							$str_sql_data .= ", null";
 						}
 				break;
 				default:
-                                        if (trim($value) != "null") {
-                                                $value = "'".$value."'";
-                                            }   
+						if (trim($value) != "null") {
+								$value = "'".$value."'";
+							}   
 					$str_sql_data .= ",".$value;
 				break;
 		}
@@ -269,11 +267,11 @@ if (!empty($file_data_path) and !empty($file_data_field)) {
 	$main_db_2 -> __destruct();
 }
 
-// Файл загружен, если есть скрипт в загрузке то запускаем его:
-if (!empty($file_data_action)) {
+// Если есть скрипт то запускаем скрипт
+if (!empty($data_action)) {
 	$main_db_2 = new db(true);	
 	BasicFunctions::end_session();
-        $to_exec = str_ireplace("&#39;", "'", str_replace(":ID_".$table_name,"'$id_mm'",$file_data_action));        
+    $to_exec = str_ireplace("&#39;", "'", str_replace(":ID_".$table_name,"'$id_mm'",$data_action));        
 	$return_id = $main_db_2 -> sql_execute($to_exec);	
 	$main_db_2 -> __destruct();	
 }
