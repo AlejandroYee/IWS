@@ -172,22 +172,6 @@ class BasicFunctions {
                                             <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />				
                                             <link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/library/normalize.css?s=<?=SESSION_ID?>" />
             <?php			
-                                            // Проверим на старые версии IE
-                                            if (strpos(HTTP_USER_AGENT, 'MSIE 6.0') > 0 or strpos(HTTP_USER_AGENT, 'MSIE 7.0') > 0 or strpos(HTTP_USER_AGENT, 'MSIE 8.0') > 0) {
-                                            ?>
-                                            <script type="text/javascript" >
-                                            var ieVersion = /*@cc_on (function() {switch(@_jscript_version) {case 1.0: return 3; case 3.0: return 4; case 5.0: return 5; case 5.1: return 5; case 5.5: return 5.5; case 5.6: return 6; case 5.7: return 7; case 5.8: return 8; case 9: return 9; case 10: return 10;}})() || @*/ 0;
-                                             if (ieVersion === 0) { // IE 11 FIX
-                                                 if (!!window.MSStream) {
-                                                  ieVersion = 11;
-                                                }    
-                                             } if ( ieVersion < 9) {					
-                                                    alert("К сожалению ваша версия Internet Explorer больше не поддерживается и не безопасна.\nОбновите ее, либо обратитесь к вашему системному администратору!");				
-                                                    throw new Exception_no_browser("error");
-                                            }
-                                            </script>
-                                            <?php
-                                            }
                                             $theme_first = array();
                                             // Тема не задана! Задаем тему по умомчанию и выводим напоминание пользователю чтобы зашел и сменил
                                             if (!is_dir(THEMES_DIR)) {
@@ -224,8 +208,9 @@ class BasicFunctions {
                                             }
                                             setcookie("theme_num_last", $theme_number);
                                             echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"". ENGINE_HTTP . "/" .$theme_first['theme_file'][$theme_number]." \" /> \n";														
-            ?>  			<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.1.0.min.js?s=<?=SESSION_ID?>"></script>
+            ?>  			<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.1.0.min.js?s=<?=SESSION_ID?>"></script>                                            
                                             <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.10.4.custom.min.js?s=<?=SESSION_ID?>"></script>
+                                            <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.mb.browser.min.js?s=<?=SESSION_ID?>" ></script>
                                             <style type="text/css">											
                                                             #loading {background:#ffffff url(<?=ENGINE_HTTP?>/library/ajax-loader-tab.gif) no-repeat center center;height: 100%;width: 100%;position: absolute; z-index: 999999; }	
                                                             #loading2 {background:#ffffff url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;height: 100%;width: 100%;position: absolute; z-index: 99; }

@@ -7,31 +7,6 @@
 jQuery.uiBackCompat = false;
 jQuery.jgrid.no_legacy_api = true;
 
-function alert_browser_message (br) {
-    alert("К сожалению, ваша версия браузера:\r\n" + br + "\r\nбольше не поддерживается и система будет работать нестабильно, обновитесь, либо обратитесь к администратору!");
-    throw new Exception_no_browser("error"); // инициируем ошибку для остановки выполнения скриптов
-}
-
-switch (jQuery.browser.name)
-{
-		case 'Chrome':
-			if (jQuery.browser.majorVersion < 27) { alert_browser_message(jQuery.browser.name +' (версия ' + jQuery.browser.fullVersion + ')'); }; 
-		break;
-		case 'Safari':
-			if (jQuery.browser.majorVersion < 5) { alert_browser_message(jQuery.browser.name +' (версия ' + jQuery.browser.fullVersion + ')'); }; 
-		break;
-		case 'Microsoft Internet Explorer':
-			if (jQuery.browser.majorVersion < 9) { alert_browser_message(jQuery.browser.name +' (версия ' + jQuery.browser.fullVersion + ')'); }; 
-		break;
-		case 'Opera':
-			if (jQuery.browser.majorVersion < 13 ) { alert_browser_message(jQuery.browser.name +' (версия ' + jQuery.browser.fullVersion + ')'); }; 
-		break;
-		case 'Firefox':
-			if (jQuery.browser.majorVersion < 26) { alert_browser_message(jQuery.browser.name +' (версия ' + jQuery.browser.fullVersion + ')'); }; 
-		break;
-};  
-
-
 var counttab = 1;	
 var sumtab = 0;
 var alert_enabled = 0;
