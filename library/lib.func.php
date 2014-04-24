@@ -578,6 +578,7 @@ class BasicFunctions {
                             <a href="https://github.com/johnculviner/jquery.fileDownload" target="_blank">JQuery fileDownload</a>,
                             <a href="http://ace.ajax.org/" target="_blank">ACE Cloud9 Editor</a>,
                             <a href="https://github.com/jasonday/printThis" target="_blank">PrintThis</a>,
+                            <a href="http://www.mpdf1.com/mpdf/index.php" target="_blank">mPDF</a>,
                             <a href="https://github.com/ehynds/jquery-ui-multiselect-widget" target="_blank">JQuery UI multiselect</a>,		
                             <a href="http://www.flotcharts.org/" target="_blank">FlotCharts</a>
                             <a href="http://keith-wood.name/calculator.html" target="_blank">jQuery Calculator</a>
