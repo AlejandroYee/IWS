@@ -145,14 +145,15 @@ private $arhive_sql,$vields_sql = [];
 	public function sql_execute($sql) { 	
 		// убираем лишнюю точку с запятой:
 		$sql = trim($sql,"\x00..\x1F;");
-		
+                if (strtolower(substr($sql,-3)) == "end") $sql .=";";
+                
 		if (strtolower(DB_USER_NAME) == "wb") {		 // костыль если пользователь WB!
 			$sql =  str_ireplace(array("wb.wb.","WB.WB."),"wb.", $sql);
 		}               
                 if (empty($sql)) {                    
                     BasicFunctions::to_log("ERR: Empty sql query!");
                 } else {                
-                    BasicFunctions::to_log("SQL: <".$this->link."> ".$sql.";");
+                    BasicFunctions::to_log("SQL: <".$this->link."> ".$sql);
                 }
 		$rowid = "";
 		
