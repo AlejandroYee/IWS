@@ -34,6 +34,7 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
         <meta name="description" content="Интелектуальная веб система. Интерфейс обмена и работы с sql базой данны" />
         <meta name="document-state" content="Dynamic" />
         <meta name="robots" content="noindex,follow" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <link rel="icon" type="image/x-icon" href="<?=ENGINE_HTTP?>/<?=$main_db -> get_settings_val("ROOT_CONFIG_FAVICON")?>" />
         <link rel="Bookmark" type="image/x-icon" href="<?=ENGINE_HTTP?>/<?=$main_db -> get_settings_val("ROOT_CONFIG_FAVICON")?>" />
         <link rel="shortcut icon" type="image/x-icon" href="<?=ENGINE_HTTP?>/<?=$main_db -> get_settings_val("ROOT_CONFIG_FAVICON")?>" />
@@ -45,8 +46,8 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
 			die ("Ошибка конфигурации и привелегий сервера!");
 		}
         ?>				
-        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.1.0.min.js?s=<?=SESSION_ID?>" ></script>		
-        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.10.4.custom.min.js?s=<?=SESSION_ID?>" ></script>
+        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.1.1.min.js?s=<?=SESSION_ID?>" ></script>		
+        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.11.min.js?s=<?=SESSION_ID?>" ></script>
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.mb.browser.min.js?s=<?=SESSION_ID?>" ></script>
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-timepicker-addon.js?s=<?=SESSION_ID?>" ></script>	
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-timepicker-ru.js?s=<?=SESSION_ID?>" ></script>
@@ -54,13 +55,13 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.fileUpload.js?s=<?=SESSION_ID?>" ></script>						
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.jqGrid.locale-ru.js?s=<?=SESSION_ID?>" ></script>        	
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.mask.min.js?s=<?=SESSION_ID?>" ></script>	
-        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.fileDownload.js?s=<?=SESSION_ID?>" ></script>	
-        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.ui.menubar.js?s=<?=SESSION_ID?>" ></script>
+        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.fileDownload.js?s=<?=SESSION_ID?>" ></script>
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.calculator.min.js?s=<?=SESSION_ID?>" ></script>				
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.flot.min.js?s=<?=SESSION_ID?>" ></script>	
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.printThis.js?s=<?=SESSION_ID?>" ></script> 
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.ui-contextmenu.js?s=<?=SESSION_ID?>" ></script> 
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.globalize.min.js?s=<?=SESSION_ID?>" ></script>
+        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.slidebarmenu.js?s=<?=SESSION_ID?>" ></script>
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/ace.js?s=<?=SESSION_ID?>" ></script>
 <?php
             if (trim(strtolower(filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL))) == 'bianca.test') {
@@ -68,7 +69,7 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
             } else {
                 $min = "min";
             }    
-        ?>        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.multiselect.<?=$min?>.js?s=<?=SESSION_ID?>" ></script>
+?>        <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.multiselect.<?=$min?>.js?s=<?=SESSION_ID?>" ></script>
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.<?=$min?>.js?s=<?=SESSION_ID?>" ></script>
         <script type="text/javascript" src="<?=ENGINE_HTTP?>/library/iws.jqgrid.extend.<?=$min?>.js?s=<?=SESSION_ID?>" ></script>
                                 <link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/library/normalize.css?s=<?=SESSION_ID?>" />  				
@@ -115,7 +116,8 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
 						.ui-menubar-item{float:left;list-style:none;white-space:nowrap;z-index:102}
 						.ui-menubar .ui-menu{list-style:none;min-width:200px;position:absolute;white-space:nowrap;z-index:102}
 						.ui-menu-item .ui-menu{min-width:200px;z-index:102}
-						.ui-menu{list-style:none;margin:1px;min-width:250px;padding:3px;white-space:nowrap;z-index:101}
+                                                .ui-menu-item .ui-state-focus {left:-px;}
+						.ui-menu{min-width:250px;z-index:101}
 						.ui-dialog .ui-dialog-content{text-align:right}
 						.formelement{padding:.3em}
 						.ui-pg-button{left:1px}
@@ -123,15 +125,13 @@ if ($main_db->get_param_view("cache_enable") == "checked") {
 						.ui-pg-table{border-collapse:separate}
 						.ui-tabs .ui-tabs-panel{padding:7px}
 						.ui-accordion-header{margin:1px}
-						.ui-jqgrid .ui-jqgrid-htable th div{height:26px;overflow:hidden;position:relative;white-space:normal!important}
-						.ui-multiselect-single .ui-multiselect-checkboxes label{padding:2px!important}
-						.ui-multiselect-checkboxes span{clear:both;font-size:.9em;padding-left:4px}
-                                                .ui-multiselect-checkboxes li.ui-multiselect-optgroup-label{text-align:left}
+						.ui-jqgrid .ui-jqgrid-htable th div{height:26px;overflow:hidden;position:relative;white-space:normal!important}						
 						.ui-jqgrid .loading{background:transparent;border:0 transparent;color:inherit;height:99%;left:-5px;opacity:1;padding:10px;top:-5px;width:98%;z-index:89}						
 						.ui-search-toolbar{border-color:transparent}
                                                 .ui-icon-triangle-1-s {background-position: -65px -16px;} /* fix fo left sprite*/
 						.ui-jqgrid tr.jqgrow,.ui-state-active{cursor:default}	
-						li, li li, li li li {list-style-type: none;}                                                
+                                                .DataTD .ace_editor{left:-5px}
+						li, li li, li li li {list-style-type: none;} 
 <?php 
 if (($main_db->get_param_view("render_type") > 2) and (!strrpos(HTTP_USER_AGENT, 'MSIE') == "")) $main_db -> set_param_view("render_type",2); // Проверка на эксплорер
 switch ($main_db->get_param_view("render_type")) {
@@ -150,7 +150,11 @@ break;
 				</style>						 
 </head>
 <body>
-	<div id="loading"></div>	
+	<div id="loading"></div>
+        <div class="slidebarmenu">
+           <?=$DataGrid -> get_tree_main_menu()?>
+       </div>
+        <div id="slidebarmenu-body">
 	<div id="param" title="Укажите ваши предпочтения:">
 	<p><span class="ui-icon ui-icon-alert" style="float: right; margin: 0 7px 20px 10px;"></span>Задайте параметры для работы. В дальнейшем их можно изменить в меню где написано ваше имя</p>
 	<form method="POST" id="settings_from" action="ajax.saveparams.php">
@@ -198,13 +202,8 @@ break;
 	</div>
 	<?=BasicFunctions::about($main_db)?>
         <?=BasicFunctions::check_version($main_db)?>
-	<table cellpadding="0" cellspacing="0" style="border:0px;padding:0px;margin:0px;width:100%"><tr>
-	<td class="ui-widget ui-widget-header main_menu">
-		<div id="Menubar" style="border:0px;">			
-					<?=$DataGrid -> get_tree_main_menu()?>
-		</div>
-	</td>
-	</tr><tr>
+        <table cellpadding="0" cellspacing="0" style="border:0px;padding:0px;margin:0px;width:100%"><tr>
+        <tr>
 	<td>
 		<div id="tabs" class="tabs_content">
 			<ul></ul>						
@@ -227,19 +226,21 @@ break;
 			num_of_mounth = <?=$main_db->get_param_view("num_mounth")?>;	
 		</script>
 <?php
-// Предупреждение о предстоящих работах
-if (defined("OFFINE_START_DATE") and defined("OFFINE_END_DATE") and (date("d.m.Y",time()) === date("d.m.Y",OFFINE_START_DATE)) and (time() <= OFFINE_END_DATE)) {
-?>
-<div id="dialog_offline" title="Запланированные работы:">
-<p>
-<b>Уважаемый пользователь.</b><br /><br />
-C <?=date("H:i:s",OFFINE_START_DATE)?> по <?=date("H:i:s",OFFINE_END_DATE)?><br /><br />
-Система будет находится в оффлайне для:<br /> 
-<b><?=OFFINE_MESSAGE?> </b><br /><br />
-Приносим свои извенения за доставленное неудобство, 
-по возможности завершите работу с системой до указанного времени.
-</p>
+        // Предупреждение о предстоящих работах
+        if (defined("OFFINE_START_DATE") and defined("OFFINE_END_DATE") and (date("d.m.Y",time()) === date("d.m.Y",OFFINE_START_DATE)) and (time() <= OFFINE_END_DATE)) {
+        ?>
+        <div id="dialog_offline" title="Запланированные работы:">
+        <p>
+        <b>Уважаемый пользователь.</b><br /><br />
+        C <?=date("H:i:s",OFFINE_START_DATE)?> по <?=date("H:i:s",OFFINE_END_DATE)?><br /><br />
+        Система будет находится в оффлайне для:<br /> 
+        <b><?=OFFINE_MESSAGE?> </b><br /><br />
+        Приносим свои извенения за доставленное неудобство, 
+        по возможности завершите работу с системой до указанного времени.
+        </p>
+        </div>
 </div>
+
 <script type='text/javascript'>	
 $(function() {
     $( "#dialog_offline" ).dialog({ minWidth: 550 });
