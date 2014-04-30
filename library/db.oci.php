@@ -153,7 +153,7 @@ private $arhive_sql,$vields_sql = [];
                 if (empty($sql)) {                    
                     BasicFunctions::to_log("ERR: Empty sql query!");
                 } else {                
-                    BasicFunctions::to_log("SQL: <".$this->link."> ".$sql);
+                    BasicFunctions::to_log("SQL: <".$this->link."> ".trim($sql,";").";");
                 }
 		$rowid = "";
 		
