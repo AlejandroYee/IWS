@@ -7,25 +7,25 @@
 */
 require_once("library/lib.func.php");
 BasicFunctions::requre_script_file("lib.requred.php");
+BasicFunctions::is_offline();
 
 $act             = filter_input(INPUT_GET, 'act',FILTER_SANITIZE_STRING);
-$theme           = filter_input(INPUT_POST, 'theme',FILTER_SANITIZE_STRING);
 $id_mm_fr   	 = filter_input(INPUT_GET, 'id_mm_fr',FILTER_SANITIZE_NUMBER_INT); 
 $rowid           = filter_input(INPUT_GET, 'rowid',FILTER_SANITIZE_STRING);
 
 // Выход пользователя
 if ($act == "logout") {	
-	BasicFunctions::clear_cache();
-	BasicFunctions::to_log("LIB: User logout....");	
+        BasicFunctions::to_log("LIB: User logout....");	
+	BasicFunctions::clear_cache();	
 	BasicFunctions::Redirect(ENGINE_HTTP);
 	exit;
 }
 
 // Отчистить кеш
 if ($act ==  "cache") {
+        BasicFunctions::to_log("LIB: User cleaned cache....");	
 	BasicFunctions::clear_cache("no_user");
-	BasicFunctions::end_session();
-	BasicFunctions::to_log("LIB: User cleaned cache....");	
+	BasicFunctions::end_session();	
 	BasicFunctions::Redirect(ENGINE_HTTP);
 	exit;
 }
@@ -35,8 +35,8 @@ $user_auth = new AUTH();
 
 // Вход пользователя
 if ($act == "login") {        
-	$pwd = base64_decode(filter_input(INPUT_POST, 'password',FILTER_SANITIZE_STRING));
-	$usr = filter_input(INPUT_POST, 'username',FILTER_SANITIZE_STRING);
+	$pwd = filter_input(INPUT_POST, 'password',FILTER_SANITIZE_SPECIAL_CHARS);
+	$usr = filter_input(INPUT_POST, 'username',FILTER_SANITIZE_SPECIAL_CHARS);
 	$user_auth -> is_user($usr,$pwd);
         if ($user_auth -> is_user()) {
 			$udb = new db();
@@ -44,12 +44,12 @@ if ($act == "login") {
 		} else {                        
 			$responce = "false";
                         BasicFunctions::to_log("ERR: USER LOGIN FILED!",$usr);
-		}		
-		echo $responce;
+	}		
+	echo $responce;
 exit;
 }
 
-if (!$user_auth -> is_user()) {
+if ($user_auth -> is_user() !== true) {
 	BasicFunctions::clear_cache();
 	die("Доступ запрещен");
 }
@@ -80,7 +80,7 @@ if ($act == "get_history") {
 }
 
 // Сделано для смены темы
-if (!empty($theme)) {
+if (filter_input(INPUT_POST, 'theme',FILTER_SANITIZE_STRING,FILTER_NULL_ON_FAILURE) or filter_input(INPUT_POST, "random_theme",FILTER_SANITIZE_STRING,FILTER_NULL_ON_FAILURE)) {
 	$dataform = new DB();
 	// сохраняем параметры:
 	foreach (filter_input_array(INPUT_POST,FILTER_SANITIZE_STRING) as $key => $line) {
