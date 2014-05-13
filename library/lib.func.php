@@ -58,6 +58,7 @@ if (PHP_SAPI === 'cli' || (!isset($_SERVER['DOCUMENT_ROOT']) && !isset($_SERVER[
         }
 }
 
+session_name(str_replace(array(".",",","-"),"_",CONFIG));
 session_start(); 
 set_error_handler('my_error_handler');
 set_exception_handler('my_exception_handler');
