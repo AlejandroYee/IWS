@@ -9,7 +9,8 @@
 // Экспорт:
 //--------------------------------------------------------------------------------------------------------------------------------------------
 	require_once("library/lib.func.php");
-	BasicFunctions::requre_script_file("lib.requred.php"); 
+	BasicFunctions::requre_script_file("lib.requred.php");
+	BasicFunctions::is_offline();	
         BasicFunctions::requre_script_file("auth.".AUTH.".php");
         BasicFunctions::requre_script_file("PHPExcel.php");
         
@@ -18,13 +19,12 @@
         header("Set-Cookie: fileDownload=false");
         
 	$user_auth = new AUTH();	
-	if (!$user_auth -> is_user()) {
+	if ($user_auth -> is_user() !== true) {
 			BasicFunctions::to_log("ERR: User maybe not loggen, from no: ".filter_input(INPUT_GET, 'id_mm_fr',FILTER_SANITIZE_NUMBER_INT)."!");
 			BasicFunctions::clear_cache();
 			die("Доступ запрещен");
 	}
 	$main_db = new db();
-	
 	BasicFunctions::end_session();  // Закрываем сейсию для паралельного исполнния
 	
         function in_array_search($text,$array) { 

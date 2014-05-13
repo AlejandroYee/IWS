@@ -9,19 +9,18 @@
 // Вывод данных для грида
 //--------------------------------------------------------------------------------------------------------------------------------------------
 	require_once("library/lib.func.php");
+	BasicFunctions::is_offline();
 	BasicFunctions::requre_script_file("lib.requred.php");
-	BasicFunctions::requre_script_file("auth.".AUTH.".php");
 	BasicFunctions::requre_script_file("lib.json.php");
-	
 	header("Content-type: text/script;charset=".HTML_ENCODING);
-
+	
   	// Начальные переменные
 	$user_auth = new AUTH();	
-	if (!$user_auth -> is_user()) {
+	if ($user_auth -> is_user() !== true) {
 			BasicFunctions::to_log("ERR: User maybe not loggen, from no: ".filter_input(INPUT_GET, 'id_mm_fr',FILTER_SANITIZE_NUMBER_INT)."!");
 			BasicFunctions::clear_cache();
 			die("Доступ запрещен");
-	}	
+	}
 	$main_db = new db();
 	if (filter_input(INPUT_GET, 'id_mm',FILTER_VALIDATE_FLOAT)) {
 		$id_mm      	 = filter_input(INPUT_GET, 'id_mm',FILTER_SANITIZE_NUMBER_FLOAT); 
@@ -201,7 +200,7 @@
 						}
 						
 						if (!empty($td_val)) {
-								$dt_cell[$r] = $td_val;
+								$dt_cell[$r] = htmlspecialchars($td_val,ENT_QUOTES,HTML_ENCODING);
 							} else {
 								$dt_cell[$r] = "";
 							}

@@ -6,17 +6,18 @@
 * Part of IWS system
 */
 require_once("library/lib.func.php");
+BasicFunctions::is_offline();
 BasicFunctions::requre_script_file("lib.requred.php"); 
 BasicFunctions::requre_script_file("auth.".AUTH.".php");
 	
 // Проверка на пользователя
 $user_auth = new AUTH();	
-if (!$user_auth -> is_user()) {
+if ($user_auth -> is_user() !== true) {
 		BasicFunctions::to_log("ERR: User maybe not loggen, from no: ".filter_input(INPUT_GET, 'id_mm_fr',FILTER_SANITIZE_NUMBER_INT)."!");
 		BasicFunctions::clear_cache();
 		die("Доступ запрещен");
 	}
-        
+       
 $main_db 	= new db();
 
 $type                   = filter_input(INPUT_GET, 'type',FILTER_SANITIZE_STRING);
@@ -77,10 +78,10 @@ $input_post = array();
 foreach (filter_input_array(INPUT_POST) as $key => $value) {    
     
     if (filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING) != null and !empty($key)) {        
-        $input_post[substr($key, 0, strrpos($key, "-"))] = filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING); 
+        $input_post[substr($key, 0, strrpos($key, "-"))] = htmlspecialchars_decode(filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING),ENT_QUOTES,HTML_ENCODING); 
     } 
     if (is_array($value) and !empty($key)) {
-        $input_post[substr($key, 0, strrpos($key, "-"))] = implode(",",filter_var_array($value,FILTER_SANITIZE_STRING));  
+        $input_post[substr($key, 0, strrpos($key, "-"))] = htmlspecialchars_decode(implode(",",filter_var_array($value,FILTER_SANITIZE_STRING)),ENT_QUOTES,HTML_ENCODING);  
     }
     if (empty($value) and (array_search(substr($key, 0, strrpos($key, "-")),$input_post) === false)) {
         $input_post[substr($key, 0, strrpos($key, "-"))] = "null";

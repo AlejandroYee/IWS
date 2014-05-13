@@ -13,50 +13,59 @@ ini_set("session.use_only_cookies", 1);
 date_default_timezone_set('Europe/Moscow');
 Error_Reporting(E_ALL);
 
+define("ENGINE_ROOT",  filter_input(INPUT_SERVER, 'DOCUMENT_ROOT',FILTER_SANITIZE_STRING));
+define("HTTP_USER_AGENT",filter_input(INPUT_SERVER, 'HTTP_USER_AGENT',FILTER_SANITIZE_STRING));
+define("VERSION_ENGINE","2.1.5");
+
+if (!defined('CONFIG')) {
+    define("CONFIG",filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL));
+}
+
 if (!defined('PHP_VERSION_ID')) {
     $version = explode('.', PHP_VERSION);
     define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));   
 }
 
 if ((PHP_VERSION_ID < 50400) and (ini_get("short_open_tag") != 1)) {
-            die("Для работы системы IWS нужно включить директиву short_open_tag = On. Либо обновить PHP до версии 5.4"); 
+        die("Для работы системы IWS нужно включить директиву short_open_tag = On. Либо обновить PHP до версии 5.4"); 
 }
+
+if (!extension_loaded ("mbstring")) {
+        die("Для работы системы IWS нужен модуль php-mbstring который незагружен или отсутсвует, подключите модуль.");  
+}
+
+if (!is_file(ENGINE_ROOT."/config.".CONFIG.".php")) {
+        die("Вы загрузили платформу IWS, но конфигурацая не настроена, пожалуйста обратитесь к вашему администратору!");   
+} 
+
+if (!is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR."jscript/") or !is_dir(ENGINE_ROOT.DIRECTORY_SEPARATOR."themes/")) {
+	die ("Ошибка конфигурации и привелегий сервера!");
+}              
 
 if (PHP_SAPI === 'cli' || (!isset($_SERVER['DOCUMENT_ROOT']) && !isset($_SERVER['REQUEST_URI']))) {
         define("ENGINE_HTTP", false);        
         define("AUTH","local");
         define("AUTH_USER_NAME","console");
         error_reporting(E_ALL ^ E_NOTICE);
-        require_once(ENGINE_ROOT."/config.".CONFIG.".php");
-    } else {
+    } else {       
         if (filter_input(INPUT_SERVER, 'HTTPS',FILTER_VALIDATE_BOOLEAN) > 0) {
-            if (!extension_loaded ("openssl")) die("Для работы системы IWS нужен модуль php_openssl который незагружен или отсутсвует, подключите модуль.");  
-            define("ENGINE_HTTP",  "https://" .filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL));
+            if (!extension_loaded ("openssl")) {
+                die("Для работы системы IWS нужен модуль php_openssl который незагружен или отсутсвует, подключите модуль.");
+            }
+            define("ENGINE_HTTP",  "https://" .CONFIG);
         } else {    
-            define("ENGINE_HTTP",  "http://" .filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL));
+            define("ENGINE_HTTP",  "http://" .CONFIG);
         }
-        
-        define("ENGINE_ROOT",  filter_input(INPUT_SERVER, 'DOCUMENT_ROOT',FILTER_SANITIZE_STRING));
-        
-        // Проверяем основные переменнные и модули
-        if (is_file(ENGINE_ROOT."/config.".filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL).".php")) {
-            require_once(ENGINE_ROOT."/config.".filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL).".php");
-        } else {
-            die("Вы зашли на сайт системы IWS, но по данному адресу ".ENGINE_HTTP." конфигурацая ненастроена, пожалуйста обратитесь к вашему администратору!");   
-        }         
-        session_start();
 }
 
-define("SESSION_ID",md5(time().rand(time()/100,getrandmax())));
-define("HTTP_USER_AGENT",filter_input(INPUT_SERVER, 'HTTP_USER_AGENT',FILTER_SANITIZE_STRING));
-define("SESSION_LIFE_TIME", 10800);
-define("VERSION_ENGINE","2.1.3");
-
-if (!extension_loaded ("mbstring")) die("Для работы системы IWS нужен модуль php-mbstring который незагружен или отсутсвует, подключите модуль.");  
-
+session_start(); 
 set_error_handler('my_error_handler');
 set_exception_handler('my_exception_handler');
 register_shutdown_function('end_timer');
+
+require_once(ENGINE_ROOT."/config.".CONFIG.".php");  
+BasicFunctions::requre_script_file("auth.".AUTH.".php");
+BasicFunctions::requre_script_file("db.".DB.".php");
 
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // exception
@@ -87,22 +96,22 @@ if (function_exists('session_register_shutdown')) {
 if (!isset($starttime)) {  
         $mtime = explode (' ', microtime());
         $mtime_split = $mtime[1] + $mtime[0];
-        $_SESSION[strtoupper("timer_".SESSION_ID)] = $mtime_split;
-        BasicFunctions::to_log("LIB: Session ".SESSION_ID." start ... ");
+        $_SESSION[strtoupper("timer_".session_id())] = $mtime_split;
+        BasicFunctions::to_log("LIB: Session ".session_id()." start ... ");
 }
 
 function end_timer()
 {
-    if (isset($_SESSION[strtoupper("timer_".SESSION_ID)])) {
+    if (isset($_SESSION[strtoupper("timer_".session_id())])) {
         $mtime = explode (' ', microtime ()); 
-        $totaltime = round(($mtime[1] + $mtime[0]) - $_SESSION[strtoupper("timer_".SESSION_ID)], 4,PHP_ROUND_HALF_ODD);
-        unset($_SESSION[strtoupper("timer_".SESSION_ID)]);
-        BasicFunctions::to_log("LIB: Session ".SESSION_ID." end, worktime ".$totaltime." s.");        
+        $totaltime = round(($mtime[1] + $mtime[0]) - $_SESSION[strtoupper("timer_".session_id())], 4,PHP_ROUND_HALF_ODD);
+        unset($_SESSION[strtoupper("timer_".session_id())]);
+        BasicFunctions::to_log("LIB: Session ".session_id()." end, worktime ".$totaltime." s.");        
    }  
    
    if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and ( auth::get_user() != "")) {
-    file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,$_SESSION[strtoupper("log_".SESSION_ID)], FILE_APPEND | LOCK_EX);    
-    $_SESSION[strtoupper("log_".SESSION_ID)] = null; 
+    file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,$_SESSION[strtoupper("log_".session_id())], FILE_APPEND | LOCK_EX);    
+    $_SESSION[strtoupper("log_".session_id())] = null; 
     // Проверяем на предыдущие закрытые сейсии чтобы не плодить файлы, и делаем унсет им:
     foreach ($_SESSION as $key => $value) { 
           if ($value  == "NULL") {
@@ -127,8 +136,7 @@ class BasicFunctions {
             // Логирование
             //--------------------------------------------------------------------------------------------------------------------------------------------
             public static function to_log($log,$sub_debug = false) {                
-            if (!stripos($log,"mdpf")) {                               
-                BasicFunctions::requre_script_file("auth.".AUTH.".php");
+            if (!stripos($log,"mdpf")) {
                 $log = str_replace(array("\r\n", "\n", "\r", "\t", "    ","   ","  ")," ",$log); 
                 $ip = BasicFunctions::get_ip();
                 if (!empty($ip)) {
@@ -138,10 +146,10 @@ class BasicFunctions {
                     $log =  iconv(HTML_ENCODING,LOCAL_ENCODING,$log);
                 }
                 if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (auth::get_user() != "")) {
-                                if (!isset($_SESSION[strtoupper("log_".SESSION_ID)])) {
-                                        $_SESSION[strtoupper("log_".SESSION_ID)] = null;
+                                if (!isset($_SESSION[strtoupper("log_".session_id())])) {
+                                        $_SESSION[strtoupper("log_".session_id())] = null;
                                 }                                
-                                $_SESSION[strtoupper("log_".SESSION_ID)].= "[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).$ip.">] ".$log."\r\n";
+                                $_SESSION[strtoupper("log_".session_id())].= "[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).$ip.">] ".$log."\r\n";
                         }
                 // для случаев когда неавторизированны
                 if ($sub_debug != false and $sub_debug != true and !auth::get_user()) {
@@ -153,224 +161,7 @@ class BasicFunctions {
                 }
             }      
             }
-
-            //--------------------------------------------------------------------------------------------------------------------------------------------
-            // Окно авторизации:
-            //--------------------------------------------------------------------------------------------------------------------------------------------
-            public static function Create_logon_window($offline = false) {
-            BasicFunctions::clear_cache();
-            ?>
-            <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-            <html lang="en-US">
-                                    <head>
-                                            <meta charset="<?php echo strtolower(HTML_ENCODING); ?>">
-                                            <title>IWS Login</title>
-                                            <meta http-equiv="Content-Type" content="text/html; charset=<?php echo strtolower(HTML_ENCODING); ?>"/>
-                                            <meta http-equiv="Cache-Control" content="no-cache">
-                                            <meta http-equiv="Pragma" content="no-cache" >				
-                                            <meta http-equiv="expires" content="0">						
-                                            <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />				
-                                            <link rel="stylesheet" type="text/css" href="<?=ENGINE_HTTP?>/library/normalize.css?s=<?=SESSION_ID?>" />
-            <?php			
-                                            $theme_first = array();
-                                            // Тема не задана! Задаем тему по умомчанию и выводим напоминание пользователю чтобы зашел и сменил
-                                            if (!is_dir(THEMES_DIR)) {
-                                                die ("Неуказана директория тем в конфигурации!");                                                
-                                            }	
-                                            if (!is_dir(ENGINE_ROOT."/jscript/")) {
-                                                die ("Ошибка конфигурации и привелегий сервера!");                                                 
-                                            }
-
-                                            $dh  = opendir(THEMES_DIR."/");
-                                            while (false !== ($file = readdir($dh))) {
-                                            if (($file == ".") or ($file == "..")) { 
-                                                    continue;                                                    
-                                            }
-                                              if (is_dir(THEMES_DIR. "/" . $file)) {
-                                                    $dh_sub  = opendir(THEMES_DIR. "/" . $file);
-                                                    while (false !== ($file_t = readdir($dh_sub))) {
-                                                            if (($file_t == ".") or ($file_t == "..")) {
-                                                                    continue;
-                                                            }
-                                                            if (strpos($file_t,".css") > 0) { 
-                                                                            $theme_first['theme_file'][] = THEMES_DIR. "/" .$file. "/" .$file_t;
-                                                                            $theme_first['theme_name'][] = $file;
-                                                                            break;
-                                                                    }	
-                                                            }
-                                                    }					
-                                            }
-                                            $theme_number = rand(0,count($theme_first['theme_file']) - 1);			
-                                            if (filter_input(INPUT_COOKIE, 'theme_num_last',FILTER_VALIDATE_INT) != false) {
-                                                    while ($theme_number == filter_input(INPUT_COOKIE, 'theme_num_last',FILTER_SANITIZE_NUMBER_INT)) {
-                                                            $theme_number = rand(0,count($theme_first['theme_file']) - 1);
-                                                    }
-                                            }
-                                            setcookie("theme_num_last", $theme_number);
-                                            echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"". ENGINE_HTTP . "/" .$theme_first['theme_file'][$theme_number]." \" /> \n";														
-            ?>  			<script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-2.1.0.min.js?s=<?=SESSION_ID?>"></script>                                            
-                                            <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery-ui-1.10.4.custom.min.js?s=<?=SESSION_ID?>"></script>
-                                            <script type="text/javascript" src="<?=ENGINE_HTTP?>/jscript/jquery.mb.browser.min.js?s=<?=SESSION_ID?>" ></script>
-                                            <style type="text/css">											
-                                                            #loading {background:#ffffff url(<?=ENGINE_HTTP?>/library/ajax-loader-tab.gif) no-repeat center center;height: 100%;width: 100%;position: absolute; z-index: 999999; }	
-                                                            #loading2 {background:#ffffff url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;height: 100%;width: 100%;position: absolute; z-index: 99; }
-                                                            html, body {padding: 0px; margin: 0px; overflow:hidden; font-size: 12px;}
-                                            </style>						 
-            </head>
-            <body>
-            <div id="loading"></div>            
-            <div id="logon" window_login="logon" class="ui-widget ui-widget-content ui-corner-all" style="position:absolute;text-align :center;width:400px;height:350px;">
-            <div id="loading2" class="ui-widget ui-widget-content ui-corner-all" style="border:0"></div>  
-            <?php if (!$offline) { ?>
-            <h3>
-            <?php
-            $main_db = new db();
-            if ($main_db) {
-                    echo $main_db -> get_settings_val("ROOT_CONFIG_NAME");
-            }
-            ?>
-            </h3>
-            <p>Необходима авторизация, представьтесь:</p>	
-            <form method="POST" id="settings_from" style="position:absolute;text-align:center;width:200px;height:190px;top:100px;left:100px" onsubmit="return false;">
-                            <div id="login_edit">
-                                    <label for="username_or_email" tabindex="-1" class="ui-widget" style="font-size:1.2em"><b>Ваш логин:</b></label><br>
-                                    <input aria-required="true"  autofocus="autofocus" id="username" name="username" class="ui-widget ui-widget-content ui-corner-all" style="height: 24px;"  type="text" /><br><br>
-                                    <label for="password" tabindex="-1" style="font-size:1.2em"><b>Пароль:</b></label>
-                            </div>
-                                    <input aria-required="true" id="password" class="ui-widget ui-widget-content ui-corner-all" name="password" style="height: 24px;" type="password" /><br><br>
-                                    <input type="submit" id="submit_settings" style="display: none;">
-                                    <button id="logon_btn" >Войти</button>	
-            </form>
-            <?php } else {?>
-                <p><br><br><br>
-                <b>Уважаемый пользователь.</b><br><br>
-                C <b><?=date("H:i:s d.m.Y",OFFINE_START_DATE)?></b> по <b><?=date("H:i:s d.m.Y",OFFINE_END_DATE)?></b><br><br>
-                Система будет находится в оффлайне для:<br><br>
-                <b><?=OFFINE_MESSAGE?> </b><br><br>
-                Приносим свои извенения<br>за доставленное неудобство,<br>
-                зайдите позже.
-                </p>
-                <?php } ?>
-                <div id="login_theme" style="position:absolute;text-align:center;width:200px;height:20px;top:280px;left:100px">
-                        <h6>Случайная тема оформления, называется: "<?=$theme_first['theme_name'][$theme_number]?>"</h6>
-                </div>
-                <div id="login_theme" style="position:absolute;text-align:center;width:200px;height:20px;top:315px;left:100px">
-                        <h6 id="about">IWS: v<?=VERSION_ENGINE?>@<?=date("Y")?></h6>
-                </div>
-            </div>   
-            <script type="text/javascript" >
-        <?php
-             echo BasicFunctions::regex_javascript("$(function() {  
-                 base64_encode = function ( data ) {    
-
-                        data = escape(data);  
-
-                        var b64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-                        var o1, o2, o3, h1, h2, h3, h4, bits, i=0, enc='';
-
-                        do { // pack three octets into four hexets
-                            o1 = data.charCodeAt(i++);
-                            o2 = data.charCodeAt(i++);
-                            o3 = data.charCodeAt(i++);
-
-                            bits = o1<<16 | o2<<8 | o3;
-
-                            h1 = bits>>18 & 0x3f;
-                            h2 = bits>>12 & 0x3f;
-                            h3 = bits>>6 & 0x3f;
-                            h4 = bits & 0x3f;
-
-                            enc += b64.charAt(h1) + b64.charAt(h2) + b64.charAt(h3) + b64.charAt(h4);
-                        } while (i < data.length);
-
-                        switch( data.length % 3 ){
-                            case 1:
-                                enc = enc.slice(0, -2) + '==';
-                            break;
-                            case 2:
-                                enc = enc.slice(0, -1) + '=';
-                            break;
-                        }
-
-                        return enc;
-                    };
-                    
-                    custom_alert = function (output_msg) {	
-                                   $('<div />').html(output_msg).dialog({
-                                           title: 'Ошибка',
-                                           resizable: false,
-                                           minWidth: 450,
-                                           modal: true,
-                                           buttons: {
-                                                   'Закрыть': function() 
-                                                   {
-                                                           $( this ).dialog( 'close' );                                                           
-                                                   }
-                                           },							
-                                           open: function() {								
-                                                           $(this).parent().css('z-index', 9999).parent().children('.ui-widget-overlay').css('z-index', 105);					
-                                           }
-                                   });
-                   };
-
-                $('#logon_btn')
-                  .button()
-                  .click(function( event ) {                  
-                            var usr = $('#username').val();
-                            var pass = $('#password').val();
-                            $('#loading2').fadeIn(300);
-                            setTimeout(function(){ 
-                            if (usr.replace(/\s/g,'') === '') custom_alert('Необходимо указать имя пользователя!');		
-                            if (pass.replace(/\s/g,'') === '') custom_alert('Необходимо указать пароль!');		
-                            if (usr.replace(/\s/g,'') !== '' && pass.replace(/\s/g,'') !== '') {   
-                                        $.ajax({
-                                                            url: '".ENGINE_HTTP."/ajax.saveparams.php?act=login',
-                                                            datatype:'json',
-                                                            data: { username: $('#username').val(), password:  base64_encode($('#password').val()) },
-                                                            cache: false,
-                                                            type: 'POST',
-                                                                    success: function(data) {                                                                    
-                                                                          if (data != 'true') {                                                                              
-                                                                              custom_alert('Неверное имя пользователя или пароль!');
-                                                                              $('#loading2').fadeOut(300);
-                                                                           } else {   
-                                                                                $('#logon').fadeOut(400);
-                                                                                setTimeout(function() {                                                                                
-                                                                                     $('#loading').fadeIn(300);
-                                                                                }, 500);                                                            
-                                                                                setTimeout(function() {                                                                                     
-                                                                                     $(location).prop('href','".ENGINE_HTTP."/');
-                                                                                }, 3000);                                                                                
-                                                                          }	
-                                                                    }
-                                            });
-                            }
-                            }, 2000);
-                            return false;
-                  });
-              });
-            $(document).ready(function () {
-                    $('#loading2').hide();
-                    $('#loading').fadeOut(500);		
-                });
-                
-            $('#password').keyup(function(eventObject){
-                    if (eventObject.keyCode === 13) {                        
-                            $('#logon_btn').click();
-                      }
-             });
-             
-            $(window).resize(function () {
-              $('#logon').css({ top: $(window).height()/2 - 175, left: $(window).width()/2 - 200 });			
-            });
             
-            $('#logon').css({ top: $(window).height()/2 - 175, left: $(window).width()/2 - 200 });");	
-        ?>
-            </script>
-            </body>
-            <?php
-            }
-
             //--------------------------------------------------------------------------------------------------------------------------------------------
             // Сжимаем Javascript
             //--------------------------------------------------------------------------------------------------------------------------------------------
@@ -409,25 +200,6 @@ class BasicFunctions {
 
                return false;
             }
-            //--------------------------------------------------------------------------------------------------------------------------------------------	
-            // Проверка загруженных классов
-            //--------------------------------------------------------------------------------------------------------------------------------------------
-            public static Function check_classes() {
-            // прогружаем оставшиеся
-            BasicFunctions::requre_script_file("lib.charts.php");
-            BasicFunctions::requre_script_file("lib.help.php");
-            BasicFunctions::requre_script_file("lib.input.php");
-            BasicFunctions::requre_script_file("lib.jqgrid.php");
-
-            //Проверяем о информации
-            $classes_define = get_declared_classes();
-                    foreach($classes_define as $key)  {
-                            if (method_exists($key, 'get_about')) {
-                                    echo "<b>".strtoupper($key).":</b> ".call_user_func($key."::get_about")."<br>";
-                            }
-                    }
-            } 
-            
             //--------------------------------------------------------------------------------------------------------------------------------------------
             // Принудительный редирект страници по адресу
             //--------------------------------------------------------------------------------------------------------------------------------------------
@@ -470,6 +242,28 @@ class BasicFunctions {
             }
             
             //--------------------------------------------------------------------------------------------------------------------------------------------
+            // Если система оффлайн то информируем
+            //--------------------------------------------------------------------------------------------------------------------------------------------
+            public static function is_offline($is_first_page = false) {
+                if (defined("OFFINE_START_DATE") and defined("OFFINE_END_DATE") and (time() > OFFINE_START_DATE) and (time() <= OFFINE_END_DATE)) {                    
+                    if ($is_first_page) {
+                        echo "<div class=\"ui-widget ui-widget-content ui-corner-all user_login\" style=\"position:absolute;text-align:center;width:400px;height:350px;\"><p><br><br><br><br><br>";
+                    }
+                    ?>
+                        <b>Уважаемый пользователь.</b><br><br>
+                        C <b><?=date("H:i:s d.m.Y",OFFINE_START_DATE)?></b> по <b><?=date("H:i:s d.m.Y",OFFINE_END_DATE)?></b><br><br>
+                        Система будет находится в оффлайне для:<br><br>
+                        <b><?=OFFINE_MESSAGE?> </b><br><br>
+                        Приносим свои извенения<br>за доставленное неудобство,<br>
+                        зайдите позже.
+                    <?php
+                    if ($is_first_page) {
+                            echo "</p></div>";        
+                    }
+                    die();
+                }
+            }
+            //--------------------------------------------------------------------------------------------------------------------------------------------
             // Сохранение масивов и переменных в кеш
             //--------------------------------------------------------------------------------------------------------------------------------------------
             public static function save_to_cache($name, $value, $time = -1) {
@@ -477,7 +271,7 @@ class BasicFunctions {
                 BasicFunctions::requre_script_file("lib.gz.php");
                     if (!isset($_SESSION["ENABLED_CACHE"])) {
                             if ($time < 0) {
-                                $time = time() + SESSION_LIFE_TIME; // по умолчанию 3 часа
+                                $time = time() + (session_cache_expire()*60); // по умолчанию
                             }
                                 $json = new json();    				
                                 $_SESSION[strtoupper($name)] = base64_encode(gz::gzencode_zip($json -> jsonencode($value)));			
@@ -536,13 +330,178 @@ class BasicFunctions {
             public static function end_session() {
                     session_write_close();  // Закрываем сейсию для паралельного исполнния
             }
+            
+            //--------------------------------------------------------------------------------------------------------------------------------------------	
+            // Получаем стили
+            //--------------------------------------------------------------------------------------------------------------------------------------------            
+            public static function get_css() {
+                $res = "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP."/library/normalize.css\" />\n";
+                    $dh  = opendir(ENGINE_ROOT."/"."jscript");
+                        while (false !== ($file = readdir($dh))) {
+                        if (($file == ".") or ($file == "..")) continue;
+                                if (strrpos($file,".css") !== false)  {
+                                        $res .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP."/jscript/".$file ."\" />\n";
+                                }
+                        }                        
+                return $res;
+            }
+            //--------------------------------------------------------------------------------------------------------------------------------------------	
+            // Подгружаем скрипты
+            //--------------------------------------------------------------------------------------------------------------------------------------------  
+            public static function get_scripts($user_auth) {               
+                if (trim(strtolower(CONFIG)) == 'bianca.test') {
+                            $min = "source";
+                        } else {
+                            $min = "min";
+                }    
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery-2.1.1.min.js'></script>\n";		
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery-ui-1.11.min.js'></script>\n";
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.mb.browser.min.js'></script>\n";                   
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.jqGrid.min.js'></script>\n";
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.multiselect.".$min.".js'></script>\n";                   
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.calculator.min.js'></script>\n";                    
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.globalize.min.js'></script>\n"; 
+                if ($user_auth -> is_user() === true) { 
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery-ui-timepicker-addon.js'></script>\n";
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery-ui-timepicker-ru.js'></script>\n";		
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.fileUpload.js'></script>\n";						
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.jqGrid.locale-ru.js'></script>\n";        	
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.mask.min.js'></script>\n";	
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.fileDownload.js'></script>\n";				
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.flot.min.js'></script>\n";	
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.printThis.js'></script>\n"; 
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.ui-contextmenu.js'></script>\n";  
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.slidebarmenu.".$min.".js'></script>\n";
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.ui.menubar.js'></script>\n";                          
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/ace.js'></script>\n";                  
+                }                     
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/library/iws.".$min.".js' ></script>\n";
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/library/iws.jqgrid.extend.".$min.".js'></script>\n";
+            }
+            //--------------------------------------------------------------------------------------------------------------------------------------------	
+            // Получаем тему пользователя
+            //--------------------------------------------------------------------------------------------------------------------------------------------  
+            public static function get_theme($db,$user_auth) {
+                $res = "";
+                define("THEMES_DIR","/themes");
+                if ($user_auth -> is_user() === true and !empty($db -> user_real_name) and $db->get_param_view("random_theme") != "checked") { 
+                        if ((trim($db->get_param_view("theme")) != "") and ( is_file(ENGINE_ROOT . "/" . $db->get_param_view("theme")) )) {	
+                                $res .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP . "/" . str_ireplace("\\", "/", $db->get_param_view("theme"))."\" /> \n";						
+                        } else {
+                                $dh  = opendir(ENGINE_ROOT.THEMES_DIR."/");
+                                while (false !== ($file = readdir($dh))) {
+                                    if (($file == ".") or ($file == "..")) continue;				
+                                      if (is_dir(THEMES_DIR."/" . $file)) {				  
+                                            $dh_sub  = opendir(THEMES_DIR."/" . $file);
+                                            while (false !== ($file_t = readdir($dh_sub))) {
+                                                    if (($file_t == ".") or ($file_t == "..")) continue;						
+                                                    if (strrpos($file_t,".css") !== false) {
+                                                        // Попытаемся найти дефолтную темку						
+                                                            if (trim(strtolower($file)) == "smoothness") {
+                                                                    $theme_first = THEMES_DIR."/" .$file. "/" .$file_t;	
+                                                            }
+                                                            if (empty($theme_first)) $theme_first =  THEMES_DIR."/" .$file. "/" .$file_t;
+                                                    }	
+                                                    }
+                                            }
+                                }
 
+                                if (!empty($theme_first)) { 
+                                    $res .=  "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP. "/" .$theme_first."\" /> \n";					
+                                }
+                        }
+                } else {
+                    $theme_first = array();         
+                    $dh  = opendir(ENGINE_ROOT.THEMES_DIR."/");
+                    while (false !== ($file = readdir($dh))) {
+                        if (($file == ".") or ($file == "..")) { 
+                                continue;                                                    
+                        }
+                        if (is_dir(ENGINE_ROOT.THEMES_DIR. "/" . $file)) {
+                              $dh_sub  = opendir(ENGINE_ROOT.THEMES_DIR. "/" . $file);
+                              while (false !== ($file_t = readdir($dh_sub))) {
+                                      if (($file_t == ".") or ($file_t == "..")) {
+                                              continue;
+                                      }
+                                      if (strpos($file_t,".css") > 0) { 
+                                                      $theme_first['theme_file'][] = THEMES_DIR. "/" .$file. "/" .$file_t;
+                                                      $theme_first['theme_name'][] = $file;
+                                                      break;
+                                              }	
+                                      }
+                        }					
+                    }
+                    $theme_number = rand(0,count($theme_first['theme_file']) - 1);			
+                    if (filter_input(INPUT_COOKIE, 'theme_num_last',FILTER_VALIDATE_INT) != false) {
+                            while ($theme_number == filter_input(INPUT_COOKIE, 'theme_num_last',FILTER_SANITIZE_NUMBER_INT)) {
+                                    $theme_number = rand(0,count($theme_first['theme_file']) - 1);
+                            }
+                    }
+                    define("THEME_NAME",$theme_first['theme_name'][$theme_number]);
+                    $res .=  "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP. "/" .$theme_first['theme_file'][$theme_number]."\" /> \n";
+                }
+                return $res;
+            }
+
+            //--------------------------------------------------------------------------------------------------------------------------------------------	
+            // Создаем параметры пользователя
+            //--------------------------------------------------------------------------------------------------------------------------------------------
+            public static function get_user_options($db) {
+            ?>
+            <div class="iws_param" title="Укажите ваши предпочтения:">
+                <p><span class="ui-icon ui-icon-alert" style="float: right; margin: 0 7px 20px 10px;"></span>Задайте параметры для работы. В дальнейшем их можно изменить в меню где написано ваше имя</p>
+                <form method="POST" id="settings_from" action="ajax.saveparams.php">
+                <label for="themefor">Тема оформления:</label>
+                        <select id="themeselector" name="theme" >;
+                                <?php			
+                                // Загружаем список тем
+                                $dh  = opendir("themes/");
+                                while (false !== ($file = readdir($dh))) {
+                                        if (($file == ".") or ($file == "..")) continue;
+                                          if (is_dir("themes". DIRECTORY_SEPARATOR . $file)) {
+                                                $dh_sub  = opendir("themes". DIRECTORY_SEPARATOR . $file);
+                                                while (false !== ($file_t = readdir($dh_sub))) {
+                                                        if (($file_t == ".") or ($file_t == "..")) continue;
+                                                        $iscss = strpos($file_t,".css");
+                                                        if (!empty($iscss)) {
+                                                                if (trim("themes". DIRECTORY_SEPARATOR .$file. DIRECTORY_SEPARATOR .$file_t) === trim($db->get_param_view("theme"))) {$selected="selected";} else {$selected="";}
+                                                                echo "			<option value=\""."themes". DIRECTORY_SEPARATOR .$file. DIRECTORY_SEPARATOR .$file_t."\" $selected>$file</option>\n\t";
+                                                                break;
+                                                        }
+                                                }				  
+                                          }
+                                }
+                ?>
+                        </select>
+                        <p><input type="hidden" name="random_theme" value="off" ><input type="checkbox" name="random_theme" id="random_theme" <?=$db->get_param_view("random_theme") ?>><label for="random_theme" style="font-size:80%" >Использовать случайную тему</label></p>
+                        <p><input type="hidden" name="width_enable" value="off" ><input type="checkbox" name="width_enable" id="width_enable" <?=$db->get_param_view("width_enable") ?>><label for="width_enable" style="font-size:80%" >Автоширина данных</label></p>
+                        <p><input type="hidden" name="editabled" value="off" ><input type="checkbox" name="editabled" id="editabled" <?=$db->get_param_view("editabled") ?>><label for="editabled" style="font-size:80%" >Отображать нередактируемые поля</label></p>
+                        <p><input type="hidden" name="enable_menu" value="off" ><input type="checkbox" name="enable_menu" id="enable_menu" <?=$db->get_param_view("enable_menu") ?>><label for="enable_menu" style="font-size:80%" >Включить обычное меню</label><br /></p>
+                        <p><label for="spinner">Количество месяцев в окне выбора дат: </label><input id="num_mounth" size="2" name="num_mounth" value = "<?=$db->get_param_view("num_mounth")?>" />
+                        <p><label for="spinner2">Количество записей на страницу: </label><input id="num_reck" size="2" name="num_reck" value = "<?=$db->get_param_view("num_reck")?>" /></p>		
+                        <p><div class="ui-widget-header" style = "height: 1px;"></div></p>
+                        <p>Парамерты производительности:</p>
+                        <p><input type="hidden" name="cache_enable" value="off" ><input type="checkbox" name="cache_enable" id="cache_enable" <?=$db->get_param_view("cache_enable") ?>><label for="cache_enable" style="font-size:80%" >Отключить кеширование</label></p>
+                        <p><label for="renderer">Качество отображения:</label></p>
+                        <input type="hidden" name="render_type" id="render_type" value="<?=$db->get_param_view("render_type")?>" />
+                        <div style="float:right">
+                                <div name="renderer" id="renderer"  style="float:right;top:-13px;width:280px;"></div>
+                                <div style="width:150px;top:10px;display: block;height:30px;">
+                                                <span style="position:absolute;float:left;display: block;width: 280px;text-align:left;font-size: 11px;">Минимальное</span>
+                                                <span style="position:absolute;float:right;display: block;width: 293px;font-size: 11px;">Максимальное</span>               
+                                </div>
+                        </div>
+                        <input type="submit" id="submit_settings" style="display: none;">		
+                </form>
+            </div>	
+            <?php    
+            }
             //--------------------------------------------------------------------------------------------------------------------------------------------	
             // Создаем о программе
             //--------------------------------------------------------------------------------------------------------------------------------------------
-            public static function about($db) {
+            public static function get_about_html($db) {
             ?>
-                    <div id="about" title="О программе" style="text-align:left">
+                    <div class="iws_about" title="О программе" style="text-align:left;">
                     <div class="ui-widget-header ui-state-default about_tabs_pict" style="top:5%; width:90%;text-align :right;position:absolute;border:1px transparent;background: transparent;margin:10px;opacity: 1">
                     <?php
                     $about_logo = $db -> get_settings_val('ROOT_CONFIG_LOGO');
@@ -555,18 +514,7 @@ class BasicFunctions {
                     <b>Версия системы:</b> v<?=VERSION_ENGINE?> <?=date("Y")?><br>
                     <b>Конфигурация:</b><br><?=$db -> get_settings_val('ROOT_CONFIG_NAME')?>, версия: <?=$db -> get_settings_val('ROOT_CONFIG_VERSION')?> <br>
                     </p>
-                    <p><b>Авторы:</b> Лысиков А.В., Мындра П.А.</p>
-                    <b>Подключенные модули:</b><br>
-                    <div class="ui-widget-content" style="height:110px;overflow: auto;font-size:80%;padding: .5em 1em; text-align:left;position: relative;">
-                    <?php	
-                    BasicFunctions::check_classes();	
-                    if (is_dir(HELP_FOLDER)) {
-                                    if (HELP) {
-                                            echo "<button class='help_button' url='".ENGINE_HTTP."/ajax.tab.php?action=help'>Справочный раздел</button>";
-                                    }
-                    }
-                    ?>
-                    </div>
+                    <p><b>Авторы:</b> Лысиков А.В., Мындра П.А.</p>      
                     <b>Используемые сторонние бибилиотеки под <a href="http://opensource.org/licenses/mit-license.php" target="_blank">MIT License:</a></b><br>
                     <div class="ui-widget-content" style="height:30px;overflow: auto;font-size:80%;padding: .5em 1em; text-align:center;position: relative;">
                             <a href="http://www.phpexcel.net" target="_blank">PHPExcel</a>,
@@ -583,6 +531,28 @@ class BasicFunctions {
                             <a href="http://www.flotcharts.org/" target="_blank">FlotCharts</a>
                             <a href="http://keith-wood.name/calculator.html" target="_blank">jQuery Calculator</a>
                             <a href="https://github.com/pupunzi/jquery.mb.browser/" target="_blank">jQuery browser</a>                            
+                    </div>
+                    <b>Подключенные модули:</b><br>
+                    <div class="ui-widget-content" style="height:110px;overflow: auto;font-size:80%;padding: .5em 1em; text-align:left;position: relative;">
+                    <?php
+                    BasicFunctions::requre_script_file("lib.charts.php");
+                    BasicFunctions::requre_script_file("lib.help.php");
+                    BasicFunctions::requre_script_file("lib.input.php");
+                    BasicFunctions::requre_script_file("lib.jqgrid.php");
+                    BasicFunctions::requre_script_file("lib.gz.php");
+                    BasicFunctions::requre_script_file("lib.json.php");
+                    $classes_define = get_declared_classes();
+                    foreach($classes_define as $key)  {                        
+                            if (method_exists($key, 'get_about')) {
+                                echo "<b>".strtoupper($key).":</b> ".call_user_func($key."::get_about")."<br>";
+                            }
+                    }
+                    if (is_dir(HELP_FOLDER)) {
+                        if (HELP) {
+                                echo "<button class='help_button' url='".ENGINE_HTTP."/ajax.tab.php?action=help'>Справочный раздел</button>";
+                        }
+                    }
+                    ?>
                     </div>
                     <a href="<?=ENGINE_HTTP?>/history.txt" target="_blank"><b>История изменений:</b></a><br>
                             <div class="ui-widget-content" style="height:150px;overflow: auto;font-size:70%;padding: .5em 1em; text-align:left;position: relative;">

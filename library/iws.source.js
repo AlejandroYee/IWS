@@ -10,40 +10,15 @@ jQuery.jgrid.no_legacy_api = true;
 var counttab = 1;	
 var sumtab = 0;
 var alert_enabled = 0;
-var hidden_menu = false;	
+var hidden_menu = false;
+var user_not_logget = true;
 var main_menu_higth;
 var doc_height;
 var doc_width;
 var doc_title = null;
-                
+
 $(function() {
     
-       // Наши вкладки
-	$( "#tabs" ).tabs({
-			collapsible: false,
-			heightStyle: "fill",
-			activate: function( event, ui ) {                                    
-                                    redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
-                                    if (doc_title === null) {
-                                      doc_title = document.title;  
-                                    } 
-                                    document.title = doc_title + ' [ ' + ui.newTab.text() + ' ]';
-                                   // console.log(ui.newTab);
-                                   // посмотреть в будущем чтобы не обрезалось
-                                   
-			}
-	});
-	
-	$( "#tabs" ).find( ".ui-tabs-nav" ).sortable({
-          axis: "x",
-	  placeholder: "ui-state-highlight",
-	  distance: 10,
-        stop: function() {
-          $( "#tabs" ).tabs( "refresh" );
-          redraw_document($(".ui-tabs-panel[aria-expanded='true']"));	
-        }
-      }).disableSelection();
-	
 	custom_alert = function (output_msg)
 	{
             
@@ -69,15 +44,6 @@ $(function() {
 			}
 		});
 	};
-					
-	// Основное меню для загрузки
-	$("#Menubar").menubar({
-		menuIcon : true
-	}).css({						
-		'float': 'left',
-		'text-align':'left',
-		'display': 'block'
-	});	
 	
 	// Функция обезки строки
 	trim_text = function (text,size,col) {
@@ -186,14 +152,19 @@ $(function() {
 			} else {							
 				var id = 'tabs_' + counttab;	
                                 sumtab++;
-				$( "#tabs").children(".ui-tabs-nav" ).append(
+				$( "#tabs").children(".ui-tabs-nav").append(
 								$('<li />')                                                                
                                                                 .append ($('<a />')
                                                                             .attr({ href: '#' + id, title: tabTitle, id: 'ui-' + id })   
                                                                             .append('<span style="float:right;left:10px;">'+trim_text(tabTitle,40,3)+'</span>')
                                                                             .append('<span class="ui-icon ui-icon-document" style="float:left;top:5px"></span>')
                                                                          )
-                                                                .append('<span class="ui-icon ui-icon-close" style="float:left"></span>')
+                                                                .append($('<span />').attr({
+                                                                    'class':'ui-icon ui-icon-close',
+                                                                    'style':'float:left;cursor:pointer'
+                                                                }).on("touchend click", function() {
+                                                                        CloseTab($( this ).parent().attr( "aria-controls" ));	
+                                                                }))
                                                                 );                                                                
 				$( "#tabs" ).append( $("<div />").attr({'id': id,'style': 'overflow:hide;width:' + (doc_width - 18) + 'px'}) );
 		}
@@ -215,18 +186,10 @@ $(function() {
                                 // нужно задестроить гриды если они есть:
                                 $.each( $('#'+id).find('.ui-jqgrid'), function() {
                                     $('#'+$(this).attr('id')).jqGrid('GridDestroy');
-                                });
-                              
-				if($(data).find("div[window_login='logon']").length === 0) {
-					$('#'+id).empty().css('text-align','left').attr({need_redraw:true});
-                                        $('#'+id).append($(data).fadeIn(300));                                        
-					redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
-				} else {		 		
-					// Нам вернули страницу авторизации. отчищаем документ
-					$('html').empty().append(data);
-                                        document.title = doc_title;
-                                       
-				}
+                                }); 
+                                $('#'+id).empty().css('text-align','left').attr({need_redraw:true});
+                                $('#'+id).append($(data).fadeIn(300));                                        
+                                redraw_document($(".ui-tabs-panel[aria-expanded='true']"));				
 			  }	  
 			});
 		counttab++;							
@@ -244,48 +207,20 @@ $(function() {
                 $( "#" + panelId ).remove();                
                 // Нужно подчистить элементы multiselect и диалоги
                 $("." + id_tab).remove();
+                
+                if (sumtab === 0 && !enable_menu) {   
+                    $('.slidebarmenu').SlidebarMenu("open");  
+                }
 	};
-
-	// Кнопка справки если есть:
-	$(".help_button").button({icons: {primary: 'ui-icon-help'},text: false})
-                        .attr('style','float: right;')
-                        .appendTo("#tabs .ui-tabs-nav").click(function() {
-				SetTab('Индекс справочного раздела',$(this).attr('url'),'false'); 
-	});
-	
-	// Кнопка закрытия
-	$("#tabs").children(".ui-tabs-nav").append(
-			$('<button>Закрыть все вкладки</button>').attr({
-				id:'close_all_tab',
-				style:'float: right;margin: 0px 5px 3px 0px;'
-			}).button({icons: {primary: 'ui-icon-closethick'},text: false}).click(function() {
-				$.each( $('#tabs .ui-tabs-nav li') , function() {                                    
-				CloseTab($(this).attr('aria-controls'));
-			});
-	}));
-        
-	// Кнопка распечатать
-	$("#tabs").children(".ui-tabs-nav").append(
-			$('<button>Распечатать текущую открытую вкладку</button>').attr({
-				id:'print_this_tab',
-				style:'float: right;margin: 0px 5px 3px 0px;'
-			}).button({icons: {primary: 'ui-icon-print'},text: false})
-                          .click(function() {
-                              var pr_object = $(".ui-tabs-panel[aria-expanded='true'] .tab_main_content").find('.ui-jqgrid-view table, .FormGrid table, .chart').clone();
-                                  pr_object.removeAttr('height class top left'); 
-                                $(pr_object).printThis({
-                                            printContainer: false, 
-                                            importCSS: false,
-                                            loadCSS: '/library/print.css',
-                                            debug: false
-                                });                 
-                        })
-        );
         
 	// Отрисовка окна и вкладок:
 	redraw_document = function (id_tab) {
-               
-               	// Для убыстрения отрисовки нам может быть передан идентификатор вкладки. (а может и нет) так что в
+                 
+                
+                $('body').width(doc_width).height(doc_height);                
+                $('.user_login').css({ top: doc_height/2 - 175, left: doc_width/2 - 200 });
+                
+                // Для убыстрения отрисовки нам может быть передан идентификатор вкладки. (а может и нет) так что в
 		// случае когда его нет берем текущую
 		if (typeof(id_tab) === 'undefined')  id_tab = $($(".ui-tabs-panel[aria-expanded='true']"));                
               
@@ -317,7 +252,7 @@ $(function() {
                     help_header.width(doc_width - 65);                    
                     hel_ll.children('.ui-accordion-content').height(content_hiegth).width(doc_width - 87);
                 }
-		
+
                 // Гриды общие	
 		$.each( id_tab.find('.grid_resizer, .grid_resizer_tabs'), function() {
 			var self = $(this);                        
@@ -355,9 +290,9 @@ $(function() {
 							   .parent().children('.ui-jqgrid-view').height(doc_height_grid - 27).width(doc_width_grid)
 										.children('.ui-jqgrid-hdiv').width(doc_width_grid)
 							   .parent().children('.ui-jqgrid-bdiv').height(doc_height_grid - coeffd_filtr).width(doc_width_grid);
-				   
+
 		});		
-		
+
 		$.each($(".grid_resizer[form_type$='_DETAIL'] div.ui-jqgrid-titlebar, .detail_tab .ui-tabs-nav"), function() {
 			if ($(this).children("div[control='window']").length < 1) {	
 				button_htm_down =  $('<span>').attr({
@@ -368,7 +303,7 @@ $(function() {
 											upper = $(".ui-tabs-panel[aria-expanded='true'] .grid_resizer:first");											
 											downn = $(".ui-tabs-panel[aria-expanded='true'] .grid_resizer:last,.ui-tabs-panel[aria-expanded='true'] .grid_resizer_tabs");
 											$(".ui-tabs-panel[aria-expanded='true'] .ui-icon-circle-triangle-s").show();
-											
+
 											if (upper.attr('percent_saved') > 0) {
 												upper.attr('percent',upper.attr('percent_saved')).removeAttr('percent_saved');
 												downn.attr('percent',downn.attr('percent_saved')).removeAttr('percent_saved');
@@ -381,9 +316,9 @@ $(function() {
 												$(this).hide();
 											}
 											redraw_document($(".ui-tabs-panel[aria-expanded='true']"));	
-											
+
 										});
-										
+
 				button_htm_up = $('<span>').attr({
 											'style':'float:right;cursor: pointer',
 											'class':'ui-icon ui-icon-circle-triangle-s',
@@ -392,7 +327,7 @@ $(function() {
 											upper = $(".ui-tabs-panel[aria-expanded='true'] .grid_resizer:first");											
 											downn = $(".ui-tabs-panel[aria-expanded='true'] .grid_resizer:last,.ui-tabs-panel[aria-expanded='true'] .grid_resizer_tabs");
 											$(".ui-tabs-panel[aria-expanded='true'] .ui-icon-circle-triangle-n").show();
-											
+
 											if (upper.attr('percent_saved') > 0) {
 												upper.attr('percent',upper.attr('percent_saved')).removeAttr('percent_saved');
 												downn.attr('percent',downn.attr('percent_saved')).removeAttr('percent_saved');
@@ -425,6 +360,7 @@ $(function() {
                                     $('.navigation_header .alert_button').remove();
                                 }
 		}
+                
         };
 	
 	replace_select_opt_group = function (object) {
@@ -440,8 +376,8 @@ $(function() {
 			
 			if (typeof(object.html()) !== 'undefined') {
 				var select_text	= $(object.html().split('</optgroup>').join('')
-												   .split('<option value="GROUP_END"></option>').join('</optgroup>')
-												   .split('<option role="option" value="GROUP_END"></option>').join('</optgroup>'));
+                                                                .split('<option value="GROUP_END"></option>').join('</optgroup>')
+                                                                .split('<option role="option" value="GROUP_END"></option>').join('</optgroup>'));
 				select_text.children('option[value="' + selected_obj.attr('value') + '"]').attr('selected','selected');	
 				object.empty().append(select_text);
 			}
@@ -498,7 +434,7 @@ $(function() {
 			handles: 's',	
 			resize: function( event, ui ) {						
 					// Обновляем проценты и перерисовываем все
-                                        var hh = doc_height - main_menu_higth - 93;
+                                        var hh = doc_height -  93;
 					var hgrid = 100 + ((ui.size.height - hh)/Math.abs(hh) * 100);
 					var lgrid = 100 - hgrid;
 					
@@ -541,77 +477,288 @@ $(function() {
 					}
 			});
 	};
+	
+	$(document).ready(function () {	           
+            // Исправление некорректных пробелов в меню для IE8+
+            if ($.browser.msie) {
+                $('.ui-menu-item a').append('&nbsp;&nbsp;&nbsp;&nbsp;');
+            }
 
-	// Нужно для корретного закрытия вкладки, чтобы ничего в коде от нее не осталось
-	$(document).on("click", "#tabs span.ui-icon-close", function() {
-		CloseTab($( this ).parent().attr( "aria-controls" ));	
-	});
-				
-	$(document).ready(function () {	
+            doc_height = $(window).height();
+            doc_width = $(window).width() - 2;
+            
+            if (!user_not_logget) {
+                if (enable_menu) {
+                    $(".slidebarmenu").menubar({
+                            menuIcon : true
+                    }).css({
+                            'text-align':'left'                            
+                    });	
+                    main_menu_higth = $(".slidebarmenu").height();
+                } else {
+                    main_menu_higth = 0;
+                    $('.slidebarmenu').SlidebarMenu({
+                        onClose:function () {
+                            if (sumtab > 0) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }
+                    }).SlidebarMenu("open");
+                    
+                    // Кнопка меню
+                    $("#tabs").children(".ui-tabs-nav").append(
+                                    $('<button>Меню</button>').attr({
+                                            style:'float: left;margin: 0px 5px 3px 0px;',
+                                            title:'Главное меню, нажмите чтобы открыть или скрыть'
+                                    }).button({icons: {primary: 'ui-icon-newwin'},text: false}).click(function() {
+                                      $('.slidebarmenu').SlidebarMenu('toggle');
+                    }));
+                }
+            }
+            // Отрисовываем все элементы и формы на вкладке
+            redraw_document();	
 
-		// Исправление некорректных пробелов в меню для IE8+
-		if ($.browser.msie) {
-			$('.ui-menu-item a').append('&nbsp;&nbsp;&nbsp;&nbsp;');
-		}
-                
-                main_menu_higth = $(".main_menu").height();
-                doc_height = $(window).height();
-		doc_width = $(window).width() - 2;
-                
-		// Если задано вскрытое меню, то прячем его
-		if (hidden_menu) {						
-			// Убиваем обычное меню:
-			$("#Menubar").menubar( "destroy" );
-			$(".main_menu").height(0).hide();
-                        
-                        main_menu_higth = 0;
-			
-                        // создаем кнопку
-			$("#tabs").children(".ui-tabs-nav").append(
-							$('<button>Меню</button>').attr({
-								id:'menu_hidden_tab',
-								style:'float: left;margin: 0px 5px 3px 0px;'
-							}).button({icons: {primary: "ui-icon-newwin", secondary: 'ui-icon-triangle-1-s'},text: true}).click(function() {
-								 var menu = $("#hidden_menubar").show().position({
-										my: "left top",
-										at: "left bottom",
-										of: this
-									  });
-								 $( document ).one( "click", function() {
-									menu.hide();
-								  });
-								  return false;
-			}));
-			$("body").append($("<ul />").attr({"id":"hidden_menubar","style":"float:left;"}).append($("#Menubar").children("li").unwrap()));
-			
-			$.each($("#hidden_menubar").children('li'), function() {
-				$(this).children('a').append("<span class='ui-icon ui-icon-folder-collapsed'></span>").removeClass("ui-button-text-icon-secondary").children("b").removeAttr("style");								
-				// Исправление некорректных пробелов в меню для IE8+
-				if ($.browser.msie) {
-					$(this).children('a').append("&nbsp;&nbsp;&nbsp;&nbsp;");
-				}
-			});
-			$("#hidden_menubar").children('li:first').after('<li></li>');
-			$("#hidden_menubar").hide().menu();							
-		}		
-
-		// Отрисовываем все элементы и формы на вкладке
-		redraw_document();	
-		
-		// Сплеш сгрин для процесса загрузки страници
-		// Дело в том что пока страница и скрипты непрогрузятся отображается как есть,
-		// По этому мы ее скрываем чтобы небыло видно кишков
-		$('#loading').fadeOut(300);
+            // Сплеш сгрин для процесса загрузки страници
+            // Дело в том что пока страница и скрипты непрогрузятся отображается как есть,
+            // По этому мы ее скрываем чтобы небыло видно кишков
+            $('#loading').fadeOut();
 	});	
 
 	$(window).resize(function () {
                 $(".ui-tabs-panel").attr({need_redraw:true});
-                main_menu_higth = $(".main_menu").height();
                 doc_height = $(window).height();
 		doc_width = $(window).width() - 2;
 		redraw_document($(".ui-tabs-panel[aria-expanded='true']"));			
 	});
         
+        // Для окна логина
+        $('#password').keyup(function(eventObject){
+            if (eventObject.keyCode === 13) {                        
+                    $('#logon_btn').click();
+              }
+        });
+
+        // Диалог настроке и обработчики
+        $(".iws_param").dialog({
+                autoOpen: false,
+                modal: true,
+                minWidth:450,
+                closeOnEscape: true,
+                resizable:false,
+                buttons: {
+                        "Применить" : function() {	
+                                // Сохраняем данные	
+                                if ($.browser.msie) {
+                                        $('#submit_settings').click();
+                                } else {	
+                                        $.ajax({
+                                                        url: location.href + 'ajax.saveparams.php',
+                                                        datatype:'json',
+                                                        data: $("#settings_from").serialize(),
+                                                        cache: false,
+                                                        type: 'POST',
+                                                                success: function(data) {											
+                                                                    $(location).prop('href',location.href);                                                                    
+                                                        }	  
+                                                });	
+
+                                }
+                                $( this ).dialog( "close" );
+                        },
+                        "Отмена":function() {
+                        $( this ).dialog( "close" );
+                        }
+                },
+                close:function() {
+                        $( this ).dialog( "close" );
+                },
+                open: function() {
+                                $('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}});
+                                $('.ui-dialog-buttonpane').find('button:contains("Применить")').button({icons: { primary: 'ui-icon-disk'}});
+                                $(this).parent().css('z-index', 805).parent().children('.ui-widget-overlay').css('z-index', 800);
+                }
+        });				
+
+        $(".iws_about").dialog({
+                autoOpen: false,
+                modal: true,
+                minWidth:650,
+                closeOnEscape: true,
+                resizable:false,                
+                close:function() {
+                        $( this ).dialog( "close" );
+                },
+                open: function() {								
+                        $(this).parent().css('z-index', 805).parent().children('.ui-widget-overlay').css('z-index', 800); 
+                }
+        });
+
+        // Обработка мультиселекта и кнопки настроек
+        $("#themeselector").multiselect({multiple: false, header: false, selectedList: 1});
+        
+        $("#random_theme").button({icons: { primary: "ui-icon-image" }}).click(function() {var btn = $("#random_theme");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");$("#themeselector").multiselect('disable');} else {btn.removeAttr("checked");$("#themeselector").multiselect('enable')}});
+        $("#width_enable").button({icons: { primary: "ui-icon-arrow-2-e-w" }}).click(function() {var btn = $("#width_enable");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});
+        $("#editabled").button({icons: { primary: "ui-icon-lightbulb" }}).click(function() {var btn = $("#editabled");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
+        $("#cache_enable").button({icons: { primary: "ui-icon-notice" }}).click(function() {var btn = $("#cache_enable");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
+        $("#enable_menu").button({icons: { primary: "ui-icon-carat-2-n-s" }}).click(function() {var btn = $("#enable_menu");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});	
+        if ($("#random_theme").attr("checked") === "checked") {
+            $("#themeselector").multiselect('disable');
+        }
+        $("#renderer").slider({
+            range: "min",
+            value: $("#render_type").val(),
+            min: 0,
+            max: 3,
+            step: 1,
+            slide: function( event, ui ) {
+                                if ($.browser.msie && ui.value >= 2) {
+                                        $( "#render_type" ).val(2);
+                                        $(this).slider({ value: 2 });
+                                } else {
+                                        $( "#render_type" ).val( ui.value );
+                                }
+            }
+        });
+        $("#num_mounth").spinner({
+                                          spin: function( event, ui ) {
+                                                if ( ui.value > 6 ) {
+                                                  $( this ).spinner( "value", 1 );
+                                                  return false;
+                                                } else if ( ui.value < 1 ) {
+                                                  $( this ).spinner( "value", 6 );
+                                                  return false;
+                                                }
+                                          }
+                                        });
+        $("#num_reck").spinner({
+                                          step: 10,
+                                          spin: function( event, ui ) {
+                                                if ( ui.value > 5000 ) {
+                                                  $( this ).spinner( "value", 1 );
+                                                  return false;
+                                                } else if ( ui.value < 1 ) {
+                                                  $( this ).spinner( "value", 5000 );
+                                                  return false;
+                                                }
+                                          }
+                                        });
+        // Наши вкладки
+        $( "#tabs" ).tabs({
+                        collapsible: false,
+                        heightStyle: "fill",
+                        activate: function( event, ui ) {                                    
+                                    redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
+                                    if (doc_title === null) {
+                                      doc_title = document.title;  
+                                    } 
+                                    document.title = doc_title + ' [ ' + $(ui.newTab).children('a').attr('title') + ' ]';
+                        }
+        }).find( ".ui-tabs-nav" ).sortable({
+          axis: "x",
+          placeholder: "ui-state-highlight",
+          distance: 10,
+        stop: function() {
+          $( "#tabs" ).tabs( "refresh" );
+          redraw_document($(".ui-tabs-panel[aria-expanded='true']"));	
+        }
+       }).disableSelection();
+
+        $('#logon_btn')
+           .button()
+           .click(function( event ) {                  
+                     var usr = $('#username').val();
+                     var pass = $('#password').val();
+                     $('#login_form').fadeOut(500);
+                     setTimeout(function() {$('#loading_text').text('Загрузка...');}, 500);    
+                     
+                     setTimeout(function(){ 
+                        if (usr.replace(/\s/g,'') === '') {
+                                custom_alert('Необходимо указать имя пользователя!');                                
+                                $('#loading_text').empty();
+                                $('#login_form').fadeIn(500);
+                        }		
+                        if (pass.replace(/\s/g,'') === '') {
+                            custom_alert('Необходимо указать пароль!');                            
+                            $('#loading_text').empty();
+                            $('#login_form').fadeIn(500);
+                        }		
+                        if (usr.replace(/\s/g,'') !== '' && pass.replace(/\s/g,'') !== '') {   
+                                    $.ajax({
+                                                        url: 'ajax.saveparams.php?act=login',
+                                                        datatype:'json',
+                                                        data: { username: $('#username').val(), password:  $('#password').val() },
+                                                        cache: false,
+                                                        type: 'POST',
+                                                                success: function(data) {                                                                    
+                                                                      if (data != 'true') {                                                                              
+                                                                          custom_alert('Неверное имя пользователя или пароль!');                                                                          
+                                                                          $('#loading_text').empty();
+                                                                          $('#login_form').fadeIn(500);
+                                                                       } else {   
+                                                                            setTimeout(function() {                                                                                
+                                                                                 $('#loading').fadeIn(300);
+                                                                            }, 500);                                                            
+                                                                            setTimeout(function() {                                                                                     
+                                                                                 $.ajax({
+                                                                                        success: function(s){
+                                                                                            $('body').html(s);
+                                                                                            // cleanup:
+                                                                                            $('body').children('meta').remove();                                                                                            
+                                                                                            $('body').children('link[rel!="stylesheet"]').remove();
+                                                                                            $('body').children('title').remove();
+                                                                                            $('head').children('style[type="text/css"]').remove();
+                                                                                            $('head').children('link[rel="stylesheet"]').remove();
+                                                                                            $('head').children('link[rel="stylesheet"]').remove();
+                                                                                            $('head').children('script[type="text/javascript"]').remove();
+                                                                                        }
+                                                                                    });
+                                                                            }, 1000);                                                                                
+                                                                      }	
+                                                                }
+                                        });
+                        }
+                     }, 1000);
+                     return false;
+        });
+
+        // Кнопка справки если есть:
+        $(".help_button").button({icons: {primary: 'ui-icon-help'},text: false})
+                        .attr('style','float: right;')
+                        .appendTo("#tabs .ui-tabs-nav").click(function() {
+                                SetTab('Индекс справочного раздела',$(this).attr('url'),'false'); 
+        });
+
+        // Кнопка закрытия
+        $("#tabs").children(".ui-tabs-nav").append(
+                        $('<button>Закрыть все вкладки</button>').attr({
+                                id:'close_all_tab',
+                                style:'float: right;margin: 0px 5px 3px 0px;'
+                        }).button({icons: {primary: 'ui-icon-closethick'},text: false}).click(function() {
+                           $.each( $('#tabs .ui-tabs-nav li') , function() {                                    
+                                CloseTab($(this).attr('aria-controls'));
+                        });
+        }));
+
+        // Кнопка распечатать
+        $("#tabs").children(".ui-tabs-nav").append(
+                        $('<button>Распечатать текущую открытую вкладку</button>').attr({
+                                id:'print_this_tab',
+                                style:'float: right;margin: 0px 5px 3px 0px;'
+                        }).button({icons: {primary: 'ui-icon-print'},text: false})
+                          .click(function() {
+                              var pr_object = $(".ui-tabs-panel[aria-expanded='true'] .tab_main_content").find('.ui-jqgrid-view table, .FormGrid table, .chart').clone();
+                                  pr_object.removeAttr('height class top left'); 
+                                $(pr_object).printThis({
+                                            printContainer: false, 
+                                            importCSS: false,
+                                            loadCSS: '/library/print.css',
+                                            debug: false
+                                });                 
+                        })
+        );
+       
 	// Проверка значений:
 	check_form = function(formid) {
 		var data_ok = true;
@@ -891,7 +1038,12 @@ $(function() {
               return s_width;
         };    
         
-	// обновление элементов и контроллов на странице
+        // хеширование строки
+        hashCode = function(s){
+            return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);              
+        }
+	
+        // обновление элементов и контроллов на странице
 	update_table_elemnts = function (form_id,cur_elem) {                
           
           if (typeof(cur_elem) === 'undefined') {
@@ -961,108 +1113,8 @@ $(function() {
 				break;
 			} 
 		});	
-	};
+	};	
 	
-	// Диалог настроке и обработчики
-	$("#param").dialog({
-		autoOpen: false,
-		modal: true,
-		minWidth:450,
-		closeOnEscape: true,
-		resizable:false,
-		buttons: {
-			"Применить" : function() {	
-				// Сохраняем данные	
-				if ($.browser.msie) {
-					$('#submit_settings').click();
-				} else {															
-					$.ajax({
-							url: location.href + 'ajax.saveparams.php',
-							datatype:'json',
-							data: $("#settings_from").serialize(),
-							cache: false,
-							type: 'POST',
-								success: function(data) {											
-									$(location).prop('href',location.href);																	
-							}	  
-						});	
-					
-				}
-				$( this ).dialog( "close" );
-			},
-			"Отмена":function() {
-			$( this ).dialog( "close" );
-			}
-		},
-		close:function() {
-			$( this ).dialog( "close" );
-		},
-		open: function() {
-				$('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}});
-				$('.ui-dialog-buttonpane').find('button:contains("Применить")').button({icons: { primary: 'ui-icon-disk'}});
-				$(this).parent().css('z-index', 110).parent().children('.ui-widget-overlay').css('z-index', 105);
-		}
-	});				
-
-	$("#about").dialog({
-		autoOpen: false,
-		modal: true,
-		minWidth:650,
-		closeOnEscape: true,
-		resizable:false,                
-		close:function() {
-			$( this ).dialog( "close" );
-		},
-		open: function() {								
-			$(this).parent().css('z-index', 110).parent().children('.ui-widget-overlay').css('z-index', 105); 
-		}
-	});	
-
-					
-	// Обработка мультиселекта и кнопки настроек
-	$("#themeselector").multiselect({multiple: false, header: true, selectedList: 1});
-	$("#width_enable").button({icons: { primary: "ui-icon-arrow-2-e-w" }}).click(function() {var btn = $("#width_enable");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});
-	$("#editabled").button({icons: { primary: "ui-icon-lightbulb" }}).click(function() {var btn = $("#editabled");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
-	$("#hide_menu").button({icons: { primary: "ui-icon-carat-2-e-w" }}).click(function() {var btn = $("#hide_menu");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
-	$("#cache_enable").button({icons: { primary: "ui-icon-notice" }}).click(function() {var btn = $("#cache_enable");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
-	$("#renderer").slider({
-	    range: "min",
-            value: $("#render_type").val(),
-            min: 0,
-            max: 3,
-            step: 1,
-            slide: function( event, ui ) {
-				if ($.browser.msie && ui.value >= 2) {
-					$( "#render_type" ).val(2);
-					$(this).slider({ value: 2 });
-				} else {
-					$( "#render_type" ).val( ui.value );
-				}
-            }
-        });
-	$("#num_mounth").spinner({
-					  spin: function( event, ui ) {
-						if ( ui.value > 6 ) {
-						  $( this ).spinner( "value", 1 );
-						  return false;
-						} else if ( ui.value < 1 ) {
-						  $( this ).spinner( "value", 6 );
-						  return false;
-						}
-					  }
-					});
-	$("#num_reck").spinner({
-					  step: 10,
-					  spin: function( event, ui ) {
-						if ( ui.value > 5000 ) {
-						  $( this ).spinner( "value", 1 );
-						  return false;
-						} else if ( ui.value < 1 ) {
-						  $( this ).spinner( "value", 5000 );
-						  return false;
-						}
-					  }
-					});
 	// Нужно для автозагрузки данных в селект в гриде 	
 	get_select_values_grid = function (gridname, value_name,parent_id) {
 		$.ajax({
@@ -1167,201 +1219,6 @@ Globalize.addCultureInfo( "ru-RU", "default", {
 		}
 	}
 });
-
-    var rotateLeft = function(lValue, iShiftBits) {
-        return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
-    };
- 
-    var addUnsigned = function(lX, lY) {
-        var lX4, lY4, lX8, lY8, lResult;
-        lX8 = (lX & 0x80000000);
-        lY8 = (lY & 0x80000000);
-        lX4 = (lX & 0x40000000);
-        lY4 = (lY & 0x40000000);
-        lResult = (lX & 0x3FFFFFFF) + (lY & 0x3FFFFFFF);
-        if (lX4 & lY4) return (lResult ^ 0x80000000 ^ lX8 ^ lY8);
-        if (lX4 | lY4) {
-            if (lResult & 0x40000000) return (lResult ^ 0xC0000000 ^ lX8 ^ lY8);
-            else return (lResult ^ 0x40000000 ^ lX8 ^ lY8);
-        } else {
-            return (lResult ^ lX8 ^ lY8);
-        }
-    };
- 
-    var F = function(x, y, z) {
-        return (x & y) | ((~ x) & z);
-    };
- 
-    var G = function(x, y, z) {
-        return (x & z) | (y & (~ z));
-    };
- 
-    var H = function(x, y, z) {
-        return (x ^ y ^ z);
-    };
- 
-    var I = function(x, y, z) {
-        return (y ^ (x | (~ z)));
-    };
- 
-    var FF = function(a, b, c, d, x, s, ac) {
-        a = addUnsigned(a, addUnsigned(addUnsigned(F(b, c, d), x), ac));
-        return addUnsigned(rotateLeft(a, s), b);
-    };
- 
-    var GG = function(a, b, c, d, x, s, ac) {
-        a = addUnsigned(a, addUnsigned(addUnsigned(G(b, c, d), x), ac));
-        return addUnsigned(rotateLeft(a, s), b);
-    };
- 
-    var HH = function(a, b, c, d, x, s, ac) {
-        a = addUnsigned(a, addUnsigned(addUnsigned(H(b, c, d), x), ac));
-        return addUnsigned(rotateLeft(a, s), b);
-    };
- 
-    var II = function(a, b, c, d, x, s, ac) {
-        a = addUnsigned(a, addUnsigned(addUnsigned(I(b, c, d), x), ac));
-        return addUnsigned(rotateLeft(a, s), b);
-    };
- 
-    var convertToWordArray = function(string) {
-        var lWordCount;
-        var lMessageLength = string.length;
-        var lNumberOfWordsTempOne = lMessageLength + 8;
-        var lNumberOfWordsTempTwo = (lNumberOfWordsTempOne - (lNumberOfWordsTempOne % 64)) / 64;
-        var lNumberOfWords = (lNumberOfWordsTempTwo + 1) * 16;
-        var lWordArray = Array(lNumberOfWords - 1);
-        var lBytePosition = 0;
-        var lByteCount = 0;
-        while (lByteCount < lMessageLength) {
-            lWordCount = (lByteCount - (lByteCount % 4)) / 4;
-            lBytePosition = (lByteCount % 4) * 8;
-            lWordArray[lWordCount] = (lWordArray[lWordCount] | (string.charCodeAt(lByteCount) << lBytePosition));
-            lByteCount++;
-        }
-        lWordCount = (lByteCount - (lByteCount % 4)) / 4;
-        lBytePosition = (lByteCount % 4) * 8;
-        lWordArray[lWordCount] = lWordArray[lWordCount] | (0x80 << lBytePosition);
-        lWordArray[lNumberOfWords - 2] = lMessageLength << 3;
-        lWordArray[lNumberOfWords - 1] = lMessageLength >>> 29;
-        return lWordArray;
-    };
- 
-    var wordToHex = function(lValue) {
-        var WordToHexValue = "", WordToHexValueTemp = "", lByte, lCount;
-        for (lCount = 0; lCount <= 3; lCount++) {
-            lByte = (lValue >>> (lCount * 8)) & 255;
-            WordToHexValueTemp = "0" + lByte.toString(16);
-            WordToHexValue = WordToHexValue + WordToHexValueTemp.substr(WordToHexValueTemp.length - 2, 2);
-        }
-        return WordToHexValue;
-    };
- 
-    var uTF8Encode = function(string) {
-        string = string.replace(/\x0d\x0a/g, "\x0a");
-        var output = "";
-        for (var n = 0; n < string.length; n++) {
-            var c = string.charCodeAt(n);
-            if (c < 128) {
-                output += String.fromCharCode(c);
-            } else if ((c > 127) && (c < 2048)) {
-                output += String.fromCharCode((c >> 6) | 192);
-                output += String.fromCharCode((c & 63) | 128);
-            } else {
-                output += String.fromCharCode((c >> 12) | 224);
-                output += String.fromCharCode(((c >> 6) & 63) | 128);
-                output += String.fromCharCode((c & 63) | 128);
-            }
-        }
-        return output;
-    };
- 
-    $.extend({
-        md5: function(string) {
-            var x = Array();
-            var k, AA, BB, CC, DD, a, b, c, d;
-            var S11=7, S12=12, S13=17, S14=22;
-            var S21=5, S22=9 , S23=14, S24=20;
-            var S31=4, S32=11, S33=16, S34=23;
-            var S41=6, S42=10, S43=15, S44=21;
-            string = uTF8Encode(string);
-            x = convertToWordArray(string);
-            a = 0x67452301; b = 0xEFCDAB89; c = 0x98BADCFE; d = 0x10325476;
-            for (k = 0; k < x.length; k += 16) {
-                AA = a; BB = b; CC = c; DD = d;
-                a = FF(a, b, c, d, x[k+0],  S11, 0xD76AA478);
-                d = FF(d, a, b, c, x[k+1],  S12, 0xE8C7B756);
-                c = FF(c, d, a, b, x[k+2],  S13, 0x242070DB);
-                b = FF(b, c, d, a, x[k+3],  S14, 0xC1BDCEEE);
-                a = FF(a, b, c, d, x[k+4],  S11, 0xF57C0FAF);
-                d = FF(d, a, b, c, x[k+5],  S12, 0x4787C62A);
-                c = FF(c, d, a, b, x[k+6],  S13, 0xA8304613);
-                b = FF(b, c, d, a, x[k+7],  S14, 0xFD469501);
-                a = FF(a, b, c, d, x[k+8],  S11, 0x698098D8);
-                d = FF(d, a, b, c, x[k+9],  S12, 0x8B44F7AF);
-                c = FF(c, d, a, b, x[k+10], S13, 0xFFFF5BB1);
-                b = FF(b, c, d, a, x[k+11], S14, 0x895CD7BE);
-                a = FF(a, b, c, d, x[k+12], S11, 0x6B901122);
-                d = FF(d, a, b, c, x[k+13], S12, 0xFD987193);
-                c = FF(c, d, a, b, x[k+14], S13, 0xA679438E);
-                b = FF(b, c, d, a, x[k+15], S14, 0x49B40821);
-                a = GG(a, b, c, d, x[k+1],  S21, 0xF61E2562);
-                d = GG(d, a, b, c, x[k+6],  S22, 0xC040B340);
-                c = GG(c, d, a, b, x[k+11], S23, 0x265E5A51);
-                b = GG(b, c, d, a, x[k+0],  S24, 0xE9B6C7AA);
-                a = GG(a, b, c, d, x[k+5],  S21, 0xD62F105D);
-                d = GG(d, a, b, c, x[k+10], S22, 0x2441453);
-                c = GG(c, d, a, b, x[k+15], S23, 0xD8A1E681);
-                b = GG(b, c, d, a, x[k+4],  S24, 0xE7D3FBC8);
-                a = GG(a, b, c, d, x[k+9],  S21, 0x21E1CDE6);
-                d = GG(d, a, b, c, x[k+14], S22, 0xC33707D6);
-                c = GG(c, d, a, b, x[k+3],  S23, 0xF4D50D87);
-                b = GG(b, c, d, a, x[k+8],  S24, 0x455A14ED);
-                a = GG(a, b, c, d, x[k+13], S21, 0xA9E3E905);
-                d = GG(d, a, b, c, x[k+2],  S22, 0xFCEFA3F8);
-                c = GG(c, d, a, b, x[k+7],  S23, 0x676F02D9);
-                b = GG(b, c, d, a, x[k+12], S24, 0x8D2A4C8A);
-                a = HH(a, b, c, d, x[k+5],  S31, 0xFFFA3942);
-                d = HH(d, a, b, c, x[k+8],  S32, 0x8771F681);
-                c = HH(c, d, a, b, x[k+11], S33, 0x6D9D6122);
-                b = HH(b, c, d, a, x[k+14], S34, 0xFDE5380C);
-                a = HH(a, b, c, d, x[k+1],  S31, 0xA4BEEA44);
-                d = HH(d, a, b, c, x[k+4],  S32, 0x4BDECFA9);
-                c = HH(c, d, a, b, x[k+7],  S33, 0xF6BB4B60);
-                b = HH(b, c, d, a, x[k+10], S34, 0xBEBFBC70);
-                a = HH(a, b, c, d, x[k+13], S31, 0x289B7EC6);
-                d = HH(d, a, b, c, x[k+0],  S32, 0xEAA127FA);
-                c = HH(c, d, a, b, x[k+3],  S33, 0xD4EF3085);
-                b = HH(b, c, d, a, x[k+6],  S34, 0x4881D05);
-                a = HH(a, b, c, d, x[k+9],  S31, 0xD9D4D039);
-                d = HH(d, a, b, c, x[k+12], S32, 0xE6DB99E5);
-                c = HH(c, d, a, b, x[k+15], S33, 0x1FA27CF8);
-                b = HH(b, c, d, a, x[k+2],  S34, 0xC4AC5665);
-                a = II(a, b, c, d, x[k+0],  S41, 0xF4292244);
-                d = II(d, a, b, c, x[k+7],  S42, 0x432AFF97);
-                c = II(c, d, a, b, x[k+14], S43, 0xAB9423A7);
-                b = II(b, c, d, a, x[k+5],  S44, 0xFC93A039);
-                a = II(a, b, c, d, x[k+12], S41, 0x655B59C3);
-                d = II(d, a, b, c, x[k+3],  S42, 0x8F0CCC92);
-                c = II(c, d, a, b, x[k+10], S43, 0xFFEFF47D);
-                b = II(b, c, d, a, x[k+1],  S44, 0x85845DD1);
-                a = II(a, b, c, d, x[k+8],  S41, 0x6FA87E4F);
-                d = II(d, a, b, c, x[k+15], S42, 0xFE2CE6E0);
-                c = II(c, d, a, b, x[k+6],  S43, 0xA3014314);
-                b = II(b, c, d, a, x[k+13], S44, 0x4E0811A1);
-                a = II(a, b, c, d, x[k+4],  S41, 0xF7537E82);
-                d = II(d, a, b, c, x[k+11], S42, 0xBD3AF235);
-                c = II(c, d, a, b, x[k+2],  S43, 0x2AD7D2BB);
-                b = II(b, c, d, a, x[k+9],  S44, 0xEB86D391);
-                a = addUnsigned(a, AA);
-                b = addUnsigned(b, BB);
-                c = addUnsigned(c, CC);
-                d = addUnsigned(d, DD);
-            }
-            var tempValue = wordToHex(a) + wordToHex(b) + wordToHex(c) + wordToHex(d);
-            return tempValue.toLowerCase();
-        }
-    });	
 	
 $.widget("ui.ace_editor", {  
 	options: {  

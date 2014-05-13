@@ -221,7 +221,7 @@ function update_db($folder) {
 // Дополнительная проверка на пользователя и права доступа:
 $query_check = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_mm_form = ".$id_mm_fr." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable'");
 while ($main_db -> sql_fetch($query_check)) {
-	$check= explode(",",strtoupper(trim( $main_db -> sql_result($query_check, "EDIT_BUTTON"))));
+	$check = explode(",",strtoupper(trim( $main_db -> sql_result($query_check, "EDIT_BUTTON"))));
 }
 // если пользователю недоступна форма, то выходим сразу
 if (empty($check)) die("Доступ запрещен");

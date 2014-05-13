@@ -9,9 +9,9 @@
 // Файл содержимого вкладок и управления ими
 //--------------------------------------------------------------------------------------------------------------------------------------------
 require_once("library/lib.func.php");
+BasicFunctions::is_offline();
 BasicFunctions::requre_script_file("lib.requred.php"); 
 BasicFunctions::requre_script_file("lib.help.php");	
-
 // Инициализация
 $main_db = new Db();
 $s_help = new Help();

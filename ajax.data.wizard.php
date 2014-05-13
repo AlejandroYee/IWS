@@ -9,6 +9,7 @@
 //Возвращаемых данных для WIZARD_FORM
 //--------------------------------------------------------------------------------------------------------------------------------------------
 require_once("library/lib.func.php");
+BasicFunctions::is_offline();
 BasicFunctions::requre_script_file("lib.requred.php"); 
 BasicFunctions::requre_script_file("auth.".AUTH.".php");
 BasicFunctions::requre_script_file("lib.input.php"); 
@@ -27,12 +28,11 @@ function ext_implode($symv,$data) {
 	
 // Начальные переменные
 $user_auth = new AUTH();	
-if (!$user_auth -> is_user()) {
+if ($user_auth -> is_user() !== true) {
 		BasicFunctions::to_log("ERR: User maybe not loggen, from no: ".filter_input(INPUT_GET, 'id_mm_fr',FILTER_SANITIZE_NUMBER_INT)."!");
 		BasicFunctions::clear_cache();
 		die("Доступ запрещен");
 }
-
 $main_db = new db();
 $id_mm_fr 			= filter_input(INPUT_GET, 'id_mm_fr',FILTER_SANITIZE_NUMBER_INT);   
 $id_mm				= filter_input(INPUT_GET, 'id_mm',FILTER_SANITIZE_NUMBER_INT);

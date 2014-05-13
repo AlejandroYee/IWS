@@ -6,18 +6,18 @@
 * Part of IWS system
 */
 require_once("library/lib.func.php");
+BasicFunctions::is_offline();
 BasicFunctions::requre_script_file("lib.requred.php"); 
 BasicFunctions::requre_script_file("auth.".AUTH.".php");
 	
 $user_auth = new AUTH();	
-if (!$user_auth -> is_user()) {
+if ($user_auth -> is_user() !== true) {
 		BasicFunctions::to_log("ERR: User maybe not loggen, from no: ".filter_input(INPUT_GET, 'field',FILTER_SANITIZE_STRING)."!");
 		BasicFunctions::clear_cache();
 		die("Доступ запрещен");
 }
 $main_db = new db();
 BasicFunctions::end_session();
-
 $data    	= filter_input(INPUT_GET, 'data',FILTER_SANITIZE_STRING);
 $name    	= filter_input(INPUT_GET, 'name',FILTER_SANITIZE_STRING);
 $id    		= filter_input(INPUT_GET, 'id',FILTER_SANITIZE_NUMBER_INT); 

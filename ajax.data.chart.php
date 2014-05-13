@@ -9,10 +9,9 @@
 // Вывод данных для графика
 //--------------------------------------------------------------------------------------------------------------------------------------------
 require_once("library/lib.func.php");
+BasicFunctions::is_offline();
 BasicFunctions::requre_script_file("lib.requred.php"); 
-BasicFunctions::requre_script_file("auth.".AUTH.".php");
 BasicFunctions::requre_script_file("lib.json.php");
-
 header("Content-type: text/script;charset=".HTML_ENCODING);
 
 // Начальные переменные
@@ -25,8 +24,8 @@ $axis_y_pos     = array();
 $showaxis       = true;
 
 $user_auth = new AUTH();	
-if (!$user_auth -> is_user()) {
-				BasicFunctions::to_log("ERR: User maybe not loggen, from no: ".$id."!");
+if ($user_auth -> is_user() !== true) {
+		BasicFunctions::to_log("ERR: User maybe not loggen, from no: ".$id."!");
                 BasicFunctions::clear_cache();
                 die("Доступ запрещен");
 }
