@@ -392,14 +392,17 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                 loadComplete: function (data) {
                                             $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');
                                 },
-                                beforeProcessing: function(data, status, xhr) {                                    
-                                        if ($("#reload_grid_<?=$this -> pageid?>").attr("checked") == "checked") {
-                                                if (crc_input_<?=$object_name?> == hashCode(xhr.responseText)) {								
-                                                                return false;
-                                                        } else {								
-                                                                crc_input_<?=$object_name?> = hashCode(xhr.responseText);
-                                                }
-                                        }
+                                beforeProcessing: function(data, status, xhr) { 
+                                    if (xhr.responseText === "Not autorised") {
+                                        $(location).prop('href',location.href);
+                                    }
+                                    if ($("#reload_grid_<?=$this -> pageid?>").attr("checked") == "checked") {
+                                            if (crc_input_<?=$object_name?> == hashCode(xhr.responseText)) {								
+                                                            return false;
+                                                    } else {								
+                                                            crc_input_<?=$object_name?> = hashCode(xhr.responseText);
+                                            }
+                                    }
                                 },
                                 editurl:'<?=ENGINE_HTTP?>/ajax.savedata.grid.php?type=<?=$type?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=<?=$this ->id_mm_fr_d?>',
                                 loadError: function(xhr,status, err){ 

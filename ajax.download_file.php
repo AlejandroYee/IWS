@@ -14,7 +14,7 @@ $user_auth = new AUTH();
 if ($user_auth -> is_user() !== true) {
 		BasicFunctions::to_log("ERR: User maybe not loggen, from no: ".filter_input(INPUT_GET, 'field',FILTER_SANITIZE_STRING)."!");
 		BasicFunctions::clear_cache();
-		die("Доступ запрещен");
+		die("Not autorised");
 }
 $main_db = new db();
 BasicFunctions::end_session();

@@ -22,7 +22,7 @@
 	if ($user_auth -> is_user() !== true) {
 			BasicFunctions::to_log("ERR: User maybe not loggen, from no: ".filter_input(INPUT_GET, 'id_mm_fr',FILTER_SANITIZE_NUMBER_INT)."!");
 			BasicFunctions::clear_cache();
-			die("Доступ запрещен");
+			die("Not autorised");
 	}
 	$main_db = new db();
 	BasicFunctions::end_session();  // Закрываем сейсию для паралельного исполнния

@@ -69,6 +69,9 @@ $(function() {
               url: self_obj.attr('url'),							  
               type: 'GET',
               success: function(data) {	 
+                  if (data === "Not autorised") {                     
+                                $(location).prop('href',location.href);
+                  }
                   var obj = jQuery.parseJSON(data); 
                   var chart_render = $('#' + self_obj.attr('id'));
                   var options = {                      
@@ -183,13 +186,18 @@ $(function() {
 			  url: tabContentUrl,							  
 			  type: 'GET',
 			  success: function(data){
+                              if (data !== "Not autorised") {
                                 // нужно задестроить гриды если они есть:
                                 $.each( $('#'+id).find('.ui-jqgrid'), function() {
                                     $('#'+$(this).attr('id')).jqGrid('GridDestroy');
                                 }); 
                                 $('#'+id).empty().css('text-align','left').attr({need_redraw:true});
                                 $('#'+id).append($(data).fadeIn(300));                                        
-                                redraw_document($(".ui-tabs-panel[aria-expanded='true']"));				
+                                redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
+                            } else {
+                                // неавторизованы
+                                $(location).prop('href',location.href);  
+                            }
 			  }	  
 			});
 		counttab++;							

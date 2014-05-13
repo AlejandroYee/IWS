@@ -37,7 +37,7 @@ while ($main_db -> sql_fetch($query_check)) {
 
 if (empty($check) and empty($action)) {
 	BasicFunctions::to_log("ERR: User maybe not loggen, from no: ".$id."!");
-	die("Доступ сюда запрещен");  
+	die("false");  
 }
 // Формирование шапки и меню навигации $Navigation_res
 //--------------------------------------------------------------------------------------------------------------------------------------------
