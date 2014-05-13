@@ -508,13 +508,11 @@ $(function() {
                     }).SlidebarMenu("open");
                     
                     // Кнопка меню
-                    $("#tabs").children(".ui-tabs-nav").append(
-                                    $('<button>Меню</button>').attr({
-                                            style:'float: left;margin: 0px 5px 3px 0px;',
-                                            title:'Главное меню, нажмите чтобы открыть или скрыть'
-                                    }).button({icons: {primary: 'ui-icon-newwin'},text: false}).click(function() {
-                                      $('.slidebarmenu').SlidebarMenu('toggle');
-                    }));
+                    $("#tabs").children(".ui-tabs-nav").append("<div class='tab-nav-sb sb-toggle' title='Главное меню'><div class='ui-state-active navicon-line sb-toggle'></div><div class='ui-state-active navicon-line sb-toggle'></div><div class='ui-state-active navicon-line sb-toggle'></div></div>");
+      
+                    $('.sb-toggle').click(function() {
+                        $('.slidebarmenu').SlidebarMenu('toggle');
+                    });
                 }
             }
             // Отрисовываем все элементы и формы на вкладке

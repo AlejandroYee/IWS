@@ -58,10 +58,12 @@ $user_auth = new AUTH();
             .ui-icon-triangle-1-s {background-position: -65px -16px;} /* fix fo left sprite*/
             .ui-jqgrid tr.jqgrow,.ui-state-active{cursor:default}	
             .DataTD .ace_editor{left:-5px}
+            .navicon-line {width: 18px;height: 2px; border:0px;border-radius: 1px; margin-bottom: 2px; cursor:pointer;}
+            .tab-nav-sb {width: 26px;float: left;padding: 6px;cursor:pointer;}
             li, li li, li li li {list-style-type: none;} 
             <?php 
             switch ($main_db->get_param_view("render_type")) {
-            case 2: echo "            * {border-radius: 0 !important;box-shadow: none !important;}";break;
+            case 2:echo "            * {border-radius: 0 !important;box-shadow: none !important;}";break;
             case 1:echo "            *:not(.ui-icon) {border-radius: 0 !important;box-shadow: none !important;background-repeat: no-repeat !important;background-image: none !important; }";break;
             case 0:echo "            * {border-radius: 0 !important;box-shadow: none !important;background:white !important;color:black !important;background-image:none !important;filter: none !important; opacity:1 !important;}";break;
             }
