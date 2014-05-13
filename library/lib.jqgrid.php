@@ -394,10 +394,10 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                 },
                                 beforeProcessing: function(data, status, xhr) {                                    
                                         if ($("#reload_grid_<?=$this -> pageid?>").attr("checked") == "checked") {
-                                                if (crc_input_<?=$object_name?> == $.md5(xhr.responseText)) {								
+                                                if (crc_input_<?=$object_name?> == hashCode(xhr.responseText)) {								
                                                                 return false;
                                                         } else {								
-                                                                crc_input_<?=$object_name?> = $.md5(xhr.responseText);
+                                                                crc_input_<?=$object_name?> = hashCode(xhr.responseText);
                                                 }
                                         }
                                 },
