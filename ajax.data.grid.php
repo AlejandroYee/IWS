@@ -91,7 +91,6 @@
 	   left join ".DB_USER_NAME.".wb_form_field t on t.id_wb_mm_form = tf.id_wb_mm_form
 	   left join ".DB_USER_NAME.".wb_form_field_align ta on ta.id_wb_form_field_align = t.id_wb_form_field_align
 	   where tf.id_wb_mm_form = ".$id_mm_fr." order by t.num");
-		
     while ($main_db -> sql_fetch($query)) {
 				if ($str_dt=="") {
                                         $owner      = $main_db -> sql_result($query, "OWNER",false);
@@ -191,16 +190,24 @@
 								$td_val = $main_db -> sql_result($query_dt, $arr_field[$key]);								
 								$td_val = $td_val -> load();
 								$td_val = $td_val;								
-								break;
+							break;
+                                                        case 'A':
+                                                        case 'E':
+                                                        case 'F':
+                                                        case 'FB':
+                                                        case 'P':
+                                                                $td_val = $main_db -> sql_result($query_dt, $arr_field[$key]);	
+                                                        break;
 							default:
-								$td_val = $main_db -> sql_result($query_dt, $arr_field[$key]);
-								if ($arr_field[$key] == 'LEV')       $td_level_val     = $td_val-1;
-							        if ($arr_field[$key] == 'ID_PARENT') $td_id_parent_val = $td_val; 							
+								$td_val = htmlspecialchars($main_db -> sql_result($query_dt, $arr_field[$key]),ENT_QUOTES,HTML_ENCODING);															
 							break;
 						}
-						
+                                                
+						if ($arr_field[$key] == 'LEV')       $td_level_val     = $td_val-1;
+						if ($arr_field[$key] == 'ID_PARENT') $td_id_parent_val = $td_val; 
+                                                                
 						if (!empty($td_val)) {
-								$dt_cell[$r] = htmlspecialchars($td_val,ENT_QUOTES,HTML_ENCODING);
+								$dt_cell[$r] = $td_val;
 							} else {
 								$dt_cell[$r] = "";
 							}
