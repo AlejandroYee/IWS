@@ -25,13 +25,12 @@ private $arhive_sql,$vields_sql = [];
 			die("<p align='left' >".iconv(LOCAL_ENCODING,HTML_ENCODING,str_replace(array("\r\n", "\n",),"<br>",str_replace(array("    ","   ","  ")," ",$err_array['message'])))."</p>");
 		
 		} else {
-		
-            $this->link = $ora;	
+                                $this->link = $ora;	
 				// Проверяем на присутсвие пользователя в базе:
 				$load_data = BasicFunctions::load_from_cache("user_prefs");
-				if ($load_data) {
-							$this -> user_real_name = $load_data['real_name'];
-							$this -> user_pref = $load_data['userprf'];								
+				if (is_array($load_data)) {
+                                                $this -> user_real_name = $load_data['real_name'];
+                                                $this -> user_pref = $load_data['userprf'];								
 					} else {				
 						if (DB_USER_NAME != "wb") { // костыль если используется пользователь WB!
 								$query = OCI_Parse($this->link,"select t.id_wb_user, t.name, t.param_view from ".DB_USER_NAME.".wb_user t where t.wb_name = upper('".auth::get_user()."')");
