@@ -7,13 +7,11 @@
 */
 if (!extension_loaded ("oci8")) die("Для работы системы IWS с БД ORACLE нужен модуль php-oci8 который незагружен или отсутсвует, подключите модуль.");  
 class AUTH {
-	function is_user($user = false,$pass = false) {		
+	function is_user($user = false,$pass = false) {	
 		// Пробуем узнать если ли у нас переменная сейсии:
-		if (isset($_SESSION['us_name']) and isset($_SESSION['us_pr'])) {
-		
+		if (isset($_SESSION['us_name']) and isset($_SESSION['us_pr']) and $user == false and $pass == false) {
 			// распаковываем пароль
 			$pwd = base64_decode($this->decrypt($_SESSION['us_pr'],session_id()));
-			
 			if (!empty($pwd)) {	
 				if (!defined("AUTH_DB_USER_NAME")) {
                                         define("AUTH_DB_USER_NAME",$_SESSION['us_name']);
@@ -36,11 +34,10 @@ class AUTH {
 				}
 			}
 		}
-		
 		// Возможно нам передали логин пароль
 		if (($user != false) and ($pass != false)) {
 			if (!empty($pass)) {
-				// пытаемся приверить пользователя по ldap
+				// пытаемся приверить пользователя
 				if (!defined("AUTH_DB_USER_NAME")) {
                                     define("AUTH_DB_USER_NAME",$user);
                                 }    
@@ -61,7 +58,7 @@ class AUTH {
 			}
 		}	
 		
-		return false;
+	 return false;
 	}
 
 	static function get_user() {
