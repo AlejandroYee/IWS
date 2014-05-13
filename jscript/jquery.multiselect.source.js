@@ -112,7 +112,7 @@
         if(!o.multiple) {
           menu.addClass('ui-multiselect-single');
         }
-
+/*
 	if ('resizable' in jQuery.ui && !$.browser.msie) {
             menu.resizable({
                 resize: function( event, ui ) {						
@@ -121,7 +121,7 @@
                 }		
             });
       }
- 
+ */
         // bump unique ID
         multiselectID++;
     },
