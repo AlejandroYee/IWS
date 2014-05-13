@@ -546,7 +546,7 @@ columnChooser : function(opts) {
                 'value':i,
                 'class':'ui-widget-content ui-state-default',
                 'style':'margin: 3px; padding: 0.4em; font-size: 0.8em; height: 12px; text-align:left; cursor:pointer;'
-            }).text(colNames[i].replace('<br>',' ').replace('<BR>',' '));
+            }).html(colNames[i].replace('<br>',' ').replace('<BR>',' '));
             
             if (!this.hidden) {
                 li.addClass('ui-state-active').addClass('ui-selected');                
