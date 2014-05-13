@@ -59,7 +59,7 @@ $user_auth = new AUTH();
             .ui-jqgrid tr.jqgrow,.ui-state-active{cursor:default}	
             .DataTD .ace_editor{left:-5px}
             .navicon-line {width: 18px;height: 2px; border:0px;border-radius: 1px; margin-bottom: 2px; cursor:pointer;}
-            .tab-nav-sb {width: 26px;float: left;padding: 6px;cursor:pointer;}
+            .tab-nav-sb {width: 26px;float: left;padding: 6px;cursor:pointer;margin-bottom: 1px;}
             li, li li, li li li {list-style-type: none;} 
             <?php 
             switch ($main_db->get_param_view("render_type")) {
