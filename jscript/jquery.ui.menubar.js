@@ -90,13 +90,18 @@ $.widget( "ui.menubar", {
 
 		this.menuItems
 			.addClass( "ui-menubar-item" )
-			.attr( "role", "presentation" )
+			.attr( "role", "presentation" ).height(30)
 			// TODO why do these not work when moved to CSS?
 			.css({
-				"border-width": "1px",
-				"border-style": "hidden"
-			});
-
+				"border-style": "hidden",
+                                "background-image":"none"
+			});                  
+                $.each(this.menuItems, function() {
+                        $(this).children('a').children('span').appendTo($(this).children('a')); 
+                        $(this).children('a').addClass('ui-state-default').css({"border":"transparent"}).height(28);
+                        $(this).children('a').find('span').css('float',"left");  
+                        $(this).children('a').find('b').css({'float':"left","padding":"0 0 0 20px"}); 
+                });
 		subMenus = this.menuItems.children( menubar.options.menus ).menu({
 			position: {
 				within: this.options.position.within
