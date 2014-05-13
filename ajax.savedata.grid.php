@@ -78,10 +78,10 @@ $input_post = array();
 foreach (filter_input_array(INPUT_POST) as $key => $value) {    
     
     if (filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING) != null and !empty($key)) {        
-        $input_post[substr($key, 0, strrpos($key, "-"))] = htmlspecialchars_decode(filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING),ENT_QUOTES,HTML_ENCODING); 
+        $input_post[substr($key, 0, strrpos($key, "-"))] = htmlspecialchars_decode(filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING),ENT_QUOTES); 
     } 
     if (is_array($value) and !empty($key)) {
-        $input_post[substr($key, 0, strrpos($key, "-"))] = htmlspecialchars_decode(implode(",",filter_var_array($value,FILTER_SANITIZE_STRING)),ENT_QUOTES,HTML_ENCODING);  
+        $input_post[substr($key, 0, strrpos($key, "-"))] = htmlspecialchars_decode(implode(",",filter_var_array($value,FILTER_SANITIZE_STRING)),ENT_QUOTES);  
     }
     if (empty($value) and (array_search(substr($key, 0, strrpos($key, "-")),$input_post) === false)) {
         $input_post[substr($key, 0, strrpos($key, "-"))] = "null";
