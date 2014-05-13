@@ -6,17 +6,10 @@
 * Part of IWS system
 */
 //--------------------------------------------------------------------------------------------------------------------------------------------
-// Определение дополнительных элементов
-//--------------------------------------------------------------------------------------------------------------------------------------------
-header("Content-Type: text/html; charset=".strtolower(HTML_ENCODING));
-header("Cache-Control: private,no-cache,no-store");
-header("Pragma: no-cache");
-//--------------------------------------------------------------------------------------------------------------------------------------------
 // Подключаем необходимые модули
 //--------------------------------------------------------------------------------------------------------------------------------------------
 require_once("lib.func.php");
 BasicFunctions::requre_script_file("db.".DB.".php");
-
 //--------------------------------------------------------------------------------------------------------------------------------------------
 // Основной класс
 //--------------------------------------------------------------------------------------------------------------------------------------------	
@@ -25,30 +18,13 @@ var $db_conn, $Param_res,  $data_res, $IsInputform, $grid_main_name, $main_menu 
 public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 
 	 // Создание связи с ДБ
-	function __construct() { 
-		
-		// Временный оффлайн системы с сообщением
-		if (defined("OFFINE_START_DATE") and defined("OFFINE_END_DATE") and (time() >= OFFINE_START_DATE) and (time() <= OFFINE_END_DATE)) {
-			die(BasicFunctions::Create_logon_window(true)); // факт офлайна включается заглушка
-		}
-		
-		// Запрос авторизации:
-		$user_auth = new AUTH();
-		if (!$user_auth -> is_user()) {
-                        BasicFunctions::to_log("LIB: Session time expired!");
-			die(BasicFunctions::Create_logon_window());
-		}
-		 // Соединение с ДБ
-		$this -> db_conn = new DB();
-		
-		// Для использования кеширования, нужно сразу загрузить меню
-		if (empty($this -> main_menu)) {
+	function __construct() {
+            // Соединение с ДБ
+            $this -> db_conn = new DB();
+           
+            if (empty($this -> main_menu)) {
                         $this -> set_tree_main_menu_from_db();
-                } 
-                if (empty($this -> db_conn -> user_real_name)) {
-                    BasicFunctions::to_log("LIB: User not registered in wb_users!");
-                    die(BasicFunctions::Create_logon_window());
-                }
+            }
 	}
 	
 	 // Метод завершения
@@ -281,7 +257,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 				// Формируем дополнительное меню пользователя:
 				$this -> main_menu[$last_num + 1]['ID'] = $last_num + 1;
 				
-				$this -> main_menu[$last_num + 1]['NAME'] = "<b style='padding:0 0 0 25px'>".$this -> db_conn -> get_realname()."</b>";
+				$this -> main_menu[$last_num + 1]['NAME'] = "<b>".$this -> db_conn -> get_realname()."</b>";
 				$this -> main_menu[$last_num + 1]['ICON'] = "<span class='ui-icon ui-icon-person'></span>";
 				
 				$this -> main_menu[$last_num + 1]['MENU'] = 1;
@@ -290,12 +266,12 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 				$this -> main_menu[$last_num + 2]['ID'] = $last_num + 2;
 				$this -> main_menu[$last_num + 2]['NAME'] = "Параметры";
 				$this -> main_menu[$last_num + 2]['ICON'] = "<span class='ui-icon ui-icon-wrench'></span>";
-				$this -> main_menu[$last_num + 2]['ACTION'] = "$('#param').dialog( 'open' );";
+				$this -> main_menu[$last_num + 2]['ACTION'] = "$('.iws_param').dialog('open');";
 				$this -> main_menu[$last_num + 2]['PARENT'] = $last_num + 1;
 				$this -> main_menu[$last_num + 3]['ID'] = $last_num + 3;
 				$this -> main_menu[$last_num + 3]['NAME'] = "Информация";
 				$this -> main_menu[$last_num + 3]['ICON'] = "<span class='ui-icon ui-icon-help'></span>";
-				$this -> main_menu[$last_num + 3]['ACTION'] = "$('#about').dialog( 'open' );";
+				$this -> main_menu[$last_num + 3]['ACTION'] = "$('.iws_about').dialog('open');";
 				$this -> main_menu[$last_num + 3]['PARENT'] = $last_num + 1;
 				
 			// каждый шаг это меню. если парент 0 то тогда это новый подпункт меню
@@ -375,7 +351,7 @@ public $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								$res .= "<li>";			
 							} else {
 							if ($parent_id == 0) {
-								$res .= "<li><a onclick=\"".$action."\" class='ui-button ui-widget ui-menubar-link ui-state-default ui-button-text-icon-secondary'>".$icon.$key['NAME']."</a>";	
+								$res .= "<li><a onclick=\"".$action."\" >".$icon.$key['NAME']."</a>";	
 							} else {
 								$res .= "<li><a onclick=\"".$action."\" >".$icon.$key['NAME']."</a>";	
 							}
