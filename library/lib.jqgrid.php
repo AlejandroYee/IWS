@@ -253,6 +253,13 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                 scrollOffset: 17,
                                 hidegrid: false,
                                 width: 500,
+                                grouping:false,
+                                groupingView : {
+                                        groupField : ['ID_WB_MAIN_MENU_VIEW_TREE_13-2'],
+                                        groupColumnShow : [false],
+                                        groupText : ['<b>{0} - {1} Элементов</b>'],
+                                        groupCollapse : true
+                                },
                                 url: '<?=ENGINE_HTTP?>/ajax.data.grid.php?type=<?=$type?>&pageid=<?=$this ->pageid?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=<?=$this ->id_mm_fr_d?>&id_mm=<?=$this ->id_mm?>',	
                                 loadtext: '',                                
                                 onSelectRow: function(ids) {

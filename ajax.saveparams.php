@@ -85,6 +85,9 @@ if (filter_input(INPUT_POST, 'theme',FILTER_SANITIZE_STRING,FILTER_NULL_ON_FAILU
 	// сохраняем параметры:
 	foreach (filter_input_array(INPUT_POST,FILTER_SANITIZE_STRING) as $key => $line) {
 		$dataform -> set_param_view($key,filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING));
+                if (trim($key) === "cache_enable") {
+                  $_SESSION["DISABLED_CACHE"] = filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING); 
+                }
 	}
 	// отчищаем куку пользователя:	
 	BasicFunctions::to_log("LIB: User changed self params!");
