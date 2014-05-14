@@ -76,16 +76,17 @@ switch ($type_of_past) {
 // Отчищаем подзапрос от лишниих указателей на страницу:
 $input_post = array();
 foreach (filter_input_array(INPUT_POST) as $key => $value) {    
-    
-    if (filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING) != null and !empty($key)) {        
-        $input_post[substr($key, 0, strrpos($key, "-"))] = htmlspecialchars_decode(filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING),ENT_QUOTES); 
-    } 
-    if (is_array($value) and !empty($key)) {
-        $input_post[substr($key, 0, strrpos($key, "-"))] = htmlspecialchars_decode(implode(",",filter_var_array($value,FILTER_SANITIZE_STRING)),ENT_QUOTES);  
-    }
-    if (empty($value) and (array_search(substr($key, 0, strrpos($key, "-")),$input_post) === false)) {
-        $input_post[substr($key, 0, strrpos($key, "-"))] = "null";
-    }
+ //   if (trim($key) != "id" and trim($key) != "oper") { // тех поля
+        if (filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING) != null and !empty($key)) {        
+            $input_post[substr($key, 0, strrpos($key, "-"))] = htmlspecialchars_decode(filter_input(INPUT_POST, $key,FILTER_SANITIZE_STRING),ENT_QUOTES); 
+        } 
+        if (is_array($value) and !empty($key)) {
+            $input_post[substr($key, 0, strrpos($key, "-"))] = htmlspecialchars_decode(implode(",",filter_var_array($value,FILTER_SANITIZE_STRING)),ENT_QUOTES);  
+        }
+        if (empty($value) and (array_search(substr($key, 0, strrpos($key, "-")),$input_post) === false)) {
+            $input_post[substr($key, 0, strrpos($key, "-"))] = "null";
+        }
+//    }
 } 
 $query = $main_db -> sql_execute("select tf.owner, tf.object_name, t.name, t.field_name || '_' || abs(t.id_wb_form_field) field_name_id, t.field_name, decode(trim(t.field_type), 'D', 'to_char('||t.field_name||', ''dd.mm.yyyy hh24:mi:ss'') '||t.field_name,t.field_name) f_name,
 								    ta.html_txt align_txt, tf.xsl_file_in, trim(t.field_type) field_type, tf.action_sql, tf.action_bat from ".DB_USER_NAME.".wb_mm_form tf
@@ -121,7 +122,7 @@ while ($main_db -> sql_fetch($query)) {
 			}
 			continue;
 		} else {
-			$str_sql_fl .= ",".$main_db -> sql_result($query, "FIELD_NAME");			
+			$str_sql_fl .= ",".$main_db -> sql_result($query, "FIELD_NAME");
 		}
         $data_action = $main_db -> sql_result($query, "ACTION_SQL");            
 		// Смотрим на тип переменных						
@@ -206,6 +207,9 @@ while ($main_db -> sql_fetch($query)) {
 		
 // Если это таблица деталей:
 if (($type == 'GRID_FORM_DETAIL') or ($type == "TREE_GRID_FORM_DETAIL")) { 
+    if (empty($Master_Table_ID)) {
+        die("Не выбрана запись для которой нужно добавить из родительской таблици");
+    }
 	$str_sql_fl 	  .= ", ".$Master_Table_ID;
 	if (is_numeric($id_mm)) {
 			$str_sql_data .= ", ".$id_mm;
