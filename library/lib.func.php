@@ -270,22 +270,21 @@ class BasicFunctions {
             public static function save_to_cache($name, $value, $time = -1) {
                 BasicFunctions::requre_script_file("lib.json.php");
                 BasicFunctions::requre_script_file("lib.gz.php");
-                    if (!isset($_SESSION["ENABLED_CACHE"])) {
+                    if (isset($_SESSION["DISABLED_CACHE"]) and $_SESSION["DISABLED_CACHE"] !== "on") {
                             if ($time < 0) {
                                 $time = time() + (session_cache_expire()*60); // по умолчанию
                             }
-                                $json = new json();    				
-                                $_SESSION[strtoupper($name)] = base64_encode(gz::gzencode_zip($json -> jsonencode($value)));			
-                                BasicFunctions::to_log("LIB: ".strtoupper($name)." saved to cache");
+                            $json = new json();    				
+                            $_SESSION[strtoupper($name)] = base64_encode(gz::gzencode_zip($json -> jsonencode($value)));			
+                            BasicFunctions::to_log("LIB: ".strtoupper($name)." saved to cache");
                     }
             }
 
             //--------------------------------------------------------------------------------------------------------------------------------------------	
             // Загрузка переменной из кеша если она там есть:
             //--------------------------------------------------------------------------------------------------------------------------------------------
-            public static function load_from_cache($name, $is_array = true) {	
-                
-                            if (isset($_SESSION[strtoupper($name)])  and !isset($_SESSION["ENABLED_CACHE"])) {				
+            public static function load_from_cache($name, $is_array = true) {
+                            if (isset($_SESSION[strtoupper($name)]) and isset($_SESSION["DISABLED_CACHE"]) and $_SESSION["DISABLED_CACHE"] !== "on") {				
                                             // Распаковываем без проверки чексум, баг firefox'a
                                             BasicFunctions::requre_script_file("lib.json.php");
                                             BasicFunctions::requre_script_file("lib.gz.php");
@@ -311,10 +310,12 @@ class BasicFunctions {
                                             // все кроме пользователя
                                             $us = isset($_SESSION['us_name'])?$_SESSION['us_name']:"";
                                             $ps = isset($_SESSION['us_pr'])?$_SESSION['us_pr']:"";
+                                            $ch = isset($_SESSION['DISABLED_CACHE'])?$_SESSION['DISABLED_CACHE']:"";
                                             session_destroy();	
                                             session_start();
                                             $_SESSION['us_name'] = $us;
                                             $_SESSION['us_pr']   = $ps;
+                                            $_SESSION['DISABLED_CACHE']   = $ch;
                                     } else {
                                             // Задана переменная для отчистки. Зачищаем:
                                             unset($name);
@@ -359,7 +360,8 @@ class BasicFunctions {
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery-ui-1.11.min.js'></script>\n";
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.mb.browser.min.js'></script>\n";                   
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.jqGrid.min.js'></script>\n";
-                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.multiselect.".$min.".js'></script>\n";                   
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.multiselect.".$min.".js'></script>\n";  
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.ios-checkbox.".$min.".js'></script>\n";  
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.calculator.min.js'></script>\n";                    
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.globalize.min.js'></script>\n"; 
                 if ($user_auth -> is_user() === true) { 
@@ -375,7 +377,7 @@ class BasicFunctions {
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.slidebarmenu.".$min.".js'></script>\n";
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.ui.menubar.js'></script>\n";                          
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/ace.js'></script>\n";                  
-                }                     
+                }  
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/library/iws.".$min.".js' ></script>\n";
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/library/iws.jqgrid.extend.".$min.".js'></script>\n";
             }
@@ -474,15 +476,15 @@ class BasicFunctions {
                                 }
                 ?>
                         </select>
-                        <p><input type="hidden" name="random_theme" value="off" ><input type="checkbox" name="random_theme" id="random_theme" <?=$db->get_param_view("random_theme") ?>><label for="random_theme" style="font-size:80%" >Использовать случайную тему</label></p>
-                        <p><input type="hidden" name="width_enable" value="off" ><input type="checkbox" name="width_enable" id="width_enable" <?=$db->get_param_view("width_enable") ?>><label for="width_enable" style="font-size:80%" >Автоширина данных</label></p>
-                        <p><input type="hidden" name="editabled" value="off" ><input type="checkbox" name="editabled" id="editabled" <?=$db->get_param_view("editabled") ?>><label for="editabled" style="font-size:80%" >Отображать нередактируемые поля</label></p>
-                        <p><input type="hidden" name="enable_menu" value="off" ><input type="checkbox" name="enable_menu" id="enable_menu" <?=$db->get_param_view("enable_menu") ?>><label for="enable_menu" style="font-size:80%" >Включить обычное меню</label><br /></p>
+                        <p><label for="random_theme" style="font-size:80%" >Использовать случайную тему</label><input type="checkbox" name="random_theme" id="random_theme" <?=$db->get_param_view("random_theme") ?>></p>
+                        <p><label for="width_enable" style="font-size:80%" >Автоширина данных</label><input type="checkbox" name="width_enable" id="width_enable" <?=$db->get_param_view("width_enable") ?>></p>
+                        <p><label for="editabled" style="font-size:80%" >Отображать нередактируемые поля</label><input type="checkbox" name="editabled" id="editabled" <?=$db->get_param_view("editabled") ?>></p>
+                        <p><label for="enable_menu" style="font-size:80%" >Включить обычное меню</label><input type="checkbox" name="enable_menu" id="enable_menu" <?=$db->get_param_view("enable_menu") ?>><br /></p>
                         <p><label for="spinner">Количество месяцев в окне выбора дат: </label><input id="num_mounth" size="2" name="num_mounth" value = "<?=$db->get_param_view("num_mounth")?>" />
                         <p><label for="spinner2">Количество записей на страницу: </label><input id="num_reck" size="2" name="num_reck" value = "<?=$db->get_param_view("num_reck")?>" /></p>		
                         <p><div class="ui-widget-header" style = "height: 1px;"></div></p>
                         <p>Парамерты производительности:</p>
-                        <p><input type="hidden" name="cache_enable" value="off" ><input type="checkbox" name="cache_enable" id="cache_enable" <?=$db->get_param_view("cache_enable") ?>><label for="cache_enable" style="font-size:80%" >Отключить кеширование</label></p>
+                        <p><label for="cache_enable" style="font-size:80%" >Отключить кеширование</label><input type="checkbox" name="cache_enable" id="cache_enable" <?=$db->get_param_view("cache_enable") ?>></p>
                         <p><label for="renderer">Качество отображения:</label></p>
                         <input type="hidden" name="render_type" id="render_type" value="<?=$db->get_param_view("render_type")?>" />
                         <div style="float:right">
@@ -491,8 +493,7 @@ class BasicFunctions {
                                                 <span style="position:absolute;float:left;display: block;width: 280px;text-align:left;font-size: 11px;">Минимальное</span>
                                                 <span style="position:absolute;float:right;display: block;width: 293px;font-size: 11px;">Максимальное</span>               
                                 </div>
-                        </div>
-                        <input type="submit" id="submit_settings" style="display: none;">		
+                        </div>		
                 </form>
             </div>	
             <?php    

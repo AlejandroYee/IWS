@@ -10,6 +10,12 @@ header("Content-Type: text/html; charset=".strtolower(HTML_ENCODING));
 BasicFunctions::requre_script_file("lib.requred.php"); 
 $main_db = new db();
 $user_auth = new AUTH();
+  
+ // Смотрим разрешено ли кеширование
+if ($main_db->get_param_view("cache_enable") == "checked" and isset($_SESSION["DISABLED_CACHE"]) and $_SESSION["DISABLED_CACHE"] === "on") {
+ 	BasicFunctions::to_log("LIB: User disabled cache!");
+ }
+ 
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html class="no-js" lang="en-US">                                                                                                                                            
