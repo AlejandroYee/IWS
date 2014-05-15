@@ -14,7 +14,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 	$ResArray['Full_width'] = 0;
 	$ResArray['Filter_Box'] = "";
 	$ResArray['colModel'] = "";
-	$ResArray['colNames'] = "";	
+	$ResArray['colNames'] = "";
+        $ResArray['grouping_cols'] = "";
 	$ResArray['TREE_EMPTY_DATA'] = "";				
 		
 	// Проверяем на наличие в кеше:
@@ -28,7 +29,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		$inv_view_table = $this -> db_conn  -> get_settings_val('SETTINGS_VIEW_INVISIBL_ID_TABLE');
 
 		// Запрос в базу сразу с возвратом необходимых тегов и скриптов, тамже считаем длину текстовых полей
-		$query = $this -> db_conn -> sql_execute("select tf.object_name, tf.name form_name, decode(nvl(t.is_requred, 0), 0, 'false', 'true') is_requred, tf.owner, t.name, tf.edit_button, nvl(t.width, 100) l_name, t.id_wb_form_field field_id, t.field_name || '_' || abs(t.id_wb_form_field) || '".str_ireplace("tabs_", "-", $this -> pageid)."' field_name, 'align: ''' || nvl(ta.html_txt, 'left') || ''', ' align_txt,
+		$query = $this -> db_conn -> sql_execute("select tf.object_name, tf.name form_name, decode(nvl(t.is_requred, 0), 0, 'false', 'true') is_requred, t.is_frosen,t.is_grouping, tf.owner, t.name, tf.edit_button, nvl(t.width, 100) l_name, t.id_wb_form_field field_id, t.field_name || '_' || abs(t.id_wb_form_field) || '".str_ireplace("tabs_", "-", $this -> pageid)."' field_name, 'align: ''' || nvl(ta.html_txt, 'left') || ''', ' align_txt,
 																case
 																	when upper(trim(t.field_type)) = 'P'  then  'edittype:''password'' '
 																	when upper(trim(t.field_type)) = 'SB' then  decode(trunc((nvl(t.count_element, 0) + 2) / 2), 1, 'stype:''select'', formatter:''select'', edittype: ''select'' ','stype:''select'', formatter:''select'', edittype: ''select'' multiple ')
@@ -113,7 +114,19 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                         // Смотрим на содержимое поля активное оно или нет
                                         if (!empty($field_txt)) {
                                             $edit_options .= ", field_has_sql:'true'";                                            
-                                        }    
+                                        } 
+                                        
+                                        //Может это замороженный столбец?
+                                        if ($this -> return_sql($query, "is_frosen")  == "1") {
+                                            $is_frozen = "true";
+                                        } else {
+                                            $is_frozen = "false";
+                                        }
+                                        
+                                        // Может группирующий столбец?
+                                        if ($this -> return_sql($query, "is_grouping")  == "1") {
+                                            $ResArray['grouping_cols'] .= "'".$this -> return_sql($query, "FIELD_NAME")."',";
+                                        }
 					// Создаем заголовок					
 					$ResArray['colNames'] .= ",
 						'".trim(str_ireplace(array("(not display)","#")," ",$this -> return_sql($query, "NAME")))."'";
@@ -155,6 +168,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 						name: '".$this -> return_sql($query, "FIELD_NAME")."',
 						index: '".$this -> return_sql($query, "FIELD_NAME")."',
 						width: ".$this -> return_sql($query, "L_NAME").",
+                                                frozen: ".$is_frozen.",
 						".$editabled.$hidden."
 						searchoptions: {sopt:['eq','ne', 'lt', 'le', 'gt', 'ge', 'bw','cn']},
 						".$this -> return_sql($query, "ALIGN_TXT")."
@@ -208,7 +222,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 				// Возвращаем все
 				$ResArray['TREE_EMPTY_DATA'] = "{0:[".trim($ResArray['TREE_EMPTY_DATA'],",")."]}";
 				$ResArray['colNames'] = "[".trim($ResArray['colNames'], ",")."]";
-				$ResArray['colModel'] = "[".trim($ResArray['colModel'], ",")."]";					
+				$ResArray['colModel'] = "[".trim($ResArray['colModel'], ",")."]";
+                                $ResArray['grouping_cols'] = trim($ResArray['grouping_cols'],",");
 				BasicFunctions::save_to_cache("grid_". abs($this->id_mm_fr), $ResArray);
 				return $ResArray;		
 		}
@@ -222,6 +237,12 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 	// Начинаем создавать сам грид
 	ob_start();
 	ob_implicit_flush();
+        if (!empty($ResArray['grouping_cols'])) {
+            $group_enable = "true";
+        } else {
+            $group_enable = "false";
+            $ResArray['grouping_cols'] = "''";
+        }
 	?>	<div class="grid_resizer <?=$this->pageid?>" for="<?=$object_name?>" form_id="<?=$form_id?>" auto_update="<?=$auto_update?>" form_type="<?=$type?>" percent="<?=$heigth_of_grid?>">
 		<table id="<?=$object_name?>" ></table>
 			<div id="Pager_<?=$object_name?>"></div>
@@ -253,9 +274,9 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                 scrollOffset: 17,
                                 hidegrid: false,
                                 width: 500,
-                                grouping:false,
+                                grouping:<?=$group_enable?>,
                                 groupingView : {
-                                        groupField : ['ID_WB_MAIN_MENU_VIEW_TREE_13-2'],
+                                        groupField : [<?=$ResArray['grouping_cols']?>],
                                         groupColumnShow : [false],
                                         groupText : ['<b>{0} - {1} Элементов</b>'],
                                         groupCollapse : true
