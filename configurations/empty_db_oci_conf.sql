@@ -221,6 +221,9 @@ create table WB_FORM_FIELD
   xls_position_row       NUMBER,
   is_requred             NUMBER default 0,
   element_alt            VARCHAR2(2000) default null,
+  is_frosen 			 number default 0,
+  is_grouping 			 number default 0,
+  is_grouping_header 	 varchar2(2000) default null,
   create_user            VARCHAR2(50) not null,
   create_date            DATE not null,
   last_user              VARCHAR2(50) not null,
@@ -462,7 +465,7 @@ prompt
 create sequence GEN_WB_FORM_FIELD_SYS
 minvalue 1
 maxvalue 9999
-start with 188
+start with 193
 increment by 1
 cache 20;
 
@@ -629,7 +632,7 @@ prompt
 prompt Creating view WB_FORM_FIELD_VIEW
 prompt ================================
 prompt
-create or replace force view wb_form_field_view as
+create or replace view wb_form_field_view as
 select t.id_wb_form_field id_wb_form_field_view,
        t.id_wb_mm_form    id_wb_mm_form_view,
        t.num,
@@ -646,6 +649,9 @@ select t.id_wb_form_field id_wb_form_field_view,
        t.xls_position_row,
        t.is_requred,
        t.element_alt,
+       t.is_frosen,
+       t.is_grouping,
+	   t.is_grouping_header,
        t.create_user,
        t.create_date,
        t.last_user,
@@ -2121,9 +2127,9 @@ DECLARE
 BEGIN
   if INSERTING then
     insert into wb_form_field(id_wb_form_field,id_wb_mm_form,num,name,field_name,field_txt,id_wb_form_field_align,field_type,
-                             is_read_only,count_element,width,xls_position_col,xls_position_row,is_requred,element_alt)
+                             is_read_only,count_element,width,xls_position_col,xls_position_row,is_requred,element_alt,is_frosen,is_grouping,is_grouping_header)
       values (null,:new.id_wb_mm_form_view,:new.num,:new.name,:new.field_name,:new.field_txt,:new.id_wb_form_field_align,:new.field_type,
-              :new.is_read_only,:new.count_element,:new.width,:new.xls_position_col,:new.xls_position_row,:new.is_requred,:new.element_alt)
+              :new.is_read_only,:new.count_element,:new.width,:new.xls_position_col,:new.xls_position_row,:new.is_requred,:new.element_alt,:new.is_frosen,:new.is_grouping,:new.is_grouping_header)
                              RETURNING id_wb_form_field INTO l_id;
 
   dbms_session.set_context('CLIENTCONTEXT', 'rowid',l_id );
@@ -2143,7 +2149,10 @@ BEGIN
       ff.xls_position_col       = :new.xls_position_col,
       ff.xls_position_row       = :new.xls_position_row,
       ff.is_requred             = :new.is_requred,
-      ff.element_alt           = :new.element_alt
+      ff.element_alt            = :new.element_alt,
+      ff.is_frosen              = :new.is_frosen,
+      ff.is_grouping            = :new.is_grouping,
+	  ff.is_grouping_header		= :new.is_grouping_header
       where ff.id_wb_form_field = l_id;
   else
     delete
@@ -2843,7 +2852,13 @@ insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_nam
 values (-188, -7, 6, 'Пароль', 'PASSWORD', null, null, 1, 'P', 0, null, 150, null, null, null, 0, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-189, -4, 13, 'Подсказка к полю', 'ELEMENT_ALT', null, null, 1, 'S', 0, null, 250, null, null, null, 0, 'DB_UPDATE', sysdate, 'DB_UPDATE', sysdate);
-prompt 189 records loaded
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date, is_frosen, is_grouping, is_grouping_header)
+values (-190, 4, 25, 'Закрепленный столбец', 'IS_FROSEN', null, null, 1, 'B', 0, null, 200, null, null, 0, 'Позволяет закрепить столбец от горизонтальной прокрутки','LOADER', sysdate, 'LOADER', sysdate, 0, 0, null);
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date, is_frosen, is_grouping, is_grouping_header)
+values (-191, 4, 26, 'Группировать строки', 'IS_GROUPING', null, null, 1, 'B', 0, null, 200, null, null, 0, 'Позволяет сгруппировать записи по данному столбцу в раскрывающееся списки, если выставлено несколько столбцов то они сгруппируются в дерево', 'LOADER', sysdate, 'LOADER', sysdate 0, 0, null);
+insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date, is_frosen, is_grouping, is_grouping_header)
+values (-192, 4, 27, 'Группировать заголовков столбцов', 'IS_GROUPING_HEADER', null, null, 1, 'S', 0, null, 200, null, null, 0, 'Группирует заголовки столбцов таким образом чтобы было понятно что они относятся к одному уровню, необходимо ввести общее имя группы, групирровать можно только рядом стоящие столбци!', 'LOADER', sysdate, 'LOADER', sysdate, 0, 0, null);
+prompt 192 records loaded
 prompt Loading WB_ROLE...
 insert into WB_ROLE (id_wb_role, wb_name, name, create_user, create_date, last_user, last_date)
 values (1, 'ADMIN', 'Администраторы', 'LOADER', sysdate, 'LOADER', sysdate);
@@ -2918,7 +2933,7 @@ values (17, null, 2, 'Изображение конфигурации', 'ROOT_CO
 insert into WB_SETTINGS (id_wb_settings, id_parent, num, name, short_name, value, used, create_user, create_date, last_user, last_date)
 values (18, null, 3, 'Иконка конфигурации', 'ROOT_CONFIG_FAVICON', 'sport_icon.png', 1, 'LOADER', sysdate, 'LOADER', sysdate);
 insert into WB_SETTINGS (id_wb_settings, id_parent, num, name, short_name, value, used, create_user, create_date, last_user, last_date)
-values (-1, null, 3, 'Версия БД', 'ROOT_DB_VERSION', '2.1.2', 1, 'LOADER', sysdate, 'LOADER', sysdate);
+values (-1, null, 3, 'Версия БД', 'ROOT_DB_VERSION', '2.1.5', 1, 'LOADER', sysdate, 'LOADER', sysdate);
 prompt 15 records loaded
 update wb_form_field t set t.element_alt =    
    case t.field_name

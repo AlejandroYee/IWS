@@ -714,7 +714,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               title: 'Поиск по ключевым словам (Кнопка F)',
                                               buttonicon: 'ui-icon-search',
                                               onClickButton: function(){
-									$('#<?=$object_name?>').jqGrid()[0].toggleToolbar();	
+                                                    $('#<?=$object_name?>').jqGrid()[0].toggleToolbar();
+                                                    redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
 					      }}).jqGrid('filterToolbar',{searchOnEnter:true})
 		<?php
 		}
@@ -751,10 +752,6 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 									}).addClass('<?=$this->pageid?>');					
 							
 		<?php
-		// Если нужна автоширина, то запускаем перерасчет
-		if ($this->db_conn->get_param_view("width_enable") == "checked") {
-				?> auto_width_grid('<?=$object_name?>'); <?php	
-		}
 	if (!empty($auto_update)) {
 	?>
 	var updater_<?=$object_name?>;
@@ -815,8 +812,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                        $('#'+ids).find('.treeclick').click();  
                    }
 		break; 
-        };
-          });      
+            };
+          }); 
 	});
 	 </script>
 	 <?php

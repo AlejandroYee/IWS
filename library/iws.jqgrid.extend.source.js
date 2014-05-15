@@ -6,11 +6,12 @@
 * 
 * from jqgrid we need only modules:
 * grid.base,
-* grid.custom (setGridState,GridUnload,GridDestroy,clearBeforeUnload,sortGrid,setColProp,getColProp),
+* grid.custom (setGridState,GridUnload,GridDestroy,clearBeforeUnload,sortGrid,setColProp,getColProp,destroyFrozenColumns,setGroupHeaders,destroyGroupHeader),
 * grid.formedit (navSeparatorAdd,navButtonAdd,navGrid),
-* grid.fmatter,
+* grid.grouping,
+* grid.treegrid,
 * grid.jqueryui,
-* grid.treegrid
+* grid.fmatter
 */
                 
 $.jgrid.extend({
@@ -58,9 +59,11 @@ editGridRow : function(rowid, p){
                    $.each(colmodel[i].editoptions, function(key, value) {
                        if (key !== "value") {
                                 edit_options = edit_options + key + '="' + value +'" ';
+                                if (key === "grouping_row" && value === "true") {
+                                    colmodel[i].hidden = false;
+                                }
                             }
                     });
-                    
                     if(!colmodel[i].editable) {
                         colmodel[i].hidden_tmp = true;
                     }    
@@ -1055,5 +1058,127 @@ filterToolbar : function(p){
 			toggleToolbar();
 		});
 		
+	},
+        setFrozenColumns : function () {
+		return this.each(function() {
+			if ( !this.grid ) {return;}
+			var $t = this, cm = $t.p.colModel,i=0, len = cm.length, maxfrozen = -1, frozen= false;
+			if($t.p.subGrid === true || $t.p.treeGrid === true)
+			{
+				return;
+			}
+			
+			if($t.p.rownumbers) { i++; }
+			if($t.p.multiselect) { i++; }
+			
+			while(i<len)
+			{
+				if(cm[i].frozen === true)
+				{
+					frozen = true;
+					maxfrozen = i;
+				} else {
+					break;
+				}
+				i++;
+			}
+			if( maxfrozen>=0 && frozen) {				
+				$t.grid.fhDiv = $('<div style="position:absolute;left:0px;" class="frozen-div ui-state-default ui-jqgrid-hdiv"></div>');
+				$t.grid.fbDiv = $('<div style="position:absolute;overflow:hidden;left:0px;" class="frozen-bdiv ui-jqgrid-bdiv"></div>');
+				$("#gview_"+$.jgrid.jqID($t.p.id)).append($t.grid.fhDiv);
+				var htbl = $(".ui-jqgrid-htable","#gview_"+$.jgrid.jqID($t.p.id)).clone(true);
+				if($t.p.groupHeader) {
+					$("tr.jqg-first-row-header, tr.jqg-third-row-header", htbl).each(function(){
+						$("th:gt("+maxfrozen+")",this).remove();
+					});
+					var swapfroz = -1, fdel = -1, cs, rs;
+					$("tr.jqg-second-row-header th", htbl).each(function(){
+						cs= parseInt($(this).attr("colspan"),10);
+						rs= parseInt($(this).attr("rowspan"),10);
+						if(rs) {
+							swapfroz++;
+							fdel++;
+						}
+						if(cs) {
+							swapfroz = swapfroz+cs;
+							fdel++;
+						}
+						if(swapfroz === maxfrozen) {
+							return false;
+						}
+					});
+					if(swapfroz !== maxfrozen) {
+						fdel = maxfrozen;
+					}
+					$("tr.jqg-second-row-header", htbl).each(function(){
+						$("th:gt("+fdel+")",this).remove();
+					});
+				} else {
+					$("tr",htbl).each(function(){
+						$("th:gt("+maxfrozen+")",this).remove();
+					});
+				}
+				$(htbl).width(1);
+				$($t.grid.fhDiv).append(htbl)
+				.mousemove(function (e) {
+					if($t.grid.resizing){ $t.grid.dragMove(e);return false; }
+				});
+                                $($t).bind('jqGridResizeStop.setFrozenColumns', function (e, w, index) {
+					var rhth = $(".ui-jqgrid-htable",$t.grid.fhDiv);
+					$("th:eq("+index+")",rhth).width( w ); 
+					var btd = $(".ui-jqgrid-btable",$t.grid.fbDiv);
+					$("tr:first td:eq("+index+")",btd).width( w ); 
+                                        redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
+				});
+				$($t).bind('jqGridSortCol.setFrozenColumns', function (e, index, idxcol) {
+
+					var previousSelectedTh = $("tr.ui-jqgrid-labels:last th:eq("+$t.p.lastsort+")",$t.grid.fhDiv), newSelectedTh = $("tr.ui-jqgrid-labels:last th:eq("+idxcol+")",$t.grid.fhDiv);
+
+					$("span.ui-grid-ico-sort",previousSelectedTh).addClass('ui-state-disabled');
+					$(previousSelectedTh).attr("aria-selected","false");
+					$("span.ui-icon-"+$t.p.sortorder,newSelectedTh).removeClass('ui-state-disabled');
+					$(newSelectedTh).attr("aria-selected","true");
+					if(!$t.p.viewsortcols[0]) {
+						if($t.p.lastsort !== idxcol) {
+							$("span.s-ico",previousSelectedTh).hide();
+							$("span.s-ico",newSelectedTh).show();
+						}
+					}
+				});				
+				$("#gview_"+$.jgrid.jqID($t.p.id)).append($t.grid.fbDiv);
+				$($t.grid.bDiv).scroll(function () {
+					$($t.grid.fbDiv).scrollTop($(this).scrollTop());
+				});
+				if($t.p.hoverrows === true) {
+					$("#"+$.jgrid.jqID($t.p.id)).unbind('mouseover').unbind('mouseout');
+				}
+				$($t).bind('jqGridAfterGridComplete.setFrozenColumns', function () {
+					$("#"+$.jgrid.jqID($t.p.id)+"_frozen").remove();
+					$($t.grid.fbDiv).height($($t.grid.bDiv).height()-16);
+					var btbl = $("#"+$.jgrid.jqID($t.p.id)).clone(true);
+					$("tr[role=row]",btbl).each(function(){
+						$("td[role=gridcell]:gt("+maxfrozen+")",this).remove();
+					});
+
+					$(btbl).width(1).attr("id",$t.p.id+"_frozen");
+					$($t.grid.fbDiv).append(btbl);
+					if($t.p.hoverrows === true) {
+						$("tr.jqgrow", btbl).hover(
+							function(){ $(this).addClass("ui-state-hover"); $("#"+$.jgrid.jqID(this.id), "#"+$.jgrid.jqID($t.p.id)).addClass("ui-state-hover"); },
+							function(){ $(this).removeClass("ui-state-hover"); $("#"+$.jgrid.jqID(this.id), "#"+$.jgrid.jqID($t.p.id)).removeClass("ui-state-hover"); }
+						);
+						$("tr.jqgrow", "#"+$.jgrid.jqID($t.p.id)).hover(
+							function(){ $(this).addClass("ui-state-hover"); $("#"+$.jgrid.jqID(this.id), "#"+$.jgrid.jqID($t.p.id)+"_frozen").addClass("ui-state-hover");},
+							function(){ $(this).removeClass("ui-state-hover"); $("#"+$.jgrid.jqID(this.id), "#"+$.jgrid.jqID($t.p.id)+"_frozen").removeClass("ui-state-hover"); }
+						);
+					}
+					btbl=null;
+				});
+				if(!$t.grid.hDiv.loading) {
+					$($t).triggerHandler("jqGridAfterGridComplete");
+				}
+				$t.p.frozenColumns = true;                                
+			}
+		});
 	}
 }); 

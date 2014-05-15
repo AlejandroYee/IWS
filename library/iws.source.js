@@ -156,11 +156,11 @@ $(function() {
 				var id = 'tabs_' + counttab;	
                                 sumtab++;
 				$( "#tabs").children(".ui-tabs-nav").append(
-								$('<li />')                                                                
-                                                                .append ($('<a />')
+								$('<li />').css('style','cursor:default;')                                                                
+                                                                .append ($('<a />').css('style','cursor:default;')   
                                                                             .attr({ href: '#' + id, title: tabTitle, id: 'ui-' + id })   
-                                                                            .append('<span style="float:right;left:10px;">'+trim_text(tabTitle,40,3)+'</span>')
-                                                                            .append('<span class="ui-icon ui-icon-document" style="float:left;top:5px"></span>')
+                                                                            .append('<span style="float:right;left:10px;cursor:default;">'+trim_text(tabTitle,40,3)+'</span>')
+                                                                            .append('<span class="ui-icon ui-icon-document" style="float:left;top:5px;cursor:default;"></span>')
                                                                          )
                                                                 .append($('<span />').attr({
                                                                     'class':'ui-icon ui-icon-close',
@@ -222,8 +222,7 @@ $(function() {
 	};
         
 	// Отрисовка окна и вкладок:
-	redraw_document = function (id_tab) {
-                 
+	redraw_document = function (id_tab) {                
                 
                 $('body').width(doc_width).height(doc_height);                
                 $('.user_login').css({ top: doc_height/2 - 175, left: doc_width/2 - 200 });
@@ -298,7 +297,13 @@ $(function() {
 							   .parent().children('.ui-jqgrid-view').height(doc_height_grid - 27).width(doc_width_grid)
 										.children('.ui-jqgrid-hdiv').width(doc_width_grid)
 							   .parent().children('.ui-jqgrid-bdiv').height(doc_height_grid - coeffd_filtr).width(doc_width_grid);
-
+                    var frosen = self.find('.frozen-div');    
+                    $.each( frosen, function() {
+                        var wd = frosen.children('table').width();
+                        var hd = self.find('.ui-jqgrid-titlebar').outerHeight();
+                        frosen.width(wd).css('top',(hd+1)+'px');
+                        frosen.parent().children('.frozen-bdiv').width(wd).height(self.find('.ui-jqgrid-bdiv')[0].clientHeight + 1).css('top',(hd + self.find('.ui-jqgrid-hbox').outerHeight()+1)+'px');
+                    });
 		});		
 
 		$.each($(".grid_resizer[form_type$='_DETAIL'] div.ui-jqgrid-titlebar, .detail_tab .ui-tabs-nav"), function() {
@@ -393,47 +398,6 @@ $(function() {
 		
 	};
 	
-	// Автоширина столбцов в гриде (применяемся только к указаннуму)
-	auto_width_grid = function (grid) {
-		// Выбираем загловок и первую строку в таблице в гриде
-		var grid_header = $('#gview_' + grid + ' .ui-jqgrid-hdiv .ui-jqgrid-hbox table tr:first th:visible');
-		var grid_hcontent = $('#gview_' + grid + ' .ui-jqgrid-bdiv div table tr:first td:visible');
-		
-		// Проверяем можно ли сделать автоширину (т.е. сумма столбцов по длине меньше чем общий документ)
-		var grid_width_old = 0;
-		var has_r_num	= 0;	
-		var count_element = 0;
-		
-		$.each(grid_header, function() {
-			if ($(this).attr('id') === grid + "_rn") {
-				has_r_num = $(this).width(); // Убираем r_num из расчета
-			}
-			grid_width_old = grid_width_old + $(this).width();
-			count_element = count_element + 1;
-		});
-		
-		var grid_width = $('#' + grid).parent().width(); // офсет на прокрутку обязателен
-		
-		if (grid_width_old < grid_width) {
-			// Перерасчитываем ширину и применяем ее согласно старой ширине столбцов
-			var coeff = (grid_width/(grid_width_old)); // Коэфициент увеличения
-			$.each(grid_header, function() {
-				var w_tmp = $(this).width();
-				// Применяем к заголовку
-				if ($(this).attr('id') !== grid + "_rn") {	
-					$(this).width(w_tmp * coeff);
-				}
-			});
-			$.each(grid_hcontent, function() {
-				var w_tmp = $(this).width();
-				// Применяем к заголовку
-				if ($(this).width() !== has_r_num) {	
-					$(this).width(w_tmp * coeff);
-				}
-			});
-		}					
-	};
-
 	// Прикрепляем ресизеры
 	set_resizers = function() {
 		// Авторесизер
@@ -482,6 +446,7 @@ $(function() {
 							$('#' + $('#' + ui.newTab.attr('aria-controls')).children('.grid_resizer_tabs').attr('for')).jqGrid().trigger('reloadGrid', true);
 							$('#' + ui.newTab.attr('aria-controls')).children('.grid_resizer_tabs').attr('need_update','false');
 						}
+                                                redraw_document(ui.newPanel);	
 					}
 			});
 	};
@@ -554,24 +519,31 @@ $(function() {
                 closeOnEscape: true,
                 resizable:false,
                 buttons: {
-                        "Применить" : function() {	
-                                // Сохраняем данные	
-                                if ($.browser.msie) {
-                                        $('#submit_settings').click();
-                                } else {	
+                        "Применить" : function() {
+                                $('#btn_opt_cancel').button('option', 'disabled', true );
+                                $('#btn_opt_save').button('option', 'disabled', true );
+                                    var searilezed = [];
+                                    $.each($(this).find("input, select, textarea"), function() {
+                                            var obj = $(this);
+                                            if (obj.attr('name') !== undefined ){                                     
+                                                   if (obj.attr('type') === 'checkbox') {
+                                                      searilezed[obj.attr('name')] = (obj.attr('checked') === 'checked')?'on':'off'; 
+                                                   } else {
+                                                      searilezed[obj.attr('name')] = obj.val();
+                                                   }                                       
+                                            }
+                                        });
+                                        searilezed =  $.extend({}, searilezed);
                                         $.ajax({
-                                                        url: location.href + 'ajax.saveparams.php',
-                                                        datatype:'json',
-                                                        data: $("#settings_from").serialize(),
-                                                        cache: false,
-                                                        type: 'POST',
-                                                                success: function(data) {											
-                                                                    $(location).prop('href',location.href);                                                                    
-                                                        }	  
-                                                });	
-
-                                }
-                                $( this ).dialog( "close" );
+                                                url: location.href + 'ajax.saveparams.php',
+                                                datatype:'json',
+                                                data: searilezed,
+                                                cache: false,
+                                                type: 'POST',
+                                                        success: function(data) {                                                            
+                                                            $(location).prop('href',location.href);                                                                    
+                                                }	  
+                                        });
                         },
                         "Отмена":function() {
                         $( this ).dialog( "close" );
@@ -581,8 +553,8 @@ $(function() {
                         $( this ).dialog( "close" );
                 },
                 open: function() {
-                                $('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}});
-                                $('.ui-dialog-buttonpane').find('button:contains("Применить")').button({icons: { primary: 'ui-icon-disk'}});
+                                $('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_opt_cancel');;
+                                $('.ui-dialog-buttonpane').find('button:contains("Применить")').button({icons: { primary: 'ui-icon-disk'}}).prop('id','btn_opt_save');;
                                 $(this).parent().css('z-index', 805).parent().children('.ui-widget-overlay').css('z-index', 800);
                 }
         });				
@@ -603,15 +575,17 @@ $(function() {
 
         // Обработка мультиселекта и кнопки настроек
         $("#themeselector").multiselect({multiple: false, header: false, selectedList: 1});
+        $("#random_theme").iosCheckbox({
+            checked: function() {
+                $("#themeselector").multiselect('enable');
+            },
+            unchecked: function() {
+                $("#themeselector").multiselect('disable');
+            }
+        });
         
-        $("#random_theme").button({icons: { primary: "ui-icon-image" }}).click(function() {var btn = $("#random_theme");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");$("#themeselector").multiselect('disable');} else {btn.removeAttr("checked");$("#themeselector").multiselect('enable')}});
-        $("#width_enable").button({icons: { primary: "ui-icon-arrow-2-e-w" }}).click(function() {var btn = $("#width_enable");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});
-        $("#editabled").button({icons: { primary: "ui-icon-lightbulb" }}).click(function() {var btn = $("#editabled");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
-        $("#cache_enable").button({icons: { primary: "ui-icon-notice" }}).click(function() {var btn = $("#cache_enable");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});		
-        $("#enable_menu").button({icons: { primary: "ui-icon-carat-2-n-s" }}).click(function() {var btn = $("#enable_menu");if (btn.attr("checked") !== "checked") {btn.attr("checked","checked");} else {btn.removeAttr("checked");}});	
-        if ($("#random_theme").attr("checked") === "checked") {
-            $("#themeselector").multiselect('disable');
-        }
+        $("#editabled,#cache_enable,#enable_menu").iosCheckbox();        
+ 
         $("#renderer").slider({
             range: "min",
             value: $("#render_type").val(),
@@ -626,7 +600,7 @@ $(function() {
                                         $( "#render_type" ).val( ui.value );
                                 }
             }
-        });
+        }).height(8).children('a').css('border-radius',"100%")
         $("#num_mounth").spinner({
                                           spin: function( event, ui ) {
                                                 if ( ui.value > 6 ) {
@@ -654,12 +628,12 @@ $(function() {
         $( "#tabs" ).tabs({
                         collapsible: false,
                         heightStyle: "fill",
-                        activate: function( event, ui ) {                                    
-                                    redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
+                        activate: function( event, ui ) {
                                     if (doc_title === null) {
                                       doc_title = document.title;  
                                     } 
                                     document.title = doc_title + ' [ ' + $(ui.newTab).children('a').attr('title') + ' ]';
+                                    redraw_document(ui.newPanel);
                         }
         }).find( ".ui-tabs-nav" ).sortable({
           axis: "x",
@@ -851,25 +825,8 @@ $(function() {
 		    case 'P': // PASSWORD
 			    obj.attr('value','');
 		    break;
-		    case 'B': // CHECKBOX			
-                             obj.before('<label for="' + obj.attr('id') + '">Включено или выключено</label>')
-                            .button({icons: { primary: 'ui-icon-check' }, text: false}).addClass(spl_tabid)
-                            .click(function() {
-                                    if (obj.attr('checked') !== 'checked') {
-                                                    obj.attr('checked','checked').button({icons: { primary: 'ui-icon-check' }});
-                                            } else {
-                                                    obj.removeAttr('checked').button({icons: { primary: 'ui-icon-bullet' }});
-                                    }
-                            });
-                            obj.addClass('ui-helper-hidden-accessible');								
-							
-                            if (obj.attr('checked')) {
-                                    obj.button({icons: { primary: 'ui-icon-check' }}).button("refresh");
-                            } else {
-                                    obj.button({icons: { primary: 'ui-icon-bullet' }}).button("refresh");						
-                            }		
-						
-			    obj.removeAttr('style'); // Исправление неверной длины чекбокса							
+		    case 'B': // CHECKBOX
+                            obj.iosCheckbox();					
 		     break;
                      case 'MAS': // МАСКА СПЕЦ ПОЛЕ
                             var char_case = obj.attr('case');
@@ -1075,14 +1032,10 @@ $(function() {
                                         obj.spinner( 'value', obj.val() );
 				break;
 				case 'P': // PASSWORD
-					obj.attr('value','');
+                                    obj.attr('value','');
 				break;				
 				case 'B': // CHECKBOX	
-                                        if (obj.attr('checked')) {
-                                                obj.button({icons: { primary: 'ui-icon-check' }}).button( "refresh" ).addClass('ui-state-active');
-                                        } else {
-                                                obj.button({icons: { primary: 'ui-icon-bullet' }}).button( "refresh" );						
-                                        }					
+                                    obj.iosCheckbox("refresh");				
 				break;
 				case 'D': // DATE
                                 case 'DT': // DATE TIME    
