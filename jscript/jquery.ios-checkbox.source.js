@@ -18,7 +18,7 @@
             
             var span_element = $(this.span_element = $('<span />').attr({
                         'class':'ui-widget ui-state-default ui-state-active',
-                        'style':'border: 0px; cursor: pointer; display: inline-block; position: relative; vertical-align: middle;padding:3px;margin:0 0 0 5px;box-shadow: inset 0px 2px 5px rgba(0,0,0,0.5);border-radius:' + (o.width * 2) + 'px'
+                        'style':'border: 0px; cursor: pointer; display: inline-block; position: relative; vertical-align: middle;padding:3px;margin:0px;box-shadow: inset 0px 2px 5px rgba(0,0,0,0.5);border-radius:' + (o.width * 2) + 'px'
                     }).append( this.small_element = $('<small />').attr({
                                         'class':'ui-widget ui-widget-content ui-state-hover',
                                         'style':'transition:left 0.2s; left: ' + (o.width/2) + 'px;border: 1px;border-radius: 100%; padding:1px;margin:1px;box-shadow: inset 0px 2px 5px rgba(0,0,0,0.2);position: absolute; top: 1px;'
