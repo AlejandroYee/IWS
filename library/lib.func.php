@@ -476,15 +476,15 @@ class BasicFunctions {
                                 }
                 ?>
                         </select>
-                        <p><label for="random_theme" style="font-size:80%" >Использовать случайную тему</label><input type="checkbox" name="random_theme" id="random_theme" <?=$db->get_param_view("random_theme") ?>></p>
-                        <p><label for="width_enable" style="font-size:80%" >Автоширина данных</label><input type="checkbox" name="width_enable" id="width_enable" <?=$db->get_param_view("width_enable") ?>></p>
-                        <p><label for="editabled" style="font-size:80%" >Отображать нередактируемые поля</label><input type="checkbox" name="editabled" id="editabled" <?=$db->get_param_view("editabled") ?>></p>
-                        <p><label for="enable_menu" style="font-size:80%" >Включить обычное меню</label><input type="checkbox" name="enable_menu" id="enable_menu" <?=$db->get_param_view("enable_menu") ?>><br /></p>
+                        <p><label for="random_theme" style="font-size:80%;margin:0 5px 0 0" >Использовать случайную тему</label><input type="checkbox" name="random_theme" id="random_theme" <?=$db->get_param_view("random_theme") ?>></p>
+                        <p><label for="width_enable" style="font-size:80%;margin:0 5px 0 0" >Автоширина данных</label><input type="checkbox" name="width_enable" id="width_enable" <?=$db->get_param_view("width_enable") ?>></p>
+                        <p><label for="editabled" style="font-size:80%;margin:0 5px 0 0" >Отображать нередактируемые поля</label><input type="checkbox" name="editabled" id="editabled" <?=$db->get_param_view("editabled") ?>></p>
+                        <p><label for="enable_menu" style="font-size:80%;margin:0 5px 0 0" >Включить обычное меню</label><input type="checkbox" name="enable_menu" id="enable_menu" <?=$db->get_param_view("enable_menu") ?>><br /></p>
                         <p><label for="spinner">Количество месяцев в окне выбора дат: </label><input id="num_mounth" size="2" name="num_mounth" value = "<?=$db->get_param_view("num_mounth")?>" />
                         <p><label for="spinner2">Количество записей на страницу: </label><input id="num_reck" size="2" name="num_reck" value = "<?=$db->get_param_view("num_reck")?>" /></p>		
                         <p><div class="ui-widget-header" style = "height: 1px;"></div></p>
                         <p>Парамерты производительности:</p>
-                        <p><label for="cache_enable" style="font-size:80%" >Отключить кеширование</label><input type="checkbox" name="cache_enable" id="cache_enable" <?=$db->get_param_view("cache_enable") ?>></p>
+                        <p><label for="cache_enable" style="font-size:80%;margin:0 5px 0 0" >Отключить кеширование</label><input type="checkbox" name="cache_enable" id="cache_enable" <?=$db->get_param_view("cache_enable") ?>></p>
                         <p><label for="renderer">Качество отображения:</label></p>
                         <input type="hidden" name="render_type" id="render_type" value="<?=$db->get_param_view("render_type")?>" />
                         <div style="float:right">
