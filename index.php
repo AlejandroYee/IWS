@@ -52,6 +52,7 @@ if ($main_db->get_param_view("cache_enable") == "checked" and isset($_SESSION["D
             .ui-menu-item .ui-menu{min-width:200px;z-index:102}
             .ui-menu{list-style:none;margin:1px;min-width:250px;padding:3px;white-space:nowrap;z-index:101}
             .ui-dialog .ui-dialog-content{text-align:right}
+            .ui-th-column-header{text-align:center}
             .formelement{padding:.3em}
             .ui-pg-button{left:1px}
             .ui-menu-divider{padding:0}
