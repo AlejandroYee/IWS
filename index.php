@@ -87,14 +87,13 @@ if (!$user_auth -> is_user()) {
             <h3><?=$main_db -> get_settings_val("ROOT_CONFIG_NAME");?></h3><b id="loading_text"></b>
                             <div id='login_form'>                                
                                 <p>Необходима авторизация, представьтесь:</p>	
-                                <form method="POST" style="position:absolute;text-align:center;width:200px;height:190px;top:100px;left:100px" onsubmit="return false;">
+                                <form method="POST" class="post_form_login" style="position:absolute;text-align:center;width:200px;height:190px;top:100px;left:100px" onsubmit="return false;">
                                                 <div id="login_edit">
                                                         <label for="username_or_email" tabindex="-1" class="ui-widget" style="font-size:1.2em"><b>Ваш логин:</b></label><br>
                                                         <input aria-required="true"  autofocus="autofocus" id="username" name="username" class="ui-widget ui-widget-content ui-corner-all" style="height: 24px;"  type="text" /><br><br>
                                                         <label for="password" tabindex="-1" style="font-size:1.2em"><b>Пароль:</b></label>
                                                 </div>
-                                                        <input aria-required="true" id="password" class="ui-widget ui-widget-content ui-corner-all" name="password" style="height: 24px;" type="password" /><br><br>
-                                                        <input type="submit" id="submit_settings" style="display: none;">
+                                                        <input aria-required="true" id="password" class="ui-widget ui-widget-content ui-corner-all" name="password" style="height: 24px;" type="password" /><br><br>                                                        
                                                         <button id="logon_btn" >Войти</button>	
                                 </form>
                             </div>
