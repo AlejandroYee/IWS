@@ -1,30 +1,31 @@
-/*
-* Copyright (c) 2013 - Andrey Boomer - andrey.boomer at gmail.com
-* icq: 454169
+// ==ClosureCompiler==
+// @compilation_level SIMPLE_OPTIMIZATIONS
+/**
+* @license Andrey Lysikov (C) 2014
 * Licensed under the MIT license:
 *   http://www.opensource.org/licenses/mit-license.php
-
-v1.0 - release 24.01.2013
-v1.1 - 11.02.2013
-	 - добавлена перезагрузка формы после отсылки файла
-	   чтобы не приходилось перезагружать страницу
-
-Использование:
-$(<element>).jInputFile();
-
-Параметры:
-url - Путь к обработчику POST
-filename - Имя файла для загрузки в пост
-iframe - Метод загрузки: если true то фреймом
-heigth - Высота элемента в пикселах
-width - Ширина в пикселах
-		
-Возвращаемые функции:
-success: Загрузка завершена
-selected: Когда один из файлов выбран
-
-
+* v1.0 - release 24.01.2013
+* v1.1 - 11.02.2013
+*	 - добавлена перезагрузка формы после отсылки файла
+*	   чтобы не приходилось перезагружать страницу
+*
+* Использование:
+* $(<element>).jInputFile();
+*
+* Параметры:
+* url - Путь к обработчику POST
+* filename - Имя файла для загрузки в пост
+* iframe - Метод загрузки: если true то фреймом
+* heigth - Высота элемента в пикселах
+* width - Ширина в пикселах
+*		
+* Возвращаемые функции:
+* success: Загрузка завершена
+* selected: Когда один из файлов выбран
 */
+//jsHint options
+/*jshint evil:true, eqeqeq:false, eqnull:true, devel:true */
+/*global jQuery */
 
 (function($) { 
 	$.widget("ui.jInputFile", {  
@@ -50,9 +51,9 @@ selected: Когда один из файлов выбран
 										// Создаем дочернюю копию элемента инпута
 										self.element.parent().find('iframe')
 										.contents().find('body').append($("<form />").attr({ 
-												method:'POST',			
-												action: self.options.url,
-												enctype:'multipart/form-data'
+												'method':'POST',			
+												'action': self.options.url,
+												'enctype':'multipart/form-data'
 										}).css('overflow','hidden'))
 										.children('form').append(self.element.clone(true).attr({ 
 												'name':self.options.filename,
@@ -64,13 +65,13 @@ selected: Когда один из файлов выбран
 										// Добавлем кнопки субмита и сброса формы:
 										self.element.parent().find('iframe').contents().find('body').children('form')
 										.append($('<input />').attr({
-												type:'submit',
-												value:'Загрузить',
-												class:'submit'												
+												'type':'submit',
+												'value':'Загрузить',
+												'class':'submit'												
 										}).hide()).append($('<input />').attr({
-												type:'reset',
-												value:'Отчистить',
-												class:'reset'
+												'type':'reset',
+												'value':'Отчистить',
+												'class':'reset'
 										}).hide());
 								// Считаем количество перезагрузок
 								self.options.reloaded =  self.options.reloaded + 1;
@@ -79,7 +80,7 @@ selected: Когда один из файлов выбран
 		
 		
 		} else {
-			this.element.wrap($('<form />').attr({	style: 'heigth: '+ this.options.heigth +'px;width: '+ this.options.width +'px', enctype: 'multipart/form-data' }));
+			this.element.wrap($('<form />').attr({	'style': 'heigth: '+ this.options.heigth +'px;width: '+ this.options.width +'px', 'enctype': 'multipart/form-data' }));
 			this._create_ajax_from(this);
 		}
 	},
@@ -110,9 +111,9 @@ selected: Когда один из файлов выбран
 			self.element.attr('name',self.options.filename);
 		}
 		self.element.after($('<input />').attr({
-												type:'reset',
-												value:'Отчистить',
-												class:'reset'
+												'type':'reset',
+												'value':'Отчистить',
+												'class':'reset'
 										}).hide());
 										
 		self.element.after('<button class="jInputFile-fakeButton">Загрузить файл...</button><div class="jInputFile-filename" style="font-size:80%">невыбран файл</div>');
