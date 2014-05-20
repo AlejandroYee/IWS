@@ -4,13 +4,14 @@
         overflow-x: hidden; 
 	position: fixed;
         top:0px;
+        font-size:12px;
+        white-space:wrap;
         z-index: 500;
 }
 
 .slidebar-item {
 	padding: 14px;
         margin: 1px;
-        text-wrap: wrap;
         cursor: pointer;
         width: 89%;
 }
@@ -26,7 +27,7 @@
         padding: 0;
         margin: 0;
 	margin-left: 12px;
-	list-style-type: none;       
+	list-style-type: none;
 }
 
 .slidebar-menu, .slidebar-item, .slidebar {	

@@ -1,10 +1,13 @@
-/*
-* Copyright (c) 2014 - Andrey Boomer - andrey.boomer at gmail.com
-* icq: 454169
+// ==ClosureCompiler==
+// @compilation_level SIMPLE_OPTIMIZATIONS
+/**
+* @license Andrey Lysikov (C) 2014
 * Licensed under the MIT license:
 *   http://www.opensource.org/licenses/mit-license.php
 */
-
+//jsHint options
+/*jshint evil:true, eqeqeq:false, eqnull:true, devel:true */
+/*global jQuery */
 (function($) { 
 	$.widget("ui.SlidebarMenu", {  
 	// Опции по умолчанию
@@ -52,35 +55,44 @@
                 if (elm_menu.text() === "") {
                     elm_menu.addClass('ui-state-default slidebar-item slidebar-item-empty').css('float',o.position).css('background-image','none');     
                 } else {
-                    elm_menu.addClass('ui-state-default slidebar-item').css('float',o.position).css('background-image','none');
-                    pls = elm_menu.children('a').html();
-                    elm_menu.children('a').empty().append($('<span />').append(pls));
+                    elm_menu.addClass('ui-state-default slidebar-item').css('float',o.position).css('background-image','none');                    
+                    clc = elm_menu.children('a').attr('onClick');
+                    if (elm_menu.parent()[0].localName === "div") {
+                        pls = elm_menu.children('a').html();
+                        elm_menu.children('a').empty().append($('<span />').append(pls));
+                        elm_menu.width(w.element.width());
+                    }
                     elm_menu.children('a').find('span').css('float',o.position);  
-                    if (elm_menu.children('a').attr('onClick') !== '') {                        
-                            elm_menu.attr('onClick',elm_menu.children('a').attr('onClick'));
+                    if (clc !== '') {                        
+                            elm_menu.attr('onClick',clc);
                     }
                     elm_menu.children('a').removeAttr('onClick');                    
                     elm_menu.on({
-                        'mouseenter': function() {                        
+                        'mouseenter': function(event) {  
+                            w._eventHandler(event, $(this));
                             elm_menu.addClass('ui-state-hover');                      
                         },
-                        'mouseleave': function() {                        
+                        'mouseleave': function(event) {          
+                            w._eventHandler(event, $(this));
                             elm_menu.removeClass('ui-state-hover');
                         },
-                        'touchend click': function(){
+                        'touchend click': function(event){
+                            w._eventHandler(event, $(this));
                             var elm = $(this);
                             if (elm.attr('has_menu') === 'true') {
-                                var next_element = elm.next('ul');
-                                elm.addClass('ui-state-active');                             
-                               if (next_element.attr('opened') === 'true') {
+                                var next_element = elm.next('ul');                                                            
+                               if (next_element.attr('opened') === 'true') { 
+                                    elm.children('a').children('.ui-icon-circlesmall-minus').removeClass('ui-icon-circlesmall-minus').addClass('ui-icon-circlesmall-plus');
                                     next_element.slideUp(o.animation_amount);                                
                                     elm.removeClass('ui-state-active');
                                     next_element.attr('opened',false);               
                                } else {
                                     elm.parent().children('ul[opened]').slideUp(o.animation_amount).attr('opened',false);
                                     elm.parent().children('.ui-state-active').removeClass('ui-state-active');
-                                    next_element.slideDown(o.animation_amount);                                      
+                                    next_element.slideDown(o.animation_amount);  
+                                    elm.children('a').children('.ui-icon-circlesmall-plus').removeClass('ui-icon-circlesmall-plus').addClass('ui-icon-circlesmall-minus');
                                     next_element.attr('opened',true);
+                                    elm.addClass('ui-state-active'); 
                                }   
                                return false;
                             } else {
@@ -92,11 +104,12 @@
                         var sub_menu = elm_menu.children('ul');
                             sub_menu.addClass('slidebar-menu');
                         elm_menu.attr('has_menu',true);
-                        elm_menu.children('a').append($('<span>').attr({
-                            'class':'ui-icon ui-icon-triangle-1-s',
+                        $('<span>').attr({
+                            'class':'ui-icon ui-icon-circlesmall-plus',
                             'style':'float:left'
-                        }));
-                        sub_menu.insertAfter(elm_menu).hide().attr('opened',false);;
+                        }).insertBefore(elm_menu.children('a').children('span:first'));
+                        sub_menu.insertAfter(elm_menu).hide().attr('opened',false);
+                        elm_menu.css('border','0px');
                         w._CreateMenu(sub_menu);
                     } else {
                         elm_menu.css('border','0px');
