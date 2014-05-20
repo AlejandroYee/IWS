@@ -33,7 +33,6 @@ if ($main_db->get_param_view("cache_enable") == "checked" and isset($_SESSION["D
 <meta name="description" content="Интелектуальная веб система. Интерфейс обмена и работы с sql базой данны" />
 <meta name="document-state" content="Dynamic" />
 <meta name="robots" content="noindex,follow" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" >
 <link rel="icon" type="image/x-icon" href="<?=ENGINE_HTTP?>/<?=$main_db -> get_settings_val("ROOT_CONFIG_FAVICON")?>" />
 <link rel="Bookmark" type="image/x-icon" href="<?=ENGINE_HTTP?>/<?=$main_db -> get_settings_val("ROOT_CONFIG_FAVICON")?>" />
 <link rel="shortcut icon" type="image/x-icon" href="<?=ENGINE_HTTP?>/<?=$main_db -> get_settings_val("ROOT_CONFIG_FAVICON")?>" />
