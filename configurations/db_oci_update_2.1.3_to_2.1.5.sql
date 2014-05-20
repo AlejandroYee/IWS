@@ -1,5 +1,5 @@
 /*
-Файл обновления БД с версии 2.1.3 до версии 2.1.3
+Файл обновления БД с версии 2.1.3 до версии 2.1.5
 */
 update WB_SETTINGS w set w.value = '2.1.5' where w.short_name = 'ROOT_DB_VERSION';
 ALTER TRIGGER T_B_U_WB_FORM_FIELD_ERR DISABLE;
