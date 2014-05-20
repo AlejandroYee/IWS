@@ -367,7 +367,7 @@ class BasicFunctions {
                 if ($user_auth -> is_user() === true) { 
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery-ui-timepicker-addon.js'></script>\n";
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery-ui-timepicker-ru.js'></script>\n";		
-                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.fileUpload.js'></script>\n";						
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.fileUpload.".$min.".js'></script>\n";						
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.jqGrid.locale-ru.js'></script>\n";        	
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.mask.min.js'></script>\n";	
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.fileDownload.js'></script>\n";				
