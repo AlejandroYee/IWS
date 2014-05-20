@@ -1,23 +1,14 @@
-/* jshint forin:true, noarg:true, noempty:true, eqeqeq:true, boss:true, undef:true, curly:true, browser:true, jquery:true */
-/*
- * jQuery MultiSelect UI Widget 1.14pre
- * Copyright (c) 2012 Eric Hynds
- *
- * http://www.erichynds.com/jquery/jquery-ui-multiselect-widget/
- *
- * Depends:
- *   - jQuery 1.4.2+
- *   - jQuery UI 1.8 widget factory
- *
- * Optional:
- *   - jQuery UI effects
- *   - jQuery UI position utility
- *
- * Dual licensed under the MIT and GPL licenses:
- *   http://www.opensource.org/licenses/mit-license.php
- *   http://www.gnu.org/licenses/gpl.html
- *
- */
+// ==ClosureCompiler==
+// @compilation_level SIMPLE_OPTIMIZATIONS
+/**
+* @license Andrey Lysikov (C) 2014
+* Licensed under the MIT license:
+*   http://www.opensource.org/licenses/mit-license.php
+* Based on jQuery MultiSelect UI Widget: http://www.erichynds.com/jquery/jquery-ui-multiselect-widget/
+*/
+//jsHint options
+/*jshint evil:true, eqeqeq:false, eqnull:true, devel:true */
+/*global jQuery */
 (function($, undefined) {
 
   var multiselectID = 0;
@@ -61,14 +52,17 @@
       this._namespaceID = this.eventNamespace || ('multiselect' + multiselectID);
       var el_div = (this.button_span = $('<span />')).insertAfter(el);
       var button = (this.button = $('<button />'))
-            .addClass('ui-multiselect ui-button ui-widget ui-state-default ui-corner-all')
+            .addClass('ui-multiselect ui-button ui-widget ui-state-default ui-button-text-only ui-corner-left')
             .addClass(o.classes)
-            .attr({ 'title':el.attr('title'), 'aria-haspopup':true, 'tabIndex':el.attr('tabIndex')})    
+            .attr({ 'title':el.attr('title'), 'aria-haspopup':true, 'tabIndex':el.attr('tabIndex')})
+            .append('<span class="ui-button-text">'+o.noneSelectedText+'</span>')
             .appendTo(el_div),  
         button_arrow = (this.button_arrow = $('<button />'))
-            .addClass('ui-multiselect ui-button ui-widget ui-state-default ui-corner-all')
+            .addClass('ui-multiselect ui-button ui-widget ui-state-default ui-button-icon-only ui-corner-right')
             .addClass(o.classes)
-            .attr({ 'title':el.attr('title'), 'aria-haspopup':true, 'tabIndex':el.attr('tabIndex') })    
+            .attr({ 'title':el.attr('title'), 'aria-haspopup':true, 'tabIndex':el.attr('tabIndex') })
+            .append('<span class="ui-button-icon-primary ui-icon ui-icon-triangle-1-s"></span>')
+            .append('<span class="ui-button-text">'+o.noneSelectedText+'</span>')
             .appendTo(el_div),  
         menu = (this.menu = $('<div />'))
           .addClass('ui-multiselect-menu ui-widget ui-widget-content ui-corner-all')
@@ -97,10 +91,10 @@
           .addClass('ui-multiselect-checkboxes ui-helper-reset')
           .appendTo(menu);
 
-        button.button({label:o.noneSelectedText}).height(o.height_button).css('padding','0px');
-        button_arrow.button({label:o.noneSelectedText,text: false,icons: {primary: "ui-icon-triangle-1-s"}}).height(o.height_button).css('padding','0px');
-        
-        el_div.buttonset();
+        button.height(o.height_button).css('margin-right','0px');
+        button.css('padding','0px');
+        button_arrow.css('border-left','0px');
+        button_arrow.height(o.height_button).css('padding','0px');
         
         // perform event bindings
         this._bindEvents();
@@ -112,16 +106,20 @@
         if(!o.multiple) {
           menu.addClass('ui-multiselect-single');
         }
-/*
+
 	if ('resizable' in jQuery.ui && !$.browser.msie) {
             menu.resizable({
-                resize: function( event, ui ) {						
-                                $(this).children('ul').height(ui.size.height);
-                                o.height = ui.size.height;
-                }		
+                resize: function( event, ui ) {
+                        if ($(this).children('.ui-multiselect-hasfilter').is(':visible')) {
+                            $(this).children('ul').height(o.height - $(this).children('.ui-multiselect-hasfilter').height() - 10);                           
+                        } else {
+                            $(this).children('ul').height(o.height);
+                        }
+                    o.height = ui.size.height;
+                }
             });
       }
- */
+ 
         // bump unique ID
         multiselectID++;
     },
@@ -314,17 +312,15 @@
         mouseenter: function() {
           if(!button.hasClass('ui-state-disabled')) {
             $(this).addClass('ui-state-hover');
-          }
+             button2.addClass('ui-state-hover');
+          }         
         },
         mouseleave: function() {
-          $(this).removeClass('ui-state-hover');
+                $(this).removeClass('ui-state-hover');
+                button2.removeClass('ui-state-hover'); 
         },
-        focus: function() {
-          if(!button.hasClass('ui-state-disabled')) {
-            $(this).addClass('ui-state-focus');
-          }
-        },
-        blur: function() {
+        focus: function () {
+          $(this).css('outline','none');
           $(this).removeClass('ui-state-focus');
         }
       });
@@ -344,20 +340,18 @@
           }
         },
         mouseenter: function() {
-          if(!button.hasClass('ui-state-disabled')) {
+          if(!button2.hasClass('ui-state-disabled')) {
             $(this).addClass('ui-state-hover');
+             button.addClass('ui-state-hover');
           }
         },
         mouseleave: function() {
-          $(this).removeClass('ui-state-hover');
+                $(this).removeClass('ui-state-hover');
+                button.removeClass('ui-state-hover');
         },
-        focus: function() {
-          if(!button.hasClass('ui-state-disabled')) {
-            $(this).addClass('ui-state-focus');
-          }
-        },
-        blur: function() {
-          $(this).removeClass('ui-state-focus');
+        focus: function () {
+            $(this).css('outline','none');
+            $(this).removeClass('ui-state-focus');
         }
       });
 
@@ -414,7 +408,6 @@
           case 9: // tab
             case 27: // esc
             self.close();
-            button.focus();
           break;
           case 38: // up
             case 40: // down
@@ -633,6 +626,7 @@
     open: function(e) {
       var self = this;
       var button = this.button;
+      var button2 = this.button_arrow;
       var menu = this.menu;
       var speed = this.speed;
       var o = this.options;
@@ -642,7 +636,10 @@
       if(this._trigger('beforeopen') === false || button.hasClass('ui-state-disabled') || this._isOpen) {
         return;
       }
-
+      this.button.addClass('ui-state-active');
+      this.button_arrow.addClass('ui-state-active');
+     
+      
       var $container = menu.find('ul').last();
       var effect = o.show;
 
@@ -657,7 +654,7 @@
       if(effect) {
         args = [ effect, speed ];
       }
-
+      
       // set the scroll of the checkbox container
       $container.scrollTop(0).height(o.height);
 
@@ -674,8 +671,7 @@
       if (!o.multiple && typeof($(menu).find('.ui-state-active').position()) !== 'undefined') {
  	  	$container.scrollTop($(menu).find('.ui-state-active').position().top);
       }
-      
-      button.addClass('ui-state-active');
+            
       this._isOpen = true;
       this._trigger('open');
     },
@@ -702,12 +698,13 @@
       }
 
       $.fn.hide.apply(this.menu, args);
-      this.button.removeClass('ui-state-active').trigger('blur').trigger('mouseleave');
-		// fire change on the select box
-		if (o.fireChangeOnClose && this.didChanged) {
-			this.element.trigger('change');
-			this.didChanged = false;
-		}
+      this.button.removeClass('ui-state-hover ui-state-active');
+      this.button_arrow.removeClass('ui-state-hover ui-state-active');
+        // fire change on the select box
+        if (o.fireChangeOnClose && this.didChanged) {
+                this.element.trigger('change');
+                this.didChanged = false;
+        }
       this._isOpen = false;
       this._trigger('close');
     },
@@ -873,13 +870,13 @@
       if (opts.has_clear_button) {
           clear_but = $('<span />').attr({
                     'class':'ui-icon ui-icon-closethick',
-                    'style':'float:left;top:8px;left:150px;position: absolute; cursor: pointer;'
+                    'style':'float:left;top:8px;left:'+(opts.width+120)+'px;position: absolute; cursor: pointer;'
                 }).on("click", function() {
                     $(this).parent().find('input').val('').click();                                        
                 });
         }
       // wrapper elem
-      var wrapper = (this.wrapper = $('<div class="ui-multiselect-filter">' + (opts.label.length ? opts.label : '') + '</div>')
+      var wrapper = (this.wrapper = $('<div class="ui-multiselect-filter"></div>')
                 .append('<input placeholder="'+opts.placeholder+'" type="search"' + (/\d/.test(opts.width) ? 'style="width:'+opts.width+'px"' : '') + ' />')
                 .append(clear_but)
                 .prependTo(this.header));
