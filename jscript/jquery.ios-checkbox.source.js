@@ -1,10 +1,13 @@
-﻿/*
-* Copyright (c) 2014 - Andrey Boomer - andrey.boomer at gmail.com
-* icq: 454169
+// ==ClosureCompiler==
+// @compilation_level SIMPLE_OPTIMIZATIONS
+/**
+* @license Andrey Lysikov (C) 2014
 * Licensed under the MIT license:
 *   http://www.opensource.org/licenses/mit-license.php
 */
-
+//jsHint options
+/*jshint evil:true, eqeqeq:false, eqnull:true, devel:true */
+/*global jQuery */
 (function($) { 
 	$.widget("ui.iosCheckbox", { 
 	options: { 
