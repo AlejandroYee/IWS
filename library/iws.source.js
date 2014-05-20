@@ -1,9 +1,14 @@
-/*
-* Autor Andrey Lysikov (C) 2014
+// ==ClosureCompiler==
+// @compilation_level SIMPLE_OPTIMIZATIONS
+/**
+* @license Andrey Lysikov (C) 2014
 * Licensed under the MIT license:
 *   http://www.opensource.org/licenses/mit-license.php
 * Part of IWS system
 */
+//jsHint options
+/*jshint evil:true, eqeqeq:false, eqnull:true, devel:true */
+/*global jQuery */
 jQuery.uiBackCompat = false;
 jQuery.jgrid.no_legacy_api = true;
 
@@ -226,7 +231,9 @@ $(function() {
                 
                 $('body').width(doc_width).height(doc_height);                
                 $('.user_login').css({ top: doc_height/2 - 175, left: doc_width/2 - 200 });
-                
+                if ($.browser.msie) {
+                    $('.post_form_login').css('top','110px');
+                }
                 // Для убыстрения отрисовки нам может быть передан идентификатор вкладки. (а может и нет) так что в
 		// случае когда его нет берем текущую
 		if (typeof(id_tab) === 'undefined')  id_tab = $($(".ui-tabs-panel[aria-expanded='true']"));                
@@ -658,47 +665,62 @@ $(function() {
                                 custom_alert('Необходимо указать имя пользователя!');                                
                                 $('#loading_text').empty();
                                 $('#login_form').fadeIn(500);
+                                return false;
                         }		
                         if (pass.replace(/\s/g,'') === '') {
                             custom_alert('Необходимо указать пароль!');                            
                             $('#loading_text').empty();
                             $('#login_form').fadeIn(500);
-                        }		
-                        if (usr.replace(/\s/g,'') !== '' && pass.replace(/\s/g,'') !== '') {   
-                                    $.ajax({
-                                                        url: 'ajax.saveparams.php?act=login',
-                                                        datatype:'json',
-                                                        data: { username: $('#username').val(), password:  $('#password').val() },
-                                                        cache: false,
-                                                        type: 'POST',
-                                                                success: function(data) {                                                                    
-                                                                      if (data != 'true') {                                                                              
-                                                                          custom_alert('Неверное имя пользователя или пароль!');                                                                          
-                                                                          $('#loading_text').empty();
-                                                                          $('#login_form').fadeIn(500);
-                                                                       } else {   
-                                                                            setTimeout(function() {                                                                                
-                                                                                 $('#loading').fadeIn(300);
-                                                                            }, 500);                                                            
-                                                                            setTimeout(function() {                                                                                     
-                                                                                 $.ajax({
-                                                                                        success: function(s){
-                                                                                            $('body').html(s);
-                                                                                            // cleanup:
-                                                                                            $('body').children('meta').remove();                                                                                            
-                                                                                            $('body').children('link[rel!="stylesheet"]').remove();
-                                                                                            $('body').children('title').remove();
-                                                                                            $('head').children('style[type="text/css"]').remove();
-                                                                                            $('head').children('link[rel="stylesheet"]').remove();
-                                                                                            $('head').children('link[rel="stylesheet"]').remove();
-                                                                                            $('head').children('script[type="text/javascript"]').remove();
-                                                                                        }
-                                                                                    });
-                                                                            }, 1000);                                                                                
-                                                                      }	
-                                                                }
-                                        });
+                            return false;
                         }
+                        var specialChars = "<>@!#$%^&*()_+[]{}?:;|'\"\\,./~`-=";
+                            var check = function(string){
+                             for(i = 0; i < specialChars.length;i++){
+                               if(string.indexOf(specialChars[i]) > -1){
+                                   return true;
+                                }
+                             }
+                             return false;
+                            };
+                        if (check(pass) === true) {
+                            custom_alert('Пароль содержит один или несколько символов которые недопустимы для логина в систему. Например символы ".",",","&#60;","&#62;" а также некотоые другие специальные символы.');                            
+                            $('#loading_text').empty();
+                            $('#login_form').fadeIn(500);
+                            return false;
+                        }
+                        $.ajax({
+                                            url: 'ajax.saveparams.php?act=login',
+                                            datatype:'json',
+                                            data: { username: $('#username').val(), password:  $('#password').val() },
+                                            cache: false,
+                                            type: 'POST',
+                                                    success: function(data) {                                                                    
+                                                          if (data != 'true') {                                                                              
+                                                              custom_alert('Неверное имя пользователя или пароль!');                                                                          
+                                                              $('#loading_text').empty();
+                                                              $('#login_form').fadeIn(500);
+                                                           } else {   
+                                                                setTimeout(function() {                                                                                
+                                                                     $('#loading').fadeIn(300);
+                                                                }, 500);                                                            
+                                                                setTimeout(function() {                                                                                     
+                                                                     $.ajax({
+                                                                            success: function(s){
+                                                                                $('body').html(s);
+                                                                                // cleanup:
+                                                                                $('body').children('meta').remove();                                                                                            
+                                                                                $('body').children('link[rel!="stylesheet"]').remove();
+                                                                                $('body').children('title').remove();
+                                                                                $('head').children('style[type="text/css"]').remove();
+                                                                                $('head').children('link[rel="stylesheet"]').remove();
+                                                                                $('head').children('link[rel="stylesheet"]').remove();
+                                                                                $('head').children('script[type="text/javascript"]').remove();
+                                                                            }
+                                                                        });
+                                                                }, 1000);                                                                                
+                                                          }	
+                                                    }
+                            });                        
                      }, 1000);
                      return false;
         });

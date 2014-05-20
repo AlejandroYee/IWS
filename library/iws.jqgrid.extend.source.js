@@ -1,9 +1,11 @@
-/*
-* Autor Andrey Lysikov (C) 2014
+// ==ClosureCompiler==
+// @compilation_level SIMPLE_OPTIMIZATIONS
+/**
+* @license Andrey Lysikov (C) 2014
 * Licensed under the MIT license:
 *   http://www.opensource.org/licenses/mit-license.php
 * Part of IWS system
-* 
+* Based on jqgrid: https://github.com/tonytomov/jqGrid
 * from jqgrid we need only modules:
 * grid.base,
 * grid.custom (setGridState,GridUnload,GridDestroy,clearBeforeUnload,sortGrid,setColProp,getColProp,destroyFrozenColumns,setGroupHeaders,destroyGroupHeader),
@@ -13,6 +15,9 @@
 * grid.jqueryui,
 * grid.fmatter
 */
+//jsHint options
+/*jshint evil:true, eqeqeq:false, eqnull:true, devel:true */
+/*global jQuery */
                 
 $.jgrid.extend({
 editGridRow : function(rowid, p){
