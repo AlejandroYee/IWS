@@ -91,10 +91,10 @@
           .addClass('ui-multiselect-checkboxes ui-helper-reset')
           .appendTo(menu);
 
-        button.height(o.height_button).css('margin-right','0px');
+        button.css('margin-right','0px');   
+        button_arrow.css('padding','0px');
         button.css('padding','0px');
         button_arrow.css('border-left','0px');
-        button_arrow.height(o.height_button).css('padding','0px');
         
         // perform event bindings
         this._bindEvents();
@@ -870,7 +870,7 @@
       if (opts.has_clear_button) {
           clear_but = $('<span />').attr({
                     'class':'ui-icon ui-icon-closethick',
-                    'style':'float:left;top:8px;left:'+(opts.width+120)+'px;position: absolute; cursor: pointer;'
+                    'style':'float:left;top:8px;left:'+(opts.width+100)+'px;position: absolute; cursor: pointer;'
                 }).on("click", function() {
                     $(this).parent().find('input').val('').click();                                        
                 });
