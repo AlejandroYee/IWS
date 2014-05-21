@@ -139,7 +139,7 @@ if (!$user_auth -> is_user()) {
       } else {
         echo "<script type='text/javascript'>enable_menu = false;user_not_logget = false;</script>";
      }
-     if ($main_db->get_param_view("slidebar_rigsht") == "checked") {
+     if ($main_db->get_param_view("slidebar_right") == "checked") {
         echo "<script type='text/javascript'>slidebar = 'right';</script>";
      }
  }

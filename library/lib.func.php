@@ -478,6 +478,7 @@ class BasicFunctions {
                         </select>
                         <p><label for="random_theme" style="font-size:80%;margin:0 5px 0 0" >Использовать случайную тему</label><input type="checkbox" name="random_theme" id="random_theme" <?=$db->get_param_view("random_theme") ?>></p>                        
                         <p><label for="editabled" style="font-size:80%;margin:0 5px 0 0" >Отображать нередактируемые поля</label><input type="checkbox" name="editabled" id="editabled" <?=$db->get_param_view("editabled") ?>></p>
+                        <p><label for="slidebar_right" style="font-size:80%;margin:0 5px 0 0" >Поместить "Slide" меню справа</label><input type="checkbox" name="slidebar_right" id="slidebar_right" <?=$db->get_param_view("slidebar_right") ?>><br /></p>
                         <p><label for="enable_menu" style="font-size:80%;margin:0 5px 0 0" >Включить обычное меню</label><input type="checkbox" name="enable_menu" id="enable_menu" <?=$db->get_param_view("enable_menu") ?>><br /></p>
                         <p><label for="spinner">Количество месяцев в окне выбора дат: </label><input id="num_mounth" size="2" name="num_mounth" value = "<?=$db->get_param_view("num_mounth")?>" />
                         <p><label for="spinner2">Количество записей на страницу: </label><input id="num_reck" size="2" name="num_reck" value = "<?=$db->get_param_view("num_reck")?>" /></p>		
