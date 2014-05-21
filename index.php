@@ -40,7 +40,7 @@ if ($main_db->get_param_view("cache_enable") == "checked" and isset($_SESSION["D
 <?=BasicFunctions::get_css()?>
 <?=BasicFunctions::get_scripts($user_auth)?>
 <style type="text/css">
-            #loading{background:#fff url(<?=ENGINE_HTTP?>/library/ajax-loader-tab.gif) no-repeat center center;height:100%;position:absolute;width:100%;z-index:100}
+            #loading{background:#fff url(<?=ENGINE_HTTP?>/library/ajax-loader-tab.gif) no-repeat center center;height:100%;position:absolute;width:100%;z-index:900}
             html,body{font-size:12px;margin:0;overflow:hidden;padding:0;}
             a{cursor:pointer}
             .loader_tab{background:url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;height:100%;position:absolute;width:100%;z-index:100}
