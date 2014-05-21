@@ -65,7 +65,7 @@ if ($main_db->get_param_view("cache_enable") == "checked" and isset($_SESSION["D
             .ui-jqgrid tr.jqgrow,.ui-state-active{cursor:default}	
             .DataTD .ace_editor{left:-5px}
             .navicon-line {width: 18px;height: 2px; border:0px;border-radius: 1px; margin-bottom: 2px; cursor:pointer;}
-            .tab-nav-sb {width: 26px;float: left;padding: 6px;cursor:pointer;margin-bottom: 1px;}
+            .tab-nav-sb {width: 26px;padding: 6px;cursor:pointer;margin-bottom: 1px;}
             li, li li, li li li {list-style-type: none;} 
             <?php 
             switch ($main_db->get_param_view("render_type")) {
@@ -138,6 +138,9 @@ if (!$user_auth -> is_user()) {
         echo "<script type='text/javascript'>enable_menu = true;user_not_logget = false;</script>";
       } else {
         echo "<script type='text/javascript'>enable_menu = false;user_not_logget = false;</script>";
+     }
+     if ($main_db->get_param_view("slidebar_rigsht") == "checked") {
+        echo "<script type='text/javascript'>slidebar = 'right';</script>";
      }
  }
 ?>
