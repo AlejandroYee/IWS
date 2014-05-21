@@ -18,6 +18,7 @@ var alert_enabled = 0;
 var hidden_menu = false;
 var user_not_logget = true;
 var main_menu_higth;
+var slidebar = 'left';
 var doc_height;
 var doc_width;
 var doc_title = null;
@@ -252,7 +253,7 @@ $(function() {
                     id_tab.attr({need_redraw:false}).children(".navigation_header").height(30);
                 }
 		//  Основные оверлеи
-		$(".dialog_jqgrid_overlay,.ui-widget-overlay").height(doc_height - main_menu_higth - 88).width(doc_width - 24).offset({ top: main_menu_higth + 30 + 50, left: 12 });
+		$(".dialog_jqgrid_overlay").height(doc_height - main_menu_higth - 88).width(doc_width - 24).offset({ top: main_menu_higth + 30 + 50, left: 12 });
                  
 		// Прячем полосу прокрутки
                 id_tab.css('overflow','hidden');
@@ -484,11 +485,13 @@ $(function() {
                             } else {
                                 return false;
                             }
-                        }
+                        },
+                        'position': slidebar,
+                        'resizable':true
                     }).SlidebarMenu("open");
                     
                     // Кнопка меню
-                    $("#tabs").children(".ui-tabs-nav").append("<div class='tab-nav-sb sb-toggle' title='Главное меню'><div class='ui-state-active navicon-line sb-toggle'></div><div class='ui-state-active navicon-line sb-toggle'></div><div class='ui-state-active navicon-line sb-toggle'></div></div>");
+                    $("#tabs").children(".ui-tabs-nav").append("<div class='tab-nav-sb sb-toggle' style='float: " + slidebar + ";' title='Главное меню'><div class='ui-state-active navicon-line sb-toggle'></div><div class='ui-state-active navicon-line sb-toggle'></div><div class='ui-state-active navicon-line sb-toggle'></div></div>");
       
                     $('.sb-toggle').click(function() {
                         $('.slidebarmenu').SlidebarMenu('toggle');
@@ -507,8 +510,11 @@ $(function() {
 	$(window).resize(function () {
                 $(".ui-tabs-panel").attr({need_redraw:true});
                 doc_height = $(window).height();
-		doc_width = $(window).width() - 2;
-		redraw_document($(".ui-tabs-panel[aria-expanded='true']"));			
+		doc_width = $(window).width() - 2;                
+		redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
+                if (!enable_menu) {
+                    $('.slidebarmenu').SlidebarMenu("resize");
+                }
 	});
         
         // Для окна логина
@@ -582,17 +588,25 @@ $(function() {
 
         // Обработка мультиселекта и кнопки настроек
         $("#themeselector").multiselect({multiple: false, header: false, selectedList: 1});
+        $("#editabled,#cache_enable,#slidebar_right").iosCheckbox(); 
         $("#random_theme").iosCheckbox({
             checked: function() {
-                $("#themeselector").multiselect('enable');
+                $("#themeselector").multiselect('disable');
             },
             unchecked: function() {
-                $("#themeselector").multiselect('disable');
-            }
+                $("#themeselector").multiselect('enable');
+            }            
         });
         
-        $("#editabled,#cache_enable,#enable_menu").iosCheckbox();        
- 
+        $("#enable_menu").iosCheckbox({
+            checked: function() {
+                $("#slidebar_right").iosCheckbox('disable');
+            },
+            unchecked: function() {
+                $("#slidebar_right").iosCheckbox('enable');
+            }
+        });      
+        
         $("#renderer").slider({
             range: "min",
             value: $("#render_type").val(),
