@@ -68,7 +68,6 @@ if ($main_db->get_param_view("cache_enable") == "checked" and isset($_SESSION["D
             .tab-nav-sb {width: 26px;padding: 6px;cursor:pointer;margin-bottom: 1px;}
             li, li li, li li li {list-style-type: none;} 
             <?php 
-            if (($main_db->get_param_view("render_type") > 2) and (!strrpos(HTTP_USER_AGENT, 'MSIE') == "")) $main_db -> set_param_view("render_type",2); // Проверка на эксплорер
             switch ($main_db->get_param_view("render_type")) {
             case 2:echo "            * {border-radius: 0 !important;box-shadow: none !important;}";break;
             case 1:echo "            *:not(.ui-icon) {border-radius: 0 !important;box-shadow: none !important;background-repeat: no-repeat !important;background-image: none !important; }";break;
