@@ -46,16 +46,20 @@
             }
         },
         check: function() {
-            this.span_element.addClass('ui-state-active');
-            this.small_element.css('left',(this.options.width/2) + 'px');
-            this.element.attr('checked','checked');
-            this._trigger("unchecked", null);
+            if (!this.span_element.hasClass('ui-state-disabled')) {
+                    this.span_element.addClass('ui-state-active');
+                    this.small_element.css('left',(this.options.width/2) + 'px');
+                    this.element.attr('checked','checked');
+                    this._trigger("checked", null);
+            }
         },
         uncheck: function() {
-            this.span_element.removeClass('ui-state-active');
-            this.small_element.css('left','1px');
-            this.element.removeAttr('checked');
-            this._trigger("checked", null);
+            if (!this.span_element.hasClass('ui-state-disabled')) {
+                this.span_element.removeClass('ui-state-active');
+                this.small_element.css('left','1px');
+                this.element.removeAttr('checked');
+                this._trigger("unchecked", null);
+            }
         },
         refresh:function(){
             if (this.element.attr("checked") !== "checked") {
@@ -63,6 +67,12 @@
             } else {
                 this.check();
             }
+        },
+        disable:function() {
+            this.span_element.addClass('ui-state-disabled');
+        },
+        enable:function() {
+            this.span_element.removeClass('ui-state-disabled');
         },
         status:function() {
             if (this.span_element.hasClass('ui-state-active')) {
