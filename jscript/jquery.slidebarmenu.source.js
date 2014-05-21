@@ -15,35 +15,45 @@
                 position:'left',
                 width: '15',
                 bodyElement:'#slidebarmenu-body',
-                animation_amount: 500,
+                animation_amount: 300,
+                minwidth:250,
+                resizable:false,
                 onClose:null,
                 onOpen:null
         },
 	_create: function() {
             var elem = this;
             var self = elem.element;
-            var $bdy = $(this.options.bodyElement);
+            var bdy = $(this.options.bodyElement);
+            var widt = $(window).width();
             
-            if (this.options.position === "left") {
-                var left = '-' +  $(window).width()/100*this.options.width;
+            if (widt/100 * this.options.width > this.options.minwidth) {
+                self.width(widt/100 * this.options.width);
             } else {
-                var left = $(window).width();
+                self.width(this.options.minwidth);
             }
-            self.addClass('ui-widget ui-state-default slidebar');    
+            if (this.options.position === "left") {
+                var left = '-' +  self.width();                
+                bdy.width(widt - self.width() - left);
+            } else {
+                var left = widt;
+                bdy.width(widt);
+            }
+            self.css('left',left + 'px');  
+            self.addClass('ui-widget ui-state-default slidebar slidebar-animate');    
             self.css('background-image','none');
-            self.css('left',left + 'px');
-            self.css('width', this.options.width + '%');
-            $bdy.css('position','relative');
-            self.hide();
-            this._CreateMenu(self); //creating menu
-            //events
-            self.on('touchend click', function(event) {
-                elem._eventHandler(event, $(this)); 
-                elem.toggle(); 
-	    });
-		
-	    $bdy.on('touchend click', function(event) {
-                elem._eventHandler(event, $(this));
+            bdy.addClass('slidebar-animate').css('position','relative');
+             if (this.options.resizable) {
+                var hand = (this.options.position === "left")?'e':'w';
+                self.resizable({							
+                           handles: hand,	
+                           resize: function( event, ui ) {	
+                               elem.resize(ui.size.width);
+                           }
+                });
+            }           
+            this._CreateMenu(self); //creating menu           		
+	    bdy.on('click', function(event) {
                 elem.close();
             });
 	},
@@ -53,46 +63,44 @@
            $.each( self.children('li'), function() {   
                 var elm_menu = $(this);               
                 if (elm_menu.text() === "") {
-                    elm_menu.addClass('ui-state-default slidebar-item slidebar-item-empty').css('float',o.position).css('background-image','none');     
+                    elm_menu.addClass('ui-state-default slidebar-item slidebar-item-empty').css('float','left').css('background-image','none');     
                 } else {
-                    elm_menu.addClass('ui-state-default slidebar-item').css('float',o.position).css('background-image','none');                    
+                    elm_menu.addClass('ui-state-default slidebar-item').css('float','left').css('background-image','none');                    
                     clc = elm_menu.children('a').attr('onClick');
                     if (elm_menu.parent()[0].localName === "div") {
                         pls = elm_menu.children('a').html();
                         elm_menu.children('a').empty().append($('<span />').append(pls));
-                        elm_menu.width(w.element.width());
+                        elm_menu.width('100%');
                     }
-                    elm_menu.children('a').find('span').css('float',o.position);  
+                    elm_menu.children('a').find('span').css('float','left');  
                     if (clc !== '') {                        
                             elm_menu.attr('onClick',clc);
                     }
                     elm_menu.children('a').removeAttr('onClick');                    
                     elm_menu.on({
                         'mouseenter': function(event) {  
-                            w._eventHandler(event, $(this));
                             elm_menu.addClass('ui-state-hover');                      
                         },
-                        'mouseleave': function(event) {          
-                            w._eventHandler(event, $(this));
+                        'mouseleave': function(event) {
                             elm_menu.removeClass('ui-state-hover');
                         },
-                        'touchend click': function(event){
-                            w._eventHandler(event, $(this));
+                        'click': function(event){
                             var elm = $(this);
                             if (elm.attr('has_menu') === 'true') {
                                 var next_element = elm.next('ul');                                                            
                                if (next_element.attr('opened') === 'true') { 
-                                    elm.children('a').children('.ui-icon-circlesmall-minus').removeClass('ui-icon-circlesmall-minus').addClass('ui-icon-circlesmall-plus');
-                                    next_element.slideUp(o.animation_amount);                                
+                                    elm.children('a').children('.ui-icon-circlesmall-minus').removeClass('ui-icon-circlesmall-minus').addClass('ui-icon-circlesmall-plus');                                                                    
                                     elm.removeClass('ui-state-active');
-                                    next_element.attr('opened',false);               
+                                    next_element.attr('opened',false);        
+                                    next_element.slideUp(o.animation_amount);       
                                } else {
-                                    elm.parent().children('ul[opened]').slideUp(o.animation_amount).attr('opened',false);
-                                    elm.parent().children('.ui-state-active').removeClass('ui-state-active');
-                                    next_element.slideDown(o.animation_amount);  
+                                    elm.parent().children('ul[opened]').attr('opened',false).slideUp(o.animation_amount)
+                                                .prev().children('a').children('.ui-icon-circlesmall-minus').removeClass('ui-icon-circlesmall-minus').addClass('ui-icon-circlesmall-plus');
+                                    elm.parent().children('.ui-state-active').removeClass('ui-state-active');                                    
                                     elm.children('a').children('.ui-icon-circlesmall-plus').removeClass('ui-icon-circlesmall-plus').addClass('ui-icon-circlesmall-minus');
                                     next_element.attr('opened',true);
                                     elm.addClass('ui-state-active'); 
+                                    next_element.slideDown(o.animation_amount);
                                }   
                                return false;
                             } else {
@@ -102,7 +110,7 @@
                       });       
                     if (elm_menu.children('ul').length > 0 ) {        
                         var sub_menu = elm_menu.children('ul');
-                            sub_menu.addClass('slidebar-menu');
+                            sub_menu.addClass('slidebar-menu showUp');
                         elm_menu.attr('has_menu',true);
                         $('<span>').attr({
                             'class':'ui-icon ui-icon-circlesmall-plus',
@@ -119,11 +127,41 @@
 	    });
               
         },
-        _eventHandler: function (event, selector) {
-			event.stopPropagation();
-			event.preventDefault();
-			if (event.type === 'touchend') selector.off('click');
-	},
+        resize: function(widt_elem) {
+            var self = this.element;
+            var bdy = $(this.options.bodyElement);
+            var widt = $(window).width();
+            
+            if (typeof(widt_elem) === 'undefined') {
+               widt_elem = self.width();
+            } 
+            
+            if (widt_elem > this.options.minwidth) {
+                  self.width(widt_elem);
+              } else {
+                  self.width(this.options.minwidth);
+            }   
+            if (self.attr('active') !== 'true') {
+                if (this.options.position === "left") {
+                    var left = '-' + self.width();
+                    bdy.css('left',0 + 'px'); 
+                } else {
+                    var left = widt;
+                    bdy.css('left',widt + 'px'); 
+                }
+                bdy.width(widt);
+            } else {
+                 if (this.options.position === "left") {
+                     var left = 0;
+                     bdy.css('left',+(left + self.width())+ 'px'); 
+                } else {
+                     var left = widt -  self.width();
+                     bdy.css('left',+(-self.width())+ 'px');
+                }
+                bdy.width(widt);                
+            }
+            self.css('left',left + 'px'); 
+        },
         toggle: function() {
             var self = this.element;              
             if (self.attr('active') === 'false' || self.attr('active') === undefined) {
@@ -158,58 +196,43 @@
                 }
             }
         },
-        _animate_hide: function () {            
-            var o = this.options;
+        _animate_hide: function () {
             var self = this.element;
-            var $bdy = $(this.options.bodyElement);
-            var selector = $bdy.add(self); 
-            var amount;
-            if (o.position === 'left') {
-                amount = '-' + $(window).width()/100 * o.width;
-            } else {
-                amount = $(window).width();
-            }
-            self.stop().animate({
-                        left: amount
-                    }, o.animation_amount); 
-            $bdy.stop().animate({
-                        left:0
-                    }, o.animation_amount); 
-                    
+            var bdy = $(this.options.bodyElement);                       
+            var widt = $(window).width();
+            if (this.options.position === "left") {
+                    var left = '-' + self.width();
+                    bdy.css('left',0 + 'px'); 
+                } else {
+                    var left = widt;
+                    bdy.css('left',widt + 'px'); 
+                }
+              bdy.width(widt);
+              self.css('left',left + 'px');
             setTimeout(function() { 
-                    self.hide();
                     self.attr('active',false);
-                }, o.animation_amount);       
+                }, this.options.animation_amount);       
         },
-        _animate_show: function() {           
-            var o = this.options;
+        _animate_show: function() { 
             var self = this.element;
-            var $bdy = $(this.options.bodyElement);
-            var selector = $bdy.add(self);  
-            if (o.position === 'left') {
-                var amount = '+=' + $(window).width()/100 * o.width;
-            } else {
-                var amount = '-=' + $(window).width()/100 * o.width;                
-            }
-            self.show();
-            selector.stop().animate({
-                left: amount
-            }, o.animation_amount);
+            var bdy = $(this.options.bodyElement);            
+            var widt = $(window).width();
+            if (this.options.position === "left") {
+                    var left = 0;
+                    bdy.css('left',+(left + self.width())+ 'px'); 
+               } else {
+                    var left = widt -  self.width();
+                    bdy.css('left',+(-self.width())+ 'px');
+               }
+               bdy.width(widt);    
+            self.css('left',left + 'px'); 
+           
             setTimeout(function() { 
                     self.attr('active',true);
-            }, o.animation_amount);  
+            }, this.options.animation_amount);  
         },
-	// Если нам вернули опцию, то заменяем ее
 	_setOption: function(option, value) {  
-		$.Widget.prototype._setOption.apply( this, arguments );  
-		/*switch (option) {  
-			case "width":  
-				if (this.options.iframe) {					
-					this.element.parent().find('iframe')
-										.contents().find('body').children('form').attr('action',value);
-				}				
-			break; 
-		} */ 
+            $.Widget.prototype._setOption.apply( this, arguments );
 	} 	
 	
 	}); 
