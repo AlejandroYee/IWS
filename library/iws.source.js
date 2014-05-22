@@ -687,7 +687,7 @@ $(function() {
                             $('#login_form').fadeIn(500);
                             return false;
                         }
-                        var specialChars = "<>@!#$%^&*()_+[]{}?:;|'\"\\,./~`-=";
+                        var specialChars = "<>!#$%^&*()+[]{}?:;|'\",.~`-=";
                             var check = function(string){
                              for(i = 0; i < specialChars.length;i++){
                                if(string.indexOf(specialChars[i]) > -1){
