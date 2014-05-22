@@ -386,24 +386,26 @@ class BasicFunctions {
             //--------------------------------------------------------------------------------------------------------------------------------------------  
             public static function get_theme($db,$user_auth) {
                 $res = "";
-                define("THEMES_DIR","/themes");
+                if (!defined('THEMES_DIR')) {
+                    define("THEMES_DIR","themes");
+                }
                 if ($user_auth -> is_user() === true and !empty($db -> user_real_name) and $db->get_param_view("random_theme") != "checked") { 
                         if ((trim($db->get_param_view("theme")) != "") and ( is_file(ENGINE_ROOT . "/" . $db->get_param_view("theme")) )) {	
                                 $res .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP . "/" . str_ireplace("\\", "/", $db->get_param_view("theme"))."\" /> \n";						
                         } else {
-                                $dh  = opendir(ENGINE_ROOT.THEMES_DIR."/");
+                                $dh  = opendir(ENGINE_ROOT."/".THEMES_DIR."/");
                                 while (false !== ($file = readdir($dh))) {
                                     if (($file == ".") or ($file == "..")) continue;				
-                                      if (is_dir(THEMES_DIR."/" . $file)) {				  
-                                            $dh_sub  = opendir(THEMES_DIR."/" . $file);
+                                      if (is_dir("/".THEMES_DIR."/" . $file)) {				  
+                                            $dh_sub  = opendir("/".THEMES_DIR."/" . $file);
                                             while (false !== ($file_t = readdir($dh_sub))) {
                                                     if (($file_t == ".") or ($file_t == "..")) continue;						
                                                     if (strrpos($file_t,".css") !== false) {
                                                         // Попытаемся найти дефолтную темку						
                                                             if (trim(strtolower($file)) == "smoothness") {
-                                                                    $theme_first = THEMES_DIR."/" .$file. "/" .$file_t;	
+                                                                    $theme_first = "/".THEMES_DIR."/" .$file. "/" .$file_t;	
                                                             }
-                                                            if (empty($theme_first)) $theme_first =  THEMES_DIR."/" .$file. "/" .$file_t;
+                                                            if (empty($theme_first)) $theme_first =  "/".THEMES_DIR."/" .$file. "/" .$file_t;
                                                     }	
                                                     }
                                             }
@@ -415,19 +417,19 @@ class BasicFunctions {
                         }
                 } else {
                     $theme_first = array();         
-                    $dh  = opendir(ENGINE_ROOT.THEMES_DIR."/");
+                    $dh  = opendir(ENGINE_ROOT."/".THEMES_DIR."/");
                     while (false !== ($file = readdir($dh))) {
                         if (($file == ".") or ($file == "..")) { 
                                 continue;                                                    
                         }
-                        if (is_dir(ENGINE_ROOT.THEMES_DIR. "/" . $file)) {
-                              $dh_sub  = opendir(ENGINE_ROOT.THEMES_DIR. "/" . $file);
+                        if (is_dir(ENGINE_ROOT."/".THEMES_DIR. "/" . $file)) {
+                              $dh_sub  = opendir(ENGINE_ROOT."/".THEMES_DIR. "/" . $file);
                               while (false !== ($file_t = readdir($dh_sub))) {
                                       if (($file_t == ".") or ($file_t == "..")) {
                                               continue;
                                       }
                                       if (strpos($file_t,".css") > 0) { 
-                                                      $theme_first['theme_file'][] = THEMES_DIR. "/" .$file. "/" .$file_t;
+                                                      $theme_first['theme_file'][] = "/".THEMES_DIR. "/" .$file. "/" .$file_t;
                                                       $theme_first['theme_name'][] = $file;
                                                       break;
                                               }	
