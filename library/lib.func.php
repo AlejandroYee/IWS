@@ -7,7 +7,7 @@
 */
 
 ini_set('max_execution_time', 2100);
-ini_set('display_errors','Off');
+ini_set('display_errors','On');
 ini_set('session.gc_probability', 1);
 ini_set("session.use_only_cookies", 1);
 date_default_timezone_set('Europe/Moscow');
@@ -60,8 +60,8 @@ if (PHP_SAPI === 'cli' || (!isset($_SERVER['DOCUMENT_ROOT']) && !isset($_SERVER[
 
 session_name(str_replace(array(".",",","-"),"_",CONFIG));
 session_start(); 
-set_error_handler('my_error_handler');
-set_exception_handler('my_exception_handler');
+//set_error_handler('my_error_handler');
+//set_exception_handler('my_exception_handler');
 register_shutdown_function('end_timer');
 
 require_once(ENGINE_ROOT."/config.".CONFIG.".php");  
@@ -390,14 +390,14 @@ class BasicFunctions {
                     define("THEMES_DIR","themes");
                 }
                 if ($user_auth -> is_user() === true and !empty($db -> user_real_name) and $db->get_param_view("random_theme") != "checked") { 
-                        if ((trim($db->get_param_view("theme")) != "") and ( is_file(ENGINE_ROOT . "/" . $db->get_param_view("theme")) )) {	
-                                $res .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP . "/" . str_ireplace("\\", "/", $db->get_param_view("theme"))."\" /> \n";						
+                        if ((trim($db->get_param_view("theme")) != "") and ( is_file(ENGINE_ROOT . "/" . $db->get_param_view("theme")) )) {
+                                $res .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ENGINE_HTTP . "/" . str_ireplace("\\", "/", $db->get_param_view("theme"))."\" /> \n";
                         } else {
                                 $dh  = opendir(ENGINE_ROOT."/".THEMES_DIR."/");
                                 while (false !== ($file = readdir($dh))) {
-                                    if (($file == ".") or ($file == "..")) continue;				
-                                      if (is_dir("/".THEMES_DIR."/" . $file)) {				  
-                                            $dh_sub  = opendir("/".THEMES_DIR."/" . $file);
+                                    if (($file == ".") or ($file == "..")) continue;
+                                      if (is_dir(ENGINE_ROOT."/".THEMES_DIR ."/" . $file . "/")) {
+                                            $dh_sub  = opendir(ENGINE_ROOT."/".THEMES_DIR."/" . $file."/");
                                             while (false !== ($file_t = readdir($dh_sub))) {
                                                     if (($file_t == ".") or ($file_t == "..")) continue;						
                                                     if (strrpos($file_t,".css") !== false) {
