@@ -269,7 +269,9 @@
                                     stoped = false;
                             }
                     }
-        } else {
+        } 
+        if (value === "") {
+            value = o.noneSelectedText;
         }
         this.button.children('.ui-button-text').text(value); 
     },

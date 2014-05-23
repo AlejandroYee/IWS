@@ -18,6 +18,7 @@ var alert_enabled = 0;
 var hidden_menu = false;
 var user_not_logget = true;
 var main_menu_higth;
+var enable_menu = false;
 var slidebar = 'left';
 var doc_height;
 var doc_width;
