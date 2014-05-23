@@ -7,7 +7,7 @@
 */
 
 ini_set('max_execution_time', 2100);
-ini_set('display_errors','On');
+ini_set('display_errors','Off');
 ini_set('session.gc_probability', 1);
 ini_set("session.use_only_cookies", 1);
 date_default_timezone_set('Europe/Moscow');
@@ -60,8 +60,8 @@ if (PHP_SAPI === 'cli' || (!isset($_SERVER['DOCUMENT_ROOT']) && !isset($_SERVER[
 
 session_name(str_replace(array(".",",","-"),"_",CONFIG));
 session_start(); 
-//set_error_handler('my_error_handler');
-//set_exception_handler('my_exception_handler');
+set_error_handler('my_error_handler');
+set_exception_handler('my_exception_handler');
 register_shutdown_function('end_timer');
 
 require_once(ENGINE_ROOT."/config.".CONFIG.".php");  
