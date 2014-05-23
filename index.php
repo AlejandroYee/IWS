@@ -17,8 +17,9 @@ if ($main_db->get_param_view("cache_enable") == "checked" and isset($_SESSION["D
  }
  
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html class="no-js" lang="en-US">                                                                                                                                            
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html class="no-js" lang="ru-RU" xmlns="http://www.w3.org/1999/xhtml">                                                                                                                                            
 <head>
 <meta charset="<?=strtolower(HTML_ENCODING)?>" />
 <title>IWS - <?=$main_db -> get_settings_val('ROOT_CONFIG_NAME')?></title>
@@ -136,12 +137,12 @@ if (!$user_auth -> is_user()) {
     $DataGrid -> __destruct();
     if ($main_db->get_param_view("enable_menu") == "checked") {
         echo "<script type='text/javascript'>enable_menu = true;user_not_logget = false;</script>";
-      } else {
-        echo "<script type='text/javascript'>enable_menu = false;user_not_logget = false;</script>";
-     }
-     if ($main_db->get_param_view("slidebar_right") == "checked") {
+    } else {
+        echo "<script type='text/javascript'>user_not_logget = false;</script>";
+    }
+    if ($main_db->get_param_view("slidebar_right") == "checked") {
         echo "<script type='text/javascript'>slidebar = 'right';</script>";
-     }
+    }
  }
 ?>
 </body>
