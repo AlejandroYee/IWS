@@ -356,8 +356,8 @@ class BasicFunctions {
                         } else {
                             $min = "min";
                 }  echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery-2.1.1.min.js'></script>\n";	
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery-ui-1.11.min.js'></script>\n";                   
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.mb.browser.min.js'></script>\n"; 
-                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery-ui-1.11.min.js'></script>\n";                 
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.jqGrid.min.js'></script>\n";
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.multiselect.".$min.".js'></script>\n";  
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.ios-checkbox.".$min.".js'></script>\n";  
