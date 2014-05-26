@@ -98,7 +98,7 @@ while ($main_db -> sql_fetch($query)) {
    	if (($main_db -> sql_result($query, "FIELD_NAME") <> "R_NUM") and ( isset($input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")]) or
                 isset($_FILES[$main_db -> sql_result($query, "FIELD_NAME")])) or ($main_db -> sql_result($query, "FIELD_NAME") == "ID_PARENT")) {
             if ($main_db -> sql_result($query, "FIELD_NAME") != "ID_PARENT" and isset($input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")])) {
-				$value =  iconv(HTML_ENCODING,LOCAL_ENCODING,$input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")]); // кодировочку меняем                
+				$value =  str_ireplace("'","&#39;",iconv(HTML_ENCODING,LOCAL_ENCODING,$input_post[$main_db -> sql_result($query, "FIELD_NAME_ID")])); // кодировочку меняем                
             }    else {
 				$value = "";
 			}
@@ -276,7 +276,7 @@ if (!empty($file_data_path) and !empty($file_data_field)) {
 if (!empty($data_action)) {
 	$main_db_2 = new db(true);	
 	BasicFunctions::end_session();
-    $to_exec = str_ireplace("&#39;", "'", str_replace(":ID_".$table_name,"'$id_mm'",$data_action));        
+        $to_exec = str_ireplace("&#39;", "'", str_replace(":ID_".$table_name,"'$id_mm'",$data_action));        
 	$return_id = $main_db_2 -> sql_execute($to_exec);	
 	$main_db_2 -> __destruct();	
 }
