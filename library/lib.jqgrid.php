@@ -290,7 +290,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                 },
                                 url: '<?=ENGINE_HTTP?>/ajax.data.grid.php?type=<?=$type?>&pageid=<?=$this ->pageid?>&id_mm_fr=<?=$this ->id_mm_fr?>&id_mm_fr_d=<?=$this ->id_mm_fr_d?>&id_mm=<?=$this ->id_mm?>',	
                                 loadtext: '',                                
-                                onSelectRow: function(ids) {
+                                onSelectRow: function(ids) {   
+                                  
                                     // Узнаем тип грида
                                     var grid_type = $("#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + $(this).attr('id') + "']").attr('form_type');
                                     var tree_leaf =  $('#<?=$object_name?>').jqGrid('getRowData', ids).isLeaf;
@@ -489,6 +490,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                             $(this).attr('need_update','true');
                                                     });
                                             }
+                                            redraw_document($(".ui-tabs-panel[aria-expanded='true']"));  
                                   }											
                                             })	
                             .jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
@@ -694,13 +696,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 											onClickButton : function (){
                                                                                             $('#<?=$object_name?>').jqGrid('columnChooser',{
                                                                                             done : function () {																	
-                                                                                                                    redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
-                                                                                                                    <?php
-                                                                                                                            // Если нужна автоширина, то запускаем перерасчет
-                                                                                                                            if ($this->db_conn->get_param_view("width_enable") == "checked") {
-                                                                                                                                    ?> auto_width_grid('<?=$object_name?>'); <?php		
-                                                                                                                            }
-                                                                                                                    ?>
+                                                                                                                    redraw_document($(".ui-tabs-panel[aria-expanded='true']"));                                                                                                                   
                                                                                                             }
                                                                                             }); 
 											}
