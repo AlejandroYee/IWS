@@ -694,7 +694,7 @@ $(function() {
                             $('#login_form').fadeIn(500);
                             return false;
                         }
-                        var specialChars = "<>!#$%^&*()+[]{}?:;|'\",.~`-=";
+                        var specialChars = "<>()+[]{}:;|'\"~`-=";
                             var check = function(string){
                              for(i = 0; i < specialChars.length;i++){
                                if(string.indexOf(specialChars[i]) > -1){
@@ -704,7 +704,7 @@ $(function() {
                              return false;
                             };
                         if (check(pass) === true) {
-                            custom_alert('Пароль содержит один или несколько символов которые недопустимы для логина в систему. Например символы ".",",","&#60;","&#62;" а также некотоые другие специальные символы.');                            
+                            custom_alert('Пароль содержит один или несколько символов которые недопустимы для логина в систему. Например символы "&#60;","&#62;" а также некотоые другие специальные символы.');                            
                             $('#loading_text').empty();
                             $('#login_form').fadeIn(500);
                             return false;
