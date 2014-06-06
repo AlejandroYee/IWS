@@ -109,7 +109,7 @@ if (!$user_auth -> is_user()) {
     $DataGrid = new Data_form();
     BasicFunctions::get_about_html($main_db); 
     BasicFunctions::get_user_options($main_db);
-  //  BasicFunctions::check_version($main_db);
+    BasicFunctions::check_version($main_db);
     if (defined("OFFINE_START_DATE") and defined("OFFINE_END_DATE") and (date("d.m.Y",time()) === date("d.m.Y",OFFINE_START_DATE)) and (time() <= OFFINE_END_DATE)) {
         echo("<div  id=\"dialog_offline\" title='Запланированные работы:'><p><b>Уважаемый пользователь.</b><br /><br />C ".date("H:i:s",OFFINE_START_DATE)." по ".date("H:i:s",OFFINE_END_DATE)."<br />");
         echo("Система будет находится в оффлайне для:<br /><b>".OFFINE_MESSAGE." </b><br /><br />Приносим свои извенения за доставленное неудобство,по возможности завершите работу с системой до указанного времени.");
