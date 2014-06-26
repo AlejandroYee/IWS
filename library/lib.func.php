@@ -356,8 +356,9 @@ class BasicFunctions {
                         } else {
                             $min = "min";
                 }  echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery-2.1.1.min.js'></script>\n";	
-                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery-ui-1.11.min.js'></script>\n";                   
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery-ui-1.11.min.js'></script>\n"; 
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.mb.browser.min.js'></script>\n"; 
+                   echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.transit.min.js'></script>\n"; 
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.jqGrid.min.js'></script>\n";
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.multiselect.".$min.".js'></script>\n";  
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/jscript/jquery.ios-checkbox.".$min.".js'></script>\n";  
@@ -379,6 +380,7 @@ class BasicFunctions {
                 }  
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/library/iws.".$min.".js' ></script>\n";
                    echo "<script type='text/javascript' src='".ENGINE_HTTP."/library/iws.jqgrid.extend.".$min.".js'></script>\n";
+                   
             }
             //--------------------------------------------------------------------------------------------------------------------------------------------	
             // Получаем тему пользователя
@@ -533,7 +535,8 @@ class BasicFunctions {
                             <a href="https://github.com/ehynds/jquery-ui-multiselect-widget" target="_blank">JQuery UI multiselect</a>,		
                             <a href="http://www.flotcharts.org/" target="_blank">FlotCharts</a>
                             <a href="http://keith-wood.name/calculator.html" target="_blank">jQuery Calculator</a>
-                            <a href="https://github.com/pupunzi/jquery.mb.browser/" target="_blank">jQuery browser</a>                            
+                            <a href="https://github.com/pupunzi/jquery.mb.browser/" target="_blank">jQuery browser</a>          
+                            <a href="http://ricostacruz.com/jquery.transit/" target="_blank">jQuery transit</a>   
                     </div>
                     <b>Подключенные модули:</b><br>
                     <div class="ui-widget-content" style="height:110px;overflow: auto;font-size:80%;padding: .5em 1em; text-align:left;position: relative;">
