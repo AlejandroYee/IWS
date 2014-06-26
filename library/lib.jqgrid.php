@@ -773,8 +773,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 	}
 	?>
           // События при нажатии кнопок:
-          $('#<?=$object_name?>').keyup(function(eventObject){
-                      //console.log(eventObject);
+          $('#<?=$object_name?>').keydown(function(eventObject){              
              switch (eventObject.keyCode)
             {
                 case 86: // view
@@ -790,7 +789,9 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 		  $('#<?=$object_name?>_edit_button').click();	
 		break;
                 case 67: // copy
-		   $('#<?=$object_name?>_copy_button').click();	
+                    if (eventObject.ctrlKey === false) {
+                        $('#<?=$object_name?>_copy_button').click();	
+                    }
 		break;                
                 case 46: // del
                    $('#<?=$object_name?>_delite_button').click();
