@@ -852,38 +852,58 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
  * http://docs.jquery.com/ui/menu#theming
  */
 
-
 .ui-menu {
 	list-style: none;
-	padding: 2px;
-	margin: 1px;
+	padding: 0;
+	margin: 0;
 	display: block;
 	outline: none;
 }
 .ui-menu .ui-menu {
-	margin-top: -3px;
 	position: absolute;
 }
 .ui-menu .ui-menu-item {
-	margin: 1px;
-	width: 100%;
+	position: relative;
+	margin: 0;
+	padding: 3px 1em 3px .4em;
+	cursor: pointer;
+	min-height: 0; /* support: IE7 */
+	/* support: IE10, see #8844 */
+	list-style-image: url("data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7");
 }
 .ui-menu .ui-menu-divider {
-	margin: 5px -2px 5px -2px;
+	margin: 5px 0;
 	height: 0;
 	font-size: 0;
 	line-height: 0;
 	border-width: 1px 0 0 0;
 }
-.ui-menu .ui-menu-item a {
-	text-decoration: none;
-	display: block;
-	margin: 2px;
-	border: 1px solid  #ffffff;
-	padding: 2px .4em;
-	line-height: 1.5;
-	min-height: 0; /* support: ie7 */
-	font-weight: normal;
+.ui-menu .ui-state-focus,
+.ui-menu .ui-state-active {
+	margin: -1px;
+}
+
+/* icon support */
+.ui-menu-icons {
+	position: relative;
+}
+.ui-menu-icons .ui-menu-item {
+	padding-left: 2em;
+}
+
+/* left-aligned */
+.ui-menu .ui-icon {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: .2em;
+	margin: auto 0;
+}
+
+/* right-aligned */
+.ui-menu .ui-menu-icon {
+	left: auto;
+	right: 0;
 }
 .ui-menu .ui-menu-item a.ui-state-focus,
 .ui-menu .ui-menu-item a.ui-state-active {
@@ -905,38 +925,6 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
   border-color: #0064cd #0064cd #003f81;
   border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
 }
-
-.ui-menu .ui-state-disabled {
-	font-weight: normal;
-	margin: .4em 0 .2em;
-	line-height: 1.5;
-}
-.ui-menu .ui-state-disabled a {
-	cursor: default;
-}
-
-/* icon support */
-.ui-menu-icons {
-	position: relative;
-}
-.ui-menu-icons .ui-menu-item a {
-	position: relative;
-	padding-left: 2em;
-}
-
-/* left-aligned */
-.ui-menu .ui-icon {
-	position: absolute;
-	top: .2em;
-	left: .2em;
-}
-
-/* right-aligned */
-.ui-menu .ui-menu-icon {
-	position: static;
-	float: right;
-}
-
 /*
  * jquery ui spinner 1.10.0
  *
