@@ -25,7 +25,161 @@ var doc_width;
 var doc_title = null;
 
 $(function() {
-    
+        // Отрисовка окна и вкладок:
+	redraw_document = function (id_tab) {  
+                $('body').width(doc_width).height(doc_height);                
+                $('.user_login').css({ top: doc_height/2 - 175, left: doc_width/2 - 200 });
+                if ($.browser.msie) {
+                    $('.post_form_login').css('top','110px');
+                }
+                // Для убыстрения отрисовки нам может быть передан идентификатор вкладки. (а может и нет) так что в
+		// случае когда его нет берем текущую
+		if (typeof(id_tab) === 'undefined')  id_tab = $($(".ui-tabs-panel[aria-hidden='false']"));
+                if (id_tab.attr('need_redraw') || id_tab.length === 0 ) {
+                    // Основная страница расчет высоты:											
+                    $("#tabs").tabs().height( doc_height - main_menu_higth - 10);
+                    $("#tabs .ui-tabs-panel").height(doc_height - main_menu_higth - 10).width(doc_width - 20);
+
+                    // Для надписи внутри вкладки
+                    $(".about_tabs").offset({ top: doc_height - 50});
+                    $(".about_tabs_ver").offset({ top: doc_height - 25});
+                    
+                    // Содержимое контейнера		
+                    id_tab.children(".tab_main_content").height(doc_height - main_menu_higth - 90).width(doc_width - 20);
+                    id_tab.attr({need_redraw:false}).children(".navigation_header").height(30);
+                }
+		//  Основные оверлеи
+		$(".dialog_jqgrid_overlay").height(doc_height - main_menu_higth - 88).width(doc_width - 24).offset({ top: main_menu_higth + 30 + 50, left: 12 });
+                 
+		// Прячем полосу прокрутки
+                id_tab.css('overflow','hidden');
+                    
+		// Помощь:
+                if (id_tab.find(".help_content").length > 0) {
+                    var hel_ll = id_tab.find(".help_content");    
+                    var help_header = id_tab.children(".ui-accordion-header");                    
+                    var content_hiegth = doc_height - main_menu_higth - 150 - ((help_header.height() * 2.05)* (help_header.length - 1));
+                    hel_ll.height(doc_height - main_menu_higth - 90).width(doc_width - 20);
+                    help_header.width(doc_width - 65);                    
+                    hel_ll.children('.ui-accordion-content').height(content_hiegth).width(doc_width - 87);
+                }
+
+                // Гриды общие	
+		$.each( id_tab.find('.grid_resizer, .grid_resizer_tabs'), function() {
+			var self = $(this);    
+                        var ft      = self.attr('form_type');
+                        var percent = self.attr('percent');
+                        
+                        if (!self.attr('detail_sub_tab')) {
+                             if ((percent < 90 && percent > 10 ) || (self.attr('percent_saved') > 0)) {
+                                            var doc_height_grid = (doc_height - main_menu_higth - 93)/100 * percent;
+                                    } else {
+                                            var doc_height_grid = doc_height - main_menu_higth - 93;
+                             }
+                             doc_width_grid = doc_width - 27;
+                             add_to_koeff = 20;
+                        } else {
+                             percent = percent - (33/(doc_height/100));
+                             doc_height_grid = (doc_height - main_menu_higth - 93)/100 * percent - 23;
+                             doc_width_grid  = doc_width - 48;
+                             add_to_koeff = 0;
+                       }
+			// Коэфициент для грида если открыт фильтр:
+                       if (ft !== "TREE_GRID_FORM_DETAIL" && ft !== "TREE_GRID_FORM") { 
+                            if (self.children('.ui-jqgrid').find('.ui-search-toolbar').css("display") !== 'none' && ft !== "TREE_GRID_FORM_MASTER" ) {
+                                            var coeffd_filtr = 82 + add_to_koeff;
+                                    } else {
+                                            var coeffd_filtr = 55 + add_to_koeff;
+                            }
+                        } else {
+                            // для деревьев кроме мастер дерева
+                             var coeffd_filtr = 82;
+                        }                        
+			self.height(doc_height_grid).width(doc_width_grid);   
+			self.height(doc_height_grid).children('.ui-jqgrid').height(doc_height_grid - 2).width(doc_width_grid)
+										.children('.ui-jqgrid-pager').height(25).width(doc_width_grid)
+							   .parent().children('.ui-jqgrid-view').height(doc_height_grid - 27).width(doc_width_grid)
+										.children('.ui-jqgrid-hdiv').width(doc_width_grid)
+							   .parent().children('.ui-jqgrid-bdiv').height(doc_height_grid - coeffd_filtr).width(doc_width_grid);
+                    var frosen = self.find('.frozen-div');    
+                    $.each( frosen, function() {
+                        var wd = frosen.children('table').width();
+                        var hd = self.find('.ui-jqgrid-titlebar').outerHeight();
+                        frosen.width(wd).css('top',(hd+1)+'px');
+                        frosen.parent().children('.frozen-bdiv').width(wd).height(self.find('.ui-jqgrid-bdiv')[0].clientHeight + 1).css('top',(hd + self.find('.ui-jqgrid-hbox').outerHeight()+1)+'px');
+                    });
+		});		
+
+		$.each($(".grid_resizer[form_type$='_DETAIL'] div.ui-jqgrid-titlebar, .detail_tab .ui-tabs-nav"), function() {
+			if ($(this).children("div[control='window']").length < 1) {	
+				button_htm_down =  $('<span>').attr({
+											'style':'float:right;cursor: pointer',
+											'class':'ui-icon ui-icon-circle-triangle-n',
+											'title':'Распахнуть на все окно/восстановить'
+										}).click(function() {	
+											upper = $(".ui-tabs-panel[aria-hidden='false'] .grid_resizer:first");											
+											downn = $(".ui-tabs-panel[aria-hidden='false'] .grid_resizer:last,.ui-tabs-panel[aria-hidden='false'] .grid_resizer_tabs");
+											$(".ui-tabs-panel[aria-hidden='false'] .ui-icon-circle-triangle-s").show();
+
+											if (upper.attr('percent_saved') > 0) {
+												upper.attr('percent',upper.attr('percent_saved')).removeAttr('percent_saved');
+												downn.attr('percent',downn.attr('percent_saved')).removeAttr('percent_saved');
+												downn.show();												
+												$(this).parent().remove();
+											} else {
+												upper.attr('percent_saved',upper.attr('percent')).attr('percent',0);
+												downn.attr('percent_saved',downn.attr('percent')).attr('percent',100);												
+												upper.hide();
+												$(this).hide();
+											}
+											redraw_document($(".ui-tabs-panel[aria-hidden='false']"));	
+
+										});
+
+				button_htm_up = $('<span>').attr({
+											'style':'float:right;cursor: pointer',
+											'class':'ui-icon ui-icon-circle-triangle-s',
+											'title':'Свернуть/восстановить'
+										}).click(function() {
+											upper = $(".ui-tabs-panel[aria-hidden='false'] .grid_resizer:first");											
+											downn = $(".ui-tabs-panel[aria-hidden='false'] .grid_resizer:last,.ui-tabs-panel[aria-hidden='false'] .grid_resizer_tabs");
+											$(".ui-tabs-panel[aria-hidden='false'] .ui-icon-circle-triangle-n").show();
+
+											if (upper.attr('percent_saved') > 0) {
+												upper.attr('percent',upper.attr('percent_saved')).removeAttr('percent_saved');
+												downn.attr('percent',downn.attr('percent_saved')).removeAttr('percent_saved');
+												upper.show();
+												$(this).show();
+											} else {
+												upper.attr('percent_saved',upper.attr('percent')).attr('percent',100);
+												downn.attr('percent_saved',downn.attr('percent')).attr('percent',0);												
+												downn.hide();
+												$(this).hide();
+												$(".ui-tabs-panel[aria-hidden='false'] div[control='window']").appendTo(upper.find('.ui-jqgrid-titlebar'));												
+											}
+											redraw_document($(".ui-tabs-panel[aria-hidden='false']"));	
+										});
+				$(this).append($('<div control="window" style="float:right;"></div>').append(button_htm_up,button_htm_down));
+			}
+		});
+            // Проверка на открытые вкладки:
+		if (sumtab > 7) {
+                                alert_enabled = 1;
+				$.each($('.navigation_header'), function() {											
+					if ($(this).children('.alert_button').length !== 1) {
+						$(this).append("<div class='alert_button ui-state-error ui-corner-all' style='float:right;width:100px;margin: 6px 15px 5px 5px;' title='Открыто более 7 вкладок одновременно," +
+							"это может сильно замедлить работу системы. По возможности закройте одну или несколько вкладок.'><span class='ui-icon ui-icon-alert' style='float:left'></span>ВНИМАНИЕ!</div>");
+					}
+				});
+			} else {
+				if (alert_enabled > 0) {
+                                    alert_enabled = 0;
+                                    $('.navigation_header .alert_button').remove();
+                                }
+		}
+                
+        };
+        
 	custom_alert = function (output_msg)
 	{
             
@@ -163,7 +317,7 @@ $(function() {
 				var id = 'tabs_' + counttab;	
                                 sumtab++;
 				$( "#tabs").children(".ui-tabs-nav").append(
-								$('<li />').css('style','cursor:default;')                                                                
+								$('<li />').css('style','cursor:default;')                                                          
                                                                 .append ($('<a />').css('style','cursor:default;')   
                                                                             .attr({ href: '#' + id, title: tabTitle, id: 'ui-' + id })   
                                                                             .append('<span style="float:right;left:10px;cursor:default;">'+trim_text(tabTitle,40,3)+'</span>')
@@ -188,7 +342,6 @@ $(function() {
 		}						
 		// ставим тригер на загрузку содержимого вкладки во фрейм
                 $('#'+id).attr({need_redraw:true});
-                redraw_document();
 		$.ajax({
 			  url: tabContentUrl,							  
 			  type: 'GET',
@@ -199,8 +352,8 @@ $(function() {
                                     $('#'+$(this).attr('id')).jqGrid('GridDestroy');
                                 }); 
                                 $('#'+id).empty().css('text-align','left').attr({need_redraw:true});
-                                $('#'+id).append($(data).fadeIn(300));                                        
-                                redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
+                                $('#'+id).append($(data));                                        
+                                redraw_document($(".ui-tabs-panel[aria-hidden='false']"));
                             } else {
                                 // неавторизованы
                                 $(location).prop('href',location.href);  
@@ -215,7 +368,7 @@ $(function() {
 		var panelId = $("#ui-" + id_tab).parent().closest( "li" ).remove().attr( "aria-controls" );
 		$( "#tabs" ).tabs( "refresh" );
                 sumtab--;
-                redraw_document($(".ui-tabs-panel[aria-expanded='true']"));              
+                redraw_document($(".ui-tabs-panel[aria-hidden='false']"));            
                 if ($(".ui-tabs-nav li[aria-selected='true']").length === 0 ) {                
                     document.title = doc_title;
                 } 
@@ -227,163 +380,6 @@ $(function() {
                     $('.slidebarmenu').SlidebarMenu("open");  
                 }
 	};
-        
-	// Отрисовка окна и вкладок:
-	redraw_document = function (id_tab) {                
-                
-                $('body').width(doc_width).height(doc_height);                
-                $('.user_login').css({ top: doc_height/2 - 175, left: doc_width/2 - 200 });
-                if ($.browser.msie) {
-                    $('.post_form_login').css('top','110px');
-                }
-                // Для убыстрения отрисовки нам может быть передан идентификатор вкладки. (а может и нет) так что в
-		// случае когда его нет берем текущую
-		if (typeof(id_tab) === 'undefined')  id_tab = $($(".ui-tabs-panel[aria-expanded='true']"));                
-              
-                if (id_tab.attr('need_redraw') || id_tab.length === 0 ) {
-                    // Основная страница расчет высоты:											
-                    $("#tabs").tabs().height( doc_height - main_menu_higth - 10);
-                    $("#tabs .ui-tabs-panel").height(doc_height - main_menu_higth - 10).width(doc_width - 20);
-
-                    // Для надписи внутри вкладки
-                    $(".about_tabs").offset({ top: doc_height - 50});
-                    $(".about_tabs_ver").offset({ top: doc_height - 25});
-                    
-                    // Содержимое контейнера		
-                    id_tab.children(".tab_main_content").height(doc_height - main_menu_higth - 90).width(doc_width - 20);
-                    id_tab.attr({need_redraw:false}).children(".navigation_header").height(30);
-                }
-		//  Основные оверлеи
-		$(".dialog_jqgrid_overlay").height(doc_height - main_menu_higth - 88).width(doc_width - 24).offset({ top: main_menu_higth + 30 + 50, left: 12 });
-                 
-		// Прячем полосу прокрутки
-                id_tab.css('overflow','hidden');
-                    
-		// Помощь:
-                if (id_tab.find(".help_content").length > 0) {
-                    var hel_ll = id_tab.find(".help_content");    
-                    var help_header = id_tab.children(".ui-accordion-header");                    
-                    var content_hiegth = doc_height - main_menu_higth - 150 - ((help_header.height() * 2.05)* (help_header.length - 1));
-                    hel_ll.height(doc_height - main_menu_higth - 90).width(doc_width - 20);
-                    help_header.width(doc_width - 65);                    
-                    hel_ll.children('.ui-accordion-content').height(content_hiegth).width(doc_width - 87);
-                }
-
-                // Гриды общие	
-		$.each( id_tab.find('.grid_resizer, .grid_resizer_tabs'), function() {
-			var self = $(this);                        
-                        var ft      = self.attr('form_type');
-                        var percent = self.attr('percent');
-                        
-                        if (!self.attr('detail_sub_tab')) {
-                             if ((percent < 90 && percent > 10 ) || (self.attr('percent_saved') > 0)) {
-                                            var doc_height_grid = (doc_height - main_menu_higth - 93)/100 * percent;
-                                    } else {
-                                            var doc_height_grid = doc_height - main_menu_higth - 93;
-                             }
-                             doc_width_grid = doc_width - 27;
-                             add_to_koeff = 20;
-                        } else {
-                             percent = percent - (33/(doc_height/100));
-                             doc_height_grid = (doc_height - main_menu_higth - 93)/100 * percent - 23;
-                             doc_width_grid  = doc_width - 48;
-                             add_to_koeff = 0;
-                       }
-			// Коэфициент для грида если открыт фильтр:
-                       if (ft !== "TREE_GRID_FORM_DETAIL" && ft !== "TREE_GRID_FORM") { 
-                            if (self.children('.ui-jqgrid').find('.ui-search-toolbar').css("display") !== 'none' && ft !== "TREE_GRID_FORM_MASTER" ) {
-                                            var coeffd_filtr = 82 + add_to_koeff;
-                                    } else {
-                                            var coeffd_filtr = 55 + add_to_koeff;
-                            }
-                        } else {
-                            // для деревьев кроме мастер дерева
-                             var coeffd_filtr = 82;
-                        }                        
-			self.height(doc_height_grid).width(doc_width_grid);   
-			self.height(doc_height_grid).children('.ui-jqgrid').height(doc_height_grid - 2).width(doc_width_grid)
-										.children('.ui-jqgrid-pager').height(25).width(doc_width_grid)
-							   .parent().children('.ui-jqgrid-view').height(doc_height_grid - 27).width(doc_width_grid)
-										.children('.ui-jqgrid-hdiv').width(doc_width_grid)
-							   .parent().children('.ui-jqgrid-bdiv').height(doc_height_grid - coeffd_filtr).width(doc_width_grid);
-                    var frosen = self.find('.frozen-div');    
-                    $.each( frosen, function() {
-                        var wd = frosen.children('table').width();
-                        var hd = self.find('.ui-jqgrid-titlebar').outerHeight();
-                        frosen.width(wd).css('top',(hd+1)+'px');
-                        frosen.parent().children('.frozen-bdiv').width(wd).height(self.find('.ui-jqgrid-bdiv')[0].clientHeight + 1).css('top',(hd + self.find('.ui-jqgrid-hbox').outerHeight()+1)+'px');
-                    });
-		});		
-
-		$.each($(".grid_resizer[form_type$='_DETAIL'] div.ui-jqgrid-titlebar, .detail_tab .ui-tabs-nav"), function() {
-			if ($(this).children("div[control='window']").length < 1) {	
-				button_htm_down =  $('<span>').attr({
-											'style':'float:right;cursor: pointer',
-											'class':'ui-icon ui-icon-circle-triangle-n',
-											'title':'Распахнуть на все окно/восстановить'
-										}).click(function() {	
-											upper = $(".ui-tabs-panel[aria-expanded='true'] .grid_resizer:first");											
-											downn = $(".ui-tabs-panel[aria-expanded='true'] .grid_resizer:last,.ui-tabs-panel[aria-expanded='true'] .grid_resizer_tabs");
-											$(".ui-tabs-panel[aria-expanded='true'] .ui-icon-circle-triangle-s").show();
-
-											if (upper.attr('percent_saved') > 0) {
-												upper.attr('percent',upper.attr('percent_saved')).removeAttr('percent_saved');
-												downn.attr('percent',downn.attr('percent_saved')).removeAttr('percent_saved');
-												downn.show();												
-												$(this).parent().remove();
-											} else {
-												upper.attr('percent_saved',upper.attr('percent')).attr('percent',0);
-												downn.attr('percent_saved',downn.attr('percent')).attr('percent',100);												
-												upper.hide();
-												$(this).hide();
-											}
-											redraw_document($(".ui-tabs-panel[aria-expanded='true']"));	
-
-										});
-
-				button_htm_up = $('<span>').attr({
-											'style':'float:right;cursor: pointer',
-											'class':'ui-icon ui-icon-circle-triangle-s',
-											'title':'Свернуть/восстановить'
-										}).click(function() {
-											upper = $(".ui-tabs-panel[aria-expanded='true'] .grid_resizer:first");											
-											downn = $(".ui-tabs-panel[aria-expanded='true'] .grid_resizer:last,.ui-tabs-panel[aria-expanded='true'] .grid_resizer_tabs");
-											$(".ui-tabs-panel[aria-expanded='true'] .ui-icon-circle-triangle-n").show();
-
-											if (upper.attr('percent_saved') > 0) {
-												upper.attr('percent',upper.attr('percent_saved')).removeAttr('percent_saved');
-												downn.attr('percent',downn.attr('percent_saved')).removeAttr('percent_saved');
-												upper.show();
-												$(this).show();
-											} else {
-												upper.attr('percent_saved',upper.attr('percent')).attr('percent',100);
-												downn.attr('percent_saved',downn.attr('percent')).attr('percent',0);												
-												downn.hide();
-												$(this).hide();
-												$(".ui-tabs-panel[aria-expanded='true'] div[control='window']").appendTo(upper.find('.ui-jqgrid-titlebar'));												
-											}
-											redraw_document($(".ui-tabs-panel[aria-expanded='true']"));	
-										});
-				$(this).append($('<div control="window" style="float:right;"></div>').append(button_htm_up,button_htm_down));
-			}
-		});
-            // Проверка на открытые вкладки:
-		if (sumtab > 7) {
-                                alert_enabled = 1;
-				$.each($('.navigation_header'), function() {											
-					if ($(this).children('.alert_button').length !== 1) {
-						$(this).append("<div class='alert_button ui-state-error ui-corner-all' style='float:right;width:100px;margin: 6px 15px 5px 5px;' title='Открыто более 7 вкладок одновременно," +
-							"это может сильно замедлить работу системы. По возможности закройте одну или несколько вкладок.'><span class='ui-icon ui-icon-alert' style='float:left'></span>ВНИМАНИЕ!</div>");
-					}
-				});
-			} else {
-				if (alert_enabled > 0) {
-                                    alert_enabled = 0;
-                                    $('.navigation_header .alert_button').remove();
-                                }
-		}
-                
-        };
 	
 	replace_select_opt_group = function (object) {
 		if (typeof(object) === 'undefined') object = $('body');
@@ -448,7 +444,7 @@ $(function() {
 	//Детальные вкладки
 	set_detail_tab= function() {						
 			$( ".detail_tab" ).tabs({
-					collapsible: true,
+					collapsible: false,
 					heightStyle: "fill",
 					activate: function( event, ui ) {
 						if ($('#' + ui.newTab.attr('aria-controls')).children('.grid_resizer_tabs').attr('need_update') === 'true') {
@@ -518,7 +514,7 @@ $(function() {
                 $(".ui-tabs-panel").attr({need_redraw:true});
                 doc_height = $(window).height();
 		doc_width = $(window).width() - 2;                
-		redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
+		redraw_document($(".ui-tabs-panel[aria-hidden='false']"));
                 if (!enable_menu) {
                     $('.slidebarmenu').SlidebarMenu("resize");
                 }
@@ -669,7 +665,7 @@ $(function() {
           distance: 10,
         stop: function() {
           $( "#tabs" ).tabs( "refresh" );
-          redraw_document($(".ui-tabs-panel[aria-expanded='true']"));	
+          redraw_document($(".ui-tabs-panel[aria-hidden='false']"));	
         }
        }).disableSelection();
 
@@ -771,7 +767,7 @@ $(function() {
                                 style:'float: right;margin: 0px 5px 3px 0px;'
                         }).button({icons: {primary: 'ui-icon-print'},text: false})
                           .click(function() {
-                              var pr_object = $(".ui-tabs-panel[aria-expanded='true'] .tab_main_content").find('.ui-jqgrid-view table, .FormGrid table, .chart').clone();
+                              var pr_object = $(".ui-tabs-panel[aria-hidden='false'] .tab_main_content").find('.ui-jqgrid-view table, .FormGrid table, .chart').clone();
                                   pr_object.removeAttr('height class top left'); 
                                 $(pr_object).printThis({
                                             printContainer: false, 

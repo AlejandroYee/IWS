@@ -42,20 +42,20 @@ if ($main_db->get_param_view("cache_enable") == "checked" and isset($_SESSION["D
 <?=BasicFunctions::get_scripts($user_auth)?>
 <style type="text/css">
             #loading{background:#fff url(<?=ENGINE_HTTP?>/library/ajax-loader-tab.gif) no-repeat center center;height:100%;position:absolute;width:100%;z-index:900}
-            html,body{font-size:12px;margin:0;overflow:hidden;padding:0;}
+            html,body{font-size:12px;overflow:hidden;}
             a{cursor:pointer}
             .loader_tab{background:url(<?=ENGINE_HTTP?>/library/ajax-loader.gif) no-repeat center center;height:100%;position:absolute;width:100%;z-index:100}
-            .ui-widget-content{margin:1px;padding:1px}
-            .ui-menubar {vertical-align:middle;}
+            .ui-widget-content{margin:0px;padding:1px}
+            .ui-menubar {font-weight: normal;vertical-align:middle;}
             .ui-menubar-item{float:left;list-style:none;white-space:nowrap;z-index:102;vertical-align:middle}
-            .ui-menubar .ui-menu{list-style:none;min-width:200px;position:absolute;white-space:nowrap;z-index:102}
-            .ui-menu-item .ui-menu{min-width:200px;z-index:102}
-            .ui-menu{list-style:none;margin:1px;min-width:250px;padding:3px;white-space:nowrap;z-index:101}
+            .ui-menubar .ui-menu{font-weight: normal;list-style:none;min-width:200px;position:absolute;white-space:nowrap;z-index:102}
+            .ui-menu-item .ui-menu{font-weight: normal;min-width:200px;z-index:102}
+            .ui-menu{font-weight: normal;list-style:none;min-width:250px;white-space:nowrap;z-index:101}
+			.ui-state-focus {font-weight: normal;} 
             .ui-dialog .ui-dialog-content{text-align:right}
             .ui-th-column-header{text-align:center}
             .formelement{padding:.3em}
             .ui-pg-button{left:1px}
-            .ui-menu-divider{padding:0}
             .ui-pg-table{border-collapse:separate}
             .ui-tabs .ui-tabs-panel{padding:7px}
             .ui-accordion-header{margin:1px}

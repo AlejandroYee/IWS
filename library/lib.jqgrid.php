@@ -490,7 +490,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                             $(this).attr('need_update','true');
                                                     });
                                             }
-                                            redraw_document($(".ui-tabs-panel[aria-expanded='true']"));  
+                                            redraw_document($(".ui-tabs-panel[aria-hidden='false']"));
                                   }											
                                             })	
                             .jqGrid('navGrid','#Pager_<?=$object_name?>').jqGrid('navButtonAdd','#Pager_<?=$object_name?>',{
@@ -559,11 +559,16 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               title: 'Скопировать выбранную запись в новую запись (Кнопка C)',
                                               buttonicon: 'ui-icon-transferthick-e-w',
                                               onClickButton: function() {
-                                                                        $('#<?=$object_name?>').removeAttr('new_colmodel');
+                                                                        if ($('#<?=$object_name?>').attr('new_colmodel') === "false" || typeof($('#<?=$object_name?>').attr('new_colmodel')) === "undefined" ) {                                                                                                                               
+                                                                                var recreate = false;														
+                                                                                    } else {
+                                                                                var recreate = true;
+                                                                                $('#<?=$object_name?>').removeAttr('new_colmodel');
+                                                                        }
 									row_id = $('#<?=$object_name?>').jqGrid('getGridParam', 'selrow');
                                                     if (row_id !== null) {                    
                                                             $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{
-                                                                                        recreateForm:true,																
+                                                                                        recreateForm:recreate,																
                                                                                         editCaption: "Скопировать запись",																
                                                                                 afterSubmit: function(response, postdata)  {
                                                                                         $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
@@ -696,7 +701,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 											onClickButton : function (){
                                                                                             $('#<?=$object_name?>').jqGrid('columnChooser',{
                                                                                             done : function () {																	
-                                                                                                                    redraw_document($(".ui-tabs-panel[aria-expanded='true']"));                                                                                                                   
+                                                                                                                    redraw_document($(".ui-tabs-panel[aria-hidden='false']"));                                                                                                                 
                                                                                                             }
                                                                                             }); 
 											}
@@ -711,7 +716,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               buttonicon: 'ui-icon-search',
                                               onClickButton: function(){
                                                     $('#<?=$object_name?>').jqGrid()[0].toggleToolbar();
-                                                    redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
+                                                    redraw_document($(".ui-tabs-panel[aria-hidden='false']"));
 					      }}).jqGrid('filterToolbar',{searchOnEnter:true})
 		<?php
 		}
@@ -955,7 +960,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								self.children('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}});
 								self.children('.ui-dialog-buttonpane').find('button:contains("Выполнить")').button({icons: { primary: 'ui-icon-check'}});
 								$($('<div />').attr({'class':'ui-widget-overlay ui-front dialog_jqgrid_overlay ui-corner-all','style':'position:absolute;z-index:99'})).prependTo(self.parent());
-								redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
+								redraw_document($(".ui-tabs-panel[aria-hidden='false']"));
 						}						
 			});
 		});
@@ -1176,7 +1181,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 								self.children('.ui-dialog-buttonpane').find('button:contains("Отмена")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_o_<?=$object_name?>');
 								self.children('.ui-dialog-buttonpane').find('button:contains("Экспортировать")').button({icons: { primary: 'ui-icon-disk'}}).prop('id','btn_e_<?=$object_name?>');
 								$($('<div />').attr({'class':'ui-widget-overlay ui-front dialog_jqgrid_overlay ui-corner-all','style':'position:absolute;z-index:99'})).prependTo(self.parent());
-								redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
+								redraw_document($(".ui-tabs-panel[aria-hidden='false']"));
 						}
 					});	
 					

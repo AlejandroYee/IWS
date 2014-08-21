@@ -157,7 +157,7 @@ editGridRow : function(rowid, p){
 		modal: false,
 		minWidth: 450,
                 width: s_width,
-                appendTo: $(".ui-tabs-panel[aria-expanded='true']").children(".tab_main_content"),
+                appendTo: $(".ui-tabs-panel[aria-hidden='false']").children(".tab_main_content"),
 		closeOnEscape: p.closeOnEscape,
 		resizable: p.resize,
 		buttons: [							 
@@ -255,11 +255,10 @@ editGridRow : function(rowid, p){
 				self.children('.ui-dialog-buttonpane').find('button:contains("'+bCancel+'")').button({icons: { primary: 'ui-icon-close'}}).prop('id','btn_c_'+form_id);
 				self.children('.ui-dialog-buttonpane').find('button:contains("'+bSubmit+'")').button({icons: { primary: 'ui-icon-disk'}}).prop('id','btn_s_'+form_id);
                                 $($('<div />').attr({'class':'ui-widget-overlay ui-front dialog_jqgrid_overlay ui-corner-all','style':'position:absolute;z-index:99'})).prependTo(self.parent());
-                                redraw_document();
+                                redraw_document($(".ui-tabs-panel[aria-hidden='false']"));
 		}
 	});
     };
-    
     
     var form_id = $('#editmod' + grid.attr('id')); 
     if (rowid !== "new") {
@@ -276,7 +275,7 @@ editGridRow : function(rowid, p){
     }
     
     //check if form is created
-    if (p.recreateForm || form_id.length  === 0) {
+    if (p.recreateForm || form_id.length  === 0 || form_id.attr('type_dialog_form') !== rowid ) {
            CreateEditDialog(row_data);
     } else {
       // refresh values  
@@ -316,9 +315,13 @@ editGridRow : function(rowid, p){
     form_id.find('input[name="oper"]').val('edit');
     form_id.find('input[name="id"]').val(rowid);
     
-    // open dialog    
-    $('#dialog_editmod' + grid.attr('id')).dialog( "option", "title",p.editCaption).dialog("open");
-    
+    // open dialog
+    if (rowid !== "new") {
+        var dialog_type = "edit";
+    } else {
+        var dialog_type = "new";  
+    }
+    $('#dialog_editmod' + grid.attr('id')).dialog( "option", "title",p.editCaption).dialog( "open" ).attr('type_dialog_form',dialog_type);
 },
 viewGridRow : function(rowid, p){
     		p = $.extend(true, {			
@@ -427,7 +430,7 @@ viewGridRow : function(rowid, p){
 		autoOpen: true,
 		modal: false,
 		minWidth: 350,
-                appendTo: $(".ui-tabs-panel[aria-expanded='true']").children(".tab_main_content"),
+                appendTo: $(".ui-tabs-panel[aria-hidden='false']").children(".tab_main_content"),
                 title: $.jgrid.view.caption,
 		closeOnEscape: p.closeOnEscape,
 		resizable: p.resize,
@@ -467,7 +470,7 @@ delGridRow : function(rowids,p) {
 		autoOpen: true,
 		modal: false,
 		minWidth: 350,
-                appendTo: $(".ui-tabs-panel[aria-expanded='true']").children(".tab_main_content"),
+                appendTo: $(".ui-tabs-panel[aria-hidden='false']").children(".tab_main_content"),
                 title: $.jgrid.del.caption,
 		closeOnEscape: p.closeOnEscape,
 		resizable: p.resize,
@@ -565,7 +568,7 @@ columnChooser : function(opts) {
         dlg.append(selector).dialog({
 		autoOpen: true,
 		modal: false,
-                appendTo: $(".ui-tabs-panel[aria-expanded='true']").children(".tab_main_content"),
+                appendTo: $(".ui-tabs-panel[aria-hidden='false']").children(".tab_main_content"),
                 title: $.jgrid.col.caption,
                 width:opts.width,
                 height:opts.height,
@@ -1133,7 +1136,7 @@ filterToolbar : function(p){
 					$("th:eq("+index+")",rhth).width( w ); 
 					var btd = $(".ui-jqgrid-btable",$t.grid.fbDiv);
 					$("tr:first td:eq("+index+")",btd).width( w ); 
-                                        redraw_document($(".ui-tabs-panel[aria-expanded='true']"));
+                                        redraw_document($(".ui-tabs-panel[aria-hidden='false']"));
 				});
 				$($t).bind('jqGridSortCol.setFrozenColumns', function (e, index, idxcol) {
 
