@@ -523,12 +523,17 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                                             } else {
                                                                         var recreate = true;
                                                                         $('#<?=$object_name?>').removeAttr('new_colmodel');
-                                                                }     
+                                                                }    
+                                                                if ($("#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + $(this).attr('id') + "']").attr('form_type') === "GRID_FORM_RELOAD" )	{
+                                                                        var reload_submit = true;
+                                                                } else {
+                                                                        var reload_submit = false;
+                                                                }
                                                             $('#<?=$object_name?>').jqGrid('editGridRow','new',{
                                                                                               addedrow:'last',
                                                                                               recreateForm: recreate,
                                                                                               editCaption: "Добавить новую запись",
-                                                                                              reloadAfterSubmit:false,															
+                                                                                              reloadAfterSubmit:reload_submit,															
                                                                                                       afterSubmit: function(response, postdata) {
                                                                                                           $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
                                                                                                               if (response.responseText.length > 0) {	
@@ -565,11 +570,17 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                                                 var recreate = true;
                                                                                 $('#<?=$object_name?>').removeAttr('new_colmodel');
                                                                         }
+                                                                        if ($("#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + $(this).attr('id') + "']").attr('form_type') === "GRID_FORM_RELOAD" )	{
+                                                                                var reload_submit = true;
+                                                                        } else {
+                                                                                var reload_submit = false;
+                                                                        }
 									row_id = $('#<?=$object_name?>').jqGrid('getGridParam', 'selrow');
                                                     if (row_id !== null) {                    
                                                             $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{
                                                                                         recreateForm:recreate,																
-                                                                                        editCaption: "Скопировать запись",																
+                                                                                        editCaption: "Скопировать запись",
+																						reloadAfterSubmit:reload_submit,		
                                                                                 afterSubmit: function(response, postdata)  {
                                                                                         $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
                                                                                                 if (response.responseText.length > 0) {																				
@@ -613,13 +624,18 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                                                 var recreate = true;
                                                                                 $('#<?=$object_name?>').removeAttr('new_colmodel');
                                                                         }
+                                                                        if ($("#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + $(this).attr('id') + "']").attr('form_type') === "GRID_FORM_RELOAD" )	{
+                                                                                var reload_submit = true;
+                                                                        } else {
+                                                                                var reload_submit = false;
+                                                                        }
 									row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
                                                                         if (row_id !== null) {
                                                                                 $('#<?=$object_name?>').jqGrid('editGridRow',row_id,{
                                                                                                 viewPagerButtons:false,
                                                                                                 closeOnEscape: true,
                                                                                                 recreateForm: recreate,
-                                                                                                reloadAfterSubmit:false,
+                                                                                                reloadAfterSubmit:reload_submit,
                                                                                                 closeAfterEdit:true,																		
                                                                                         afterSubmit: function(response, postdata)  {
                                                                                             $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');                                                                             
@@ -650,9 +666,13 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                               buttonicon: 'ui-icon-close',
                                               onClickButton: function(){
                                                                 row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selarrrow');
-                                                                
+                                                                if ($("#<?=$this -> pageid?> .tab_main_content .grid_resizer[for='" + $(this).attr('id') + "']").attr('form_type') === "GRID_FORM_RELOAD" )	{
+                                                                        var reload_submit = true;
+                                                                } else {
+                                                                        var reload_submit = false;
+                                                                }
                                                                 if ($.isArray(row_id) && row_id != "") {																	
-                                                                                 $('#<?=$object_name?>').jqGrid('delGridRow',row_id,{closeAfterDel: true,closeOnEscape:true, recreateForm:false,reloadAfterSubmit:false,															
+                                                                                 $('#<?=$object_name?>').jqGrid('delGridRow',row_id,{closeAfterDel: true,closeOnEscape:true, recreateForm:false,reloadAfterSubmit:reload_submit,															
                                                                                         afterSubmit: function(response, postdata)  {
                                                                                             $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
                                                                                                 if (response.responseText.length > 0) {
@@ -669,7 +689,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                                 } else {
                                                                                 row_id = $('#<?=$object_name?>').jqGrid ('getGridParam', 'selrow');
                                                                                 if (row_id !== null) {
-                                                                                            $('#<?=$object_name?>').jqGrid('delGridRow',row_id,{closeAfterDel: true,closeOnEscape:true, recreateForm:true,reloadAfterSubmit:false,																
+                                                                                            $('#<?=$object_name?>').jqGrid('delGridRow',row_id,{closeAfterDel: true,closeOnEscape:true, recreateForm:true,reloadAfterSubmit:reload_submit,																
                                                                                                   afterSubmit: function(response, postdata)  {
                                                                                                       $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document'); 
                                                                                                           if (response.responseText.length > 0) {

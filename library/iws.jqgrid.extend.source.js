@@ -232,7 +232,11 @@ editGridRow : function(rowid, p){
                                                                }
                                                         }
                                                         dlg.dialog( "close" );
-                                                     }
+                                                      }
+                                                      if (p.reloadAfterSubmit) {
+                                                         grid.trigger('reloadGrid');
+                                                         redraw_document($(".ui-tabs-panel[aria-hidden='false']"));
+                                                      }
                                                       $('#btn_s_'+form_id).button('option', 'disabled', false );
                                                       $('#btn_c_'+form_id).button('option', 'disabled', false );
                                                 }	  
@@ -458,7 +462,8 @@ viewGridRow : function(rowid, p){
 delGridRow : function(rowids,p) {
     	p = $.extend(true, {			
 			resize: true,			
-			mtype : "POST"
+			mtype : "POST",
+                        reloadAfterSubmit:false
 		}, $.jgrid.del, p ||{});
     var grid = this;
     var form_id   = grid.attr('id');  
@@ -493,7 +498,11 @@ delGridRow : function(rowids,p) {
                                                       
                                                       $.each(rowids.split(','), function(key, value) {
                                                           grid.jqGrid('delRowData',value);  
-                                                       });                                                      
+                                                       });             
+                                                       if (p.reloadAfterSubmit) {
+                                                         grid.trigger('reloadGrid');
+                                                         redraw_document($(".ui-tabs-panel[aria-hidden='false']"));
+                                                       }
                                                       dlg.dialog( "close" );
                                                       $('#btn_d_'+form_id).button('option', 'disabled', false );
                                                       $('#btn_c_'+form_id).button('option', 'disabled', false );

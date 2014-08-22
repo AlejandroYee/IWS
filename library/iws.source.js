@@ -429,6 +429,7 @@ $(function() {
                                                 break;
                                                 default:
                                                     objjj.parent().children("div[form_type='GRID_FORM']").attr('percent', lgrid);
+													objjj.parent().children("div[form_type='GRID_FORM_RELOAD']").attr('percent', lgrid);
                                                 break;
                                             }
 					}									

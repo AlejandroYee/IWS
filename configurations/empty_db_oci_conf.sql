@@ -2416,6 +2416,8 @@ insert into WB_FORM_TYPE (id_wb_form_type, num, name, create_user, create_date, 
 values (-11, 11, 'TREE_GRID_FORM', 'LOADER', sysdate, 'LOADER', sysdate, 'Древовидная форма');
 insert into WB_FORM_TYPE (id_wb_form_type, num, name, create_user, create_date, last_user, last_date, human_name)
 values (-12, 12, 'TREE_GRID_FORM_MASTER', 'LOADER', sysdate, 'LOADER', sysdate, 'Древовидная форма с подтаблицей');
+insert into WB_FORM_TYPE (id_wb_form_type, num, name, create_user, create_date, last_user, last_date, human_name)
+values (-13, 13, 'GRID_FORM_RELOAD', 'LOADER', sysdate, 'LOADER', sysdate, 'Форма с пренудительной перезагрузкой данных');
 prompt 12 records loaded
 prompt Loading WB_MAIN_MENU...
 insert into WB_MAIN_MENU (id_wb_main_menu, id_parent, num, name, create_user, create_date, last_user, last_date, used)
