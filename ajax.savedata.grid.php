@@ -250,7 +250,13 @@ switch ($type_of_past) {
 			
 	// Изменяем запись
 	case 'edit':
-		$str_sql = "update ".$owner.".".$table_name." set (".trim($str_sql_fl, ", ").") = (select ".trim($str_sql_data,", ")." from dual) where  ID_".$table_name." in (".$id_mm.")";
+	if (empty($file_data_path) and empty($file_data_field)) { // если у нас загрузка файла, то произведем ее позже
+		if (strpos(trim($str_sql_fl, ", "),",") === false) {
+			$str_sql = "update ".$owner.".".$table_name." set ".trim($str_sql_fl, ", ")." = ".trim($str_sql_data, ", ")." where ID_".$table_name." in (".$id_mm.")";
+		} else {
+			$str_sql = "update ".$owner.".".$table_name." set (".trim($str_sql_fl, ", ").") = (select ".trim($str_sql_data,", ")." from dual) where  ID_".$table_name." in (".$id_mm.")";
+		}
+	}
 	break;
 	
 }    
@@ -262,7 +268,7 @@ $return_id = $main_db -> sql_execute($str_sql);
 if (!empty($file_data_path) and !empty($file_data_field)) {
 	// Отчищаем клоб и загружаем данные	
 	$main_db_2 = new db(true);	
-	$main_db_2 -> sql_execute("update ".$owner.".".$table_name." set ".$file_data_field." = null where ID_".$table_name." = '$id_mm'");
+	$main_db_2 -> sql_execute("update ".$owner.".".$table_name." set ".$file_data_field." = null, ".trim($str_sql_fl, ", ")."=".trim($str_sql_data, ", ")." where ID_".$table_name." = '$id_mm'");
 	BasicFunctions::to_log("Load binary file to ".$owner.".".$table_name." ... WHERE ID_".$table_name." = ".$id_mm);
         BasicFunctions::requre_script_file("lib.gz.php");
 	$filedata = str_split(base64_encode(gz::gzencode_zip(file_get_contents($file_data_path))), 2048);
