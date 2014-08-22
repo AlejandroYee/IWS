@@ -337,7 +337,7 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                                                     get_select_values_grid(gridname, this.name,ids);
                                                                             }
                                                             });
-                                                            if ($(this).parent().attr('aria-expanded') == "true") {
+                                                            if ($(this).parent().attr('aria-hidden') == "false") {
                                                                     $('#' + gridname).trigger('reloadGrid');
                                                             } else {
                                                                     $(this).attr('need_update','true');
