@@ -24,10 +24,9 @@ register_shutdown_function('unlink', LOCK_FILE); // удалим лок файл
 
 // используются модули IWS:
 require_once("library/lib.func.php");
-BasicFunctions::requre_script_file("lib.smtp.php");
 BasicFunctions::requre_script_file("db.".DB.".php");
 BasicFunctions::requre_script_file("lib.gz.php");
-
+BasicFunctions::requre_script_file("lib.smtp.php");
 // считываем параметры переданные скрипту
 $arguments = BasicFunctions::getinput_var($argv);
 
@@ -47,7 +46,6 @@ Options:
 
 // создаем подключение к бд (используется конфигурация IWS)
 $db = new DB(); 
-
 /*
  * функция позволяет проверить запущен ли сейчас скрипт?
  */
@@ -61,146 +59,6 @@ function isLocked() {
     file_put_contents( LOCK_FILE, getmypid() . "\n" ); 
     return false; 
 } 
-
-/*
- * функции для работы с почтой и вложениями
- */
-// получаем содержимое буфера соединения с сервером почты
-function get_data($pop_conn) {
-    $data = "";
-    while (!feof($pop_conn)) {
-        $buffer = chop(fgets($pop_conn,1024));
-        $data .= "$buffer\r\n";
-        if(trim($buffer) == ".") break;
-    }
-    return $data;
-}
-
-// получаем структуру письма при запросе писем
-function fetch_structure($email) {
-    $ARemail = Array();
-    $separador = "\r\n\r\n";
-    $header = trim(substr($email,0,strpos($email,$separador)));
-    $bodypos = strlen($header)+strlen($separador);
-    $body = substr($email,$bodypos,strlen($email)-$bodypos);
-    $ARemail["header"] = $header;
-    $ARemail["body"] = $body;
-    return $ARemail;
-}
-
-// декодируем заголовок письма
-function decode_header($header) {
-    $count=substr_count ($header, "\r\n\t");
-    for ($i=1; $i<=$count; $i++) $header=substr_replace ($header, " ", strpos ($header, "\r\n\t"), 3);
-    $lasthead = "";
-    $headers = explode("\r\n",$header);
-    $decodedheaders = Array();
-    for($i=0;$i<count($headers);$i++) {
-        $thisheader = trim($headers[$i]);
-        if(!empty($thisheader))
-        if(!preg_match("/^[A-Z0-9a-z_-]+:/",$thisheader))
-                $decodedheaders[$lasthead] .= " $thisheader";          
-        else {
-            $dbpoint = strpos($thisheader,":");
-            $headname = strtolower(substr($thisheader,0,$dbpoint));
-            $headvalue = trim(substr($thisheader,$dbpoint+1));
-            if(isset($decodedheaders[$headname]) and ($decodedheaders[$headname] != "")) $decodedheaders[$headname] .= "; $headvalue";
-            else $decodedheaders[$headname] = $headvalue;
-            $lasthead = $headname;
-        }
-    }
-    return $decodedheaders;
-}
-
-// преобразование и перекодирование строки mime, поддерживаем кои8 и утф
-function decode_mime_string($subject) {
-    $string = $subject;
-    if(($pos = strpos($string,"=?")) === false) return $string;
-    $newresult = "";
-    while(!($pos === false)) {
-        $newresult .= substr($string,0,$pos);
-        $string = substr($string,$pos+2,strlen($string));
-        $intpos = strpos($string,"?");
-        $charset = substr($string,0,$intpos);
-        $enctype = strtolower(substr($string,$intpos+1,1));
-        $string = substr($string,$intpos+3,strlen($string));
-        $endpos = strpos($string,"?=");
-        $mystring = substr($string,0,$endpos);
-        $string = substr($string,$endpos+2,strlen($string));
-        if($enctype == "q") $mystring = quoted_printable_decode(preg_replace("_"," ",$mystring));
-        else if ($enctype == "b") $mystring = base64_decode($mystring);
-        $newresult .= $mystring;
-        $pos = strpos($string,"=?");
-    }
-
-    $result = $newresult.$string;
-    if(preg_match("/koi8/", $subject)) $result = convert_cyr_string($result, "k", "w");
-    if(preg_match("/KOI8/", $subject)) $result = convert_cyr_string($result, "k", "w");
-    if(preg_match("/utf-8/", $subject)) $result = iconv("UTF-8", "WINDOWS-1251", $result);
-    if(preg_match("/UTF-8/", $subject)) $result = iconv("UTF-8", "WINDOWS-1251", $result);
-
-    return $result;
-}
-
-// находим в теле письма разделитель вложений
-function get_boundary($ctype){
-    if(preg_match('/boundary[ ]?=[ ]?(["]?.*)/i',$ctype,$regs)) {
-        $boundary = preg_replace('/\"(.*)\"$/', "\\1", $regs[1]);
-        $boundary = explode ("\"", $boundary);
-        return trim("--$boundary[0]");
-    }
-}
-
-// разбиваем письмо по вложениям
-function split_parts($boundary,$body) {
-    $startpos = strpos($body,$boundary)+strlen($boundary)+2;
-    $lenbody = strpos($body,"\r\n$boundary--") - $startpos;
-    $body = substr($body,$startpos,$lenbody);
-    return explode($boundary."\r\n",$body);
-}
-
-// функция позволяющая собрать тело письма в единое целое и закодировать его
-function compile_body($body,$enctype,$ctype) {
-    $enctype = explode(" ",$enctype); $enctype = $enctype[0];
-    if(strtolower($enctype) == "base64")
-         $body = base64_decode($body);
-    elseif(strtolower($enctype) == "quoted-printable")
-         $body = quoted_printable_decode($body);
-    if(preg_match("/koi8/", $ctype)) $body = convert_cyr_string($body, "k", "w");
-    if(preg_match("/utf-8/", $ctype)) $body = iconv("UTF-8", "WINDOWS-1251", $body);
-    if(preg_match("/UTF-8/", $ctype)) $body = iconv("UTF-8", "WINDOWS-1251", $body);
-    return $body;
-}
-
-// Отправка письма
-function SendMail($mail_to, $subject, $param, $body) { 
-    $db = new DB();
-    $smtp=new smtp_class;
-	$smtp->host_name=$db->get_settings_val("SETTINGS_MAIL_SMTP_HOST");      
-	$smtp->host_port=25;            
-	$smtp->ssl=0;
-    $smtp->start_tls=0; 
-	$smtp->localhost="localhost";    
-	$smtp->timeout=10;              
-	$smtp->data_timeout=0;        
-	$smtp->debug=1;                  
-	$smtp->html_debug=0;             
-	$smtp->user=$db->get_settings_val("SETTINGS_MAIL_SMTP_AUTHLOGIN") ;     
-	$smtp->password=$db->get_settings_val("SETTINGS_MAIL_SMTP_AUTHPWD"); 
-	$smtp->authentication_mechanism=""; 
-    if($smtp->SendMessage(
-		$db->get_settings_val("SETTINGS_MAIL_SMTP_SENDER"),
-		array( $mail_to ), array(
-									"From: ".get_settings_val("SETTINGS_MAIL_SMTP_SENDER"),
-									"To: ".$mail_to,
-									"Subject: ".$subject,
-									"Date: ".strftime("%a, %d %b %Y %H:%M:%S %Z")
-							), $body)) {
-            return true;
-        } else {
-            return false;
-        }
-}
 
 /*
  * ЧАСТЬ ПЕРВАЯ: ОБРАБОТКА СТАТУСОВ ИЗ АСТЕРИСКА
@@ -270,7 +128,7 @@ if (isset($arguments['status']))
             $tmp_error = "";
             $tmp_fax_id = "";
 			// получаем айди для дальнейше работы, а переменная error в данном случае контролирует количество попыток
-            $query_send = $db -> sql_execute("select * from FAX_QUERY t where t.status = 'SENDING' and p.name_prefix like '".$arguments['number']."') and t.file_pic = '".str_ireplace(TMP_FOLDER_ASTERISK,"",$arguments['file'])."' and t.tel_number ='".$arguments['from']."'");
+            $query_send = $db -> sql_execute("select * from FAX_QUERY t where t.status = 'SENDING' and t.file_pic = '".str_ireplace(TMP_FOLDER_ASTERISK,"",$arguments['file'])."' and t.tel_number ='".$arguments['from']."'");
             while ($db -> sql_fetch($query_send)) { 
                 $tmp_error = $db -> sql_result($query_send, "error");
                 $tmp_fax_id = $db -> sql_result($query_send, "id_fax_query");
@@ -407,7 +265,7 @@ while ($db -> sql_fetch($query_send)) {
 	if (empty($mail_to)) $mail_to = $db->get_settings_val("SETTINGS_DEFAULT_MAIL");
 	
 	// отправляем и смотрим отправилось или нет
-    if (!SendMail($mail_to, $subject, "", $headers))  $error = "Ошибка почтового сервера при отправке письма";
+    if (!SendMail($mail_to, $subject, $headers,""))  $error = "Ошибка почтового сервера при отправке письма";
 	
     // Записываем статус факсового сообщения в базу, и перемещаем его в историю
     $query_tmp = $db -> sql_execute("insert into messages (in_out, tel_number, id_files, email, wb_user, status, error, create_date, last_date,id_tranks) values ('".$db -> sql_result($query_send, "in_out")."', '".$db -> sql_result($query_send, "tel_number")."', ".$file_id.", "
@@ -577,10 +435,10 @@ if ($data[1] > 0) {
 									// выставляем статус отправки 
 									$status = "QUERED"; 
 									$filedata = "";                            
-									if (stripos($filename,".tif") === false) { 
+									$tmp_filename = TMP_FOLDER_ASTERISK.intval($mass_header["subject"]).$db -> sql_result($query, "tel_number")."_".date("Ymd_His");
+									if (stripos($filename,".tif") === false) {
 									
 										// Если файл не TIF то пробуем сконвертировать его:
-										$tmp_filename = TMP_FOLDER_ASTERISK.intval($mass_header["subject"]).$db -> sql_result($query, "tel_number")."_".date("Ymd_His");
 										$tmp_file_type = substr($filename,stripos($filename,"."));
 										
 										// Сначала сохраняем:
@@ -658,22 +516,9 @@ if ($data[1] > 0) {
 			} else {
 				$message .= "Ваше факсимильное сообщение не будет отправлено, так как вас нет в разрешенных отправителях,\n\n";
 				$message .= "обратитесь на e-mail: ".$db->get_settings_val("RECIPIENT_ADMIN")." чтобы вас добавили.\n\n";
-			}    
-			$separator = md5(time());
-			$eol = PHP_EOL;
-			// Готовим хидеры для письма:
-			$headers  = "From: fax-server <".$db->get_settings_val("SETTINGS_MAIL_SMTP_SENDER").">" . $eol;
-			$headers .= "MIME-Version: 1.0" . $eol;
-			$headers .= "Content-Type: multipart/mixed; boundary=\"" . $separator . "\"" . $eol . $eol;
-			$headers .= "Content-Transfer-Encoding: 7bit" . $eol;
-			$headers .= "This is a MIME encoded message." . $eol . $eol;    
-			$headers .= "--" . $separator . $eol;
-			$headers .= "Content-Type: text/plain; charset=\"UTF-8\"" . $eol;
-			$headers .= "Content-Transfer-Encoding: 8bit" . $eol . $eol;
-			$headers .= $message . $eol . $eol;
-			$headers .= "--" . $separator . "--";   
+			}  
 			// Отправляем
-			SendMail($mail_to, $subject, "", $headers); 
+			SendMail($mail_to, $subject, "", $message); 
 		}
     }
 }
