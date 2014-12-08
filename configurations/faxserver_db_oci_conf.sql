@@ -717,6 +717,7 @@ END;
 /
 
 alter table WB_FORM_FIELD disable all triggers;
+alter table WB_MM_FORM disable all triggers;
 insert into WB_MAIN_MENU (id_wb_main_menu, id_parent, num, name, create_user, create_date, last_user, last_date, used)
 values (1000007, null, 20, 'Работа с факсами', 'LOADER', to_date('17-03-2014 16:52:14', 'dd-mm-yyyy hh24:mi:ss'), 'LOADER', to_date('17-03-2014 16:52:14', 'dd-mm-yyyy hh24:mi:ss'), 1);
 insert into WB_MAIN_MENU (id_wb_main_menu, id_parent, num, name, create_user, create_date, last_user, last_date, used)
@@ -885,4 +886,5 @@ insert into WB_ROLE (id_wb_role, wb_name, name, create_user, create_date, last_u
 values (23, 'FAX_USER', 'Пользователь для работы с факсами через веб интерфейс', 'LOADER', to_date('21-03-2014 13:29:52', 'dd-mm-yyyy hh24:mi:ss'), 'LOADER', to_date('21-03-2014 13:29:52', 'dd-mm-yyyy hh24:mi:ss'));
 insert into WB_SETTINGS (id_wb_settings, id_parent, num, name, short_name, value, used, create_user, create_date, last_user, last_date)
 values (19, 14, 9, 'Почтовый ящик по умолчанию', 'SETTINGS_DEFAULT_MAIL', 'mail@domain.ru', 1, 'LOADER', to_date('26-03-2014 12:43:29', 'dd-mm-yyyy hh24:mi:ss'), 'LOADER', to_date('26-03-2014 12:43:29', 'dd-mm-yyyy hh24:mi:ss'));
+alter table WB_MM_FORM enable all triggers;
 alter table WB_FORM_FIELD enable all triggers;

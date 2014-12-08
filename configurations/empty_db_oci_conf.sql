@@ -938,13 +938,6 @@ procedure save_wb_user(i_user varchar2)
 as
 begin
   wb.wb_user := i_user;
-  -- Для использования других БД через DBLink's
-  /*
-  begin
-    wb.save_wb_user@vm(wb.wb_user);
-  exception
-    when OTHERS then null;
-  end;*/
   commit;
 end;
 
@@ -2855,11 +2848,11 @@ values (-188, -7, 6, 'Пароль', 'PASSWORD', null, null, 1, 'P', 0, null, 15
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date)
 values (-189, -4, 13, 'Подсказка к полю', 'ELEMENT_ALT', null, null, 1, 'S', 0, null, 250, null, null, null, 0, 'DB_UPDATE', sysdate, 'DB_UPDATE', sysdate);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date, is_frosen, is_grouping, is_grouping_header)
-values (-190, 4, 25, 'Закрепленный столбец', 'IS_FROSEN', null, null, 1, 'B', 0, null, 200, null, null, 0, 'Позволяет закрепить столбец от горизонтальной прокрутки','LOADER', sysdate, 'LOADER', sysdate, 0, 0, null);
+values (-190, -4, 25, 'Закрепленный столбец', 'IS_FROSEN', null, null, 1, 'B', 0, null, 200, null, null, 0, 'Позволяет закрепить столбец от горизонтальной прокрутки','LOADER', sysdate, 'LOADER', sysdate, 0, 0, null);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date, is_frosen, is_grouping, is_grouping_header)
-values (-191, 4, 26, 'Группировать строки', 'IS_GROUPING', null, null, 1, 'B', 0, null, 200, null, null, 0, 'Позволяет сгруппировать записи по данному столбцу в раскрывающееся списки, если выставлено несколько столбцов то они сгруппируются в дерево', 'LOADER', sysdate, 'LOADER', sysdate 0, 0, null);
+values (-191, -4, 26, 'Группировать строки', 'IS_GROUPING', null, null, 1, 'B', 0, null, 200, null, null, 0, 'Позволяет сгруппировать записи по данному столбцу в раскрывающееся списки, если выставлено несколько столбцов то они сгруппируются в дерево', 'LOADER', sysdate, 'LOADER', sysdate, 0, 0, null);
 insert into WB_FORM_FIELD (id_wb_form_field, id_wb_mm_form, num, name, field_name, array_name, field_txt, id_wb_form_field_align, field_type, is_read_only, count_element, width, xls_position_col, xls_position_row, is_requred, element_alt, create_user, create_date, last_user, last_date, is_frosen, is_grouping, is_grouping_header)
-values (-192, 4, 27, 'Группировать заголовков столбцов', 'IS_GROUPING_HEADER', null, null, 1, 'S', 0, null, 200, null, null, 0, 'Группирует заголовки столбцов таким образом чтобы было понятно что они относятся к одному уровню, необходимо ввести общее имя группы, групирровать можно только рядом стоящие столбци!', 'LOADER', sysdate, 'LOADER', sysdate, 0, 0, null);
+values (-192, -4, 27, 'Группировать заголовков столбцов', 'IS_GROUPING_HEADER', null, null, 1, 'S', 0, null, 200, null, null, 0, 'Группирует заголовки столбцов таким образом чтобы было понятно что они относятся к одному уровню, необходимо ввести общее имя группы, групирровать можно только рядом стоящие столбци!', 'LOADER', sysdate, 'LOADER', sysdate, 0, 0, null);
 prompt 192 records loaded
 prompt Loading WB_ROLE...
 insert into WB_ROLE (id_wb_role, wb_name, name, create_user, create_date, last_user, last_date)
