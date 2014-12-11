@@ -201,14 +201,13 @@
             var bdy = $(this.options.bodyElement);                       
             var widt = $(window).width();
             if (this.options.position === "left") {
-                    var left = '-' + self.width();
-                    bdy.css('left',0 + 'px'); 
-                } else {
-                    var left = widt;
-                    bdy.css('left',widt + 'px'); 
-                }
-              bdy.width(widt);
-              self.css('left',left + 'px');
+                var left = '-' + self.width();
+            } else {
+                var left = widt;
+            }
+            bdy.css('left',0 + 'px'); 
+            bdy.width(widt);
+            self.css('left',left + 'px');
             setTimeout(function() { 
                     self.attr('active',false);
                 }, this.options.animation_amount);       
