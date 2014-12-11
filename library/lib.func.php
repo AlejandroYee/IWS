@@ -15,7 +15,7 @@ Error_Reporting(E_ALL);
 
 define("ENGINE_ROOT",  filter_input(INPUT_SERVER, 'DOCUMENT_ROOT',FILTER_SANITIZE_STRING));
 define("HTTP_USER_AGENT",filter_input(INPUT_SERVER, 'HTTP_USER_AGENT',FILTER_SANITIZE_STRING));
-define("VERSION_ENGINE","2.1.5");
+define("VERSION_ENGINE","2.2.0");
 
 if (!defined('CONFIG')) {
     define("CONFIG",filter_input(INPUT_SERVER, 'HTTP_HOST',FILTER_SANITIZE_URL));
@@ -146,20 +146,22 @@ class BasicFunctions {
                 if(strpos($log,"Load page:") != false) {
                     $log =  iconv(HTML_ENCODING,LOCAL_ENCODING,$log);
                 }
-                if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) and (auth::get_user() != "")) {
-                                if (!isset($_SESSION[strtoupper("log_".session_id())])) {
-                                        $_SESSION[strtoupper("log_".session_id())] = null;
-                                }                                
-                                $_SESSION[strtoupper("log_".session_id())].= "[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).$ip.">] ".$log."\r\n";
-                        }
-                // для случаев когда неавторизированны
-                if ($sub_debug != false and $sub_debug != true and !auth::get_user()) {
-                    file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." <".strtoupper($sub_debug).$ip.">] ".$log."\r\n", FILE_APPEND | LOCK_EX);                
-                }
-                // для случаев когда неавторизированны без пользователя
-                if ($sub_debug == true) {
-                    file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." ] ".$log."\r\n", FILE_APPEND | LOCK_EX);                
-                }
+		if (defined("HAS_DEBUG_FILE") and (HAS_DEBUG_FILE != "" ) ) {
+		    if (auth::get_user() != "") {
+				    if (!isset($_SESSION[strtoupper("log_".session_id())])) {
+					    $_SESSION[strtoupper("log_".session_id())] = null;
+				    }                                
+				    $_SESSION[strtoupper("log_".session_id())].= "[".date("d.m.Y H:i:s")." <".strtoupper(auth::get_user()).$ip.">] ".$log."\r\n";
+			    }
+		    // для случаев когда неавторизированны
+		    if ($sub_debug != false and $sub_debug != true and !auth::get_user()) {
+			file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." <".strtoupper($sub_debug).$ip.">] ".$log."\r\n", FILE_APPEND | LOCK_EX);                
+		    }
+		    // для случаев когда неавторизированны без пользователя
+		    if ($sub_debug == true) {
+			file_put_contents(ENGINE_ROOT. DIRECTORY_SEPARATOR .HAS_DEBUG_FILE,"[".date("d.m.Y H:i:s")." ] ".$log."\r\n", FILE_APPEND | LOCK_EX);                
+		    }
+		}
             }      
             }
             
@@ -351,7 +353,7 @@ class BasicFunctions {
             // Подгружаем скрипты
             //--------------------------------------------------------------------------------------------------------------------------------------------  
             public static function get_scripts($user_auth) {               
-                if (trim(strtolower(CONFIG)) == 'bianca.test') {
+                if (trim(strtolower(CONFIG)) == 'iws.test') {
                             $min = "source";
                         } else {
                             $min = "min";
@@ -537,6 +539,7 @@ class BasicFunctions {
                             <a href="http://keith-wood.name/calculator.html" target="_blank">jQuery Calculator</a>
                             <a href="https://github.com/pupunzi/jquery.mb.browser/" target="_blank">jQuery browser</a>          
                             <a href="http://ricostacruz.com/jquery.transit/" target="_blank">jQuery transit</a>   
+			    <a href="https://github.com/shadz3rg/PHPStamp/" target="_blank">PHPStamp</a>  
                     </div>
                     <b>Подключенные модули:</b><br>
                     <div class="ui-widget-content" style="height:110px;overflow: auto;font-size:80%;padding: .5em 1em; text-align:left;position: relative;">
@@ -600,13 +603,15 @@ class BasicFunctions {
                                type: 'GET',
                                success: function(data){	                                  
                                      if (data != "") {
-                                       var dt = jQuery.parseJSON(data);                                            
-                                        if ((dt.version) && $.trim(dt.version) !== $.trim('<?=VERSION_ENGINE?>') ) {                                        			
+                                       var dt = jQuery.parseJSON(data);   
+				       var new_ver = parseInt($.trim(dt.version).replace('.','').replace('.','').replace('.',''));
+				       var now_ver = parseInt($.trim('<?=VERSION_ENGINE?>').replace('.','').replace('.','').replace('.',''));
+                                       if ((dt.version) && new_ver > now_ver) {                                        			
                                             $.ajax({
                                                    url: '<?=ENGINE_HTTP?>/ajax.saveparams.php?act=get_history',							  
                                                    type: 'GET',
                                                    success: function(dat)  {	
-                                                   $('#tabs').children('.ui-tabs-nav').append("<div class='alert_button ui-state-highlight ui-corner-all' onclick='$(\"#update_dlg\").dialog(\"open\");' style='float:right;width:145px;margin:3px;padding:3px;cursor:pointer;' title='Доступна новая версия: v" + 
+                                                   $('#tabs').children('.ui-tabs-nav').append("<div class='alert_button ui-state-highlight ui-corner-all' onclick='$(\"#update_dlg\").dialog(\"open\");' style='float:right;width:160px;margin:3px;padding:3px;cursor:pointer;' title='Доступна новая версия: v" + 
                                                                dt.version + " от " + dt.date + "'><span class='ui-icon ui-icon-alert' style='float:left'></span>Обновление IWS</div>");
                                                    
                                                    var msg = '<p><b>Новая версия:</b> v'+dt.version+'<br><b>Дата выпуска:</b> '+dt.date+'</p><b>Что нового:</b><br>'+ dat +

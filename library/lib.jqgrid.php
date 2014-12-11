@@ -411,15 +411,15 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                         }
                                                 }
                                                 if ($("#reload_grid_<?=$this -> pageid?>").attr("checked") != "checked") {
-                                                        $(this).jqGrid('clearGridData');							
+                                                        $(this).jqGrid('clearGridData');
                                                         function loader_function() {
                                                                 grid_load_<?=$object_name?>_time++;
                                                                 minutes_<?=$object_name?> = (Math.floor(grid_load_<?=$object_name?>_time/60) < 10) ? "0"+Math.floor(grid_load_<?=$object_name?>_time/60) : Math.floor(grid_load_<?=$object_name?>_time/60);
                                                                 seconds_<?=$object_name?> = ((grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60) < 10) ? "0"+(grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60) : (grid_load_<?=$object_name?>_time - minutes_<?=$object_name?>*60);
-                                                                $("#load_<?=$object_name?>").html("<table style='left:42%;position:absolute;top:47%;width:250px;vertical-align:middle;'><tr><td><img src='<?=ENGINE_HTTP?>/library/ajax-loader-tab.gif'><span style='top:-10px;'></td><td>(" + minutes_<?=$object_name?> +':' + seconds_<?=$object_name?> + ") Ожидаю данные...</td></tr></table>");
+                                                                $("#load_<?=$object_name?>").find(".load_information").html("(" + minutes_<?=$object_name?> +":" + seconds_<?=$object_name?> + ") Ожидаю данные...");
                                                         }
                                                         grid_load_<?=$object_name?>_intval = setInterval(loader_function, 1000);                                                        
-                                                        loader_function();
+                                                        $("#load_<?=$object_name?>").html("<table style='left:42%;position:absolute;top:47%;width:250px;vertical-align:middle;'><tr><td><img src='<?=ENGINE_HTTP?>/library/ajax-loader-tab.gif'><span style='top:-10px;'></td><td class='load_information'>(00:00) Ожидаю данные...</td></tr></table>");
                                                 }
                                 },
                                 onPaging: function () {
@@ -1112,16 +1112,24 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
 	 } else {
 		$export_grid = $object_name;
 	}	
-        if (!is_file(ENGINE_ROOT.DIRECTORY_SEPARATOR."xlt".DIRECTORY_SEPARATOR.$XSL_EXP_FILE)) {
-            $disabled="disabled";
-            } else {            
-             $disabled = "";   
+        if (is_file(ENGINE_ROOT.DIRECTORY_SEPARATOR."exp_template".DIRECTORY_SEPARATOR.$XSL_EXP_FILE)) {
+	    if (stristr($XSL_EXP_FILE,".docx") === false) {
+		$disabled_xls="";
+		$disabled_docx="disabled";
+	    } else {
+		$disabled_xls="disabled";
+		$disabled_docx="";
+	    }
+            } else {         
+	     $disabled_xls="disabled";
+	     $disabled_docx="disabled";
         }  
 	?>
 	<div id="export_<?=$object_name?>" title='Укажите формат экспорта:'>
 							<label for="themefor">Тип экспорта:</label>
 							<select id="select_export_<?=$object_name?>" name="select_export_<?=$object_name?>" >
-								<option value='xlsm' <?=$disabled?>>По шаблону с макросами</option>
+								<option value='xlsm'<?=$disabled_xls?>>По шаблону Excel</option>
+								<option value='docx'<?=$disabled_docx?>>По шаблону World</option>
 								<option value='xls'>Формат Microsoft Office XP (.xls)</option>
 								<option value='xlsx'>Формат Microsoft Office 2007 (.xlsx)</option>
                                                                 <option value='pdf'>Формат Adobe Acrobat Reader (.pdf)</option>                                                                
@@ -1242,7 +1250,8 @@ var $db_conn, $id_mm_fr, $id_mm_fr_d, $id_mm, $pageid;
                                                                    type: 'POST',
                                                                    success: function(data) {				
                                                                         $(data).printThis({
-                                                                            pageTitle: '<?=$label?>'
+                                                                            pageTitle: document.title,
+									    header: null
                                                                         });
                                                                         $('#ui-<?=$this -> pageid?> span').removeClass('ui-icon-transferthick-e-w').addClass('ui-icon-document');  
                                                                    },

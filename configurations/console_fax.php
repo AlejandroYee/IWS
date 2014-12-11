@@ -135,24 +135,25 @@ if (isset($arguments['status']))
             } 
 			
 			// если айдишник есть
-            if (!empty($tmp_fax_id)) {  
-				
+            if (!empty($tmp_fax_id)) {
+		
                 if (!isset($arguments['error']) or (empty($arguments['error']))) { 
-					// если отправился то просто обновляем бд
+		// если отправился то просто обновляем бд
                     $db -> sql_execute("update fax_query t set t.status = '".$arguments['status']."' where t.id_fax_query = ".$tmp_fax_id);  
                     if (is_file($arguments['file']))  unlink($arguments['file']);                    
                 } else {
-					// смотрим на количество попыток
+		    // смотрим на количество попыток
                     $num_ret = explode(":",$tmp_error);
-                    $num_ret_val = intval($num_ret[1]);
-                    if ($num_ret_val > 3) {
-						// если больше 3х то тогда записываем ошибку и чистим файл
+                    $num_ret_val = intval(trim($num_ret[1]));
+                    if (!is_file(OUT_FOLDER_ASTERISK."/".str_ireplace(TMP_FOLDER_ASTERISK,"",$arguments['file']))) {
+			// если удален файл то тогда записываем ошибку и чистим файл
                         $arguments['status'] = "ERROR";
-                        $arguments['error'] = "После ".$num_ret_val." попыток, факс так и небыл принят.";
+                        $arguments['error'] = "После ".$num_ret_val." попыток, факс так и небыл принят. [".$arguments['error']."]";
                         if (is_file($arguments['file']))  unlink($arguments['file']);                        
                     } else {
 						// если меньше 3х то тогда пробуем еще
-                        $arguments['error']="Retry:".($num_ret_val+1);
+                        $arguments['error']="Retry: ".($num_ret_val+1).": - [".$arguments['error']."]";
+                        $arguments['status'] = "SENDING";
                     }
 					// записываем статус в базу
                     $db -> sql_execute("update fax_query t set t.status = '".$arguments['status']."',  t.error = '".$arguments['error']."' where t.id_fax_query = ".$tmp_fax_id);
@@ -177,13 +178,14 @@ $db -> sql_execute("insert into messages select null as id_message,  'I' as in_o
         where s.last_date < sysdate - 1 / 24 / 2 group by s.id_tranks, s.tel_number");
 // Чистим таблицу после предыдущего запроса, чтобы убрать лишние записи		
 $db -> sql_execute("delete from fax_query t where t.in_out = 'I' and t.status = 'ERROR' and t.last_date < sysdate - 1 / 24 / 2");
-
+//Подчищаем записи о проблемах приема (в случае если завис астериск, либо какая либо еще проблема)
+$db -> sql_execute("delete from fax_query t where t.in_out = 'I' and t.status = 'INCOMING' and t.last_date < sysdate - 1");
 /*
  * ЧАСТЬ ВТОРАЯ: ОПОВЕЩЕНИЯ
  * Селект из БД для оповещения пользователей в случае если состояние факса изменилось
  */
 $query_send = $db -> sql_execute("select * from (select null as email_lists, null as wb_user, to_char(fq.create_date, 'dd.mm.yyyy hh24:mi:ss') as msg_date, to_char(fq.last_date, 'dd.mm.yyyy hh24:mi:ss') as msg_last_date, fq.*,
-               count(rownum) over (partition by null) as count_mails from fax_query fq where fq.in_out = 'O' and fq.status in ('SEND','ERROR') order by fq.id_fax_query) union all
+               count(rownum) over (partition by null) as count_mails from fax_query fq where fq.in_out = 'O' and fq.status in ('SEND','ERROR', 'SENDING') order by fq.id_fax_query) union all
 			   select * from (select p.email_lists, p.wb_user, to_char(fq.create_date, 'dd.mm.yyyy hh24:mi:ss') as msg_date, to_char(fq.last_date, 'dd.mm.yyyy hh24:mi:ss') as msg_last_date, fq.*,
                count(rownum) over (partition by null) as count_mails from (select id_fax_query, email_lists, max(wb_user) as wb_user from (select t.id_fax_query, l.email_lists, null as wb_user from fax_query t
                left join lists l on l.id_tranks = t.id_tranks and (l.in_out = 'I' or l.in_out = 'A') where t.status = 'RESIVED' and t.in_out = 'I' union all
@@ -198,13 +200,14 @@ while ($db -> sql_fetch($query_send)) {
     $user       = $db -> sql_result($query_send, "wb_user");
     $mail_to    = $db -> sql_result($query_send, "email_lists");
     $id_tranks  = $db -> sql_result($query_send, "ID_TRANKS");
-	
-	// проверка на наличе файл в табличке с файлами
+    $message = "";
+
+    // проверка на наличе файл в табличке с файлами
     $query_file = $db -> sql_execute("select f.id_files from files f where lower(f.file_pic) = lower('".$db -> sql_result($query_send, "file_pic")."')");
     while ($db -> sql_fetch($query_file)) $file_id = $db -> sql_result($query_file, "id_files");
 	
     // если файлна нет, то добавляем его (перенося из рабочей таблички
-    if ($file_id === false and !empty($query_file)) {
+    if ($file_id === false and !empty($query_file) and $status != 'SENDING') {
         $file_id =  $query_tmp = $db -> sql_execute("insert into files f (file_pic, file_pic_content) values ((select t.file_pic from fax_query t where t.id_fax_query = ".$query_now."), (select t.file_pic_content from fax_query t where t.id_fax_query = ".$query_now.")) returning id_files into :rid");	
     }  
     if (empty($user)) $user  = "null";
@@ -231,53 +234,61 @@ while ($db -> sql_fetch($query_send)) {
             $subject = "Статус вашего факсимильного сообщения номер: ".$db -> sql_result($query_send, "id_fax_query");;
             $message = "Ваше факсимильное сообщение для номера:\n";
             $message .= $db -> sql_result($query_send, "tel_number")." от ".$db -> sql_result($query_send, "msg_date")."\n\n";
-            $message .= "Неотправлено из за ошибки:\n";
+            $message .= "Не отправлено из за ошибки:\n";
             $message .= $error."\n\n";
         break;
+        case 'SENDING':
+	    // Возможна ситуация когда мы ждем когда отправится файл, а он по какйто причине не ушел и астериск не стал повторно отправлять
+            if (!is_file(OUT_FOLDER_ASTERISK."/".$db -> sql_result($query_send, "file_pic"))) {
+		$db -> sql_execute("update fax_query t set t.status = 'ERROR' where t.id_fax_query = ".$query_now);
+		if (is_file(TMP_FOLDER_ASTERISK."/".$db -> sql_result($query_send, "file_pic")))  unlink(TMP_FOLDER_ASTERISK."/".$db -> sql_result($query_send, "file_pic"));    
+            } 
+        break;
     }
-	
+    if (!empty($message)) {
 	// теперь формируем само письмо, основныех хидеры письма:
-    $separator = md5(time());
-    $eol = PHP_EOL;
-    $headers  = "From: fax-server <".$db->get_settings_val("SETTINGS_MAIL_SMTP_SENDER").">" . $eol;
-    $headers .= "MIME-Version: 1.0" . $eol;
-    $headers .= "Content-Type: multipart/mixed; boundary=\"" . $separator . "\"" . $eol . $eol;
-    $headers .= "Content-Transfer-Encoding: 7bit" . $eol;
-    $headers .= "This is a MIME encoded message." . $eol . $eol;    
-    $headers .= "--" . $separator . $eol;
-    $headers .= "Content-Type: text/plain; charset=\"UTF-8\"" . $eol;
-    $headers .= "Content-Transfer-Encoding: 8bit" . $eol . $eol;
-    $headers .= $message . $eol . $eol;
-	
-	// Если факс пришел ДЛЯ пользователя, то прикрепляем к письму сам файл
-    if ($status == "RESIVED") {
-        $headers .= "--" . $separator . $eol;
-        $headers .= "Content-Type: application/octet-stream; name=\"" . $db -> sql_result($query_send, "file_pic") . "\"" . $eol;
-        $headers .= "Content-Transfer-Encoding: base64" . $eol;
-        $headers .= "Content-Disposition: attachment" . $eol . $eol;
-        $headers .= chunk_split(base64_encode(gz::gzdecode_zip(base64_decode($db -> sql_result($query_send, "file_pic_content"))))) . $eol . $eol;
-    }
-	
-	// Закрываем письмо контрольным boundary
-    $headers .= "--" . $separator . "--";   
-	
-    // В случае если неуказано или произошла ошибка определения кому отправить факс, то берем адрес для писем поумолчанию из настроек
-	if (empty($mail_to)) $mail_to = $db->get_settings_val("SETTINGS_DEFAULT_MAIL");
-	
-	// отправляем и смотрим отправилось или нет
-    if (!SendMail($mail_to, $subject, $headers,""))  $error = "Ошибка почтового сервера при отправке письма";
-	
-    // Записываем статус факсового сообщения в базу, и перемещаем его в историю
-    $query_tmp = $db -> sql_execute("insert into messages (in_out, tel_number, id_files, email, wb_user, status, error, create_date, last_date,id_tranks) values ('".$db -> sql_result($query_send, "in_out")."', '".$db -> sql_result($query_send, "tel_number")."', ".$file_id.", "
-                                   . "'".$mail_to."', ".$user.", '".$status."', '".iconv(HTML_ENCODING,LOCAL_ENCODING,$error)."',to_date('".$db -> sql_result($query_send, "msg_date")."','dd.mm.yyyy hh24:mi:ss') ,"
-                                   . "to_date('".$db -> sql_result($query_send, "msg_last_date")."','dd.mm.yyyy hh24:mi:ss'),".intval(trim($id_tranks)).")");
+	$separator = md5(time());
+	$eol = PHP_EOL;
+	$headers  = "From: fax-server <".$db->get_settings_val("SETTINGS_MAIL_SMTP_SENDER").">" . $eol;
+	$headers .= "MIME-Version: 1.0" . $eol;
+	$headers .= "Content-Type: multipart/mixed; boundary=\"" . $separator . "\"" . $eol . $eol;
+	$headers .= "Content-Transfer-Encoding: 7bit" . $eol;
+	$headers .= "This is a MIME encoded message." . $eol . $eol;    
+	$headers .= "--" . $separator . $eol;
+	$headers .= "Content-Type: text/plain; charset=\"UTF-8\"" . $eol;
+	$headers .= "Content-Transfer-Encoding: 8bit" . $eol . $eol;
+	$headers .= $message . $eol . $eol;
+
+	    // Если факс пришел ДЛЯ пользователя, то прикрепляем к письму сам файл
+	if ($status == "RESIVED") {
+	    $headers .= "--" . $separator . $eol;
+	    $headers .= "Content-Type: application/octet-stream; name=\"" . $db -> sql_result($query_send, "file_pic") . "\"" . $eol;
+	    $headers .= "Content-Transfer-Encoding: base64" . $eol;
+	    $headers .= "Content-Disposition: attachment" . $eol . $eol;
+	    $headers .= chunk_split(base64_encode(gz::gzdecode_zip(base64_decode($db -> sql_result($query_send, "file_pic_content"))))) . $eol . $eol;
+	}
+
+	    // Закрываем письмо контрольным boundary
+	$headers .= "--" . $separator . "--";   
+
+	// В случае если неуказано или произошла ошибка определения кому отправить факс, то берем адрес для писем поумолчанию из настроек
+	    if (empty($mail_to)) $mail_to = $db->get_settings_val("SETTINGS_DEFAULT_MAIL");
+
+	    // отправляем и смотрим отправилось или нет
+	if (!SendMail($mail_to, $subject, $headers,""))  $error = "Ошибка почтового сервера при отправке письма";
+
+	// Записываем статус факсового сообщения в базу, и перемещаем его в историю
+	$query_tmp = $db -> sql_execute("insert into messages (in_out, tel_number, id_files, email, wb_user, status, error, create_date, last_date,id_tranks) values ('".$db -> sql_result($query_send, "in_out")."', '".$db -> sql_result($query_send, "tel_number")."', ".$file_id.", "
+				       . "'".$mail_to."', ".$user.", '".$status."', '".iconv(HTML_ENCODING,LOCAL_ENCODING,$error)."',to_date('".$db -> sql_result($query_send, "msg_date")."','dd.mm.yyyy hh24:mi:ss') ,"
+				       . "to_date('".$db -> sql_result($query_send, "msg_last_date")."','dd.mm.yyyy hh24:mi:ss'),".intval(trim($id_tranks)).")");
     
 	// В случае если пытались отправить или принять факс несколько раз, то у нас останутся несколько записей про это
 	// следовательно нужно их подчистить (к слову селект который формирует письма идет с ордером по номеру телефона факса)
 	// по этому сравниваем айди предыдущей запими и текущей, в случаем если изменился айди, то предыдущие запись можно подчистить
 	// так как предыдущий скрипт уже внес количество попыток отправки или получения
 	if ($p_query_id != $query_now) $query_tmp = $db -> sql_execute("delete from fax_query ff where ff.id_fax_query = ".$p_query_id);
-    $p_query_id = $query_now;
+	$p_query_id = $query_now;
+    }
 }    
 
 // окончательно подчищаем табличку очереди, т.к. все нужные нам записи уже обработаны       
@@ -294,7 +305,7 @@ $query = $db -> sql_execute("select t.id_fax_query, t.file_pic,t.file_pic_conten
 							inner join tranks tt on tt.id_tranks = t.id_tranks where upper(t.status) = 'QUERED' and upper(t.in_out) = 'O' and t.id_tranks not in (select distinct d.id_tranks from fax_query d where upper(d.status) = 'SENDING')");
 while ($db -> sql_fetch($query)) {
 	// формируем временный файл для астериска
-	$file_name = TMP_FOLDER_ASTERISK.$db -> sql_result($query, "tel_number")."_".date("Ymd_His").".tif";
+	$file_name = TMP_FOLDER_ASTERISK.$db -> sql_result($query, "file_pic");
 	
 	// и подготавливаем содержимое файла
 	$data = gz::gzdecode_zip(base64_decode($db -> sql_result($query, "file_pic_content")));  
@@ -321,9 +332,9 @@ while ($db -> sql_fetch($query)) {
 	$call_file .= "Extension: ".$db -> sql_result($query, "prefix")."\n"; // откого собственно отправляем файл
 	$call_file .= "Context: fax_out\n"; // имя контекса который вызовется и отправит файл (там должно бых fax_send)
 	$call_file .= "Priority: 1\n"; // приоритет
-	$call_file .= "RetryTime: 300\n"; // время повтора в секундах
+	$call_file .= "RetryTime: 100\n"; // время повтора в секундах
 	$call_file .= "MaxRetries: 2\n"; // количество повторов ( отсчет от нуля)
-	$call_file .= "WaitTime: 25\n"; // время ожидания приема факса на той стороне
+	$call_file .= "WaitTime: 100\n"; // время ожидания приема факса на той стороне
 	// Эти переменне используются к файле описания контекстов в астериске
 	$call_file .= "Set: TEL_NUMB=".$db -> sql_result($query, "tel_number")."\n"; // указываем куда отправляем файл
 	$call_file .= "Set: PICTURE=".$file_name."\n";  // путь к файлу
@@ -331,17 +342,17 @@ while ($db -> sql_fetch($query)) {
 	// Проверяем ошибки на предыдущих этапах
 	if (empty($error)) {
 		// Пробуем записать калл файл в папку астериска для уходящих вызовов
-		if(file_put_contents(OUT_FOLDER_ASTERISK."/".$db -> sql_result($query, "prefix")."-".md5(time().rand(time()/100,getrandmax())),$call_file) === false) {
+		if(file_put_contents(OUT_FOLDER_ASTERISK."/".$db -> sql_result($query, "file_pic"),$call_file) === false) {
 			// Ошибка! Проблемы с ФС или с привелегиями
 			$error = "Ошибка записи call файла";
 		}		
 	}    
 	if (empty($error)) { 
 		// Ошибок нет, ставим статус что факс отправляется
-		$db -> sql_execute("update fax_query t set t.status = 'SENDING',t.error = 'Retry:1', t.file_pic = '".str_ireplace(TMP_FOLDER_ASTERISK,"",$file_name)."' where t.id_fax_query = ".$db -> sql_result($query, "id_fax_query"));
+		$db -> sql_execute("update fax_query t set t.status = 'SENDING',t.error = 'Retry:1' where t.id_fax_query = ".$db -> sql_result($query, "id_fax_query"));
 	} else {
 		// есть ошибки, пишем их
-		$db -> sql_execute("update fax_query t set t.error = '".iconv(HTML_ENCODING,LOCAL_ENCODING,$error)."', t.file_pic = '".str_ireplace(TMP_FOLDER_ASTERISK,"",$file_name)."' where t.id_fax_query = ".$db -> sql_result($query, "id_fax_query"));
+		$db -> sql_execute("update fax_query t set t.error = '".iconv(HTML_ENCODING,LOCAL_ENCODING,$error)."' where t.id_fax_query = ".$db -> sql_result($query, "id_fax_query"));
 	}    
 }
 
@@ -504,7 +515,6 @@ if ($data[1] > 0) {
 		if (stripos($mass_header["from"],ALLOWED_DOMAIN) !== false ) {
 			
 			// Удаляем письмо из ящика, чтобы оно там не висело
-			fputs($pop_conn,"DELE ".$i."\r\n");
 			// Кому шлем письмо
 			$mail_to = $mass_header["from"];	
 			// Содержимое
@@ -520,6 +530,7 @@ if ($data[1] > 0) {
 			// Отправляем
 			SendMail($mail_to, $subject, "", $message); 
 		}
+		fputs($pop_conn,"DELE ".$i."\r\n");
     }
 }
 // Обработали все письма, вежливо прощаемся с почтовым сервером и закрываем соединение

@@ -116,25 +116,36 @@
 						if (array_search(BasicFunctions::trim_fieldname($k), $arr_field, true)) {
 							$type_field = $arr_field_type[array_search(BasicFunctions::trim_fieldname($k), $arr_field)];
                                                         $k = strip_tags(html_entity_decode(BasicFunctions::trim_fieldname($k)));
-							if ($v != "" ) if (( $type_field == "DT" ) or ( $type_field == "D" )) {
+							
+							switch (trim($s_opts[0])) { // Смотрим что за логическая операция
+								case "NOT": $literal = "!="; break;
+								case "MORE": $literal = ">"; break;
+								case "MINI": $literal = "<"; break;
+								case "EQUAL": $literal = "="; break;
+								case "LIKE": $literal = "LIKE"; break;
+								case "undefined": $literal = "= "; break;
+								case "NONE": break;
+							}	
+										
+							if ($v != "" ) 
+							    if ((( $type_field == "DT" ) or ( $type_field == "D" ) and trim($s_opts[0]) != "LIKE") ) {
 									// Дата может быть нескольких форматов
 									if (stripos($v,":") > 0) {
-										$qWhere .= " AND t.".$k." = to_date('".$v."', 'dd.mm.yyyy hh24:mi:ss') ";
+										$qWhere .= " AND t.".$k." ".$literal." to_date('".$v."', 'dd.mm.yyyy hh24:mi:ss') ";
 									} else {
-										$qWhere .= " AND t.".$k." = to_date('".$v."', 'dd.mm.yyyy') ";
+										$qWhere .= " AND t.".$k." ".$literal." to_date('".$v."', 'dd.mm.yyyy') ";
 									}								
-								} else switch (trim($s_opts[0])) { // Смотрим что за логическая операция
-											case "NOT": $qWhere .= " AND lower(t.".$k.") != lower('".$v."') "; break;
-											case "MORE": $qWhere .= " AND lower(t.".$k.") > lower('".$v."') "; break;
-											case "MINI": $qWhere .= " AND lower(t.".$k.") < lower('".$v."') "; break;
-											case "EQUAL": $qWhere .= " AND lower(t.".$k.") = lower('".$v."') "; break;
-											case "LIKE": $qWhere .= " AND lower(t.".$k.") LIKE lower('%".$v."%') "; break;
-											case "undefined": $qWhere .= " AND lower(t.".$k.") = lower('".$v."') "; break;
-											case "NONE": break;
-										}										
+							} else {
+							    if (trim($s_opts[0]) == "LIKE") { 
+								$qWhere .= " AND lower(t.".$k.") ".$literal." lower('%".$v."%') ";
+							    } else {
+								$qWhere .= " AND lower(t.".$k.") ".$literal." lower('".$v."') ";
+							    }
+
+							}										
 						}
 					}
-			}	
+			}
 			// Вычисляем узлы дерева если это дерево
 			if (($type == "TREE_GRID_FORM") or ($type == "TREE_GRID_FORM_MASTER")  or ($type == "TREE_GRID_FORM_DETAIL")) {
 				$query_leafs = $main_db -> sql_execute($str_leafs);				

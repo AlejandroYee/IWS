@@ -57,7 +57,9 @@
 	$check		= "";	 
         $cell_exp       = 0;
         $cell_exp_first = 0;
-        $row_exp        = 2;        
+        $row_exp        = 2; 
+	$exp_shabloned  = false;
+	$exp_from_file	= false;
         
 	// Дополнительная проверка на пользователя и права доступа:
 	$query_check = $main_db -> sql_execute("select tf.edit_button from wb_mm_form tf where tf.id_wb_mm_form = ".$id_mm_fr." and wb.get_access_main_menu(tf.id_wb_main_menu) = 'enable'");
@@ -98,9 +100,9 @@
               $exp_file = $exp_name." (".date("d-m-Y").").".$isaexport;	// Если имени файла нет то берем текущую дату и формируем
         }  
                 
-        if (is_file(ENGINE_ROOT.DIRECTORY_SEPARATOR."xlt".DIRECTORY_SEPARATOR.$exp_file) and ($isaexport == 'xlsm')) {                     
+        if (is_file(ENGINE_ROOT.DIRECTORY_SEPARATOR."exp_template".DIRECTORY_SEPARATOR.$exp_file) and ($isaexport == 'xlsm')) {                     
 			$temp_file = tempnam(sys_get_temp_dir(), rand(5, 15) . $exp_file);			
-			file_put_contents($temp_file,file_get_contents("xlt/". $exp_file));
+			file_put_contents($temp_file,file_get_contents("exp_template/". $exp_file));
                         $filetype = PHPExcel_IOFactory::identify($temp_file);
 			$objReader = PHPExcel_IOFactory::createReader($filetype);                        
 			$objPHPExcel = $objReader -> load($temp_file);
@@ -111,6 +113,7 @@
                             $isaexport = 'xlsx';
                             $exp_file = substr($exp_file,0,strrpos($exp_file, '.')).".".$isaexport;
                         }
+			$exp_from_file = true;
         } else {    
             $exp_file = substr($exp_file,0,strrpos($exp_file, '.')).".".$isaexport;
             $temp_file = tempnam(sys_get_temp_dir(), rand(5, 15) . $exp_file);
@@ -122,10 +125,11 @@
         }
 	
         if  ($isaexport != 'csv') {
-              
+	    if (!$exp_from_file){
+		$row_exp--; 
+	    }
             // Заполняем поля заголовка если они есть
-            $exp_query = $main_db -> sql_execute("select t.name,t.field_txt, t.field_name,  nvl(t.xls_position_col,1) as xls_position_col,
-                                                            nvl(t.xls_position_row,rownum +1) as xls_position_row,t.field_type
+            $exp_query = $main_db -> sql_execute("select t.name,t.field_txt, t.field_name,  nvl(t.xls_position_col,1) as xls_position_col, nvl(t.xls_position_row,rownum +1) as xls_position_row,t.field_type
                                 from ".DB_USER_NAME.".wb_form_cells t where t.id_wb_mm_form = ".$id_mm_fr." and t.type_cells = 'H' order by t.num");
             while ($main_db -> sql_fetch($exp_query)) {				
                                             // получаем значение
@@ -137,13 +141,13 @@
                                                             $objPHPExcel->setActiveSheetIndex(0)->setSelectedCellByColumnAndRow($main_db -> sql_result($exp_query, "xls_position_col"),$main_db -> sql_result($exp_query, "xls_position_row"));
                                                             $objPHPExcel->setActiveSheetIndex(0)->getStyle($objPHPExcel->setActiveSheetIndex(0)->getActiveCell())->getFont()->setBold(true);
                                             $row_exp++;									
-                                            }					
+                                            }
+					    $exp_shabloned = true;
              }	
-          $row_exp++;   
+	 $row_exp++; 
         } else {
           $row_exp--;
         }
-        
 	// Запоминаем стратовую позицию данных
 	$row_exp_zag = 	$row_exp;
 	
@@ -162,15 +166,18 @@
         }           
                 
 	// Запрос списка столбцов и их имен
-        $query = $main_db -> sql_execute("select tf.owner,tf.object_name, t.name, round(t.width/3) as l_width,
+        $query = $main_db -> sql_execute("select owner, object_name,name,l_width,f_name,form_where,field_type,field_name, align_txt,nvl(xls_position_col, rownum) as xls_position_col,nvl(xls_position_row, 2) as xls_position_row
+	from (select tf.owner,tf.object_name, t.name, round(t.width/3) as l_width,
                        decode(t.field_type, 'D', 'to_char('||t.field_name||', ''dd.mm.yyyy hh24:mi:ss'') '||t.field_name, 'I', 'round('||t.field_name||', 0) '||t.field_name, t.field_name) f_name,
                        nvl2(tf.form_where, 'AND '||tf.form_where, null) form_where,  t.field_type,
-                       t.field_name, ta.html_txt align_txt, nvl(t.xls_position_col,t.num) as xls_position_col, nvl(t.xls_position_row,2) as xls_position_row
+                       t.field_name, ta.html_txt align_txt,t.xls_position_col, t.xls_position_row
                   from ".DB_USER_NAME.".wb_mm_form tf
                   left join ".DB_USER_NAME.".wb_form_field t on t.id_wb_mm_form = tf.id_wb_mm_form
                   left join ".DB_USER_NAME.".wb_form_field_align ta on ta.id_wb_form_field_align = t.id_wb_form_field_align
-                  where tf.id_wb_mm_form = ".$id_mm_fr." ".$show_hidden." and t.field_name != 'ID_' || tf.object_name order by t.num");
-        
+                  where tf.id_wb_mm_form = ".$id_mm_fr." ".$show_hidden." and t.field_name != 'ID_' || tf.object_name order by t.num)");
+        if (!$exp_shabloned) {
+	    
+	}
         while ($main_db -> sql_fetch($query)) {
 		if ((intval($param_value) <> 1) and ($main_db -> sql_result($query, "FIELD_NAME") == "ID_CONTROL_LOAD_DATA")) continue;	
                 
@@ -185,8 +192,7 @@
                 }
                 
                 if ($isaexport != 'csv' ) $row_exp = intval($main_db -> sql_result($query, "xls_position_row"));
-                $cell_exp = intval($main_db -> sql_result($query, "xls_position_col")) - 1;                
-                
+                $cell_exp = intval($main_db -> sql_result($query, "xls_position_col")) - 1;  
                 $arr_field[$cell_exp] = $main_db -> sql_result($query, "FIELD_NAME");
                 $arr_field_type[$cell_exp] = $main_db -> sql_result($query, "FIELD_TYPE");
                 
@@ -210,8 +216,10 @@
                                 default: $Cell_format_align[$cell_exp] = PHPExcel_Style_Alignment::HORIZONTAL_LEFT; break;
                         }
 
-                        // Выстовляем ширину столбца
-                        $objPHPExcel->setActiveSheetIndex(0)->getColumnDimensionByColumn($cell_exp)->setWidth($main_db -> sql_result($query, "L_WIDTH"));					
+                        // Выставляем ширину столбца
+			if (!$exp_from_file) {
+			 $objPHPExcel->setActiveSheetIndex(0)->getColumnDimensionByColumn($cell_exp)->setWidth($main_db -> sql_result($query, "L_WIDTH")/2);
+			}
                 }	
 
                 // Указываем Формат для всего столбца начиная с текущей строки:					
@@ -242,34 +250,44 @@
             
         // Разбираем переменные для поиска			
         if (filter_input(INPUT_GET, '_search',FILTER_VALIDATE_BOOLEAN) and (filter_input(INPUT_GET, 'filtred',FILTER_SANITIZE_STRING) <> "undefined")) {
-                foreach(filter_input_array(INPUT_GET) as $k=>$v) {
-                    // Мы можем передать данные в формате <тип поиска>><данные>
-                    $s_opts = explode(">",$v);
-                    if (isset($s_opts[1])) {
-                        $v = iconv(HTML_ENCODING,LOCAL_ENCODING,trim(strip_tags(html_entity_decode($s_opts[1])))); // кодировочку меняем				
-                        $type_field = $arr_field_type[in_array_search(BasicFunctions::trim_fieldname($k), $arr_field)];
-                        $k = strip_tags(html_entity_decode(BasicFunctions::trim_fieldname($k)));
-                        if ($v != "" ) if ( $type_field == "D" ) {
-                                        // Дата может быть нескольких форматов
-                                        if (stripos($v,":") > 0) {
-                                                $qWhere .= " AND t.".BasicFunctions::trim_fieldname($k)." = to_date('".$v."', 'dd.mm.yyyy hh24:mi:ss') ";
-                                        } else {
-                                                $qWhere .= " AND t.".BasicFunctions::trim_fieldname($k)." = to_date('".$v."', 'dd.mm.yyyy') ";
-                                        }								
-                        } else {
-                                switch (trim($s_opts[0])) { // Смотрим что за логическая операция
-                                    case "NOT": $qWhere .= " AND lower(t.".$k.") != lower('".$v."') "; break;
-                                    case "MORE": $qWhere .= " AND lower(t.".$k.") > lower('".$v."') "; break;
-                                    case "MINI": $qWhere .= " AND lower(t.".$k.") < lower('".$v."') "; break;
-                                    case "EQUAL": $qWhere .= " AND lower(t.".$k.") = lower('".$v."') "; break;
-                                    case "LIKE": $qWhere .= " AND lower(t.".$k.") LIKE lower('%".$v."%') "; break;
-                                    case "undefined": $qWhere .= " AND lower(t.".$k.") = lower('".$v."') "; break;
-                                    case "NONE": break;
-                                }
-                        }
-                    }
+               foreach(filter_input_array(INPUT_GET) as $k => $v) {
+				// Мы можем передать данные в формате <тип поиска>><данные>
+				$s_opts = explode(">",$v);
+					if (isset($s_opts[1])) {
+					$v = iconv(HTML_ENCODING,LOCAL_ENCODING,trim(strip_tags(html_entity_decode($s_opts[1])))); // кодировочку меняем
+						if (array_search(BasicFunctions::trim_fieldname($k), $arr_field, true)) {
+							$type_field = $arr_field_type[array_search(BasicFunctions::trim_fieldname($k), $arr_field)];
+                                                        $k = strip_tags(html_entity_decode(BasicFunctions::trim_fieldname($k)));
+							
+							switch (trim($s_opts[0])) { // Смотрим что за логическая операция
+								case "NOT": $literal = "!="; break;
+								case "MORE": $literal = ">"; break;
+								case "MINI": $literal = "<"; break;
+								case "EQUAL": $literal = "="; break;
+								case "LIKE": $literal = "LIKE"; break;
+								case "undefined": $literal = "= "; break;
+								case "NONE": break;
+							}	
+										
+							if ($v != "" ) 
+							    if ((( $type_field == "DT" ) or ( $type_field == "D" ) and trim($s_opts[0]) != "LIKE") ) {
+									// Дата может быть нескольких форматов
+									if (stripos($v,":") > 0) {
+										$qWhere .= " AND t.".$k." ".$literal." to_date('".$v."', 'dd.mm.yyyy hh24:mi:ss') ";
+									} else {
+										$qWhere .= " AND t.".$k." ".$literal." to_date('".$v."', 'dd.mm.yyyy') ";
+									}								
+							} else {
+							    if (trim($s_opts[0]) == "LIKE") { 
+								$qWhere .= " AND lower(t.".$k.") ".$literal." lower('%".$v."%') ";
+							    } else {
+								$qWhere .= " AND lower(t.".$k.") ".$literal." lower('".$v."') ";
+							    }
 
-                }
+							}										
+						}
+					}
+			}
         }        
 
         // Теперь загружаем данные в табличку
@@ -337,6 +355,7 @@
         header("Cache-Control: max-age=0");        
         header("Set-Cookie: fileDownload=true");
         $objWriter -> save("php://output");
+	
         // подчищаем за собой
         $objPHPExcel->disconnectWorksheets();
         unset($objWriter, $objPHPExcel);

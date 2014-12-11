@@ -760,25 +760,7 @@ $(function() {
                                 CloseTab($(this).attr('aria-controls'));
                         });
         }));
-
-        // Кнопка распечатать
-        $("#tabs").children(".ui-tabs-nav").append(
-                        $('<button>Распечатать текущую открытую вкладку</button>').attr({
-                                id:'print_this_tab',
-                                style:'float: right;margin: 0px 5px 3px 0px;'
-                        }).button({icons: {primary: 'ui-icon-print'},text: false})
-                          .click(function() {
-                              var pr_object = $(".ui-tabs-panel[aria-hidden='false'] .tab_main_content").find('.ui-jqgrid-view table, .FormGrid table, .chart').clone();
-                                  pr_object.removeAttr('height class top left'); 
-                                $(pr_object).printThis({
-                                            printContainer: false, 
-                                            importCSS: false,
-                                            loadCSS: '/library/print.css',
-                                            debug: false
-                                });                 
-                        })
-        );
-       
+        
 	// Проверка значений:
 	check_form = function(formid) {
 		var data_ok = true;
@@ -811,7 +793,7 @@ $(function() {
 				return false;
 		}
 	};
-	
+        
         // Создание элементов
         create_from_table_elements = function (form_id) {         
              var spl_text = form_id.attr('id').split('_');

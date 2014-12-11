@@ -19,8 +19,11 @@ private $arhive_sql,$vields_sql = [];
 	function __construct($new_descript = false) {	
 	$ora = $this -> connect_db($new_descript);
 	
-		if (!$ora) {		
-			$err_array = oci_error();				
+		if (!is_resource($ora)) {		
+			$err_array = oci_error();
+			if (empty($err_array['message'])) {
+			    $err_array['message'] = "Пpоизошла неизвестная ошибка oracle, попробуйте проверить error.log.";
+			}
 			BasicFunctions::to_log("ERR: ".$err_array['message'],true);
 			die("<p align='left' >".iconv(LOCAL_ENCODING,HTML_ENCODING,str_replace(array("\r\n", "\n",),"<br>",str_replace(array("    ","   ","  ")," ",$err_array['message'])))."</p>");
 		
@@ -91,8 +94,8 @@ private $arhive_sql,$vields_sql = [];
 								   $PASSWORD,
 								   $NAME,
 								   DB_ENCODING);
-		}		
-		return $connection;
+		}
+	return $connection;
 	}	
 	
 	// Загрузка параметров системы
